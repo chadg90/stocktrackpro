@@ -43,72 +43,60 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-gray-900 border-t border-gray-800">
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-zinc-800 mt-auto">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
-          <div className="col-span-1 md:col-span-2">
-            <h3 className="text-white text-lg font-bold mb-4">Tool Manager</h3>
-            <p className="text-gray-400 mb-4">
+          <div>
+            <h3 className="text-white font-semibold mb-4">Stock Track PRO</h3>
+            <p className="text-zinc-400 text-sm">
               Professional tool management solution for businesses of all sizes.
             </p>
-            <div className="flex space-x-4">
-              {socialLinks.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    className="text-gray-400 hover:text-white"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="sr-only">{item.name}</span>
-                    <Icon className="h-6 w-6" />
-                  </a>
-                );
-              })}
-            </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white text-sm font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-3">
-              {footerSections[0].links.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
+            <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/pricing" className="text-zinc-400 hover:text-white text-sm">
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <Link href="/benefits" className="text-zinc-400 hover:text-white text-sm">
+                  Benefits
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-zinc-400 hover:text-white text-sm">
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* Legal */}
           <div>
-            <h3 className="text-white text-sm font-semibold mb-4">Legal</h3>
-            <ul className="space-y-3">
-              {footerSections[2].links.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
+            <h3 className="text-white font-semibold mb-4">Legal</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/terms" className="text-zinc-400 hover:text-white text-sm">
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="text-zinc-400 hover:text-white text-sm">
+                  Privacy Policy
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-gray-800">
-          <p className="text-gray-400 text-sm text-center">
-            © {new Date().getFullYear()} Tool Manager. All rights reserved.
+        <div className="mt-8 pt-8 border-t border-zinc-700">
+          <p className="text-zinc-400 text-sm text-center">
+            © {new Date().getFullYear()} Stock Track PRO. All rights reserved.
           </p>
         </div>
       </div>
