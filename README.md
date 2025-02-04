@@ -2,6 +2,8 @@
 
 A professional tool management system that helps businesses track and manage their tools efficiently.
 
+Visit our website: [www.stocktrackpro.co.uk](https://www.stocktrackpro.co.uk)
+
 ## Features
 
 - Real-time tool tracking with QR codes
@@ -49,6 +51,18 @@ npm run dev
 ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Deployment
+
+This project is deployed using Vercel and can be accessed at [www.stocktrackpro.co.uk](https://www.stocktrackpro.co.uk).
+
+To deploy your own instance:
+
+1. Fork this repository
+2. Sign up for a [Vercel account](https://vercel.com)
+3. Import your forked repository
+4. Configure your environment variables in Vercel
+5. Deploy!
 
 ## Contact
 
