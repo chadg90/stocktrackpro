@@ -12,7 +12,7 @@ export default function Pricing() {
     {
       name: "Starter",
       users: "1-5 users",
-      price: 12,
+      price: 10.00, // £12 with VAT
       features: [
         "Real-time tool tracking",
         "QR code scanning",
@@ -26,7 +26,7 @@ export default function Pricing() {
     {
       name: "Growth",
       users: "6-20 users",
-      price: 10,
+      price: 8.33, // £10 with VAT
       features: [
         "Real-time tool tracking",
         "QR code scanning",
@@ -40,7 +40,7 @@ export default function Pricing() {
     {
       name: "Scale",
       users: "21-50 users",
-      price: 8,
+      price: 6.67, // £8 with VAT
       features: [
         "Real-time tool tracking",
         "QR code scanning",
