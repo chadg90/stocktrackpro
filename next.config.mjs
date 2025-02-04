@@ -9,11 +9,6 @@ const nextConfig = {
     });
     return config;
   },
-  output: 'export',
-  images: {
-    unoptimized: true,
-  },
-  basePath: process.env.NODE_ENV === 'production' ? '/tool-management-website' : '',
   typescript: {
     ignoreBuildErrors: false,
   },
