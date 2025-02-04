@@ -1,22 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stock Track PRO
+
+A professional tool management system that helps businesses track and manage their tools efficiently.
+
+## Features
+
+- Real-time tool tracking with QR codes
+- Tool condition monitoring
+- Location tracking
+- Mobile app for iOS and Android
+- Full history tracking
+- Manager controls
+- Enterprise-grade security
+
+## Technology Stack
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+- Node.js
 
 ## Getting Started
 
-First, run the development server:
-
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/chadg90/stocktrackpro.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+cd stocktrackpro
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create a `.env.local` file with the following variables:
+```
+SMTP_HOST=your_smtp_host
+SMTP_PORT=your_smtp_port
+SMTP_USER=your_smtp_user
+SMTP_PASSWORD=your_smtp_password
+SMTP_FROM_EMAIL=your_from_email
+CONTACT_EMAIL=your_contact_email
+```
+
+4. Run the development server:
+```bash
+npm run dev
+```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Contact
+
+For inquiries and demos, please contact:
+- Email: support@stocktrackpro.co.uk
+- Sales: sales@stocktrackpro.co.uk
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
