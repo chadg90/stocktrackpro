@@ -3,14 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    unoptimized: false,
-  },
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.css$/,
-      use: ['style-loader', 'css-loader', 'postcss-loader'],
-    });
-    return config;
+    domains: ['vercel.com'],
   },
   typescript: {
     ignoreBuildErrors: false,
