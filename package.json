@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "tailwindcss init -p"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.18",
