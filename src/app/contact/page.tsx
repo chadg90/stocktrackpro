@@ -1,62 +1,67 @@
 'use client';
 
-import { useState } from 'react';
-import { Mail } from 'lucide-react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
+import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     company: '',
-    message: ''
+    phone: '',
+    message: '',
   });
-  const [status, setStatus] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('sending');
-
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setStatus('success');
-        setFormData({ name: '', email: '', company: '', message: '' });
-      } else {
-        setStatus('error');
-      }
-    } catch (error) {
-      setStatus('error');
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission
+    console.log(formData);
+  };
+
+  const contactInfo = [
+    {
+      icon: <Mail className="w-6 h-6 text-primary" />,
+      title: "Email",
+      details: [
+        "sales@stocktrackpro.com",
+        "support@stocktrackpro.com"
+      ]
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-zinc-900">
+    <div className="min-h-screen bg-black">
       <Navbar />
       
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <h1 className="text-4xl font-bold text-white mb-6">
+              Get in <span className="text-primary">Touch</span>
+            </h1>
+            <p className="text-xl text-white/80 max-w-2xl mx-auto">
+              Have questions about Stock Track PRO? We're here to help!
+              Request a demo or contact our sales team to see how our solution can work for your business.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Form */}
-            <div className="bg-zinc-800 p-8 rounded-lg border border-zinc-600 shadow-xl">
-              <h2 className="text-3xl font-bold text-white mb-6">Get in Touch</h2>
+            <div className="bg-black border border-primary/20 rounded-2xl p-8">
+              <h2 className="text-2xl font-bold text-white mb-6">Send us a Message</h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
                     Name
                   </label>
                   <input
@@ -66,11 +71,12 @@ export default function Contact() {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                    className="w-full px-4 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
+                    placeholder="Your name"
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
                     Email
                   </label>
                   <input
@@ -80,11 +86,12 @@ export default function Contact() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                    className="w-full px-4 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
+                    placeholder="your@email.com"
                   />
                 </div>
                 <div>
-                  <label htmlFor="company" className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label htmlFor="company" className="block text-sm font-medium text-white mb-2">
                     Company
                   </label>
                   <input
@@ -93,78 +100,74 @@ export default function Contact() {
                     name="company"
                     value={formData.company}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                    className="w-full px-4 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
+                    placeholder="Your company name"
                   />
                 </div>
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-zinc-300 mb-2">
+                  <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
                     Message
                   </label>
                   <textarea
                     id="message"
                     name="message"
-                    rows={4}
                     required
                     value={formData.message}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 bg-zinc-700 border border-zinc-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
-                  ></textarea>
+                    rows={4}
+                    className="w-full px-4 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
+                    placeholder="How can we help you?"
+                  />
                 </div>
-                <div>
-                  <button
-                    type="submit"
-                    disabled={status === 'sending'}
-                    className="w-full px-8 py-3 bg-zinc-700 text-white rounded-lg hover:bg-zinc-600 transition-colors border border-zinc-600"
-                  >
-                    {status === 'sending' ? 'Sending...' : 'Send Message'}
-                  </button>
-                </div>
-
-                {status === 'success' && (
-                  <p className="text-green-400 text-center">Message sent successfully!</p>
-                )}
-                {status === 'error' && (
-                  <p className="text-red-400 text-center">Failed to send message. Please try again.</p>
-                )}
+                <button
+                  type="submit"
+                  className="w-full bg-primary hover:bg-primary-light text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                >
+                  Send Message
+                </button>
               </form>
             </div>
 
             {/* Contact Information */}
             <div className="space-y-8">
-              <div>
-                <h2 className="text-3xl font-bold text-white mb-6">Contact Information</h2>
-                <p className="text-zinc-300 mb-8">
-                  Have questions about Stock Track PRO? We're here to help! Request a demo to see how our tool management solution can work for your business.
-                </p>
-              </div>
-
-              <div className="bg-zinc-800 p-8 rounded-lg border border-zinc-600 mb-8">
+              {/* Email Info */}
+              <div className="bg-black border border-primary/20 rounded-xl p-6 hover:border-primary/50 transition-colors">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-zinc-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-6 h-6 text-zinc-300" />
+                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <Mail className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-3">Email Us</h3>
-                    <p className="text-zinc-300">support@stocktrackpro.co.uk</p>
-                    <p className="text-zinc-300">sales@stocktrackpro.co.uk</p>
+                    <h3 className="text-lg font-semibold text-white mb-2">Email</h3>
+                    <p className="text-white/80">sales@stocktrackpro.com</p>
+                    <p className="text-white/80">support@stocktrackpro.com</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-zinc-800 p-8 rounded-lg border border-zinc-600">
-                <h3 className="text-xl font-semibold text-white mb-3">Book a Demo</h3>
-                <p className="text-zinc-300 mb-4">
+              {/* Demo Info */}
+              <div className="bg-black border border-primary/20 rounded-2xl p-8">
+                <h3 className="text-xl font-semibold text-white mb-4">Book a Demo</h3>
+                <p className="text-white/80 mb-6">
                   See Stock Track PRO in action with a personalized demo. Our team will show you how to:
                 </p>
-                <ul className="space-y-2 text-zinc-300 mb-6">
-                  <li>• Track and manage your tools effectively</li>
-                  <li>• Set up QR code scanning</li>
-                  <li>• Monitor tool locations and conditions</li>
-                  <li>• Use the mobile app</li>
+                <ul className="space-y-3 text-white/80 mb-6">
+                  <li className="flex items-center space-x-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Track and manage your tools effectively</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Set up QR code scanning</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Monitor tool locations and conditions</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Generate reports and analytics</span>
+                  </li>
                 </ul>
-                <p className="text-zinc-300">
-                  Contact us today to schedule your demo session.
-                </p>
               </div>
             </div>
           </div>

@@ -8,6 +8,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        primary: {
+          DEFAULT: '#fea917',
+          light: '#feba46',
+        },
+        black: '#000000',
+        white: '#ffffff',
         brand: {
           50: '#f0f9ff',
           100: '#e0f2fe',

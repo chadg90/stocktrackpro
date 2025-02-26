@@ -1,83 +1,104 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
-import { Shield, Smartphone, Lock, PoundSterling, Settings, FileCheck } from 'lucide-react';
 import Link from 'next/link';
+import { Shield, Clock, Users, Wrench, BarChart, Smartphone, Cloud, HeartHandshake } from 'lucide-react';
 
 export default function Benefits() {
   const benefits = [
     {
-      icon: <Shield className="w-6 h-6 text-zinc-300" />,
-      title: "Smart Tool Management",
-      description: "Track tools in real-time with QR codes and get instant updates on tool location and status."
+      title: "Enhanced Security",
+      description: "Keep your tools secure with QR code tracking and user authentication. Every tool movement is logged and monitored.",
+      icon: <Shield className="w-6 h-6 text-primary" />
     },
     {
-      icon: <PoundSterling className="w-6 h-6 text-zinc-300" />,
-      title: "Cost Reduction",
-      description: "Save money by reducing lost tools and better managing tool maintenance and repairs."
+      title: "Time Saving",
+      description: "Reduce time spent on manual inventory checks. Quick check-in/check-out process with mobile scanning.",
+      icon: <Clock className="w-6 h-6 text-primary" />
     },
     {
-      icon: <Smartphone className="w-6 h-6 text-zinc-300" />,
-      title: "Mobile App",
-      description: "User-friendly mobile app for iOS and Android devices."
+      title: "Team Management",
+      description: "Assign tools to specific team members and track responsibility. Improve accountability across your organization.",
+      icon: <Users className="w-6 h-6 text-primary" />
     },
     {
-      icon: <Lock className="w-6 h-6 text-zinc-300" />,
-      title: "Enterprise-Grade Security",
-      description: "Keep your data safe with advanced encryption and secure authentication."
-    },
-    {
-      icon: <Settings className="w-6 h-6 text-zinc-300" />,
-      title: "Manager Controls",
-      description: "Complete control over users, tools, locations, and access to full history tracking."
-    },
-    {
-      icon: <FileCheck className="w-6 h-6 text-zinc-300" />,
       title: "Maintenance Tracking",
-      description: "Keep track of tool conditions and schedule maintenance to prevent costly repairs."
+      description: "Schedule and track tool maintenance. Receive alerts for upcoming maintenance to prevent downtime.",
+      icon: <Wrench className="w-6 h-6 text-primary" />
+    },
+    {
+      title: "Analytics & Reporting",
+      description: "Generate detailed reports on tool usage, maintenance history, and costs. Make data-driven decisions.",
+      icon: <BarChart className="w-6 h-6 text-primary" />
+    },
+    {
+      title: "Mobile Access",
+      description: "Access your tool inventory anywhere with our mobile app. Perfect for on-site management.",
+      icon: <Smartphone className="w-6 h-6 text-primary" />
+    },
+    {
+      title: "Cloud Storage",
+      description: "Secure cloud storage for all your tool data. Access history and reports from anywhere, anytime.",
+      icon: <Cloud className="w-6 h-6 text-primary" />
+    },
+    {
+      title: "Customer Support",
+      description: "24/7 customer support to help you get the most out of Stock Track PRO. We're here when you need us.",
+      icon: <HeartHandshake className="w-6 h-6 text-primary" />
     }
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-900">
+    <div className="min-h-screen bg-black">
       <Navbar />
       
       <div className="container mx-auto px-4 pt-32 pb-20">
+        {/* Hero Section */}
         <div className="max-w-4xl mx-auto text-center mb-16">
           <h1 className="text-4xl font-bold text-white mb-6">
-            Why Choose Stock Track PRO?
+            Why Choose <span className="text-primary">Stock Track PRO</span>?
           </h1>
-          <p className="text-xl text-zinc-300">
-            Discover how our mobile tool management solution can transform your workflow,
-            reduce costs, and boost productivity.
+          <p className="text-xl text-white">
+            Discover how our tool management solution transforms your workflow,
+            reduces costs, and boosts productivity.
           </p>
         </div>
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Benefits Grid */}
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {benefits.map((benefit, index) => (
             <div
               key={index}
-              className="bg-zinc-800 p-6 rounded-lg border border-zinc-600 hover:bg-zinc-700/80 transition-colors"
+              className="bg-black p-8 rounded-lg border border-primary/20 hover:border-primary/50 transition-all duration-300 group"
             >
-              <div className="w-12 h-12 bg-zinc-700 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
                 {benefit.icon}
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">
+              <h3 className="text-xl font-semibold text-white mb-4">
                 {benefit.title}
               </h3>
-              <p className="text-zinc-300">
+              <p className="text-white/80">
                 {benefit.description}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <Link
-            href="/contact"
-            className="inline-flex items-center px-6 py-3 border border-zinc-600 text-white rounded-md bg-zinc-800 hover:bg-zinc-700 transition-colors"
-          >
-            Contact Sales
-          </Link>
+        {/* CTA Section */}
+        <div className="mt-20 text-center">
+          <div className="max-w-3xl mx-auto bg-primary/10 rounded-2xl p-8 border border-primary/20">
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Ready to Transform Your Tool Management?
+            </h2>
+            <p className="text-white/80 mb-8">
+              Join thousands of businesses that trust Stock Track PRO for their tool management needs.
+            </p>
+            <Link
+              href="/contact"
+              className="inline-flex items-center px-6 py-3 text-white bg-primary hover:bg-primary-light rounded-md transition-colors"
+            >
+              Get Started Today
+            </Link>
+          </div>
         </div>
       </div>
     </div>

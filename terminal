@@ -1,0 +1,15 @@
+# First backup your files
+cp package.json package.json.backup
+cp package-lock.json package-lock.json.backup
+
+# Then update Next.js
+npm install next@latest
+
+npm install @react-native-community/cli@latest
+npm install semver@latest
+npm install send@latest
+npm audit fix --force
+
+mv package.json.backup package.json
+mv package-lock.json.backup package-lock.json
+npm install 

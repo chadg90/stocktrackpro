@@ -43,33 +43,33 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-zinc-800 mt-auto">
+    <footer className="bg-black mt-auto border-t border-primary/20">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Stock Track PRO</h3>
-            <p className="text-zinc-400 text-sm">
+            <h3 className="text-primary font-semibold mb-4">Stock Track PRO</h3>
+            <p className="text-white text-sm">
               Professional tool management solution for businesses of all sizes.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-primary font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/pricing" className="text-zinc-400 hover:text-white text-sm">
+                <Link href="/pricing" className="text-white hover:text-primary text-sm">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href="/benefits" className="text-zinc-400 hover:text-white text-sm">
+                <Link href="/benefits" className="text-white hover:text-primary text-sm">
                   Benefits
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-zinc-400 hover:text-white text-sm">
+                <Link href="/contact" className="text-white hover:text-primary text-sm">
                   Contact
                 </Link>
               </li>
@@ -78,24 +78,29 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Legal</h3>
+            <h3 className="text-primary font-semibold mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/terms" className="text-zinc-400 hover:text-white text-sm">
+                <Link href="/terms" className="text-white hover:text-primary text-sm">
                   Terms & Conditions
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-zinc-400 hover:text-white text-sm">
+                <Link href="/privacy" className="text-white hover:text-primary text-sm">
                   Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/cookies" className="text-white hover:text-primary text-sm">
+                  Cookie Policy
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-zinc-700">
-          <p className="text-zinc-400 text-sm text-center">
+        <div className="mt-8 pt-8 border-t border-primary/20">
+          <p className="text-white text-sm text-center">
             © {new Date().getFullYear()} Stock Track PRO. All rights reserved.
           </p>
         </div>
