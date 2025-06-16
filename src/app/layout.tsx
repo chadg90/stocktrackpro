@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
+import AppDownloadBanner from "./components/AppDownloadBanner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -175,6 +176,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} antialiased bg-black min-h-screen flex flex-col`}>
+        <AppDownloadBanner />
         {children}
         <Footer />
         <CookieConsent />
