@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
-import AppDownloadBanner from "./components/AppDownloadBanner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -99,6 +98,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        {/* iOS Smart App Banner */}
+        <meta name="apple-itunes-app" content="app-id=6744621973, app-argument=https://stocktrackpro.com" />
+        
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
@@ -176,7 +178,6 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} antialiased bg-black min-h-screen flex flex-col`}>
-        <AppDownloadBanner />
         {children}
         <Footer />
         <CookieConsent />

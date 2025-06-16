@@ -9,14 +9,14 @@ export default function Home() {
       <Navbar />
       
       {/* Hero Section */}
-      <div className="hero-section relative overflow-hidden">
+      <div className="relative overflow-hidden pt-20 sm:pt-32">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/95 to-transparent"></div>
           <div className="absolute top-1/2 right-0 w-72 sm:w-96 h-72 sm:h-96 bg-primary/20 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-1/4 w-48 sm:w-72 h-48 sm:h-72 bg-primary/10 rounded-full blur-2xl"></div>
         </div>
         
-        <div className="container relative mx-auto px-4 pt-20 sm:pt-32 pb-12 sm:pb-20">
+        <div className="container relative mx-auto px-4 pb-12 sm:pb-20">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 sm:mb-6">
               Transform Your Equipment Management with

@@ -35,10 +35,9 @@ const Navbar = () => {
 
   return (
     <nav 
-      className={`fixed w-full z-40 left-0 transition-all duration-300 ${
+      className={`fixed w-full z-40 left-0 top-0 transition-all duration-300 ${
         isScrolled ? 'bg-black/95 backdrop-blur-sm border-b border-primary/10 shadow-lg' : 'bg-transparent'
       }`}
-      style={{ top: 'var(--app-banner-height, 0px)' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
