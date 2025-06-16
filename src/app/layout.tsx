@@ -129,7 +129,7 @@ export default function RootLayout({
               "description": "Professional tool and equipment management system with QR-based tracking",
               "offers": {
                 "@type": "Offer",
-                "price": "10.00",
+                "price": "7.99",
                 "priceCurrency": "GBP",
                 "priceValidUntil": new Date(
                   new Date().setFullYear(new Date().getFullYear() + 1)

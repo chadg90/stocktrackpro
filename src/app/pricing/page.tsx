@@ -10,69 +10,51 @@ export default function Pricing() {
   
   const tiers = [
     {
-      name: "Starter",
-      users: "1-5 users",
-      price: 10.00,
+      name: "Basic",
+      description: "Perfect for individual users",
+      price: 7.99,
       features: [
-        "Real-time tool tracking",
+        "Track up to 50 tools",
+        "1 user account",
         "QR code scanning",
+        "Basic reporting",
+        "Mobile app access",
         "Tool condition monitoring",
         "Location tracking",
-        "Mobile app access",
-        "Advanced reporting",
-        "API access",
-        "Priority support",
-        "Custom fields",
-        "Bulk operations",
-        "Data export",
-        "Custom integrations",
-        "Training sessions",
-        "SLA guarantee",
-        "Custom workflows"
+        "7-day free trial"
       ]
     },
     {
-      name: "Growth",
-      users: "6-20 users",
-      price: 8.33,
+      name: "Team",
+      description: "Ideal for small teams",
+      price: 19.99,
       features: [
-        "Real-time tool tracking",
+        "Track up to 500 tools",
+        "Up to 10 team members",
         "QR code scanning",
+        "Advanced reporting",
+        "Mobile app access",
         "Tool condition monitoring",
         "Location tracking",
-        "Mobile app access",
-        "Advanced reporting",
-        "API access",
-        "Priority support",
-        "Custom fields",
-        "Bulk operations",
-        "Data export",
-        "Custom integrations",
-        "Training sessions",
-        "SLA guarantee",
-        "Custom workflows"
+        "Team collaboration",
+        "7-day free trial"
       ]
     },
     {
-      name: "Scale",
-      users: "21-50 users",
-      price: 6.67,
+      name: "Business",
+      description: "For growing businesses",
+      price: 39.99,
       features: [
-        "Real-time tool tracking",
+        "Unlimited tools tracking",
+        "Up to 50 team members",
         "QR code scanning",
+        "Advanced reporting",
+        "Mobile app access",
         "Tool condition monitoring",
         "Location tracking",
-        "Mobile app access",
-        "Advanced reporting",
-        "API access",
+        "Team collaboration",
         "Priority support",
-        "Custom fields",
-        "Bulk operations",
-        "Data export",
-        "Custom integrations",
-        "Training sessions",
-        "SLA guarantee",
-        "Custom workflows"
+        "7-day free trial"
       ]
     }
   ];
@@ -97,7 +79,7 @@ export default function Pricing() {
             Simple, Transparent <span className="text-primary">Pricing</span>
           </h1>
           <p className="text-lg sm:text-xl text-white/80 mb-8 sm:mb-12">
-            All plans include every feature. Simply choose the plan that matches your team size.
+            All plans include a 7-day free trial. Choose the plan that fits your needs.
           </p>
 
           {/* VAT Toggle */}
@@ -135,12 +117,12 @@ export default function Pricing() {
               >
                 <div className="text-center">
                   <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{tier.name}</h3>
-                  <p className="text-white/60 mb-4 sm:mb-6 text-sm sm:text-base">{tier.users}</p>
+                  <p className="text-white/60 mb-4 sm:mb-6 text-sm sm:text-base">{tier.description}</p>
                   <div className="mb-6 sm:mb-8">
                     <span className="text-3xl sm:text-4xl font-bold text-white">
                       {formatPrice(calculatePrice(tier.price))}
                     </span>
-                    <div className="text-white/60 text-xs sm:text-sm mt-1">per user, per month</div>
+                    <div className="text-white/60 text-xs sm:text-sm mt-1">per month</div>
                   </div>
                   <Link
                     href="/contact"
@@ -150,7 +132,7 @@ export default function Pricing() {
                         : 'bg-primary/10 hover:bg-primary/20 text-white'
                     }`}
                   >
-                    Get Started
+                    Start Free Trial
                   </Link>
                 </div>
                 <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4 max-h-[300px] overflow-y-auto">
@@ -188,6 +170,18 @@ export default function Pricing() {
                 </Link>
               </div>
             </div>
+          </div>
+
+          {/* Subscription Terms */}
+          <div className="mt-8 sm:mt-12 bg-black border border-primary/20 rounded-xl p-6 text-left">
+            <h3 className="text-lg font-semibold text-white mb-4">Subscription Terms</h3>
+            <ul className="space-y-2 text-sm text-white/80">
+              <li>• All subscriptions are auto-renewable and billed monthly</li>
+              <li>• 7-day free trial included with all plans - no charges during trial period</li>
+              <li>• Subscriptions automatically renew unless cancelled 24 hours before period end</li>
+              <li>• Manage subscriptions through your App Store account settings</li>
+              <li>• Unused trial time is forfeited when purchasing a subscription</li>
+            </ul>
           </div>
 
           {/* VAT Notice */}

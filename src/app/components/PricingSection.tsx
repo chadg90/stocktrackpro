@@ -1,49 +1,50 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Check } from 'lucide-react';
 
 export default function PricingSection() {
-  const [isAnnual, setIsAnnual] = useState(false);
-  
   const tiers = [
     {
-      name: "Starter",
-      users: "1-5 users",
-      priceMonthly: 12,
-      priceAnnual: 10,
+      name: "Basic",
+      description: "Perfect for individual users",
+      price: 7.99,
+      features: [
+        "Track up to 50 tools",
+        "1 user account",
+        "QR code scanning",
+        "Basic reporting",
+        "Mobile app access",
+        "7-day free trial"
+      ]
+    },
+    {
+      name: "Team",
+      description: "Ideal for small teams",
+      price: 19.99,
+      features: [
+        "Track up to 500 tools",
+        "Up to 10 team members",
+        "QR code scanning",
+        "Advanced reporting",
+        "Team collaboration",
+        "Mobile app access",
+        "7-day free trial"
+      ]
+    },
+    {
+      name: "Business",
+      description: "For growing businesses",
+      price: 39.99,
       features: [
         "Unlimited tools tracking",
-        "Basic reporting",
-        "User management",
-        "Email support",
-        "Mobile app access"
-      ]
-    },
-    {
-      name: "Growth",
-      users: "6-20 users",
-      priceMonthly: 10,
-      priceAnnual: 8,
-      features: [
-        "Everything in Starter",
+        "Up to 50 team members",
+        "QR code scanning",
         "Advanced reporting",
-        "API access",
+        "Team collaboration",
         "Priority support",
-        "Custom fields"
-      ]
-    },
-    {
-      name: "Scale",
-      users: "21-50 users",
-      priceMonthly: 8,
-      priceAnnual: 6,
-      features: [
-        "Everything in Growth",
-        "Custom integrations",
-        "Dedicated account manager",
-        "Training sessions",
-        "SLA guarantee"
+        "Mobile app access",
+        "7-day free trial"
       ]
     }
   ];
@@ -57,32 +58,8 @@ export default function PricingSection() {
             Simple, transparent pricing
           </h2>
           <p className="mt-4 text-lg text-gray-600">
-            Choose the perfect plan for your team
+            All plans include a 7-day free trial
           </p>
-        </div>
-
-        {/* Billing Toggle */}
-        <div className="mt-8 flex justify-center">
-          <div className="relative flex items-center">
-            <span className={`mr-3 text-sm ${!isAnnual ? 'font-semibold' : ''}`}>
-              Monthly billing
-            </span>
-            <button
-              onClick={() => setIsAnnual(!isAnnual)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                isAnnual ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isAnnual ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            <span className={`ml-3 text-sm ${isAnnual ? 'font-semibold' : ''}`}>
-              Annual billing (save up to 25%)
-            </span>
-          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -94,20 +71,15 @@ export default function PricingSection() {
             >
               <div className="p-6">
                 <h3 className="text-2xl font-bold text-gray-900">{tier.name}</h3>
-                <p className="mt-2 text-sm text-gray-500">{tier.users}</p>
+                <p className="mt-2 text-sm text-gray-500">{tier.description}</p>
                 <p className="mt-4">
                   <span className="text-4xl font-bold text-gray-900">
-                    £{isAnnual ? tier.priceAnnual : tier.priceMonthly}
+                    £{tier.price}
                   </span>
-                  <span className="text-base font-medium text-gray-500">/user/month</span>
+                  <span className="text-base font-medium text-gray-500">/month</span>
                 </p>
-                {isAnnual && (
-                  <p className="mt-1 text-sm text-green-600">
-                    Billed annually
-                  </p>
-                )}
                 <button className="mt-8 w-full bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 transition-colors">
-                  Get started
+                  Start Free Trial
                 </button>
               </div>
               <div className="p-6">
