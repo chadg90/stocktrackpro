@@ -9,6 +9,7 @@
   --primary-light: #feba46;
   --text-dark: #000000;
   --text-light: #ffffff;
+  --app-banner-height: 0px;
 }
 
 body {
@@ -28,6 +29,16 @@ body {
     background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 60px 60px;
+  }
+  
+  .hero-section {
+    padding-top: calc(4rem + var(--app-banner-height, 0px));
+  }
+  
+  @media (min-width: 640px) {
+    .hero-section {
+      padding-top: calc(5rem + var(--app-banner-height, 0px));
+    }
   }
 }
 

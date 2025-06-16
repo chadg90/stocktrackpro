@@ -46,6 +46,15 @@ export default function AppDownloadBanner({
     }
   }, []);
 
+  // Update CSS custom property when banner visibility changes
+  useEffect(() => {
+    if (isVisible && isMobile) {
+      document.documentElement.style.setProperty('--app-banner-height', '60px');
+    } else {
+      document.documentElement.style.setProperty('--app-banner-height', '0px');
+    }
+  }, [isVisible, isMobile]);
+
   const handleDismiss = () => {
     setIsVisible(false);
     localStorage.setItem('app-banner-dismissed', Date.now().toString());
@@ -72,8 +81,8 @@ export default function AppDownloadBanner({
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary to-primary/80 text-white shadow-lg">
-      <div className="flex items-center justify-between px-4 py-3">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary to-primary/80 text-white shadow-lg h-[60px]">
+      <div className="flex items-center justify-between px-4 py-3 h-full">
         <div className="flex items-center space-x-3 flex-1">
           <div className="bg-white/20 p-2 rounded-lg">
             <Smartphone className="w-5 h-5" />

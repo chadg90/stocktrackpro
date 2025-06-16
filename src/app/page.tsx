@@ -9,7 +9,7 @@ export default function Home() {
       <Navbar />
       
       {/* Hero Section */}
-      <div className="relative overflow-hidden pt-16 sm:pt-20">
+      <div className="hero-section relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/95 to-transparent"></div>
           <div className="absolute top-1/2 right-0 w-72 sm:w-96 h-72 sm:h-96 bg-primary/20 rounded-full blur-3xl"></div>
