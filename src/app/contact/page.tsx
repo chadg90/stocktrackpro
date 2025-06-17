@@ -1,40 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Navbar from '../components/Navbar';
-import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
+import { Mail } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    company: '',
-    phone: '',
-    message: '',
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission
-    console.log(formData);
-  };
-
-  const contactInfo = [
+  const contactMethods = [
     {
       icon: <Mail className="w-6 h-6 text-primary" />,
-      title: "Email",
-      details: [
-        "sales@stocktrackpro.com",
-        "support@stocktrackpro.com"
-      ]
+      title: "Sales Inquiries",
+      description: "For pricing and demo requests",
+      email: "sales@stocktrackpro.com",
+      actionText: "Email Sales Team"
+    },
+    {
+      icon: <Mail className="w-6 h-6 text-primary" />,
+      title: "Support",
+      description: "For technical support and help",
+      email: "support@stocktrackpro.com",
+      actionText: "Email Support"
     }
   ];
 
@@ -51,124 +36,59 @@ export default function Contact() {
             </h1>
             <p className="text-xl text-white/80 max-w-2xl mx-auto">
               Have questions about Stock Track PRO? We're here to help!
-              Request a demo or contact our sales team to see how our solution can work for your business.
+              Our team is ready to assist you with any inquiries about our tool management solution.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Form */}
-            <div className="bg-black border border-primary/20 rounded-2xl p-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Send us a Message</h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
-                    placeholder="Your name"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
-                    placeholder="your@email.com"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="company" className="block text-sm font-medium text-white mb-2">
-                    Company
-                  </label>
-                  <input
-                    type="text"
-                    id="company"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
-                    placeholder="Your company name"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-white mb-2">
-                    Message
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    required
-                    value={formData.message}
-                    onChange={handleChange}
-                    rows={4}
-                    className="w-full px-4 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary transition-colors"
-                    placeholder="How can we help you?"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-primary hover:bg-primary-light text-white font-medium py-3 px-6 rounded-lg transition-colors"
-                >
-                  Send Message
-                </button>
-              </form>
-            </div>
-
-            {/* Contact Information */}
-            <div className="space-y-8">
-              {/* Email Info */}
-              <div className="bg-black border border-primary/20 rounded-xl p-6 hover:border-primary/50 transition-colors">
-                <div className="flex items-start space-x-4">
+          {/* Contact Methods Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {contactMethods.map((method, index) => (
+              <div 
+                key={index}
+                className="bg-black border border-primary/20 rounded-2xl p-8 hover:border-primary/50 transition-all duration-300"
+              >
+                <div className="flex items-center space-x-4 mb-6">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Mail className="w-6 h-6 text-primary" />
+                    {method.icon}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Email</h3>
-                    <p className="text-white/80">sales@stocktrackpro.com</p>
-                    <p className="text-white/80">support@stocktrackpro.com</p>
+                    <h3 className="text-xl font-semibold text-white">{method.title}</h3>
+                    <p className="text-white/60">{method.description}</p>
                   </div>
                 </div>
-              </div>
 
-              {/* Demo Info */}
-              <div className="bg-black border border-primary/20 rounded-2xl p-8">
-                <h3 className="text-xl font-semibold text-white mb-4">Book a Demo</h3>
-                <p className="text-white/80 mb-6">
-                  See Stock Track PRO in action with a personalized demo. Our team will show you how to:
-                </p>
-                <ul className="space-y-3 text-white/80 mb-6">
-                  <li className="flex items-center space-x-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                    <span>Track and manage your tools effectively</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                    <span>Set up QR code scanning</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                    <span>Monitor tool locations and conditions</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                    <span>Generate reports and analytics</span>
-                  </li>
-                </ul>
+                <div className="mb-6">
+                  <div className="text-white break-all">{method.email}</div>
+                </div>
+
+                <Link
+                  href={`mailto:${method.email}`}
+                  className="inline-flex items-center justify-center w-full px-6 py-3 bg-primary hover:bg-primary-light text-white rounded-lg transition-colors"
+                >
+                  {method.actionText}
+                </Link>
               </div>
+            ))}
+          </div>
+
+          {/* Response Time Info */}
+          <div className="mt-16 max-w-4xl mx-auto">
+            <div className="bg-black border border-primary/20 rounded-2xl p-8">
+              <h3 className="text-xl font-semibold text-white mb-4">What to Expect</h3>
+              <ul className="space-y-4 text-white/80">
+                <li className="flex items-start space-x-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>We aim to respond to all inquiries within 24 hours during business days</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>For urgent matters, please mention "Urgent" in your email subject</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>Business hours: Monday-Friday, 9am-5pm GMT</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
