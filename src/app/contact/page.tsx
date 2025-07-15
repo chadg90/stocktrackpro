@@ -11,14 +11,14 @@ export default function Contact() {
       icon: <Mail className="w-6 h-6 text-primary" />,
       title: "Sales Inquiries",
       description: "For pricing and demo requests",
-      email: "sales@stocktrackpro.com",
+      email: "sales@stocktrackpro.co.uk",
       actionText: "Email Sales Team"
     },
     {
       icon: <Mail className="w-6 h-6 text-primary" />,
       title: "Support",
       description: "For technical support and help",
-      email: "support@stocktrackpro.com",
+      email: "support@stocktrackpro.co.uk",
       actionText: "Email Support"
     }
   ];
