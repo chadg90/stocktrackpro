@@ -1,13 +1,13 @@
 # Stock Track PRO
 
-A professional tool management system that helps businesses track and manage their tools efficiently.
+A professional asset management system that helps businesses track and manage their assets efficiently.
 
 Visit our website: [www.stocktrackpro.co.uk](https://www.stocktrackpro.co.uk)
 
 ## Features
 
-- Real-time tool tracking with QR codes
-- Tool condition monitoring
+- Real-time asset tracking with QR codes
+- Asset condition monitoring
 - Location tracking
 - Mobile app for iOS and Android
 - Full history tracking

@@ -36,7 +36,7 @@ export default function Contact() {
             </h1>
             <p className="text-xl text-white/80 max-w-2xl mx-auto">
               Have questions about Stock Track PRO? We're here to help!
-              Our team is ready to assist you with any inquiries about our tool management solution.
+              Our team is ready to assist you with any inquiries about our asset management solution.
             </p>
           </div>
 

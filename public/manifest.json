@@ -1,7 +1,7 @@
 {
   "name": "Stock Track PRO",
   "short_name": "Stock Track",
-  "description": "Professional tool and equipment management system with QR-based tracking",
+  "description": "Professional asset and equipment management system with QR-based tracking",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

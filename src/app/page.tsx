@@ -23,7 +23,7 @@ export default function Home() {
               <span className="text-primary block mt-2">Stock Track PRO</span>
             </h1>
             <p className="text-lg sm:text-xl text-white/80 mb-6 sm:mb-8 leading-relaxed">
-              Take control of your tools and equipment with our innovative QR-based tracking system. 
+              Take control of your assets and equipment with our innovative QR-based tracking system. 
               Optimised for construction companies, workshops, and industrial facilities.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 sm:mt-8 justify-center">
@@ -53,7 +53,7 @@ export default function Home() {
         
         <div className="container relative mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-8 sm:mb-12 text-center">
-            Powerful Tools for Equipment Management
+            Powerful Assets for Equipment Management
           </h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto">
@@ -111,7 +111,7 @@ export default function Home() {
               Ready to Optimise Your Equipment Management?
             </h2>
             <p className="text-base sm:text-lg text-white/80 mb-6 sm:mb-8">
-              Experience how Stock Track PRO can revolutionise your tool and equipment tracking.
+              Experience how Stock Track PRO can revolutionise your asset and equipment tracking.
               Book a personalised demo today.
             </p>
             <Link

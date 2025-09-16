@@ -7,7 +7,7 @@ export default function Benefits() {
   const benefits = [
     {
       title: "Enhanced Security",
-      description: "Keep your tools secure with QR code tracking and user authentication. Every tool movement is logged and monitored.",
+      description: "Keep your assets secure with QR code tracking and user authentication. Every asset movement is logged and monitored.",
       icon: <Shield className="w-6 h-6 text-primary" />
     },
     {
@@ -17,27 +17,27 @@ export default function Benefits() {
     },
     {
       title: "Team Management",
-      description: "Assign tools to specific team members and track responsibility. Improve accountability across your organization.",
+      description: "Assign assets to specific team members and track responsibility. Improve accountability across your organization.",
       icon: <Users className="w-6 h-6 text-primary" />
     },
     {
       title: "Maintenance Tracking",
-      description: "Schedule and track tool maintenance. Receive alerts for upcoming maintenance to prevent downtime.",
+      description: "Schedule and track asset maintenance. Receive alerts for upcoming maintenance to prevent downtime.",
       icon: <Wrench className="w-6 h-6 text-primary" />
     },
     {
       title: "Analytics & Reporting",
-      description: "Generate detailed reports on tool usage, maintenance history, and costs. Make data-driven decisions.",
+      description: "Generate detailed reports on asset usage, maintenance history, and costs. Make data-driven decisions.",
       icon: <BarChart className="w-6 h-6 text-primary" />
     },
     {
       title: "Mobile Access",
-      description: "Access your tool inventory anywhere with our mobile app. Perfect for on-site management.",
+      description: "Access your asset inventory anywhere with our mobile app. Perfect for on-site management.",
       icon: <Smartphone className="w-6 h-6 text-primary" />
     },
     {
       title: "Cloud Storage",
-      description: "Secure cloud storage for all your tool data. Access history and reports from anywhere, anytime.",
+      description: "Secure cloud storage for all your asset data. Access history and reports from anywhere, anytime.",
       icon: <Cloud className="w-6 h-6 text-primary" />
     },
     {
@@ -58,7 +58,7 @@ export default function Benefits() {
             Why Choose <span className="text-primary">Stock Track PRO</span>?
           </h1>
           <p className="text-xl text-white">
-            Discover how our tool management solution transforms your workflow,
+            Discover how our asset management solution transforms your workflow,
             reduces costs, and boosts productivity.
           </p>
         </div>
@@ -87,10 +87,10 @@ export default function Benefits() {
         <div className="mt-20 text-center">
           <div className="max-w-3xl mx-auto bg-primary/10 rounded-2xl p-8 border border-primary/20">
             <h2 className="text-2xl font-bold text-white mb-4">
-              Ready to Transform Your Tool Management?
+              Ready to Transform Your Asset Management?
             </h2>
             <p className="text-white/80 mb-8">
-              Join thousands of businesses that trust Stock Track PRO for their tool management needs.
+              Join thousands of businesses that trust Stock Track PRO for their asset management needs.
             </p>
             <Link
               href="/contact"

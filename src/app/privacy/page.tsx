@@ -42,7 +42,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Company and tool management data</span>
+                  <span>Company and asset management data</span>
                 </li>
               </ul>
 
@@ -67,7 +67,7 @@ export default function PrivacyPolicy() {
               <ul className="space-y-3 text-white/80">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Scanning QR codes for tool management</span>
+                  <span>Scanning QR codes for asset management</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
@@ -92,7 +92,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Firestore: Storing and managing tool inventory, user profiles, and company data</span>
+                  <span>Firestore: Storing and managing asset inventory, user profiles, and company data</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
@@ -210,7 +210,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Tool and inventory data is retained per company requirements</span>
+                  <span>Asset and inventory data is retained per company requirements</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>

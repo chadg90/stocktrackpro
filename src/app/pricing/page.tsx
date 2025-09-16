@@ -14,12 +14,12 @@ export default function Pricing() {
       description: "Perfect for individual users",
       price: 7.99,
       features: [
-        "Track up to 50 tools",
+        "Track up to 50 assets",
         "1 user account",
         "QR code scanning",
         "Basic reporting",
         "Mobile app access",
-        "Tool condition monitoring",
+        "Asset condition monitoring",
         "Location tracking",
         "7-day free trial"
       ]
@@ -29,12 +29,12 @@ export default function Pricing() {
       description: "Ideal for small teams",
       price: 19.99,
       features: [
-        "Track up to 500 tools",
+        "Track up to 500 assets",
         "Up to 10 team members",
         "QR code scanning",
         "Advanced reporting",
         "Mobile app access",
-        "Tool condition monitoring",
+        "Asset condition monitoring",
         "Location tracking",
         "Team collaboration",
         "7-day free trial"
@@ -45,12 +45,12 @@ export default function Pricing() {
       description: "For growing businesses",
       price: 39.99,
       features: [
-        "Unlimited tools tracking",
+        "Unlimited assets tracking",
         "Up to 50 team members",
         "QR code scanning",
         "Advanced reporting",
         "Mobile app access",
-        "Tool condition monitoring",
+        "Asset condition monitoring",
         "Location tracking",
         "Team collaboration",
         "Priority support",

@@ -16,7 +16,7 @@ export default function Terms() {
 
             <p className="text-zinc-300 mb-8">
               Welcome to Stock Track PRO ("we," "our," "us"). These Terms and Conditions govern your use of our website, 
-              tool management application, and services. By accessing or using our website, application, or services, 
+              asset management application, and services. By accessing or using our website, application, or services, 
               you agree to be bound by these Terms and Conditions.
             </p>
 
@@ -29,11 +29,11 @@ export default function Terms() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">2. Service Description</h2>
             <p className="text-zinc-300 mb-4">
-              Stock Track PRO is a tool management solution that provides:
+              Stock Track PRO is an asset management solution that provides:
             </p>
             <ul className="list-disc pl-6 text-zinc-300 mb-4">
-              <li>Real-time tool tracking using QR codes</li>
-              <li>Tool condition monitoring</li>
+              <li>Real-time asset tracking using QR codes</li>
+              <li>Asset condition monitoring</li>
               <li>Location tracking</li>
               <li>Mobile app access</li>
               <li>Full history tracking</li>
@@ -56,19 +56,19 @@ export default function Terms() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">5. Data Privacy and Security</h2>
             <p className="text-zinc-300 mb-4">
-              We take the security of your data seriously. All tool tracking data, user information, and usage 
+              We take the security of your data seriously. All asset tracking data, user information, and usage 
               statistics are stored securely and handled in accordance with our Privacy Policy and applicable 
               data protection laws.
             </p>
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">6. Acceptable Use</h2>
             <p className="text-zinc-300 mb-4">
-              You agree to use Stock Track PRO only for legitimate tool management purposes. Prohibited activities include:
+              You agree to use Stock Track PRO only for legitimate asset management purposes. Prohibited activities include:
             </p>
             <ul className="list-disc pl-6 text-zinc-300 mb-4">
               <li>Attempting to bypass or manipulate our QR code system</li>
               <li>Sharing account credentials with unauthorized users</li>
-              <li>Using the service to track items other than tools and equipment</li>
+              <li>Using the service to track items other than assets and equipment</li>
               <li>Attempting to reverse engineer or copy our system</li>
             </ul>
 
@@ -81,7 +81,7 @@ export default function Terms() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">8. Limitation of Liability</h2>
             <p className="text-zinc-300 mb-4">
-              While we strive to provide accurate tool tracking and management services, we cannot guarantee 
+              While we strive to provide accurate asset tracking and management services, we cannot guarantee 
               100% accuracy at all times. We are not liable for any losses resulting from system downtime, 
               data inaccuracies, or misuse of the system.
             </p>
