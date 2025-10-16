@@ -79,6 +79,13 @@ const Navbar = () => {
               >
                 How To
               </Link>
+              <a
+                href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.0.4/app-release.apk"
+                download="StockTrackPro.apk"
+                className="text-white/90 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Download
+              </a>
               <Link href="/contact" 
                 className="text-white bg-primary hover:bg-primary-light px-4 py-2 rounded-md text-sm font-medium transition-colors"
               >
@@ -128,6 +135,13 @@ const Navbar = () => {
           >
             How To
           </Link>
+          <a
+            href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.0.4/app-release.apk"
+            download="StockTrackPro.apk"
+            className="text-white/90 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+          >
+            Download
+          </a>
           <Link href="/contact" 
             className="text-white bg-primary hover:bg-primary-light block px-3 py-2 rounded-md text-base font-medium"
           >
