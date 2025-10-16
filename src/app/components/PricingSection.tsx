@@ -41,7 +41,7 @@ export default function PricingSection() {
       description: "For growing businesses",
       price: 49.99,
       features: [
-        "Unlimited assets tracking",
+        "Unlimited asset tracking",
         "Up to 40 vehicles",
         "Up to 40 team members",
         "QR code scanning",
@@ -69,31 +69,31 @@ export default function PricingSection() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="mt-12 grid gap-8 lg:grid-cols-3">
+        <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {tiers.map((tier) => (
             <div
               key={tier.name}
-              className="rounded-lg bg-white shadow-lg divide-y divide-gray-200"
+              className="rounded-lg bg-white shadow-lg divide-y divide-gray-200 flex flex-col"
             >
               <div className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900">{tier.name}</h3>
+                <h3 className="text-xl font-bold text-gray-900">{tier.name}</h3>
                 <p className="mt-2 text-sm text-gray-500">{tier.description}</p>
                 <p className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">
+                  <span className="text-3xl font-bold text-gray-900">
                     £{tier.price}
                   </span>
                   <span className="text-base font-medium text-gray-500">/month</span>
                 </p>
-                <button className="mt-8 w-full bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 transition-colors">
+                <button className="mt-6 w-full bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 transition-colors text-sm">
                   Start Free Trial
                 </button>
               </div>
-              <div className="p-6">
-                <ul className="space-y-4">
+              <div className="p-6 flex-1">
+                <ul className="space-y-3">
                   {tier.features.map((feature) => (
                     <li key={feature} className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 shrink-0" />
-                      <span className="ml-3 text-gray-600">{feature}</span>
+                      <Check className="h-4 w-4 text-green-500 shrink-0 mt-0.5 mr-2" />
+                      <span className="text-sm text-gray-600 leading-relaxed">{feature}</span>
                     </li>
                   ))}
                 </ul>

@@ -47,7 +47,7 @@ export default function Pricing() {
       description: "For growing businesses",
       price: 49.99,
       features: [
-        "Unlimited assets tracking",
+        "Unlimited asset tracking",
         "Up to 40 vehicles",
         "Up to 40 team members",
         "QR code scanning",
@@ -66,8 +66,8 @@ export default function Pricing() {
       description: "For large enterprises",
       price: 119.99,
       features: [
-        "Unlimited assets tracking",
-        "Unlimited vehicles",
+        "Unlimited asset tracking",
+        "Unlimited vehicle tracking",
         "Unlimited team members",
         "QR code scanning",
         "Vehicle inspections",
@@ -103,29 +103,29 @@ export default function Pricing() {
           </p>
 
           {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8 max-w-8xl mx-auto relative">
             <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-3xl"></div>
             {tiers.map((tier, index) => (
               <div
                 key={tier.name}
-                className={`relative bg-black rounded-xl sm:rounded-2xl p-6 sm:p-8 border transition-all duration-300 hover:border-primary/50 hover:scale-105 ${
+                className={`relative bg-black rounded-xl sm:rounded-2xl p-6 sm:p-8 border transition-all duration-300 hover:border-primary/50 hover:scale-105 flex flex-col ${
                   index === 2 
                     ? 'border-primary shadow-xl shadow-primary/10' 
                     : 'border-primary/20'
                 }`}
               >
-                <div className="text-center">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{tier.name}</h3>
-                  <p className="text-white/60 mb-4 sm:mb-6 text-sm sm:text-base">{tier.description}</p>
-                  <div className="mb-6 sm:mb-8">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">
+                <div className="text-center mb-6">
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">{tier.name}</h3>
+                  <p className="text-white/60 mb-4 text-sm">{tier.description}</p>
+                  <div className="mb-6">
+                    <span className="text-2xl sm:text-3xl font-bold text-white">
                       {formatPrice(tier.price)}
                     </span>
-                    <div className="text-white/60 text-xs sm:text-sm mt-1">per month</div>
+                    <div className="text-white/60 text-xs mt-1">per month</div>
                   </div>
                   <Link
                     href="/contact"
-                    className={`block w-full py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors ${
+                    className={`block w-full py-2.5 px-4 rounded-lg transition-colors text-sm font-medium ${
                       index === 2
                         ? 'bg-primary hover:bg-primary-light text-white'
                         : 'bg-primary/10 hover:bg-primary/20 text-white'
@@ -134,11 +134,11 @@ export default function Pricing() {
                     Start Free Trial
                   </Link>
                 </div>
-                <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4 max-h-[300px] overflow-y-auto">
+                <div className="flex-1 space-y-2">
                   {tier.features.map((feature) => (
                     <div key={feature} className="flex items-start">
-                      <Check className="h-4 sm:h-5 w-4 sm:w-5 text-primary shrink-0 mt-0.5" />
-                      <span className="ml-3 text-white/80 text-sm sm:text-base">{feature}</span>
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5 mr-2" />
+                      <span className="text-white/80 text-xs leading-relaxed">{feature}</span>
                     </div>
                   ))}
                 </div>
