@@ -6,26 +6,30 @@ import { Check } from 'lucide-react';
 export default function PricingSection() {
   const tiers = [
     {
-      name: "Basic",
+      name: "Professional Starter",
       description: "Perfect for individual users",
-      price: 7.99,
+      price: 19.99,
       features: [
         "Track up to 50 assets",
+        "Up to 5 vehicles",
         "1 user account",
         "QR code scanning",
+        "Vehicle inspections",
         "Basic reporting",
         "Mobile app access",
         "7-day free trial"
       ]
     },
     {
-      name: "Team",
+      name: "Professional Team",
       description: "Ideal for small teams",
-      price: 19.99,
+      price: 34.99,
       features: [
         "Track up to 500 assets",
+        "Up to 15 vehicles",
         "Up to 10 team members",
         "QR code scanning",
+        "Vehicle inspections",
         "Advanced reporting",
         "Team collaboration",
         "Mobile app access",
@@ -33,13 +37,15 @@ export default function PricingSection() {
       ]
     },
     {
-      name: "Business",
+      name: "Professional Business",
       description: "For growing businesses",
-      price: 39.99,
+      price: 49.99,
       features: [
         "Unlimited assets tracking",
-        "Up to 50 team members",
+        "Up to 40 vehicles",
+        "Up to 40 team members",
         "QR code scanning",
+        "Vehicle inspections",
         "Advanced reporting",
         "Team collaboration",
         "Priority support",
@@ -98,9 +104,9 @@ export default function PricingSection() {
 
         {/* Enterprise Call-out */}
         <div className="mt-12 text-center bg-white rounded-lg shadow-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900">Enterprise</h3>
+          <h3 className="text-2xl font-bold text-gray-900">Professional Enterprise</h3>
           <p className="mt-4 text-lg text-gray-600">
-            Need more than 50 users? Contact us for custom pricing and features.
+            Need more than 40 users or unlimited vehicles? Contact us for custom pricing and features.
           </p>
           <button className="mt-6 inline-flex items-center px-6 py-3 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors">
             Contact Sales

@@ -1,18 +1,42 @@
 # Stock Track PRO
 
-A professional asset management system that helps businesses track and manage their assets efficiently.
+A comprehensive asset, equipment, and fleet management solution that helps businesses track and manage their valuable resources efficiently.
 
 Visit our website: [www.stocktrackpro.co.uk](https://www.stocktrackpro.co.uk)
 
+## Core Capabilities
+
+### Asset & Equipment Management
+- QR Code Scanning - Instant check-in/out of assets and equipment
+- Real-Time Tracking - See availability status of all assets
+- User Accountability - Track who has each item
+- Condition Monitoring - Flag items for quarantine or removal
+- Location Management - Organise assets across multiple sites
+- Detailed History - Complete audit trail of usage and condition
+
+### Fleet Management System
+- Vehicle Inspections - 6-photo comprehensive vehicle checks
+- Defect Reporting - Report issues with severity levels and descriptions
+- Fleet Dashboard - Monitor vehicle status and maintenance needs
+- Manager Notifications - Instant alerts for reported defects
+- Vehicle Assignment - Track team member assignments
+- Inspection History - Complete records with photos and details
+
+### User Management
+- Role-Based Access - Different permission levels (Manager, User)
+- Team Management - Add team members with access codes and remove with user management dashboard
+
 ## Features
 
-- Real-time asset tracking with QR codes
-- Asset condition monitoring
-- Location tracking
+- Real-time asset and vehicle tracking with QR codes
+- Asset and vehicle condition monitoring
+- Location tracking across multiple sites
+- Vehicle inspections with photo documentation
+- Defect reporting and management notifications
 - Mobile app for iOS and Android
-- Full history tracking
-- Manager controls
-- Enterprise-grade security
+- Complete audit trail and history tracking
+- Role-based access controls and team management
+- Enterprise-grade security with Firebase authentication
 
 ## Technology Stack
 

@@ -29,15 +29,17 @@ export default function Terms() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">2. Service Description</h2>
             <p className="text-zinc-300 mb-4">
-              Stock Track PRO is an asset management solution that provides:
+              Stock Track PRO is a comprehensive asset, equipment, and fleet management solution that provides:
             </p>
             <ul className="list-disc pl-6 text-zinc-300 mb-4">
-              <li>Real-time asset tracking using QR codes</li>
-              <li>Asset condition monitoring</li>
-              <li>Location tracking</li>
-              <li>Mobile app access</li>
-              <li>Full history tracking</li>
-              <li>Manager controls</li>
+              <li>Real-time asset and vehicle tracking using QR codes</li>
+              <li>Asset and vehicle condition monitoring</li>
+              <li>Location tracking across multiple sites</li>
+              <li>Vehicle inspections with photo documentation</li>
+              <li>Defect reporting and management notifications</li>
+              <li>Mobile app access for on-site operations</li>
+              <li>Complete audit trail and history tracking</li>
+              <li>Role-based access controls and team management</li>
             </ul>
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">3. User Accounts and Security</h2>
@@ -56,19 +58,20 @@ export default function Terms() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">5. Data Privacy and Security</h2>
             <p className="text-zinc-300 mb-4">
-              We take the security of your data seriously. All asset tracking data, user information, and usage 
-              statistics are stored securely and handled in accordance with our Privacy Policy and applicable 
-              data protection laws.
+              We take the security of your data seriously. All asset tracking data, vehicle inspection photos, 
+              user information, and usage statistics are stored securely and handled in accordance with our 
+              Privacy Policy and applicable data protection laws.
             </p>
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">6. Acceptable Use</h2>
             <p className="text-zinc-300 mb-4">
-              You agree to use Stock Track PRO only for legitimate asset management purposes. Prohibited activities include:
+              You agree to use Stock Track PRO only for legitimate asset, equipment, and fleet management purposes. Prohibited activities include:
             </p>
             <ul className="list-disc pl-6 text-zinc-300 mb-4">
               <li>Attempting to bypass or manipulate our QR code system</li>
-              <li>Sharing account credentials with unauthorized users</li>
-              <li>Using the service to track items other than assets and equipment</li>
+              <li>Sharing account credentials with unauthorised users</li>
+              <li>Using the service to track items other than assets, equipment, and vehicles</li>
+              <li>Submitting false or misleading vehicle inspection reports</li>
               <li>Attempting to reverse engineer or copy our system</li>
             </ul>
 
@@ -81,7 +84,7 @@ export default function Terms() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">8. Limitation of Liability</h2>
             <p className="text-zinc-300 mb-4">
-              While we strive to provide accurate asset tracking and management services, we cannot guarantee 
+              While we strive to provide accurate asset, equipment, and fleet tracking services, we cannot guarantee 
               100% accuracy at all times. We are not liable for any losses resulting from system downtime, 
               data inaccuracies, or misuse of the system.
             </p>

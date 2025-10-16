@@ -19,12 +19,12 @@ export default function Home() {
         <div className="container relative mx-auto px-4 pb-12 sm:pb-20">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 sm:mb-6">
-              Transform Your Equipment Management with
+              Transform Your Asset, Equipment & Fleet Management with
               <span className="text-primary block mt-2">Stock Track PRO</span>
             </h1>
             <p className="text-lg sm:text-xl text-white/80 mb-6 sm:mb-8 leading-relaxed">
-              Take control of your assets and equipment with our innovative QR-based tracking system. 
-              Optimised for construction companies, workshops, and industrial facilities.
+              Take control of your assets, equipment, and vehicle fleet with our comprehensive QR-based tracking system. 
+              Perfect for any business that needs to track valuable resources efficiently.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 sm:mt-8 justify-center">
               <Link
@@ -53,7 +53,7 @@ export default function Home() {
         
         <div className="container relative mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-8 sm:mb-12 text-center">
-            Powerful Assets for Equipment Management
+            Powerful Features for Asset, Equipment & Fleet Management
           </h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto">
@@ -61,22 +61,22 @@ export default function Home() {
               {
                 icon: <QrCode className="w-6 h-6 text-primary" />,
                 title: "QR Code System",
-                description: "Unique QR codes for each piece of equipment, ensuring simple and efficient tracking."
+                description: "Unique QR codes for each asset and vehicle, ensuring simple and efficient tracking."
               },
               {
                 icon: <Map className="w-6 h-6 text-primary" />,
                 title: "Location Tracking",
-                description: "Monitor equipment across multiple sites, workshops, or vehicles in real-time."
+                description: "Monitor assets and vehicles across multiple sites in real-time."
               },
               {
                 icon: <Smartphone className="w-6 h-6 text-primary" />,
                 title: "Mobile Access",
-                description: "Manage equipment from any mobile device, ideal for on-site operations."
+                description: "Manage assets and perform vehicle inspections from any mobile device."
               },
               {
                 icon: <PoundSterling className="w-6 h-6 text-primary" />,
                 title: "Cost Control",
-                description: "Minimise equipment loss and track maintenance costs effectively."
+                description: "Minimise asset loss and track maintenance costs effectively."
               }
             ].map((feature, index) => (
               <div
@@ -108,10 +108,10 @@ export default function Home() {
         <div className="container relative mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">
-              Ready to Optimise Your Equipment Management?
+              Ready to Optimise Your Asset, Equipment & Fleet Management?
             </h2>
             <p className="text-base sm:text-lg text-white/80 mb-6 sm:mb-8">
-              Experience how Stock Track PRO can revolutionise your asset and equipment tracking.
+              Experience how Stock Track PRO can revolutionise your asset, equipment, and fleet tracking.
               Book a personalised demo today.
             </p>
             <Link

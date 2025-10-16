@@ -74,6 +74,11 @@ const Navbar = () => {
               >
                 Pricing
               </Link>
+              <Link href="/how-to" 
+                className="text-white/90 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                How To
+              </Link>
               <Link href="/contact" 
                 className="text-white bg-primary hover:bg-primary-light px-4 py-2 rounded-md text-sm font-medium transition-colors"
               >
@@ -117,6 +122,11 @@ const Navbar = () => {
             className="text-white/90 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
           >
             Pricing
+          </Link>
+          <Link href="/how-to" 
+            className="text-white/90 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
+          >
+            How To
           </Link>
           <Link href="/contact" 
             className="text-white bg-primary hover:bg-primary-light block px-3 py-2 rounded-md text-base font-medium"

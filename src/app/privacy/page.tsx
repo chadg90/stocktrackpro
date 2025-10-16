@@ -67,15 +67,19 @@ export default function PrivacyPolicy() {
               <ul className="space-y-3 text-white/80">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Scanning QR codes for asset management</span>
+                  <span>Scanning QR codes for asset and vehicle management</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>This access is only used when you actively choose to scan a QR code</span>
+                  <span>Taking vehicle inspection photos (6 photos per inspection)</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>No photos or videos are stored or transmitted</span>
+                  <span>QR code scanning is only used when you actively choose to scan</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>Vehicle inspection photos are stored securely in our cloud system</span>
                 </li>
               </ul>
             </div>
@@ -92,7 +96,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Firestore: Storing and managing asset inventory, user profiles, and company data</span>
+                  <span>Firestore: Storing and managing asset inventory, vehicle fleet data, user profiles, and company data</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
@@ -210,7 +214,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Asset and inventory data is retained per company requirements</span>
+                  <span>Asset, vehicle, and inspection data is retained per company requirements</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
