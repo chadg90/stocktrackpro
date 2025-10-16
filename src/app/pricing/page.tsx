@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Navbar from '../components/Navbar';
 import { Check } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Pricing() {
-  const [showVAT, setShowVAT] = useState(true);
-  
   const tiers = [
     {
       name: "Professional Starter",
@@ -85,10 +83,6 @@ export default function Pricing() {
     }
   ];
 
-  const calculatePrice = (basePrice: number) => {
-    return showVAT ? basePrice * 1.20 : basePrice; // 20% VAT
-  };
-
   const formatPrice = (price: number) => {
     return `£${price.toFixed(2)}`;
   };
@@ -108,27 +102,6 @@ export default function Pricing() {
             All plans include a 7-day free trial. Choose the plan that fits your needs.
           </p>
 
-          {/* VAT Toggle */}
-          <div className="flex items-center justify-center mb-8 sm:mb-16">
-            <span className={`mr-3 text-xs sm:text-sm ${!showVAT ? 'text-white' : 'text-white/60'}`}>
-              Prices ex. VAT
-            </span>
-            <button
-              onClick={() => setShowVAT(!showVAT)}
-              className="relative inline-flex h-5 sm:h-6 w-10 sm:w-11 items-center rounded-full transition-colors focus:outline-none"
-              style={{ backgroundColor: showVAT ? '#fea917' : '#4B5563' }}
-            >
-              <span
-                className={`inline-block h-3.5 sm:h-4 w-3.5 sm:w-4 transform rounded-full bg-white transition-transform ${
-                  showVAT ? 'translate-x-5 sm:translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            <span className={`ml-3 text-xs sm:text-sm ${showVAT ? 'text-white' : 'text-white/60'}`}>
-              Prices inc. VAT
-            </span>
-          </div>
-
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto relative">
             <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-3xl"></div>
@@ -146,7 +119,7 @@ export default function Pricing() {
                   <p className="text-white/60 mb-4 sm:mb-6 text-sm sm:text-base">{tier.description}</p>
                   <div className="mb-6 sm:mb-8">
                     <span className="text-3xl sm:text-4xl font-bold text-white">
-                      {formatPrice(calculatePrice(tier.price))}
+                      {formatPrice(tier.price)}
                     </span>
                     <div className="text-white/60 text-xs sm:text-sm mt-1">per month</div>
                   </div>
@@ -210,9 +183,9 @@ export default function Pricing() {
             </ul>
           </div>
 
-          {/* VAT Notice */}
+          {/* Pricing Notice */}
           <p className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-white/60">
-            {showVAT ? 'All prices shown include VAT at 20%' : 'All prices shown exclude VAT at 20%'}
+            All prices shown include VAT at 20%
           </p>
         </div>
       </div>

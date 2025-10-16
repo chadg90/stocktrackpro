@@ -113,9 +113,9 @@ export default function PricingSection() {
           </button>
         </div>
 
-        {/* VAT Notice */}
+        {/* Pricing Notice */}
         <p className="mt-8 text-center text-sm text-gray-500">
-          All prices exclude VAT where applicable
+          All prices include VAT at 20%
         </p>
       </div>
     </section>
