@@ -1,6 +1,6 @@
 import React from 'react';
 import Navbar from './components/Navbar';
-import { Wrench, QrCode, Map, Smartphone, Users, PoundSterling, Download } from 'lucide-react';
+import { Wrench, QrCode, Map, Smartphone, Users, PoundSterling } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
@@ -98,62 +98,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Download Section */}
-      <div className="relative bg-black py-12 sm:py-20">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-primary/5"></div>
-          <div className="absolute top-1/2 right-1/4 w-48 sm:w-64 h-48 sm:h-64 bg-primary/10 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="container relative mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="flex items-center justify-center mb-6">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
-                <Download className="w-6 h-6 text-primary" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                Download <span className="text-primary">Stock Track PRO</span>
-              </h2>
-            </div>
-            <p className="text-base sm:text-lg text-white/80 mb-8">
-              Get started with our Android app today. Version 1.0.4 - 127 MB
-            </p>
-            
-            <div className="bg-black border border-primary/20 rounded-2xl p-6 sm:p-8 mb-8">
-              <a
-                href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.0.4/app-release.apk"
-                download="StockTrackPro.apk"
-                className="inline-flex items-center px-8 py-4 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors text-lg font-semibold mb-6"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                📱 Download Android APK
-              </a>
-              
-              <div className="text-left max-w-2xl mx-auto">
-                <h3 className="text-lg font-semibold text-white mb-4">Installation Instructions:</h3>
-                <ol className="space-y-2 text-white/80">
-                  <li className="flex items-start">
-                    <span className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center text-sm font-semibold text-primary mr-3 mt-0.5">1</span>
-                    <span>Download the APK file above</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center text-sm font-semibold text-primary mr-3 mt-0.5">2</span>
-                    <span>Enable "Install unknown apps" in Android settings</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center text-sm font-semibold text-primary mr-3 mt-0.5">3</span>
-                    <span>Tap the downloaded APK to install</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center text-sm font-semibold text-primary mr-3 mt-0.5">4</span>
-                    <span>Launch Stock Track PRO and start tracking!</span>
-                  </li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* CTA Section */}
       <div className="relative bg-black py-12 sm:py-20">
