@@ -29,14 +29,9 @@ export default function DownloadPage() {
                 <Download className="w-8 h-8 text-primary" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-4">Android APK Download</h2>
-              <p className="text-white/80 mb-4">
+              <p className="text-white/80 mb-6">
                 Version 1.0.5 - 127 MB
               </p>
-              <div className="bg-black/50 border border-primary/20 rounded-lg p-3 mb-6">
-                <p className="text-white/60 text-xs font-mono text-center">
-                  SHA256: 880ebf0fe3d16e1ba644abde793718100003293d9c0df2ce173b0c0b1eec3121
-                </p>
-              </div>
               
               <a
                 href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.05/StockTrackPro-v1.0.5.apk"
