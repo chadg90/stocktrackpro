@@ -17,7 +17,6 @@ export default function PricingSection() {
         "Vehicle inspections",
         "Basic reporting",
         "Mobile app access",
-        "7-day free trial"
       ]
     },
     {
@@ -30,10 +29,8 @@ export default function PricingSection() {
         "Up to 10 team members",
         "QR code scanning",
         "Vehicle inspections",
-        "Advanced reporting",
-        "Team collaboration",
+        "Basic reporting",
         "Mobile app access",
-        "7-day free trial"
       ]
     },
     {
@@ -46,11 +43,8 @@ export default function PricingSection() {
         "Up to 40 team members",
         "QR code scanning",
         "Vehicle inspections",
-        "Advanced reporting",
-        "Team collaboration",
-        "Priority support",
+        "Basic reporting",
         "Mobile app access",
-        "7-day free trial"
       ]
     }
   ];
@@ -64,7 +58,7 @@ export default function PricingSection() {
             Simple, transparent pricing
           </h2>
           <p className="mt-4 text-lg text-gray-600">
-            All plans include a 7-day free trial
+            Choose the plan that fits your needs
           </p>
         </div>
 
@@ -76,8 +70,8 @@ export default function PricingSection() {
               className="rounded-lg bg-white shadow-lg divide-y divide-gray-200 flex flex-col"
             >
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900">{tier.name}</h3>
-                <p className="mt-2 text-sm text-gray-500">{tier.description}</p>
+                <h3 className="text-xl font-bold text-gray-900 text-center">{tier.name}</h3>
+                <p className="mt-2 text-sm text-gray-500 text-center">{tier.description}</p>
                 <p className="mt-4">
                   <span className="text-3xl font-bold text-gray-900">
                     £{tier.price}
@@ -85,7 +79,7 @@ export default function PricingSection() {
                   <span className="text-base font-medium text-gray-500">/month</span>
                 </p>
                 <button className="mt-6 w-full bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 transition-colors text-sm">
-                  Start Free Trial
+                  Get Started
                 </button>
               </div>
               <div className="p-6 flex-1">
@@ -102,16 +96,6 @@ export default function PricingSection() {
           ))}
         </div>
 
-        {/* Enterprise Call-out */}
-        <div className="mt-12 text-center bg-white rounded-lg shadow-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900">Professional Enterprise</h3>
-          <p className="mt-4 text-lg text-gray-600">
-            Need more than 40 users or unlimited vehicles? Contact us for custom pricing and features.
-          </p>
-          <button className="mt-6 inline-flex items-center px-6 py-3 border border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors">
-            Contact Sales
-          </button>
-        </div>
 
         {/* Pricing Notice */}
         <p className="mt-8 text-center text-sm text-gray-500">
