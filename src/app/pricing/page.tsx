@@ -34,11 +34,10 @@ export default function Pricing() {
         "Up to 10 team members",
         "QR code scanning",
         "Vehicle inspections",
-        "Advanced reporting",
+        "Basic reporting",
         "Mobile app access",
         "Asset condition monitoring",
         "Location tracking",
-        "Team collaboration",
         "7-day free trial"
       ]
     },
@@ -52,12 +51,10 @@ export default function Pricing() {
         "Up to 40 team members",
         "QR code scanning",
         "Vehicle inspections",
-        "Advanced reporting",
+        "Basic reporting",
         "Mobile app access",
         "Asset condition monitoring",
         "Location tracking",
-        "Team collaboration",
-        "Priority support",
         "7-day free trial"
       ]
     },
@@ -71,13 +68,10 @@ export default function Pricing() {
         "Unlimited team members",
         "QR code scanning",
         "Vehicle inspections",
-        "Advanced reporting",
+        "Basic reporting",
         "Mobile app access",
         "Asset condition monitoring",
         "Location tracking",
-        "Team collaboration",
-        "Priority support",
-        "Dedicated account manager",
         "7-day free trial"
       ]
     }
@@ -93,52 +87,59 @@ export default function Pricing() {
       
       <div className="container mx-auto px-4 pt-20 sm:pt-32 pb-12 sm:pb-20">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto relative px-2 sm:px-4">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-primary/10 rounded-full blur-xl"></div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 sm:mb-6 relative">
-            Simple, Transparent <span className="text-primary">Pricing</span>
+        <div className="text-center max-w-4xl mx-auto relative px-2 sm:px-4">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/15 rounded-full blur-2xl"></div>
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-primary/5 rounded-full blur-xl"></div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 sm:mb-8 relative leading-tight">
+            Simple, Transparent <span className="text-primary bg-gradient-to-r from-primary to-yellow-400 bg-clip-text text-transparent">Pricing</span>
           </h1>
-          <p className="text-lg sm:text-xl text-white/80 mb-8 sm:mb-12">
+          <p className="text-xl sm:text-2xl text-white/90 mb-12 sm:mb-16 max-w-2xl mx-auto leading-relaxed">
             All plans include a 7-day free trial. Choose the plan that fits your needs.
           </p>
 
           {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8 max-w-8xl mx-auto relative">
-            <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-3xl"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 sm:gap-10 max-w-8xl mx-auto relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 blur-3xl rounded-3xl"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
             {tiers.map((tier, index) => (
               <div
                 key={tier.name}
-                className={`relative bg-black rounded-xl sm:rounded-2xl p-6 sm:p-8 border transition-all duration-300 hover:border-primary/50 hover:scale-105 flex flex-col ${
+                className={`relative bg-black/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-8 sm:p-10 border transition-all duration-500 hover:border-primary/60 hover:scale-[1.02] hover:shadow-2xl flex flex-col group ${
                   index === 2 
-                    ? 'border-primary shadow-xl shadow-primary/10' 
-                    : 'border-primary/20'
+                    ? 'border-primary shadow-2xl shadow-primary/20 ring-2 ring-primary/20' 
+                    : 'border-primary/30 hover:shadow-xl hover:shadow-primary/10'
                 }`}
               >
-                <div className="text-center mb-6">
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">{tier.name}</h3>
-                  <p className="text-white/60 mb-4 text-sm">{tier.description}</p>
-                  <div className="mb-6">
-                    <span className="text-2xl sm:text-3xl font-bold text-white">
+                <div className="text-center mb-8">
+                  {index === 2 && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                      <span className="bg-primary text-black px-4 py-1 rounded-full text-sm font-bold">Most Popular</span>
+                    </div>
+                  )}
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 text-center">{tier.name}</h3>
+                  <p className="text-white/70 mb-6 text-sm sm:text-base text-center leading-relaxed">{tier.description}</p>
+                  <div className="mb-8">
+                    <span className="text-3xl sm:text-4xl font-bold text-white">
                       {formatPrice(tier.price)}
                     </span>
-                    <div className="text-white/60 text-xs mt-1">per month</div>
+                    <div className="text-white/60 text-sm mt-2">per month</div>
                   </div>
                   <Link
                     href="/contact"
-                    className={`block w-full py-2.5 px-4 rounded-lg transition-colors text-sm font-medium ${
+                    className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold ${
                       index === 2
-                        ? 'bg-primary hover:bg-primary-light text-white'
-                        : 'bg-primary/10 hover:bg-primary/20 text-white'
+                        ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
+                        : 'bg-primary/10 hover:bg-primary/20 text-white border border-primary/20 hover:border-primary/40'
                     }`}
                   >
                     Start Free Trial
                   </Link>
                 </div>
-                <div className="flex-1 space-y-2">
+                <div className="flex-1 space-y-3">
                   {tier.features.map((feature) => (
-                    <div key={feature} className="flex items-start">
-                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5 mr-2" />
-                      <span className="text-white/80 text-xs leading-relaxed">{feature}</span>
+                    <div key={feature} className="flex items-start group-hover:translate-x-1 transition-transform duration-300">
+                      <Check className="h-5 w-5 text-primary shrink-0 mt-0.5 mr-3" />
+                      <span className="text-white/85 text-sm leading-relaxed">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -147,23 +148,24 @@ export default function Pricing() {
           </div>
 
           {/* Enterprise Section */}
-          <div className="mt-12 sm:mt-20 bg-black border border-primary/20 rounded-xl sm:rounded-2xl p-6 sm:p-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-primary/10 rounded-full blur-3xl"></div>
+          <div className="mt-16 sm:mt-24 bg-gradient-to-br from-black/90 to-black/70 border border-primary/30 rounded-2xl sm:rounded-3xl p-8 sm:p-12 relative overflow-hidden backdrop-blur-sm">
+            <div className="absolute top-0 right-0 w-64 sm:w-80 h-64 sm:h-80 bg-primary/15 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-48 sm:w-64 h-48 sm:h-64 bg-primary/5 rounded-full blur-2xl"></div>
             <div className="relative">
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Enterprise</h2>
-              <p className="text-white/80 mb-6 text-sm sm:text-base">
-                Need more than 40 users or unlimited vehicles? Contact us for custom pricing and features.
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Enterprise Solutions</h2>
+              <p className="text-white/90 mb-8 text-base sm:text-lg leading-relaxed max-w-2xl">
+                Need more than 40 users or unlimited vehicles? Contact us for custom pricing and features tailored to your enterprise needs.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
                 <Link
                   href="/contact"
-                  className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 bg-primary hover:bg-primary-light text-white rounded-lg transition-colors text-sm sm:text-base"
+                  className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-primary hover:bg-primary-light text-black rounded-xl transition-all duration-300 text-base sm:text-lg font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
                 >
                   Contact Sales
                 </Link>
                 <Link
                   href="/contact"
-                  className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 border border-primary/20 hover:border-primary/50 text-white rounded-lg transition-colors text-sm sm:text-base"
+                  className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border-2 border-primary/30 hover:border-primary/60 text-white rounded-xl transition-all duration-300 text-base sm:text-lg font-semibold hover:bg-primary/5"
                 >
                   Book a Demo
                 </Link>
@@ -172,21 +174,41 @@ export default function Pricing() {
           </div>
 
           {/* Subscription Terms */}
-          <div className="mt-8 sm:mt-12 bg-black border border-primary/20 rounded-xl p-6 text-left">
-            <h3 className="text-lg font-semibold text-white mb-4">Subscription Terms</h3>
-            <ul className="space-y-2 text-sm text-white/80">
-              <li>• All subscriptions are auto-renewable and billed monthly</li>
-              <li>• 7-day free trial included with all plans - no charges during trial period</li>
-              <li>• Subscriptions automatically renew unless cancelled 24 hours before period end</li>
-              <li>• Manage subscriptions through your App Store account settings</li>
-              <li>• Unused trial time is forfeited when purchasing a subscription</li>
+          <div className="mt-12 sm:mt-16 bg-black/60 border border-primary/30 rounded-2xl p-8 text-left backdrop-blur-sm">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+              <div className="w-2 h-2 bg-primary rounded-full mr-3"></div>
+              Subscription Terms
+            </h3>
+            <ul className="space-y-3 text-sm sm:text-base text-white/85">
+              <li className="flex items-start">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <span>All subscriptions are auto-renewable and billed monthly</span>
+              </li>
+              <li className="flex items-start">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <span>7-day free trial included with all plans - no charges during trial period</span>
+              </li>
+              <li className="flex items-start">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <span>Subscriptions automatically renew unless cancelled 24 hours before period end</span>
+              </li>
+              <li className="flex items-start">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <span>Manage subscriptions through your App Store account settings</span>
+              </li>
+              <li className="flex items-start">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <span>Unused trial time is forfeited when purchasing a subscription</span>
+              </li>
             </ul>
           </div>
 
           {/* Pricing Notice */}
-          <p className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-white/60">
-            All prices shown include VAT at 20%
-          </p>
+          <div className="mt-8 sm:mt-12 text-center">
+            <p className="text-sm sm:text-base text-white/70 bg-black/40 border border-primary/20 rounded-lg px-6 py-3 inline-block">
+              All prices shown include VAT at 20%
+            </p>
+          </div>
         </div>
       </div>
     </div>

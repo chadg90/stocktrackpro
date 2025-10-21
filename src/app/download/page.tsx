@@ -12,9 +12,15 @@ export default function DownloadPage() {
           <h1 className="text-4xl font-bold text-white mb-6">
             Download <span className="text-primary">Stock Track PRO</span>
           </h1>
-          <p className="text-xl text-white/80 mb-12">
-            Get the Stock Track PRO Android app and start managing your assets, equipment, and fleet today.
+          <p className="text-xl text-white/80 mb-4">
+            Get the Stock Track PRO <span className="text-primary font-semibold">Android app</span> and start managing your assets, equipment, and fleet today.
           </p>
+          <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mb-8">
+            <p className="text-primary font-semibold text-center mb-2">📱 Android Only</p>
+            <p className="text-white/80 text-sm text-center">
+              iOS version available separately on the App Store. This download is for Android devices only.
+            </p>
+          </div>
 
           {/* Download Section */}
           <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
@@ -23,17 +29,22 @@ export default function DownloadPage() {
                 <Download className="w-8 h-8 text-primary" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-4">Android APK Download</h2>
-              <p className="text-white/80 mb-6">
-                Version 1.0.4 - 127 MB
+              <p className="text-white/80 mb-4">
+                Version 1.0.5 - 127 MB
               </p>
+              <div className="bg-black/50 border border-primary/20 rounded-lg p-3 mb-6">
+                <p className="text-white/60 text-xs font-mono text-center">
+                  SHA256: 880ebf0fe3d16e1ba644abde793718100003293d9c0df2ce173b0c0b1eec3121
+                </p>
+              </div>
               
               <a
-                href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.0.4/app-release.apk"
-                download="StockTrackPro.apk"
+                href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.05/StockTrackPro-v1.0.5.apk"
+                download="StockTrackPro-v1.0.5.apk"
                 className="inline-flex items-center px-8 py-4 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors text-lg font-semibold mb-8"
               >
                 <Download className="w-5 h-5 mr-2" />
-                📱 Download Android APK
+                📱 Download Android APK v1.0.5
               </a>
             </div>
 
@@ -53,7 +64,7 @@ export default function DownloadPage() {
                     <span className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-sm font-semibold text-primary mr-4 mt-0.5">2</span>
                     <div>
                       <h4 className="text-white font-semibold mb-1">Enable Unknown Sources</h4>
-                      <p className="text-white/80 text-sm">Go to Settings > Security > Install unknown apps and enable for your browser</p>
+                      <p className="text-white/80 text-sm">Go to Settings &gt; Security &gt; Install unknown apps and enable for your browser</p>
                     </div>
                   </div>
                 </div>
@@ -161,8 +172,8 @@ export default function DownloadPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.0.4/app-release.apk"
-                download="StockTrackPro.apk"
+                href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.05/StockTrackPro-v1.0.5.apk"
+                download="StockTrackPro-v1.0.5.apk"
                 className="inline-flex items-center px-6 py-3 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors"
               >
                 <Download className="w-4 h-4 mr-2" />
