@@ -30,16 +30,16 @@ export default function DownloadPage() {
               </div>
               <h2 className="text-2xl font-bold text-white mb-4">Android APK Download</h2>
               <p className="text-white/80 mb-6">
-                Version 1.0.5 - 127 MB
+                Version 1.0.6 - 127 MB
               </p>
               
               <a
-                href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.05/StockTrackPro-v1.0.5.apk"
-                download="StockTrackPro-v1.0.5.apk"
+                href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.0.6/StockTrackPro-v1.0.6.apk"
+                download="StockTrackPro-v1.0.6.apk"
                 className="inline-flex items-center px-8 py-4 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors text-lg font-semibold mb-8"
               >
                 <Download className="w-5 h-5 mr-2" />
-                📱 Download Android APK v1.0.5
+                📱 Download Android APK v1.0.6
               </a>
             </div>
 
@@ -167,8 +167,8 @@ export default function DownloadPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.05/StockTrackPro-v1.0.5.apk"
-                download="StockTrackPro-v1.0.5.apk"
+                href="https://github.com/chadg90/StockTrackPro-Releases/releases/download/v1.0.6/StockTrackPro-v1.0.6.apk"
+                download="StockTrackPro-v1.0.6.apk"
                 className="inline-flex items-center px-6 py-3 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors"
               >
                 <Download className="w-4 h-4 mr-2" />
