@@ -19,6 +19,7 @@ import {
   orderBy,
   limit,
   DocumentData,
+  Timestamp,
 } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { RefreshCw, Shield, Users, Truck, Package, AlertTriangle } from 'lucide-react';
@@ -61,12 +62,15 @@ type AccessCode = {
   expiresAt?: string;
 };
 
-const formatDate = (value?: string) => {
+const formatDate = (value?: string | Timestamp) => {
   if (!value) return '—';
   try {
+    if (value instanceof Timestamp) {
+      return value.toDate().toLocaleString();
+    }
     return new Date(value).toLocaleString();
   } catch {
-    return value;
+    return typeof value === 'string' ? value : '—';
   }
 };
 
