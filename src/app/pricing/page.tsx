@@ -8,67 +8,59 @@ import Link from 'next/link';
 export default function Pricing() {
   const tiers = [
     {
-      name: "Professional Starter",
+      name: "Starter",
       description: "Perfect for individual users",
       price: 19.99,
       features: [
+        "Up to 1 user",
         "Track up to 50 assets",
         "Up to 5 vehicles",
-        "1 user account",
         "QR code scanning",
         "Vehicle inspections",
-        "Basic reporting",
-        "Mobile app access",
-        "Asset condition monitoring",
-        "Location tracking",
+        "Fleet and asset management",
+        "7-day free trial for new users",
       ]
     },
     {
-      name: "Professional Team",
+      name: "Team",
       description: "Ideal for small teams",
       price: 34.99,
       features: [
+        "Up to 10 users",
         "Track up to 500 assets",
         "Up to 15 vehicles",
-        "Up to 10 team members",
-        "QR code scanning",
-        "Vehicle inspections",
-        "Basic reporting",
-        "Mobile app access",
-        "Asset condition monitoring",
-        "Location tracking",
+        "Vehicle inspections and defect workflow",
+        "Full company dashboard",
+        "Priority email support",
+        "7-day free trial for new users",
       ]
     },
     {
-      name: "Professional Business",
+      name: "Business",
       description: "For growing businesses",
       price: 49.99,
       features: [
-        "Unlimited asset tracking",
+        "Up to 40 users",
+        "Unlimited assets",
         "Up to 40 vehicles",
-        "Up to 40 team members",
-        "QR code scanning",
-        "Vehicle inspections",
-        "Basic reporting",
-        "Mobile app access",
-        "Asset condition monitoring",
-        "Location tracking",
+        "All features included",
+        "Admin and manager roles",
+        "Full audit trail",
+        "7-day free trial for new users",
       ]
     },
     {
-      name: "Professional Enterprise",
+      name: "Enterprise",
       description: "For large enterprises",
       price: 119.99,
       features: [
-        "Unlimited asset tracking",
-        "Unlimited vehicle tracking",
-        "Unlimited team members",
-        "QR code scanning",
-        "Vehicle inspections",
-        "Basic reporting",
-        "Mobile app access",
-        "Asset condition monitoring",
-        "Location tracking",
+        "Unlimited users",
+        "Unlimited assets",
+        "Unlimited vehicles",
+        "Custom onboarding",
+        "Dedicated support",
+        "All features included",
+        "7-day free trial for new users",
       ]
     }
   ];
@@ -89,8 +81,8 @@ export default function Pricing() {
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 sm:mb-8 relative leading-tight">
             Simple, Transparent <span className="text-primary bg-gradient-to-r from-primary to-yellow-400 bg-clip-text text-transparent">Pricing</span>
           </h1>
-          <p className="text-xl sm:text-2xl text-white/90 mb-12 sm:mb-16 max-w-2xl mx-auto leading-relaxed">
-            Choose the plan that fits your needs.
+          <p className="text-xl sm:text-2xl text-white/90 mb-12 sm:mb-16 max-w-3xl mx-auto leading-relaxed">
+            Simple, transparent pricing. All subscriptions are managed in the app. New users receive a 7-day free trial.
           </p>
 
           {/* Pricing Cards */}
@@ -121,14 +113,14 @@ export default function Pricing() {
                     <div className="text-white/60 text-sm mt-2">per month</div>
                   </div>
                   <Link
-                    href="/contact"
+                    href="/download"
                     className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold ${
                       index === 2
                         ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
                         : 'bg-primary/10 hover:bg-primary/20 text-white border border-primary/20 hover:border-primary/40'
                     }`}
                   >
-                    Get Started
+                    Start Free Trial
                   </Link>
                 </div>
                 <div className="flex-1 space-y-2">
@@ -157,11 +149,19 @@ export default function Pricing() {
               </li>
               <li className="flex items-start">
                 <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <span>New users receive a 7-day free trial</span>
+              </li>
+              <li className="flex items-start">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
                 <span>Subscriptions automatically renew unless cancelled 24 hours before period end</span>
               </li>
               <li className="flex items-start">
                 <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
-                <span>Manage subscriptions through your App Store account settings</span>
+                <span>Manage subscriptions through your App Store or Google Play account settings</span>
+              </li>
+              <li className="flex items-start">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <span>Enterprise is available in-app and follows the same in-app subscription flow</span>
               </li>
             </ul>
           </div>

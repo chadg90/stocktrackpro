@@ -17,6 +17,7 @@ export default function PricingSection() {
         "Vehicle inspections",
         "Basic reporting",
         "Mobile app access",
+        "7-day free trial for new users",
       ]
     },
     {
@@ -31,6 +32,7 @@ export default function PricingSection() {
         "Vehicle inspections",
         "Basic reporting",
         "Mobile app access",
+        "7-day free trial for new users",
       ]
     },
     {
@@ -45,6 +47,7 @@ export default function PricingSection() {
         "Vehicle inspections",
         "Basic reporting",
         "Mobile app access",
+        "7-day free trial for new users",
       ]
     }
   ];
@@ -58,7 +61,7 @@ export default function PricingSection() {
             Simple, transparent pricing
           </h2>
           <p className="mt-4 text-lg text-gray-600">
-            Choose the plan that fits your needs
+            Subscriptions are managed in the app. New users receive a 7-day free trial.
           </p>
         </div>
 
@@ -79,7 +82,7 @@ export default function PricingSection() {
                   <span className="text-base font-medium text-gray-500">/month</span>
                 </p>
                 <button className="mt-6 w-full bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 transition-colors text-sm">
-                  Get Started
+                  Start Free Trial
                 </button>
               </div>
               <div className="p-6 flex-1">

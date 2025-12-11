@@ -1,6 +1,6 @@
 import React from 'react';
 import Navbar from './components/Navbar';
-import { Wrench, QrCode, Map, Smartphone, Users, PoundSterling } from 'lucide-react';
+import { Wrench, QrCode, Map, Smartphone, Users, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
@@ -19,32 +19,30 @@ export default function Home() {
         <div className="container relative mx-auto px-4 pb-12 sm:pb-20">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 sm:mb-6">
-              Transform Your Asset, Equipment & Fleet Management with
-              <span className="text-primary block mt-2">Stock Track PRO</span>
+              Fleet and Asset Management for Small Businesses, Trades and Contractors
             </h1>
             <p className="text-lg sm:text-xl text-white/80 mb-6 sm:mb-8 leading-relaxed">
-              Take control of your assets, equipment, and vehicle fleet with our comprehensive QR-based tracking system. 
-              Perfect for any business that needs to track valuable resources efficiently.
+              Track tools, equipment, and vehicles in one simple app. Handle inspections, defects, QR check-ins, and team management in real time.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 sm:mt-8 justify-center">
               <Link
-                href="/contact"
+                href="/pricing"
                 className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-primary text-white rounded-lg bg-primary hover:bg-primary-light transition-colors text-sm sm:text-base"
               >
-                Book a Demo
+                Start Free Trial
               </Link>
               <Link
-                href="/benefits"
+                href="/contact"
                 className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-primary/20 text-white rounded-lg hover:border-primary/50 transition-colors text-sm sm:text-base"
               >
-                Explore Features
+                Book a Demo
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Features Section */}
+      {/* Hero Feature Highlights */}
       <div className="relative bg-black py-12 sm:py-20">
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-48 sm:w-64 h-48 sm:h-64 bg-primary/5 rounded-full blur-3xl"></div>
@@ -53,30 +51,40 @@ export default function Home() {
         
         <div className="container relative mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-8 sm:mb-12 text-center">
-            Powerful Features for Asset, Equipment & Fleet Management
+            Work Smarter. Stay Organised. Reduce Loss and Downtime.
           </h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto">
             {[
               {
                 icon: <QrCode className="w-6 h-6 text-primary" />,
-                title: "QR Code System",
-                description: "Unique QR codes for each asset and vehicle, ensuring simple and efficient tracking."
+                title: "QR Check-In / Check-Out",
+                description: "Instant check-in and check-out with QR scanning across tools, equipment, and vehicles."
               },
               {
                 icon: <Map className="w-6 h-6 text-primary" />,
-                title: "Location Tracking",
-                description: "Monitor assets and vehicles across multiple sites in real-time."
+                title: "Fleet Tracking",
+                description: "Monitor vehicles, inspections, mileage, and service dates across every site."
               },
               {
                 icon: <Smartphone className="w-6 h-6 text-primary" />,
-                title: "Mobile Access",
-                description: "Manage assets and perform vehicle inspections from any mobile device."
+                title: "Tool and Asset Management",
+                description: "Track tools and equipment across locations, jobs, and users with full history."
               },
               {
-                icon: <PoundSterling className="w-6 h-6 text-primary" />,
-                title: "Cost Control",
-                description: "Minimise asset loss and track maintenance costs effectively."
+                icon: <Users className="w-6 h-6 text-primary" />,
+                title: "Team and Role Management",
+                description: "Managers oversee companies, admins run the platform, and users work in the field."
+              },
+              {
+                icon: <Wrench className="w-6 h-6 text-primary" />,
+                title: "Vehicle Inspections",
+                description: "Capture required photos, checklist items, and defects to keep vehicles compliant."
+              },
+              {
+                icon: <ClipboardList className="w-6 h-6 text-primary" />,
+                title: "Defect Reporting",
+                description: "Flag defects, mark repairs complete, and update vehicle status instantly."
               }
             ].map((feature, index) => (
               <div
@@ -98,6 +106,78 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Why Stock Track PRO */}
+      <div className="relative bg-black py-12 sm:py-20">
+        <div className="container relative mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-8 sm:mb-12 text-center">
+            Why Stock Track PRO
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+            {[
+              { title: "Asset Tracking", description: "Track tools, equipment, and machinery across locations, jobs, and users.", icon: <ClipboardList className="w-6 h-6 text-primary" /> },
+              { title: "QR Scanning", description: "Instant check-in and check-out using built-in QR scanning for fast workflows.", icon: <QrCode className="w-6 h-6 text-primary" /> },
+              { title: "Fleet Management", description: "Log every vehicle, inspection, mileage reading, and service date.", icon: <Map className="w-6 h-6 text-primary" /> },
+              { title: "Photo Inspections", description: "Capture required inspection photos and attach defect reports on the spot.", icon: <Smartphone className="w-6 h-6 text-primary" /> },
+              { title: "Defect Reporting", description: "Flag defects, mark repairs complete, and automatically update vehicle status.", icon: <Wrench className="w-6 h-6 text-primary" /> },
+              { title: "Team Management", description: "Managers control their company; admins run the platform; field users keep work moving.", icon: <Users className="w-6 h-6 text-primary" /> },
+            ].map((item, index) => (
+              <div key={index} className="bg-black border border-primary/20 rounded-xl p-6 sm:p-7 hover:border-primary/50 transition-colors">
+                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  {item.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+                <p className="text-white/80 text-sm sm:text-base leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Screenshots / Visuals placeholder */}
+      <div className="relative bg-black py-12 sm:py-20">
+        <div className="container relative mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-8 sm:mb-10 text-center">
+            Platform Views
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+            {[
+              { title: "Manager Dashboard", description: "At-a-glance metrics for total assets, vehicles, and team members." },
+              { title: "Vehicle Inspection", description: "Guided checklist with required photos and defect logging." },
+              { title: "QR Scan", description: "Fast scan to check items in or out and record who has them." },
+              { title: "Asset List", description: "Filtered views of tools and equipment across locations and projects." },
+              { title: "Vehicle Status", description: "Status by vehicle including active, maintenance, and defects." },
+            ].map((item, index) => (
+              <div key={index} className="bg-black border border-primary/20 rounded-xl p-6 sm:p-7">
+                <div className="text-white text-base sm:text-lg font-semibold mb-2">{item.title}</div>
+                <p className="text-white/70 text-sm sm:text-base leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Benefits */}
+      <div className="relative bg-black py-12 sm:py-20">
+        <div className="container relative mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-8 sm:mb-10 text-center">
+            Why Companies Choose Stock Track PRO
+          </h2>
+          <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+            {[
+              "Stop losing tools and assets.",
+              "Reduce downtime with faster defect reporting.",
+              "Keep vehicles safe and compliant.",
+              "See team activity in one place.",
+              "Get audit trails for insurance and compliance.",
+              "Use on iOS, Android, and Web Dashboard.",
+            ].map((benefit, index) => (
+              <div key={index} className="bg-black border border-primary/20 rounded-xl p-5 sm:p-6">
+                <p className="text-white/85 text-sm sm:text-base leading-relaxed">{benefit}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* CTA Section */}
       <div className="relative bg-black py-12 sm:py-20">
@@ -109,18 +189,25 @@ export default function Home() {
         <div className="container relative mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-6">
-              Ready to Optimise Your Asset, Equipment & Fleet Management?
+              Start Managing Your Fleet and Tools Today
             </h2>
             <p className="text-base sm:text-lg text-white/80 mb-6 sm:mb-8">
-              Experience how Stock Track PRO can revolutionise your asset, equipment, and fleet tracking.
-              Book a personalised demo today.
+              New users get a 7-day free trial. All subscriptions are managed through the app. Managers can access the dashboard to review company data.
             </p>
-            <Link
-              href="/contact"
-              className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors text-sm sm:text-base"
-            >
-              Book Your Demo
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors text-sm sm:text-base"
+              >
+                Start Free Trial
+              </Link>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 border border-primary/30 hover:border-primary/50 text-white rounded-lg transition-colors text-sm sm:text-base"
+              >
+                View Pricing
+              </Link>
+            </div>
           </div>
         </div>
       </div>

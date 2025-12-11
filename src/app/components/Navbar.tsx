@@ -19,19 +19,13 @@ const Navbar = () => {
   }, []);
 
   const navigation = [
-    { name: 'Home', href: '#home' },
-    { name: 'Features', href: '#features' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'Support', href: '#support' },
+    { name: 'Home', href: '/' },
+    { name: 'Features', href: '/features' },
+    { name: 'Pricing', href: '/pricing' },
+    { name: 'FAQ', href: '/faq' },
+    { name: 'Contact', href: '/contact' },
+    { name: 'Dashboard Login', href: 'https://app.stocktrackpro.co.uk', external: true },
   ];
-
-  const scrollToSection = (sectionId: string) => {
-    setIsMenuOpen(false);
-    const element = document.querySelector(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
   return (
     <nav 
@@ -59,36 +53,22 @@ const Navbar = () => {
           {/* Desktop navigation */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-center space-x-4">
-              <Link href="/" 
-                className="text-white/90 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Home
-              </Link>
-              <Link href="/benefits" 
-                className="text-white/90 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Benefits
-              </Link>
-              <Link href="/pricing" 
-                className="text-white/90 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Pricing
-              </Link>
-              <Link href="/how-to" 
-                className="text-white/90 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                How To
-              </Link>
-              <Link href="/download" 
-                className="text-white/90 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Download
-              </Link>
-              <Link href="/contact" 
-                className="text-white bg-primary hover:bg-primary-light px-4 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Contact
-              </Link>
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  target={item.external ? '_blank' : undefined}
+                  rel={item.external ? 'noopener noreferrer' : undefined}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    item.name === 'Contact'
+                      ? 'text-white bg-primary hover:bg-primary-light'
+                      : 'text-white/90 hover:text-primary'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              ))}
             </div>
           </div>
 
@@ -113,36 +93,22 @@ const Navbar = () => {
       {/* Mobile menu */}
       <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <div className="px-2 pt-2 pb-3 space-y-1 bg-black/95 backdrop-blur-sm border-t border-primary/10">
-          <Link href="/" 
-            className="text-white/90 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
-          >
-            Home
-          </Link>
-          <Link href="/benefits" 
-            className="text-white/90 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
-          >
-            Benefits
-          </Link>
-          <Link href="/pricing" 
-            className="text-white/90 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
-          >
-            Pricing
-          </Link>
-          <Link href="/how-to" 
-            className="text-white/90 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
-          >
-            How To
-          </Link>
-          <Link href="/download" 
-            className="text-white/90 hover:text-primary block px-3 py-2 rounded-md text-base font-medium"
-          >
-            Download
-          </Link>
-          <Link href="/contact" 
-            className="text-white bg-primary hover:bg-primary-light block px-3 py-2 rounded-md text-base font-medium"
-          >
-            Contact
-          </Link>
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              target={item.external ? '_blank' : undefined}
+              rel={item.external ? 'noopener noreferrer' : undefined}
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                item.name === 'Contact'
+                  ? 'text-white bg-primary hover:bg-primary-light'
+                  : 'text-white/90 hover:text-primary'
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {item.name}
+            </Link>
+          ))}
         </div>
       </div>
     </nav>
