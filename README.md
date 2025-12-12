@@ -2,6 +2,8 @@
 
 A comprehensive asset, equipment, and fleet management solution that helps businesses track and manage their valuable resources efficiently.
 
+<!-- Deployment trigger -->
+
 Visit our website: [www.stocktrackpro.co.uk](https://www.stocktrackpro.co.uk)
 
 ## Core Capabilities
