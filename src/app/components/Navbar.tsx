@@ -67,7 +67,7 @@ const Navbar = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
-                </Link>
+              </Link>
               ))}
             </div>
           </div>
@@ -107,7 +107,7 @@ const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               {item.name}
-            </Link>
+          </Link>
           ))}
         </div>
       </div>

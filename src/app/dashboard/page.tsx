@@ -22,6 +22,9 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
+
+// Check if Firebase is properly initialized
+const isFirebaseAvailable = firebaseAuth && firebaseDb;
 import { RefreshCw, Shield, Users, Truck, Package, AlertTriangle } from 'lucide-react';
 
 type Profile = {
@@ -94,7 +97,12 @@ export default function DashboardPage() {
   const [accessCodes, setAccessCodes] = useState<AccessCode[]>([]);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(firebaseAuth, (user) => {
+    if (!isFirebaseAvailable) {
+      setError('Firebase configuration is not available. Please check your environment variables.');
+      return;
+    }
+
+    const unsub = onAuthStateChanged(firebaseAuth!, (user) => {
       setAuthUser(user);
       if (!user) {
         setProfile(null);
@@ -105,7 +113,10 @@ export default function DashboardPage() {
 
   const loadProfile = useCallback(
     async (user: User) => {
-      const profileRef = doc(firebaseDb, 'profiles', user.uid);
+      if (!isFirebaseAvailable) {
+        throw new Error('Firebase is not configured properly');
+      }
+      const profileRef = doc(firebaseDb!, 'profiles', user.uid);
       const snap = await getDoc(profileRef);
       if (!snap.exists()) {
         throw new Error('Profile not found for this account.');
@@ -121,6 +132,7 @@ export default function DashboardPage() {
   );
 
   const safeCount = async (refQuery: ReturnType<typeof query>) => {
+    if (!isFirebaseAvailable) return null;
     try {
       const countSnap = await getCountFromServer(refQuery);
       return countSnap.data().count;
@@ -131,13 +143,18 @@ export default function DashboardPage() {
 
   const fetchData = useCallback(
     async (companyId: string) => {
+      if (!isFirebaseAvailable) {
+        setError('Firebase is not configured properly');
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {
-        const toolsQ = query(collection(firebaseDb, 'tools'), where('company_id', '==', companyId));
-        const vehiclesQ = query(collection(firebaseDb, 'vehicles'), where('company_id', '==', companyId));
-        const teamQ = query(collection(firebaseDb, 'profiles'), where('company_id', '==', companyId));
-        const inspectionsQ = query(collection(firebaseDb, 'vehicle_inspections'), where('company_id', '==', companyId));
+        const toolsQ = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId));
+        const vehiclesQ = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId));
+        const teamQ = query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId));
+        const inspectionsQ = query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', companyId));
 
         const [toolsCount, vehiclesCountVal, teamCountVal, inspectionsCountVal] = await Promise.all([
           safeCount(toolsQ),
@@ -152,25 +169,25 @@ export default function DashboardPage() {
         setInspectionsCount(inspectionsCountVal);
 
         const recentInspectionsQ = query(
-          collection(firebaseDb, 'vehicle_inspections'),
+          collection(firebaseDb!, 'vehicle_inspections'),
           where('company_id', '==', companyId),
           orderBy('inspected_at', 'desc'),
           limit(5)
         );
         const defectsQ = query(
-          collection(firebaseDb, 'vehicle_defects'),
+          collection(firebaseDb!, 'vehicle_defects'),
           where('company_id', '==', companyId),
           orderBy('reported_at', 'desc'),
           limit(5)
         );
         const historyQ = query(
-          collection(firebaseDb, 'tool_history'),
+          collection(firebaseDb!, 'tool_history'),
           where('company_id', '==', companyId),
           orderBy('timestamp', 'desc'),
           limit(5)
         );
         const accessCodesQ = query(
-          collection(firebaseDb, 'access_codes'),
+          collection(firebaseDb!, 'access_codes'),
           where('companyId', '==', companyId),
           limit(5)
         );
@@ -241,7 +258,10 @@ export default function DashboardPage() {
     setError(null);
     setLoading(true);
     try {
-      const cred = await signInWithEmailAndPassword(firebaseAuth, email.trim(), password);
+      if (!isFirebaseAvailable) {
+        throw new Error('Firebase is not configured properly');
+      }
+      const cred = await signInWithEmailAndPassword(firebaseAuth!, email.trim(), password);
       await loadProfile(cred.user);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Sign-in failed');
@@ -251,7 +271,8 @@ export default function DashboardPage() {
   };
 
   const handleSignOut = async () => {
-    await signOut(firebaseAuth);
+    if (!isFirebaseAvailable) return;
+    await signOut(firebaseAuth!);
     setProfile(null);
     setInspections([]);
     setDefects([]);

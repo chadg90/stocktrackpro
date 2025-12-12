@@ -195,10 +195,10 @@ export default function Home() {
               New users get a 7-day free trial. All subscriptions are managed through the app. Managers can access the dashboard to review company data.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <Link
+            <Link
                 href="/pricing"
-                className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors text-sm sm:text-base"
-              >
+              className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors text-sm sm:text-base"
+            >
                 Start Free Trial
               </Link>
               <Link
@@ -206,7 +206,7 @@ export default function Home() {
                 className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 border border-primary/30 hover:border-primary/50 text-white rounded-lg transition-colors text-sm sm:text-base"
               >
                 View Pricing
-              </Link>
+            </Link>
             </div>
           </div>
         </div>

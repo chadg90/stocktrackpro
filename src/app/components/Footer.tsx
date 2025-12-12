@@ -26,7 +26,7 @@ const Footer = () => {
             <Link href="/contact" className="hover:text-primary">Contact</Link>
             <Link href="https://app.stocktrackpro.co.uk" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
               Dashboard Login
-            </Link>
+                </Link>
           </div>
         </div>
 

@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     domains: ['vercel.com'],
   },
@@ -10,10 +9,6 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: false,
-  },
-  // Enable HTTPS in development
-  server: {
-    https: process.env.NODE_ENV === 'development',
   },
   // Add security headers
   async headers() {
