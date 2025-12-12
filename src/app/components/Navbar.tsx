@@ -57,8 +57,6 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   href={item.href}
-                  target={item.external ? '_blank' : undefined}
-                  rel={item.external ? 'noopener noreferrer' : undefined}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     item.name === 'Contact'
                       ? 'text-white bg-primary hover:bg-primary-light'
@@ -97,8 +95,6 @@ const Navbar = () => {
             <Link
               key={item.name}
               href={item.href}
-              target={item.external ? '_blank' : undefined}
-              rel={item.external ? 'noopener noreferrer' : undefined}
               className={`block px-3 py-2 rounded-md text-base font-medium ${
                 item.name === 'Contact'
                   ? 'text-white bg-primary hover:bg-primary-light'
