@@ -24,7 +24,7 @@ const Navbar = () => {
     { name: 'Pricing', href: '/pricing' },
     { name: 'FAQ', href: '/faq' },
     { name: 'Contact', href: '/contact' },
-    { name: 'Dashboard Login', href: 'https://app.stocktrackpro.co.uk', external: true },
+    { name: 'Dashboard', href: '/dashboard' },
   ];
 
   return (
