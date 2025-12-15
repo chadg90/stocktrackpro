@@ -27,8 +27,19 @@ type HistoryItem = {
 };
 
 type Profile = {
+  id: string;
   company_id?: string;
   role?: string;
+  displayName?: string;
+  name?: string;
+  email?: string;
+};
+
+type Tool = {
+  id: string;
+  name?: string;
+  brand?: string;
+  model?: string;
 };
 
 const formatDate = (value?: string | Timestamp) => {
@@ -48,6 +59,8 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [tools, setTools] = useState<Record<string, Tool>>({});
+  const [users, setUsers] = useState<Record<string, Profile>>({});
   
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -75,6 +88,24 @@ export default function HistoryPage() {
     if (!firebaseDb) return;
     setLoading(true);
     try {
+      // Fetch tools for mapping
+      const toolsQ = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId));
+      const toolsSnap = await getDocs(toolsQ);
+      const toolsMap: Record<string, Tool> = {};
+      toolsSnap.docs.forEach(doc => {
+        toolsMap[doc.id] = { id: doc.id, ...doc.data() } as Tool;
+      });
+      setTools(toolsMap);
+
+      // Fetch users for mapping
+      const usersQ = query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId));
+      const usersSnap = await getDocs(usersQ);
+      const usersMap: Record<string, Profile> = {};
+      usersSnap.docs.forEach(doc => {
+        usersMap[doc.id] = { id: doc.id, ...doc.data() } as Profile;
+      });
+      setUsers(usersMap);
+
       // Fetch tool_history
       const historyQ = query(
         collection(firebaseDb!, 'tool_history'),
@@ -153,34 +184,41 @@ export default function HistoryPage() {
                   </td>
                 </tr>
               ) : (
-                filteredHistory.map((item) => (
-                  <tr key={item.id} className="hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4 text-white/70 text-sm whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5 opacity-50" />
-                        {formatDate(item.timestamp)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                        ${item.action?.includes('check_out') ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 
-                          item.action?.includes('check_in') ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
-                          'bg-white/10 text-white/60 border border-white/20'}`}
-                      >
-                        {item.action?.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-white font-mono text-sm">
-                      {item.tool_id || '—'}
-                    </td>
-                    <td className="px-6 py-4 text-white/80 text-sm">
-                      {item.user_id || '—'}
-                    </td>
-                    <td className="px-6 py-4 text-white/60 text-sm">
-                      {item.details || '—'}
-                    </td>
-                  </tr>
-                ))
+                filteredHistory.map((item) => {
+                  const tool = item.tool_id ? tools[item.tool_id] : null;
+                  const user = item.user_id ? users[item.user_id] : null;
+                  const userName = user ? (user.displayName || user.name || user.email?.split('@')[0] || 'Unknown') : (item.user_id || '—');
+                  const toolName = tool ? (tool.name || `${tool.brand} ${tool.model}`.trim() || item.tool_id) : (item.tool_id || '—');
+                  
+                  return (
+                    <tr key={item.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 text-white/70 text-sm whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 opacity-50" />
+                          {formatDate(item.timestamp)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                          ${item.action?.includes('check_out') ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 
+                            item.action?.includes('check_in') ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                            'bg-white/10 text-white/60 border border-white/20'}`}
+                        >
+                          {item.action?.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-white text-sm">
+                        {toolName}
+                      </td>
+                      <td className="px-6 py-4 text-white/80 text-sm">
+                        {userName}
+                      </td>
+                      <td className="px-6 py-4 text-white/60 text-sm">
+                        {item.details || '—'}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
