@@ -6,7 +6,6 @@ import {
   query,
   where,
   getDocs,
-  addDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -14,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Plus, Pencil, Trash2, Search, QrCode, Image as ImageIcon, Eye } from 'lucide-react';
+import { Pencil, Trash2, Search, QrCode, Image as ImageIcon, Eye } from 'lucide-react';
 import Modal from '../components/Modal';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
@@ -45,7 +44,6 @@ export default function AssetsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   
   // Modal states
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentTool, setCurrentTool] = useState<Tool | null>(null);
   const [formData, setFormData] = useState<Partial<Tool>>({});
@@ -93,30 +91,6 @@ export default function AssetsPage() {
       console.error('Error fetching tools:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAddTool = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!firebaseDb || !profile?.company_id) return;
-    
-    setProcessing(true);
-    try {
-      await addDoc(collection(firebaseDb!, 'tools'), {
-        ...formData,
-        company_id: profile.company_id,
-        created_at: serverTimestamp(),
-        status: formData.status || 'active',
-        // If qr_code is not provided, generate a simple one (or leave empty for app to handle)
-        qr_code: formData.qr_code || `TOOL-${Date.now()}`, 
-      });
-      setIsAddModalOpen(false);
-      setFormData({});
-      fetchTools(profile.company_id);
-    } catch (error) {
-      console.error('Error adding tool:', error);
-    } finally {
-      setProcessing(false);
     }
   };
 
@@ -177,18 +151,8 @@ export default function AssetsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Assets</h1>
-          <p className="text-white/70 text-sm mt-1">Manage your tools and equipment inventory</p>
+          <p className="text-white/70 text-sm mt-1">View and edit your tools and equipment inventory</p>
         </div>
-        <button
-          onClick={() => {
-            setFormData({});
-            setIsAddModalOpen(true);
-          }}
-          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
-        >
-          <Plus className="h-5 w-5" />
-          Add Asset
-        </button>
       </div>
 
       {/* Search and Filter */}
@@ -324,90 +288,6 @@ export default function AssetsPage() {
           </table>
         </div>
       </div>
-
-      {/* Add Modal */}
-      <Modal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        title="Add New Asset"
-      >
-        <form onSubmit={handleAddTool} className="space-y-4">
-          <div>
-            <label className="block text-sm text-white/70 mb-1">Asset Name</label>
-            <input
-              type="text"
-              required
-              value={formData.name || ''}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-              placeholder="e.g. Hilti Drill"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-white/70 mb-1">Brand</label>
-              <input
-                type="text"
-                value={formData.brand || ''}
-                onChange={(e) => setFormData({...formData, brand: e.target.value})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-white/70 mb-1">Model</label>
-              <input
-                type="text"
-                value={formData.model || ''}
-                onChange={(e) => setFormData({...formData, model: e.target.value})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm text-white/70 mb-1">Status</label>
-            <select
-              value={formData.status || 'active'}
-              onChange={(e) => setFormData({...formData, status: e.target.value as any})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-            >
-              <option value="active">Active</option>
-              <option value="maintenance">Maintenance</option>
-              <option value="broken">Broken</option>
-              <option value="lost">Lost</option>
-              <option value="retired">Retired</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm text-white/70 mb-1">Location</label>
-            <input
-              type="text"
-              value={formData.location || ''}
-              onChange={(e) => setFormData({...formData, location: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-              placeholder="e.g. Warehouse A"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-white/70 mb-1">QR Code (Optional)</label>
-            <input
-              type="text"
-              value={formData.qr_code || ''}
-              onChange={(e) => setFormData({...formData, qr_code: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-              placeholder="Leave blank to auto-generate"
-            />
-          </div>
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={processing}
-              className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
-            >
-              {processing ? 'Adding Asset...' : 'Add Asset'}
-            </button>
-          </div>
-        </form>
-      </Modal>
 
       {/* Edit Modal */}
       <Modal
