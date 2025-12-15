@@ -61,21 +61,17 @@ const formatDate = (value?: string | Timestamp) => {
 const firstPhotoUrl = (defect: any): string | null => {
   // Check for simple photo_url string
   if (defect?.photo_url && typeof defect.photo_url === 'string') {
-    console.log('Found photo_url:', defect.photo_url);
     return defect.photo_url;
   }
   
   // Check for photo_urls map
   if (defect?.photo_urls && typeof defect.photo_urls === 'object') {
-    console.log('Found photo_urls object:', defect.photo_urls);
     const vals = Object.values(defect.photo_urls).filter((v) => typeof v === 'string') as string[];
     if (vals.length > 0) {
-      console.log('Extracted first URL:', vals[0]);
       return vals[0];
     }
   }
   
-  console.log('No photo found for defect:', defect.id, defect);
   return null;
 };
 
