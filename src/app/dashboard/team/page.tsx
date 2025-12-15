@@ -26,6 +26,11 @@ type Profile = {
   phone?: string;
 };
 
+type Company = {
+  id: string;
+  name?: string;
+};
+
 type Invite = {
   id: string;
   email: string;
@@ -57,6 +62,7 @@ export default function TeamPage() {
 
   // Company info for admin actions
   const [companyName, setCompanyName] = useState<string | undefined>(undefined);
+  const [companies, setCompanies] = useState<Company[]>([]);
 
   // Check permissions
   const isAdmin = currentUserProfile?.role === 'admin';
@@ -76,6 +82,9 @@ export default function TeamPage() {
             fetchTeam(data.company_id);
             fetchInvites(data.company_id);
             fetchCompany(data.company_id);
+            if (data.role === 'admin') {
+              fetchCompanies();
+            }
           }
         }
       } else {
@@ -124,6 +133,18 @@ export default function TeamPage() {
       setInvites(invitesData);
     } catch (error) {
       console.error('Error fetching invites:', error);
+    }
+  };
+
+  const fetchCompanies = async () => {
+    if (!firebaseDb) return;
+    try {
+      const q = query(collection(firebaseDb!, 'companies'));
+      const snapshot = await getDocs(q);
+      const companyList = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as { name?: string }) }));
+      setCompanies(companyList);
+    } catch (error) {
+      console.error('Error fetching companies:', error);
     }
   };
 
@@ -487,14 +508,19 @@ export default function TeamPage() {
           </div>
           <div>
             <label className="block text-sm text-white/70 mb-1">Company ID</label>
-            <input
-              type="text"
+            <select
               value={editCompanyId}
               onChange={(e) => setEditCompanyId(e.target.value)}
               className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-              placeholder="company_id"
               required
-            />
+            >
+              <option value="" disabled>Select company</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name || c.id}
+                </option>
+              ))}
+            </select>
             <p className="text-xs text-white/50 mt-1">Admin-only: move user to another company.</p>
           </div>
           <div className="pt-2 flex justify-end gap-2">
