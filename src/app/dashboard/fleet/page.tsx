@@ -54,8 +54,8 @@ export default function FleetPage() {
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [viewingImageAlt, setViewingImageAlt] = useState('');
 
-  // Check if user can delete (both admin and manager can delete their company's data)
-  const canDelete = profile?.role === 'admin' || profile?.role === 'manager';
+  // Only admins can delete per policy; managers can add/edit
+  const canDelete = profile?.role === 'admin';
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
