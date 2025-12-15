@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History, MapPin, Key } from 'lucide-react';
+import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History, MapPin, Key, Building2 } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -18,6 +18,7 @@ const navigation = [
   { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
   { name: 'Team', href: '/dashboard/team', icon: Users },
   { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key, adminOnly: true },
+  { name: 'Companies', href: '/dashboard/companies', icon: Building2, adminOnly: true },
 ];
 
 export default function Sidebar() {
