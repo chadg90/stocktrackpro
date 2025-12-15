@@ -21,6 +21,7 @@ export default function DashboardLayout({
   const [authorized, setAuthorized] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const isDashboardRoot = pathname === '/dashboard' || pathname === '/dashboard/';
 
   useEffect(() => {
     // Only run on client side and if firebase is initialized
@@ -72,7 +73,7 @@ export default function DashboardLayout({
     );
   }
 
-  if (!authorized && pathname !== '/dashboard') {
+  if (!authorized && !isDashboardRoot) {
     // Redirect sub-pages to main dashboard for login
     if (typeof window !== 'undefined') {
       router.push('/dashboard');
