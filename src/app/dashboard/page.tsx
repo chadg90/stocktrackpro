@@ -50,6 +50,13 @@ type Defect = {
   description?: string;
 };
 
+type Vehicle = {
+  id: string;
+  registration?: string;
+  make?: string;
+  model?: string;
+};
+
 type HistoryItem = {
   id: string;
   tool_id?: string;
@@ -95,6 +102,7 @@ export default function DashboardPage() {
   const [defects, setDefects] = useState<Defect[]>([]);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [accessCodes, setAccessCodes] = useState<AccessCode[]>([]);
+  const [vehicles, setVehicles] = useState<Record<string, Vehicle>>({});
 
   useEffect(() => {
     if (!isFirebaseAvailable) {
@@ -167,6 +175,14 @@ export default function DashboardPage() {
         setVehiclesCount(vehiclesCountVal);
         setTeamCount(teamCountVal);
         setInspectionsCount(inspectionsCountVal);
+
+        // Fetch vehicles for mapping
+        const vehiclesSnap = await getDocs(vehiclesQ);
+        const vehiclesMap: Record<string, Vehicle> = {};
+        vehiclesSnap.docs.forEach(doc => {
+          vehiclesMap[doc.id] = { id: doc.id, ...doc.data() } as Vehicle;
+        });
+        setVehicles(vehiclesMap);
 
         const recentInspectionsQ = query(
           collection(firebaseDb!, 'vehicle_inspections'),
@@ -392,20 +408,25 @@ export default function DashboardPage() {
                   {inspections.length === 0 && (
                     <p className="text-white/60 text-sm">No inspections found.</p>
                   )}
-                  {inspections.map((insp) => (
-                    <div key={insp.id} className="rounded-lg border border-primary/15 p-3">
-                      <div className="flex items-center justify-between">
-                        <p className="text-white text-sm font-semibold">Vehicle: {insp.vehicle_id ?? '—'}</p>
-                        {insp.has_defect && (
-                          <span className="text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
-                            Defect
-                          </span>
-                        )}
+                  {inspections.map((insp) => {
+                    const vehicle = insp.vehicle_id ? vehicles[insp.vehicle_id] : null;
+                    return (
+                      <div key={insp.id} className="rounded-lg border border-primary/15 p-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-white text-sm font-semibold">
+                            Vehicle: {vehicle ? `${vehicle.registration} (${vehicle.make} ${vehicle.model})` : (insp.vehicle_id ?? '—')}
+                          </p>
+                          {insp.has_defect && (
+                            <span className="text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
+                              Defect
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-white/70 text-xs mt-1">Inspected at: {formatDate(insp.inspected_at)}</p>
+                        <p className="text-white/60 text-xs">Inspector: {insp.inspected_by ?? '—'}</p>
                       </div>
-                      <p className="text-white/70 text-xs mt-1">Inspected at: {formatDate(insp.inspected_at)}</p>
-                      <p className="text-white/60 text-xs">Inspector: {insp.inspected_by ?? '—'}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -416,19 +437,24 @@ export default function DashboardPage() {
                 </div>
                 <div className="space-y-3">
                   {defects.length === 0 && <p className="text-white/60 text-sm">No defects reported.</p>}
-                  {defects.map((d) => (
-                    <div key={d.id} className="rounded-lg border border-primary/15 p-3">
-                      <div className="flex items-center justify-between">
-                        <p className="text-white text-sm font-semibold">Vehicle: {d.vehicle_id ?? '—'}</p>
-                        <AlertTriangle className="h-4 w-4 text-primary" />
+                  {defects.map((d) => {
+                    const vehicle = d.vehicle_id ? vehicles[d.vehicle_id] : null;
+                    return (
+                      <div key={d.id} className="rounded-lg border border-primary/15 p-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-white text-sm font-semibold">
+                            Vehicle: {vehicle ? `${vehicle.registration} (${vehicle.make} ${vehicle.model})` : (d.vehicle_id ?? '—')}
+                          </p>
+                          <AlertTriangle className="h-4 w-4 text-primary" />
+                        </div>
+                        <p className="text-white/70 text-xs mt-1">Reported: {formatDate(d.reported_at)}</p>
+                        <p className="text-white/70 text-xs">Severity: {d.severity ?? '—'}</p>
+                        <p className="text-white/60 text-xs mt-1 line-clamp-2">
+                          {d.description ?? 'No description'}
+                        </p>
                       </div>
-                      <p className="text-white/70 text-xs mt-1">Reported: {formatDate(d.reported_at)}</p>
-                      <p className="text-white/70 text-xs">Severity: {d.severity ?? '—'}</p>
-                      <p className="text-white/60 text-xs mt-1 line-clamp-2">
-                        {d.description ?? 'No description'}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
