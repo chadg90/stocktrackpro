@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Truck, Users, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { firebaseAuth } from '@/lib/firebase';
 import Image from 'next/image';
@@ -12,6 +12,7 @@ const navigation = [
   { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Assets', href: '/dashboard/assets', icon: Package },
   { name: 'Fleet', href: '/dashboard/fleet', icon: Truck },
+  { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle },
   { name: 'Team', href: '/dashboard/team', icon: Users },
 ];
 
