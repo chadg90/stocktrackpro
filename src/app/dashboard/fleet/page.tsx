@@ -11,6 +11,8 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
+  orderBy,
+  limit,
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -31,6 +33,12 @@ type Vehicle = {
   image_url?: string;
   next_service_date?: string;
   next_mot_date?: string;
+};
+
+type Inspection = {
+  id: string;
+  vehicle_id?: string;
+  photo_urls?: Record<string, string>;
 };
 
 type Profile = {
@@ -80,17 +88,74 @@ export default function FleetPage() {
     return () => unsub();
   }, []);
 
-    const fetchVehicles = async (companyId: string) => {
+  // Helper to extract photo from inspection photo_urls map
+  const getInspectionPhoto = (inspection: Inspection): string | null => {
+    if (!inspection?.photo_urls || typeof inspection.photo_urls !== 'object') return null;
+    
+    // Prefer specific angles in order
+    const preferred = ['front', 'driver_side', 'passenger_side', 'rear', 'interior'];
+    for (const key of preferred) {
+      if (inspection.photo_urls[key] && typeof inspection.photo_urls[key] === 'string') {
+        return inspection.photo_urls[key];
+      }
+    }
+    
+    // Fallback to first available URL
+    const urls = Object.values(inspection.photo_urls).filter(v => typeof v === 'string') as string[];
+    return urls.length > 0 ? urls[0] : null;
+  };
+
+  const fetchVehicles = async (companyId: string) => {
     if (!firebaseDb) return;
     setLoading(true);
     try {
-      const q = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId));
-      const snapshot = await getDocs(q);
-      const vehiclesData = snapshot.docs.map(doc => {
+      // Fetch vehicles
+      const vehiclesQ = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId));
+      const vehiclesSnap = await getDocs(vehiclesQ);
+      const vehiclesData = vehiclesSnap.docs.map(doc => {
         const data = doc.data();
         return { id: doc.id, ...data } as Vehicle;
       });
-      setVehicles(vehiclesData);
+
+      // Fetch recent inspections to get photos
+      const inspectionsQ = query(
+        collection(firebaseDb!, 'vehicle_inspections'),
+        where('company_id', '==', companyId),
+        orderBy('inspected_at', 'desc'),
+        limit(100) // Get recent inspections
+      );
+      
+      let inspectionsMap: Record<string, Inspection> = {};
+      try {
+        const inspectionsSnap = await getDocs(inspectionsQ);
+        inspectionsMap = {};
+        // Since inspections are ordered by inspected_at desc, first one per vehicle_id is most recent
+        inspectionsSnap.docs.forEach(doc => {
+          const data = doc.data();
+          if (data.vehicle_id && !inspectionsMap[data.vehicle_id]) {
+            inspectionsMap[data.vehicle_id] = { 
+              id: doc.id, 
+              vehicle_id: data.vehicle_id, 
+              photo_urls: data.photo_urls 
+            };
+          }
+        });
+      } catch (err) {
+        console.error('Error fetching inspections (non-critical):', err);
+      }
+
+      // Enrich vehicles with inspection photos if they don't have image_url
+      const enrichedVehicles = vehiclesData.map(vehicle => {
+        if (!vehicle.image_url && inspectionsMap[vehicle.id]) {
+          const photoUrl = getInspectionPhoto(inspectionsMap[vehicle.id]);
+          if (photoUrl) {
+            return { ...vehicle, image_url: photoUrl };
+          }
+        }
+        return vehicle;
+      });
+
+      setVehicles(enrichedVehicles);
     } catch (error) {
       console.error('Error fetching vehicles:', error);
     } finally {
