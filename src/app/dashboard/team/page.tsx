@@ -22,6 +22,8 @@ type Profile = {
   role: 'admin' | 'manager' | 'user';
   displayName?: string;
   name?: string;
+  first_name?: string;
+  last_name?: string;
   email?: string;
   phone?: string;
 };
@@ -251,8 +253,14 @@ export default function TeamPage() {
     }
   };
 
-  const displayNameFor = (member: Profile) =>
-    member.displayName || member.name || member.email?.split('@')[0] || 'Unnamed User';
+  const displayNameFor = (member: Profile) => {
+    // Try first_name + last_name first
+    if (member.first_name || member.last_name) {
+      return `${member.first_name || ''} ${member.last_name || ''}`.trim();
+    }
+    // Fall back to displayName, name, email prefix
+    return member.displayName || member.name || member.email?.split('@')[0] || 'Unnamed User';
+  };
 
   const filteredTeam = team.filter(member => 
     displayNameFor(member).toLowerCase().includes(searchTerm.toLowerCase()) ||

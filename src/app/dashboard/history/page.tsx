@@ -32,6 +32,8 @@ type Profile = {
   role?: string;
   displayName?: string;
   name?: string;
+  first_name?: string;
+  last_name?: string;
   email?: string;
 };
 
@@ -187,7 +189,19 @@ export default function HistoryPage() {
                 filteredHistory.map((item) => {
                   const tool = item.tool_id ? tools[item.tool_id] : null;
                   const user = item.user_id ? users[item.user_id] : null;
-                  const userName = user ? (user.displayName || user.name || user.email?.split('@')[0] || 'Unknown') : (item.user_id || '—');
+                  
+                  // Build user name with first_name + last_name priority
+                  let userName = '—';
+                  if (user) {
+                    if (user.first_name || user.last_name) {
+                      userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                    } else {
+                      userName = user.displayName || user.name || user.email?.split('@')[0] || 'Unknown';
+                    }
+                  } else if (item.user_id) {
+                    userName = item.user_id;
+                  }
+                  
                   const toolName = tool ? (tool.name || `${tool.brand} ${tool.model}`.trim() || item.tool_id) : (item.tool_id || '—');
                   
                   return (
