@@ -56,6 +56,16 @@ const formatDate = (value?: string | Timestamp) => {
   }
 };
 
+// Safely pick a photo url from possible fields
+const firstPhotoUrl = (defect: any): string | null => {
+  if (defect?.photo_url && typeof defect.photo_url === 'string') return defect.photo_url;
+  if (defect?.photo_urls && typeof defect.photo_urls === 'object') {
+    const vals = Object.values(defect.photo_urls).filter((v) => typeof v === 'string') as string[];
+    if (vals.length > 0) return vals[0];
+  }
+  return null;
+};
+
 export default function DefectsPage() {
   const [defects, setDefects] = useState<Defect[]>([]);
   const [vehicles, setVehicles] = useState<Record<string, Vehicle>>({});
@@ -278,12 +288,13 @@ export default function DefectsPage() {
                           {defect.description}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          {defect.photo_url ? (
+                          {firstPhotoUrl(defect) ? (
                             <>
                               <button 
                                 onClick={() => {
-                                  if (defect.photo_url) {
-                                    setViewingImage(defect.photo_url);
+                                  const url = firstPhotoUrl(defect);
+                                  if (url) {
+                                    setViewingImage(url);
                                     setViewingImageAlt(defect.description || 'Defect Photo');
                                   }
                                 }}
@@ -292,7 +303,7 @@ export default function DefectsPage() {
                                 View Photo
                               </button>
                               <a
-                                href={defect.photo_url}
+                                href={firstPhotoUrl(defect) || '#'}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-xs text-white/60 hover:text-primary"
