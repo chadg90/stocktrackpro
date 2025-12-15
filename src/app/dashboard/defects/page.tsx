@@ -10,6 +10,7 @@ import {
   doc,
   serverTimestamp,
   orderBy,
+  limit,
   Timestamp,
   DocumentData,
 } from 'firebase/firestore';
@@ -38,6 +39,12 @@ type Vehicle = {
   registration: string;
   make: string;
   model: string;
+};
+
+type Inspection = {
+  id: string;
+  vehicle_id?: string;
+  photo_urls?: Record<string, string>;
 };
 
 type Profile = {
@@ -109,6 +116,23 @@ export default function DefectsPage() {
     return () => unsub();
   }, []);
 
+  // Helper to extract photo from inspection photo_urls map
+  const getInspectionPhoto = (inspection: Inspection): string | null => {
+    if (!inspection?.photo_urls || typeof inspection.photo_urls !== 'object') return null;
+    
+    // Prefer specific angles in order
+    const preferred = ['front', 'driver_side', 'passenger_side', 'rear', 'interior'];
+    for (const key of preferred) {
+      if (inspection.photo_urls[key] && typeof inspection.photo_urls[key] === 'string') {
+        return inspection.photo_urls[key];
+      }
+    }
+    
+    // Fallback to first available URL
+    const urls = Object.values(inspection.photo_urls).filter(v => typeof v === 'string') as string[];
+    return urls.length > 0 ? urls[0] : null;
+  };
+
   const fetchData = async (companyId: string) => {
     if (!firebaseDb) return;
     setLoading(true);
@@ -122,6 +146,32 @@ export default function DefectsPage() {
       });
       setVehicles(vehiclesMap);
 
+      // Fetch recent inspections to get photos
+      const inspectionsQ = query(
+        collection(firebaseDb!, 'vehicle_inspections'),
+        where('company_id', '==', companyId),
+        orderBy('inspected_at', 'desc'),
+        limit(100) // Get recent inspections
+      );
+      
+      let inspectionsMap: Record<string, Inspection> = {};
+      try {
+        const inspectionsSnap = await getDocs(inspectionsQ);
+        // Since inspections are ordered by inspected_at desc, first one per vehicle_id is most recent
+        inspectionsSnap.docs.forEach(doc => {
+          const data = doc.data();
+          if (data.vehicle_id && !inspectionsMap[data.vehicle_id]) {
+            inspectionsMap[data.vehicle_id] = { 
+              id: doc.id, 
+              vehicle_id: data.vehicle_id, 
+              photo_urls: data.photo_urls 
+            };
+          }
+        });
+      } catch (err) {
+        console.error('Error fetching inspections (non-critical):', err);
+      }
+
       // Fetch defects
       const defectsQ = query(
         collection(firebaseDb!, 'vehicle_defects'), 
@@ -130,7 +180,26 @@ export default function DefectsPage() {
       );
       const defectsSnap = await getDocs(defectsQ);
       const defectsData = defectsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Defect));
-      setDefects(defectsData);
+      
+      // Enrich defects with inspection photos if they don't have their own photos
+      const enrichedDefects = defectsData.map(defect => {
+        // If defect already has a photo, keep it
+        if (firstPhotoUrl(defect)) {
+          return defect;
+        }
+        
+        // Otherwise, try to get photo from vehicle's latest inspection
+        if (defect.vehicle_id && inspectionsMap[defect.vehicle_id]) {
+          const photoUrl = getInspectionPhoto(inspectionsMap[defect.vehicle_id]);
+          if (photoUrl) {
+            return { ...defect, photo_url: photoUrl };
+          }
+        }
+        
+        return defect;
+      });
+      
+      setDefects(enrichedDefects);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
