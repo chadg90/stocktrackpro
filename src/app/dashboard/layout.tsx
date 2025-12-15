@@ -24,7 +24,12 @@ export default function DashboardLayout({
 
   useEffect(() => {
     // Only run on client side and if firebase is initialized
-    if (!firebaseAuth || !firebaseDb) return;
+    if (!firebaseAuth || !firebaseDb) {
+      // Firebase not available - stop loading and show login
+      setLoading(false);
+      setAuthorized(false);
+      return;
+    }
 
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
       if (!user) {
