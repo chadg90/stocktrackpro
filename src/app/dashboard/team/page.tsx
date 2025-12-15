@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Plus, Trash2, Search, Mail, User as UserIcon } from 'lucide-react';
+import { Trash2, Search, Mail, User as UserIcon, Pencil, ShieldOff } from 'lucide-react';
 import Modal from '../components/Modal';
 
 type Profile = {
@@ -21,6 +21,7 @@ type Profile = {
   company_id: string;
   role: 'admin' | 'manager' | 'user';
   displayName?: string;
+  name?: string;
   email?: string;
   phone?: string;
 };
@@ -47,9 +48,19 @@ export default function TeamPage() {
   const [inviteRole, setInviteRole] = useState('user');
   const [processing, setProcessing] = useState(false);
 
+  // Edit user modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<Profile | null>(null);
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editRole, setEditRole] = useState<Profile['role']>('user');
+  const [editCompanyId, setEditCompanyId] = useState('');
+
+  // Company info for admin actions
+  const [companyName, setCompanyName] = useState<string | undefined>(undefined);
+
   // Check permissions
   const isAdmin = currentUserProfile?.role === 'admin';
-  const canDelete = isAdmin || currentUserProfile?.role === 'manager';
+  const canDelete = isAdmin; // per request, delete/edit is admin only now
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -64,6 +75,7 @@ export default function TeamPage() {
           if (data.company_id) {
             fetchTeam(data.company_id);
             fetchInvites(data.company_id);
+            fetchCompany(data.company_id);
           }
         }
       } else {
@@ -89,6 +101,20 @@ export default function TeamPage() {
     }
   };
 
+  const fetchCompany = async (companyId: string) => {
+    if (!firebaseDb || !companyId) return;
+    try {
+      const companyRef = doc(firebaseDb!, 'companies', companyId);
+      const snap = await import('firebase/firestore').then(mod => mod.getDoc(companyRef));
+      if (snap.exists()) {
+        const data = snap.data() as { name?: string };
+        setCompanyName(data.name);
+      }
+    } catch (error) {
+      console.error('Error fetching company:', error);
+    }
+  };
+
   const fetchInvites = async (companyId: string) => {
     if (!firebaseDb) return;
     try {
@@ -98,6 +124,53 @@ export default function TeamPage() {
       setInvites(invitesData);
     } catch (error) {
       console.error('Error fetching invites:', error);
+    }
+  };
+
+  const openEditUser = (member: Profile) => {
+    setEditingUser(member);
+    setEditDisplayName(member.displayName || member.name || member.email?.split('@')[0] || '');
+    setEditRole(member.role);
+    setEditCompanyId(member.company_id || '');
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firebaseDb || !editingUser || !isAdmin) return;
+    setProcessing(true);
+    try {
+      await import('firebase/firestore').then(mod =>
+        mod.updateDoc(mod.doc(firebaseDb!, 'profiles', editingUser.id), {
+          displayName: editDisplayName.trim() || null,
+          role: editRole,
+          company_id: editCompanyId.trim(),
+        })
+      );
+      if (currentUserProfile?.company_id) fetchTeam(currentUserProfile.company_id);
+      setIsEditModalOpen(false);
+      setEditingUser(null);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      alert('Failed to update user.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleDeleteCompany = async () => {
+    if (!firebaseDb || !isAdmin || !currentUserProfile?.company_id) return;
+    const companyId = currentUserProfile.company_id;
+    if (!confirm(`Delete company "${companyName || companyId}"? This cannot be undone and will orphan related data.`)) return;
+    try {
+      await import('firebase/firestore').then(mod =>
+        mod.deleteDoc(mod.doc(firebaseDb!, 'companies', companyId))
+      );
+      alert('Company deleted. Please sign out.');
+      setCompanyName(undefined);
+    } catch (error) {
+      console.error('Error deleting company:', error);
+      alert('Failed to delete company.');
     }
   };
 
@@ -157,8 +230,11 @@ export default function TeamPage() {
     }
   };
 
+  const displayNameFor = (member: Profile) =>
+    member.displayName || member.name || member.email?.split('@')[0] || 'Unnamed User';
+
   const filteredTeam = team.filter(member => 
-    member.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    displayNameFor(member).toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -169,6 +245,17 @@ export default function TeamPage() {
           <h1 className="text-3xl font-bold text-white">Team Management</h1>
           <p className="text-white/70 text-sm mt-1">Manage your team members and permissions</p>
         </div>
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <button
+              onClick={handleDeleteCompany}
+              className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-red-400/40 text-red-200 hover:border-red-300 hover:text-red-100 transition-colors"
+              title="Admin only: delete this company record"
+            >
+              <ShieldOff className="h-4 w-4" />
+              Delete Company
+            </button>
+          )}
         <button
           onClick={() => setIsInviteModalOpen(true)}
           className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
@@ -176,6 +263,7 @@ export default function TeamPage() {
           <Mail className="h-5 w-5" />
           Invite Member
         </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -227,7 +315,7 @@ export default function TeamPage() {
                         </div>
                         <div>
                           <p className="text-white font-medium">
-                            {member.displayName || member.email?.split('@')[0] || 'Unnamed User'}
+                            {displayNameFor(member)}
                           </p>
                           {member.id === currentUserProfile?.id && (
                             <span className="text-xs text-primary">(You)</span>
@@ -249,6 +337,15 @@ export default function TeamPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {isAdmin && (
+                          <button
+                            onClick={() => openEditUser(member)}
+                            className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                            title="Edit User"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        )}
                         {canDelete && member.id !== currentUserProfile?.id && (
                           <button 
                             onClick={() => handleRemoveUser(member.id)}
@@ -354,6 +451,66 @@ export default function TeamPage() {
               className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
             >
               {processing ? 'Sending Invite...' : 'Send Invitation'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit User Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title={editingUser ? `Edit ${displayNameFor(editingUser)}` : 'Edit User'}
+      >
+        <form onSubmit={handleEditUser} className="space-y-4">
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Display Name</label>
+            <input
+              type="text"
+              value={editDisplayName}
+              onChange={(e) => setEditDisplayName(e.target.value)}
+              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              placeholder="Name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Role</label>
+            <select
+              value={editRole}
+              onChange={(e) => setEditRole(e.target.value as Profile['role'])}
+              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+            >
+              <option value="user">User</option>
+              <option value="manager">Manager</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Company ID</label>
+            <input
+              type="text"
+              value={editCompanyId}
+              onChange={(e) => setEditCompanyId(e.target.value)}
+              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              placeholder="company_id"
+              required
+            />
+            <p className="text-xs text-white/50 mt-1">Admin-only: move user to another company.</p>
+          </div>
+          <div className="pt-2 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(false)}
+              className="px-4 py-2 rounded-lg border border-white/20 text-white/80 hover:border-white/40"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={processing}
+              className="px-4 py-2 rounded-lg bg-primary text-black font-semibold hover:bg-primary-light disabled:opacity-60"
+            >
+              {processing ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
