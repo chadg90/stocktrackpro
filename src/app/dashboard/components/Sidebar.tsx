@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History } from 'lucide-react';
-import { signOut } from 'firebase/auth';
-import { firebaseAuth } from '@/lib/firebase';
+import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History, MapPin, Key } from 'lucide-react';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import Image from 'next/image';
 
 const navigation = [
@@ -14,11 +15,30 @@ const navigation = [
   { name: 'Fleet', href: '/dashboard/fleet', icon: Truck },
   { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle },
   { name: 'History', href: '/dashboard/history', icon: History },
+  { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
   { name: 'Team', href: '/dashboard/team', icon: Users },
+  { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key, adminOnly: true },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!firebaseAuth || !firebaseDb) return;
+
+    const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
+      if (user && firebaseDb) {
+        const profileRef = doc(firebaseDb, 'profiles', user.uid);
+        const snap = await getDoc(profileRef);
+        if (snap.exists()) {
+          setUserRole(snap.data().role || null);
+        }
+      }
+    });
+
+    return () => unsub();
+  }, []);
 
   const handleSignOut = async () => {
     if (firebaseAuth) {
@@ -43,23 +63,25 @@ export default function Sidebar() {
       
       <div className="flex-1 overflow-y-auto py-6 px-4">
         <nav className="space-y-2">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-primary/10 text-primary border border-primary/20'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <item.icon className={`h-5 w-5 ${isActive ? 'text-primary' : 'text-white/50'}`} />
-                {item.name}
-              </Link>
-            );
-          })}
+          {navigation
+            .filter(item => !item.adminOnly || userRole === 'admin')
+            .map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-primary/10 text-primary border border-primary/20'
+                      : 'text-white/70 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <item.icon className={`h-5 w-5 ${isActive ? 'text-primary' : 'text-white/50'}`} />
+                  {item.name}
+                </Link>
+              );
+            })}
         </nav>
       </div>
 

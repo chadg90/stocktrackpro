@@ -54,6 +54,9 @@ export default function FleetPage() {
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [viewingImageAlt, setViewingImageAlt] = useState('');
 
+  // Check if user is admin
+  const isAdmin = profile?.role === 'admin';
+
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
 
@@ -273,15 +276,19 @@ export default function FleetPage() {
                         <button 
                           onClick={() => openEditModal(vehicle)}
                           className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          title="Edit Vehicle"
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
-                        <button 
-                          onClick={() => handleDeleteVehicle(vehicle.id)}
-                          className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {isAdmin && (
+                          <button 
+                            onClick={() => handleDeleteVehicle(vehicle.id)}
+                            className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            title="Delete Vehicle (Admin Only)"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

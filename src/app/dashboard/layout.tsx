@@ -67,32 +67,25 @@ export default function DashboardLayout({
     );
   }
 
-  if (!authorized) {
-    // If not authorized, show the sign-in form (which is on the main dashboard page)
-    // But if we are on a sub-route, we should redirect to the main dashboard page to sign in
-    // However, for simplicity, we'll let the child pages handle the "not authorized" state 
-    // or just render the children which will likely show the login form if it's the main page.
-    
-    // Actually, simpler approach: The main dashboard page handles login. 
-    // Sub-pages should probably redirect to /dashboard if not authorized.
-    if (pathname !== '/dashboard') {
-       // Ideally redirect to /dashboard, but let's render children for now as they might handle it
-       // or we can render a simple "Access Denied" or "Please Login" message
-       return (
-         <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
-           <h1 className="text-2xl font-bold mb-4">Access Restricted</h1>
-           <p className="mb-6 text-white/70">Please sign in to access the dashboard.</p>
-           <button 
-             onClick={() => router.push('/dashboard')}
-             className="px-4 py-2 bg-primary text-black rounded-lg font-semibold hover:bg-primary-light"
-           >
-             Go to Login
-           </button>
-         </div>
-       );
+  if (!authorized && pathname !== '/dashboard') {
+    // Redirect sub-pages to main dashboard for login
+    if (typeof window !== 'undefined') {
+      router.push('/dashboard');
     }
-    // If on /dashboard, let the page render the login form
-    return <>{children}</>;
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!authorized) {
+    // On /dashboard page, show login form without sidebar
+    return (
+      <div className="min-h-screen bg-black">
+        {children}
+      </div>
+    );
   }
 
   return (

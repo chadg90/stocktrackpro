@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import Navbar from '../components/Navbar';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -288,36 +289,17 @@ export default function DashboardPage() {
   }, [authUser, profile]);
 
   return (
-    <div className="bg-black text-white">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Manager Dashboard</h1>
-            <p className="text-white/70 text-sm mt-1">
-              Overview of your organization's assets and activities.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            {isAuthedManager && (
-              <button
-                onClick={() => profile?.company_id && fetchData(profile.company_id)}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-primary/40 text-white hover:border-primary transition-colors"
-                disabled={loading}
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
-            )}
-          </div>
-        </div>
+    <div className="min-h-screen bg-black">
+      {!authUser && <Navbar />}
+      <div className={`${!authUser ? 'container mx-auto px-4 pt-28 pb-16' : ''}`}>
+        <div className="max-w-6xl mx-auto">
+          {error && (
+            <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+              {error}
+            </div>
+          )}
 
-        {error && (
-          <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-            {error}
-          </div>
-        )}
-
-        {!authUser && (
+          {!authUser && (
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <div className="bg-black border border-primary/30 rounded-2xl p-8 max-w-md w-full">
               <div className="text-center mb-6">
@@ -362,6 +344,23 @@ export default function DashboardPage() {
 
         {isAuthedManager && (
           <div className="space-y-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-white">Dashboard Overview</h1>
+                <p className="text-white/70 text-sm mt-1">
+                  Overview of your organization's assets and activities.
+                </p>
+              </div>
+              <button
+                onClick={() => profile?.company_id && fetchData(profile.company_id)}
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-primary/40 text-white hover:border-primary transition-colors"
+                disabled={loading}
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { title: 'Assets', value: assetsCount, icon: Package },
@@ -483,6 +482,7 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
