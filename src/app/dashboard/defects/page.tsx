@@ -16,6 +16,7 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Search, AlertTriangle, CheckCircle, Clock, Filter, Truck } from 'lucide-react';
+import ImageViewerModal from '../components/ImageViewerModal';
 
 type Defect = {
   id: string;
@@ -63,6 +64,10 @@ export default function DefectsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'resolved'>('pending');
   
+  // Image viewer state
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
+  const [viewingImageAlt, setViewingImageAlt] = useState('');
+
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
 
@@ -151,6 +156,13 @@ export default function DefectsPage() {
 
   return (
     <div>
+      <ImageViewerModal 
+        isOpen={!!viewingImage} 
+        onClose={() => setViewingImage(null)} 
+        imageUrl={viewingImage} 
+        altText={viewingImageAlt} 
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Defect Management</h1>
@@ -266,14 +278,17 @@ export default function DefectsPage() {
                           {defect.description}
                         </p>
                         {defect.photo_url && (
-                          <a 
-                            href={defect.photo_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
+                          <button 
+                            onClick={() => {
+                              if (defect.photo_url) {
+                                setViewingImage(defect.photo_url);
+                                setViewingImageAlt(defect.description || 'Defect Photo');
+                              }
+                            }}
                             className="text-primary text-xs hover:underline mt-1 inline-block"
                           >
                             View Photo
-                          </a>
+                          </button>
                         )}
                       </td>
                       <td className="px-6 py-4 text-white/70 text-sm">

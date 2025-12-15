@@ -222,7 +222,9 @@ export default function TeamPage() {
                           <UserIcon className="h-5 w-5 text-white/40" />
                         </div>
                         <div>
-                          <p className="text-white font-medium">{member.displayName || 'Unnamed User'}</p>
+                          <p className="text-white font-medium">
+                            {member.displayName || member.email?.split('@')[0] || 'Unnamed User'}
+                          </p>
                           {member.id === currentUserProfile?.id && (
                             <span className="text-xs text-primary">(You)</span>
                           )}

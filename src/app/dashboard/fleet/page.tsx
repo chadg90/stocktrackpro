@@ -14,8 +14,9 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Plus, Pencil, Trash2, Search, Truck, AlertTriangle } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Truck, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import Modal from '../components/Modal';
+import ImageViewerModal from '../components/ImageViewerModal';
 
 type Vehicle = {
   id: string;
@@ -48,6 +49,10 @@ export default function FleetPage() {
   const [currentVehicle, setCurrentVehicle] = useState<Vehicle | null>(null);
   const [formData, setFormData] = useState<Partial<Vehicle>>({});
   const [processing, setProcessing] = useState(false);
+
+  // Image viewer state
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
+  const [viewingImageAlt, setViewingImageAlt] = useState('');
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -157,6 +162,13 @@ export default function FleetPage() {
 
   return (
     <div>
+      <ImageViewerModal 
+        isOpen={!!viewingImage} 
+        onClose={() => setViewingImage(null)} 
+        imageUrl={viewingImage} 
+        altText={viewingImageAlt} 
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Fleet</h1>
@@ -219,9 +231,21 @@ export default function FleetPage() {
                   <tr key={vehicle.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                          <Truck className="h-5 w-5 text-white/40" />
-                        </div>
+                        <button 
+                          onClick={() => {
+                            if (vehicle.image_url) {
+                              setViewingImage(vehicle.image_url);
+                              setViewingImageAlt(`${vehicle.make} ${vehicle.model}`);
+                            }
+                          }}
+                          className={`w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${vehicle.image_url ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''}`}
+                        >
+                          {vehicle.image_url ? (
+                            <img src={vehicle.image_url} alt={vehicle.make} className="w-full h-full object-cover" />
+                          ) : (
+                            <Truck className="h-5 w-5 text-white/40" />
+                          )}
+                        </button>
                         <div>
                           <p className="text-white font-medium">{vehicle.make} {vehicle.model}</p>
                           <p className="text-white/50 text-xs">VIN: {vehicle.vin || '—'}</p>
@@ -298,6 +322,16 @@ export default function FleetPage() {
                 placeholder="e.g. Transit"
               />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Image URL</label>
+            <input
+              type="text"
+              value={formData.image_url || ''}
+              onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              placeholder="https://example.com/image.jpg"
+            />
           </div>
           <div>
             <label className="block text-sm text-white/70 mb-1">Registration</label>
@@ -383,6 +417,15 @@ export default function FleetPage() {
                 className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
               />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Image URL</label>
+            <input
+              type="text"
+              value={formData.image_url || ''}
+              onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+            />
           </div>
           <div>
             <label className="block text-sm text-white/70 mb-1">Registration</label>

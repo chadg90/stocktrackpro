@@ -14,8 +14,9 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Plus, Pencil, Trash2, Search, QrCode, Image as ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, QrCode, Image as ImageIcon, Eye } from 'lucide-react';
 import Modal from '../components/Modal';
+import ImageViewerModal from '../components/ImageViewerModal';
 
 type Tool = {
   id: string;
@@ -48,6 +49,10 @@ export default function AssetsPage() {
   const [currentTool, setCurrentTool] = useState<Tool | null>(null);
   const [formData, setFormData] = useState<Partial<Tool>>({});
   const [processing, setProcessing] = useState(false);
+  
+  // Image viewer state
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
+  const [viewingImageAlt, setViewingImageAlt] = useState('');
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -158,6 +163,13 @@ export default function AssetsPage() {
 
   return (
     <div>
+      <ImageViewerModal 
+        isOpen={!!viewingImage} 
+        onClose={() => setViewingImage(null)} 
+        imageUrl={viewingImage} 
+        altText={viewingImageAlt} 
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Assets</h1>
@@ -220,13 +232,21 @@ export default function AssetsPage() {
                   <tr key={tool.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <button 
+                          onClick={() => {
+                            if (tool.image_url) {
+                              setViewingImage(tool.image_url);
+                              setViewingImageAlt(tool.name || 'Asset Image');
+                            }
+                          }}
+                          className={`w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${tool.image_url ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''}`}
+                        >
                           {tool.image_url ? (
                             <img src={tool.image_url} alt={tool.name} className="w-full h-full object-cover" />
                           ) : (
                             <ImageIcon className="h-5 w-5 text-white/40" />
                           )}
-                        </div>
+                        </button>
                         <div>
                           <p className="text-white font-medium">{tool.name || 'Unnamed Asset'}</p>
                           <p className="text-white/50 text-xs">
