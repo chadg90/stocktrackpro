@@ -47,8 +47,9 @@ export default function TeamPage() {
   const [inviteRole, setInviteRole] = useState('user');
   const [processing, setProcessing] = useState(false);
 
-  // Check if user is admin
+  // Check permissions
   const isAdmin = currentUserProfile?.role === 'admin';
+  const canDelete = isAdmin || currentUserProfile?.role === 'manager';
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -248,11 +249,11 @@ export default function TeamPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {isAdmin && member.id !== currentUserProfile?.id && (
+                        {canDelete && member.id !== currentUserProfile?.id && (
                           <button 
                             onClick={() => handleRemoveUser(member.id)}
                             className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                            title="Remove User (Admin Only)"
+                            title="Remove User"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>

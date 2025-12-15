@@ -54,8 +54,8 @@ export default function AssetsPage() {
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [viewingImageAlt, setViewingImageAlt] = useState('');
 
-  // Check if user is admin
-  const isAdmin = profile?.role === 'admin';
+  // Check if user can delete (both admin and manager can delete their company's data)
+  const canDelete = profile?.role === 'admin' || profile?.role === 'manager';
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -286,11 +286,11 @@ export default function AssetsPage() {
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
-                        {isAdmin && (
+                        {canDelete && (
                           <button 
                             onClick={() => handleDeleteTool(tool.id)}
                             className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                            title="Delete Asset (Admin Only)"
+                            title="Delete Asset"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>

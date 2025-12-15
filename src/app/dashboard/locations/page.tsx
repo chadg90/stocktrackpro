@@ -45,6 +45,7 @@ export default function LocationsPage() {
 
   const isAdmin = profile?.role === 'admin';
   const canManage = profile?.role === 'admin' || profile?.role === 'manager';
+  const canDelete = canManage; // Both admin and manager can delete within their company
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -127,8 +128,8 @@ export default function LocationsPage() {
   };
 
   const handleDeleteLocation = async (locationId: string) => {
-    if (!isAdmin) {
-      alert('Only admins can delete locations.');
+    if (!canDelete) {
+      alert('You do not have permission to delete locations.');
       return;
     }
     if (!confirm('Are you sure you want to delete this location? This action cannot be undone.') || !firebaseDb) return;
@@ -236,11 +237,11 @@ export default function LocationsPage() {
                             <Pencil className="h-4 w-4" />
                           </button>
                         )}
-                        {isAdmin && (
+                        {canDelete && (
                           <button 
                             onClick={() => handleDeleteLocation(location.id)}
                             className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                            title="Delete Location (Admin Only)"
+                            title="Delete Location"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>

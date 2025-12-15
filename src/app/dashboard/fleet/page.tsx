@@ -54,8 +54,8 @@ export default function FleetPage() {
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [viewingImageAlt, setViewingImageAlt] = useState('');
 
-  // Check if user is admin
-  const isAdmin = profile?.role === 'admin';
+  // Check if user can delete (both admin and manager can delete their company's data)
+  const canDelete = profile?.role === 'admin' || profile?.role === 'manager';
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -280,11 +280,11 @@ export default function FleetPage() {
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
-                        {isAdmin && (
+                        {canDelete && (
                           <button 
                             onClick={() => handleDeleteVehicle(vehicle.id)}
                             className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                            title="Delete Vehicle (Admin Only)"
+                            title="Delete Vehicle"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
