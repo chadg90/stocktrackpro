@@ -88,8 +88,6 @@ export default function FleetPage() {
       const snapshot = await getDocs(q);
       const vehiclesData = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Debug log for vehicle images
-        console.log(`Vehicle ${data.registration}:`, data.image_url ? 'Has image URL' : 'No image URL', data.image_url);
         return { id: doc.id, ...data } as Vehicle;
       });
       setVehicles(vehiclesData);
