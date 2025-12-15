@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import Navbar from '../components/Navbar';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -289,48 +288,42 @@ export default function DashboardPage() {
   }, [authUser, profile]);
 
   return (
-    <div className="min-h-screen bg-black">
-      <Navbar />
-      <div className="container mx-auto px-4 pt-28 pb-16">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-white">Manager Dashboard</h1>
-              <p className="text-white/70 text-sm mt-1">
-                Read-only dashboard for managers. Subscriptions are managed in the mobile app.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              {isAuthedManager && (
-                <button
-                  onClick={() => profile?.company_id && fetchData(profile.company_id)}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-primary/40 text-white hover:border-primary transition-colors"
-                  disabled={loading}
-                >
-                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </button>
-              )}
-              {authUser && (
-                <button
-                  onClick={handleSignOut}
-                  className="inline-flex items-center px-3 py-2 text-sm rounded-lg border border-primary/40 text-white hover:border-primary transition-colors"
-                >
-                  Sign Out
-                </button>
-              )}
-            </div>
+    <div className="bg-black text-white">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Manager Dashboard</h1>
+            <p className="text-white/70 text-sm mt-1">
+              Overview of your organization's assets and activities.
+            </p>
           </div>
+          <div className="flex items-center gap-3">
+            {isAuthedManager && (
+              <button
+                onClick={() => profile?.company_id && fetchData(profile.company_id)}
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-primary/40 text-white hover:border-primary transition-colors"
+                disabled={loading}
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            )}
+          </div>
+        </div>
 
-          {error && (
-            <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            {error}
+          </div>
+        )}
 
-          {!authUser && (
-            <div className="bg-black border border-primary/30 rounded-2xl p-6 max-w-lg">
-              <h2 className="text-xl font-semibold text-white mb-4">Manager Sign In</h2>
+        {!authUser && (
+          <div className="flex flex-col items-center justify-center min-h-[60vh]">
+            <div className="bg-black border border-primary/30 rounded-2xl p-8 max-w-md w-full">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-white">Manager Sign In</h2>
+                <p className="text-white/60 text-sm mt-2">Access your organization's dashboard</p>
+              </div>
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div>
                   <label className="block text-sm text-white/80 mb-1">Email</label>
@@ -360,138 +353,137 @@ export default function DashboardPage() {
                   {loading ? 'Signing in...' : 'Sign In'}
                 </button>
               </form>
-              <p className="text-white/60 text-sm mt-3">
+              <p className="text-white/60 text-center text-sm mt-4">
                 Managers only. Contact your admin if you need access.
               </p>
             </div>
-          )}
+          </div>
+        )}
 
-          {isAuthedManager && (
-            <div className="space-y-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { title: 'Assets', value: assetsCount, icon: Package },
-                  { title: 'Vehicles', value: vehiclesCount, icon: Truck },
-                  { title: 'Team Members', value: teamCount, icon: Users },
-                  { title: 'Inspections', value: inspectionsCount, icon: Shield },
-                ].map((item) => (
-                  <div key={item.title} className="bg-black border border-primary/25 rounded-xl p-5 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <item.icon className="h-5 w-5 text-primary" />
+        {isAuthedManager && (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { title: 'Assets', value: assetsCount, icon: Package },
+                { title: 'Vehicles', value: vehiclesCount, icon: Truck },
+                { title: 'Team Members', value: teamCount, icon: Users },
+                { title: 'Inspections', value: inspectionsCount, icon: Shield },
+              ].map((item) => (
+                <div key={item.title} className="bg-black border border-primary/25 rounded-xl p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <item.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-white/70 text-sm">{item.title}</p>
+                    <p className="text-white text-xl font-semibold">
+                      {item.value === null ? '—' : item.value}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white text-lg font-semibold">Recent Inspections</h3>
+                  <span className="text-xs text-white/50">Latest 5</span>
+                </div>
+                <div className="space-y-3">
+                  {inspections.length === 0 && (
+                    <p className="text-white/60 text-sm">No inspections found.</p>
+                  )}
+                  {inspections.map((insp) => (
+                    <div key={insp.id} className="rounded-lg border border-primary/15 p-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-white text-sm font-semibold">Vehicle: {insp.vehicle_id ?? '—'}</p>
+                        {insp.has_defect && (
+                          <span className="text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
+                            Defect
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-white/70 text-xs mt-1">Inspected at: {formatDate(insp.inspected_at)}</p>
+                      <p className="text-white/60 text-xs">Inspector: {insp.inspected_by ?? '—'}</p>
                     </div>
-                    <div>
-                      <p className="text-white/70 text-sm">{item.title}</p>
-                      <p className="text-white text-xl font-semibold">
-                        {item.value === null ? '—' : item.value}
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white text-lg font-semibold">Defects</h3>
+                  <span className="text-xs text-white/50">Latest 5</span>
+                </div>
+                <div className="space-y-3">
+                  {defects.length === 0 && <p className="text-white/60 text-sm">No defects reported.</p>}
+                  {defects.map((d) => (
+                    <div key={d.id} className="rounded-lg border border-primary/15 p-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-white text-sm font-semibold">Vehicle: {d.vehicle_id ?? '—'}</p>
+                        <AlertTriangle className="h-4 w-4 text-primary" />
+                      </div>
+                      <p className="text-white/70 text-xs mt-1">Reported: {formatDate(d.reported_at)}</p>
+                      <p className="text-white/70 text-xs">Severity: {d.severity ?? '—'}</p>
+                      <p className="text-white/60 text-xs mt-1 line-clamp-2">
+                        {d.description ?? 'No description'}
                       </p>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-white text-lg font-semibold">Recent Inspections</h3>
-                    <span className="text-xs text-white/50">Latest 5</span>
-                  </div>
-                  <div className="space-y-3">
-                    {inspections.length === 0 && (
-                      <p className="text-white/60 text-sm">No inspections found.</p>
-                    )}
-                    {inspections.map((insp) => (
-                      <div key={insp.id} className="rounded-lg border border-primary/15 p-3">
-                        <div className="flex items-center justify-between">
-                          <p className="text-white text-sm font-semibold">Vehicle: {insp.vehicle_id ?? '—'}</p>
-                          {insp.has_defect && (
-                            <span className="text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
-                              Defect
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-white/70 text-xs mt-1">Inspected at: {formatDate(insp.inspected_at)}</p>
-                        <p className="text-white/60 text-xs">Inspector: {insp.inspected_by ?? '—'}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-white text-lg font-semibold">Defects</h3>
-                    <span className="text-xs text-white/50">Latest 5</span>
-                  </div>
-                  <div className="space-y-3">
-                    {defects.length === 0 && <p className="text-white/60 text-sm">No defects reported.</p>}
-                    {defects.map((d) => (
-                      <div key={d.id} className="rounded-lg border border-primary/15 p-3">
-                        <div className="flex items-center justify-between">
-                          <p className="text-white text-sm font-semibold">Vehicle: {d.vehicle_id ?? '—'}</p>
-                          <AlertTriangle className="h-4 w-4 text-primary" />
-                        </div>
-                        <p className="text-white/70 text-xs mt-1">Reported: {formatDate(d.reported_at)}</p>
-                        <p className="text-white/70 text-xs">Severity: {d.severity ?? '—'}</p>
-                        <p className="text-white/60 text-xs mt-1 line-clamp-2">
-                          {d.description ?? 'No description'}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-white text-lg font-semibold">Tool History</h3>
-                    <span className="text-xs text-white/50">Latest 5</span>
-                  </div>
-                  <div className="space-y-3">
-                    {historyItems.length === 0 && <p className="text-white/60 text-sm">No history available.</p>}
-                    {historyItems.map((h) => (
-                      <div key={h.id} className="rounded-lg border border-primary/15 p-3">
-                        <p className="text-white text-sm font-semibold">Tool: {h.tool_id ?? '—'}</p>
-                        <p className="text-white/70 text-xs">Action: {h.action ?? '—'}</p>
-                        <p className="text-white/70 text-xs">User: {h.user_id ?? '—'}</p>
-                        <p className="text-white/60 text-xs mt-1">When: {formatDate(h.timestamp)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-white text-lg font-semibold">Access Codes (read-only)</h3>
-                    <span className="text-xs text-white/50">Latest 5</span>
-                  </div>
-                  <p className="text-white/60 text-sm mb-3">
-                    Codes are generated in the app. Displayed here for reference only.
-                  </p>
-                  <div className="space-y-3">
-                    {accessCodes.length === 0 && <p className="text-white/60 text-sm">No access codes found.</p>}
-                    {accessCodes.map((c) => (
-                      <div key={c.id} className="rounded-lg border border-primary/15 p-3 flex items-center justify-between">
-                        <div>
-                          <p className="text-white text-sm font-semibold">Code: {c.id}</p>
-                          <p className="text-white/70 text-xs">Expires: {formatDate(c.expiresAt)}</p>
-                        </div>
-                        <span
-                          className={`text-xs px-2 py-1 rounded ${
-                            c.used ? 'bg-white/10 text-white/70' : 'bg-primary/20 text-primary'
-                          }`}
-                        >
-                          {c.used ? 'Used' : 'Active'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
-          )}
-        </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white text-lg font-semibold">Tool History</h3>
+                  <span className="text-xs text-white/50">Latest 5</span>
+                </div>
+                <div className="space-y-3">
+                  {historyItems.length === 0 && <p className="text-white/60 text-sm">No history available.</p>}
+                  {historyItems.map((h) => (
+                    <div key={h.id} className="rounded-lg border border-primary/15 p-3">
+                      <p className="text-white text-sm font-semibold">Tool: {h.tool_id ?? '—'}</p>
+                      <p className="text-white/70 text-xs">Action: {h.action ?? '—'}</p>
+                      <p className="text-white/70 text-xs">User: {h.user_id ?? '—'}</p>
+                      <p className="text-white/60 text-xs mt-1">When: {formatDate(h.timestamp)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white text-lg font-semibold">Access Codes (read-only)</h3>
+                  <span className="text-xs text-white/50">Latest 5</span>
+                </div>
+                <p className="text-white/60 text-sm mb-3">
+                  Codes are generated in the app. Displayed here for reference only.
+                </p>
+                <div className="space-y-3">
+                  {accessCodes.length === 0 && <p className="text-white/60 text-sm">No access codes found.</p>}
+                  {accessCodes.map((c) => (
+                    <div key={c.id} className="rounded-lg border border-primary/15 p-3 flex items-center justify-between">
+                      <div>
+                        <p className="text-white text-sm font-semibold">Code: {c.id}</p>
+                        <p className="text-white/70 text-xs">Expires: {formatDate(c.expiresAt)}</p>
+                      </div>
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          c.used ? 'bg-white/10 text-white/70' : 'bg-primary/20 text-primary'
+                        }`}
+                      >
+                        {c.used ? 'Used' : 'Active'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
