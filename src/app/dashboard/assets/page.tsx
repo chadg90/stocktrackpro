@@ -235,21 +235,41 @@ export default function AssetsPage() {
                   <tr key={tool.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <button 
-                          onClick={() => {
-                            if (tool.image_url) {
-                              setViewingImage(tool.image_url);
-                              setViewingImageAlt(tool.name || 'Asset Image');
-                            }
-                          }}
-                          className={`w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${tool.image_url ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''}`}
-                        >
-                          {tool.image_url ? (
-                            <img src={tool.image_url} alt={tool.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <ImageIcon className="h-5 w-5 text-white/40" />
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => {
+                              if (tool.image_url) {
+                                setViewingImage(tool.image_url);
+                                setViewingImageAlt(tool.name || 'Asset Image');
+                              }
+                            }}
+                            className={`w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${tool.image_url ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''}`}
+                          >
+                            {tool.image_url ? (
+                              <img
+                                src={tool.image_url}
+                                alt={tool.name || 'Asset Image'}
+                                className="w-full h-full object-cover"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              />
+                            ) : (
+                              <ImageIcon className="h-5 w-5 text-white/40" />
+                            )}
+                          </button>
+                          {!tool.image_url && (
+                            <span className="text-xs text-white/50">No image provided</span>
                           )}
-                        </button>
+                          {tool.image_url && (
+                            <a
+                              href={tool.image_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs text-primary hover:underline"
+                            >
+                              Open image
+                            </a>
+                          )}
+                        </div>
                         <div>
                           <p className="text-white font-medium">{tool.name || 'Unnamed Asset'}</p>
                           <p className="text-white/50 text-xs">

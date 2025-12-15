@@ -234,21 +234,41 @@ export default function FleetPage() {
                   <tr key={vehicle.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <button 
-                          onClick={() => {
-                            if (vehicle.image_url) {
-                              setViewingImage(vehicle.image_url);
-                              setViewingImageAlt(`${vehicle.make} ${vehicle.model}`);
-                            }
-                          }}
-                          className={`w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${vehicle.image_url ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''}`}
-                        >
-                          {vehicle.image_url ? (
-                            <img src={vehicle.image_url} alt={vehicle.make} className="w-full h-full object-cover" />
-                          ) : (
-                            <Truck className="h-5 w-5 text-white/40" />
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => {
+                              if (vehicle.image_url) {
+                                setViewingImage(vehicle.image_url);
+                                setViewingImageAlt(`${vehicle.make} ${vehicle.model}`);
+                              }
+                            }}
+                            className={`w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${vehicle.image_url ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''}`}
+                          >
+                            {vehicle.image_url ? (
+                              <img
+                                src={vehicle.image_url}
+                                alt={vehicle.make || 'Vehicle Image'}
+                                className="w-full h-full object-cover"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              />
+                            ) : (
+                              <Truck className="h-5 w-5 text-white/40" />
+                            )}
+                          </button>
+                          {!vehicle.image_url && (
+                            <span className="text-xs text-white/50">No image provided</span>
                           )}
-                        </button>
+                          {vehicle.image_url && (
+                            <a
+                              href={vehicle.image_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs text-primary hover:underline"
+                            >
+                              Open image
+                            </a>
+                          )}
+                        </div>
                         <div>
                           <p className="text-white font-medium">{vehicle.make} {vehicle.model}</p>
                           <p className="text-white/50 text-xs">VIN: {vehicle.vin || '—'}</p>

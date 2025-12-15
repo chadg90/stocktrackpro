@@ -277,19 +277,33 @@ export default function DefectsPage() {
                         <p className="text-white/90 text-sm line-clamp-2 max-w-xs" title={defect.description}>
                           {defect.description}
                         </p>
-                        {defect.photo_url && (
-                          <button 
-                            onClick={() => {
-                              if (defect.photo_url) {
-                                setViewingImage(defect.photo_url);
-                                setViewingImageAlt(defect.description || 'Defect Photo');
-                              }
-                            }}
-                            className="text-primary text-xs hover:underline mt-1 inline-block"
-                          >
-                            View Photo
-                          </button>
-                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                          {defect.photo_url ? (
+                            <>
+                              <button 
+                                onClick={() => {
+                                  if (defect.photo_url) {
+                                    setViewingImage(defect.photo_url);
+                                    setViewingImageAlt(defect.description || 'Defect Photo');
+                                  }
+                                }}
+                                className="text-primary text-xs hover:underline inline-flex items-center gap-1"
+                              >
+                                View Photo
+                              </button>
+                              <a
+                                href={defect.photo_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs text-white/60 hover:text-primary"
+                              >
+                                Open
+                              </a>
+                            </>
+                          ) : (
+                            <span className="text-xs text-white/50">No photo provided</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-white/70 text-sm">
                         <div className="flex items-center gap-1.5">
