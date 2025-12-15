@@ -27,6 +27,7 @@ type Defect = {
   status: 'pending' | 'resolved' | 'investigating';
   company_id: string;
   photo_url?: string;
+  photo_urls?: Record<string, string>;
   reported_by?: string;
   resolved_at?: Timestamp | string;
   resolved_by?: string;
