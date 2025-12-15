@@ -80,13 +80,18 @@ export default function FleetPage() {
     return () => unsub();
   }, []);
 
-  const fetchVehicles = async (companyId: string) => {
+    const fetchVehicles = async (companyId: string) => {
     if (!firebaseDb) return;
     setLoading(true);
     try {
       const q = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId));
       const snapshot = await getDocs(q);
-      const vehiclesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Vehicle));
+      const vehiclesData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        // Debug log for vehicle images
+        console.log(`Vehicle ${data.registration}:`, data.image_url ? 'Has image URL' : 'No image URL', data.image_url);
+        return { id: doc.id, ...data } as Vehicle;
+      });
       setVehicles(vehiclesData);
     } catch (error) {
       console.error('Error fetching vehicles:', error);
