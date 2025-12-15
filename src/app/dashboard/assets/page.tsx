@@ -17,6 +17,7 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Plus, Pencil, Trash2, Search, QrCode, Image as ImageIcon, Eye } from 'lucide-react';
 import Modal from '../components/Modal';
 import ImageViewerModal from '../components/ImageViewerModal';
+import AuthenticatedImage from '../components/AuthenticatedImage';
 
 type Tool = {
   id: string;
@@ -246,11 +247,10 @@ export default function AssetsPage() {
                             className={`w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${tool.image_url ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''}`}
                           >
                             {tool.image_url ? (
-                              <img
+                              <AuthenticatedImage
                                 src={tool.image_url}
                                 alt={tool.name || 'Asset Image'}
                                 className="w-full h-full object-cover"
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                               />
                             ) : (
                               <ImageIcon className="h-5 w-5 text-white/40" />

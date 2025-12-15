@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import Image from 'next/image';
+import AuthenticatedImage from './AuthenticatedImage';
 
 interface ImageViewerModalProps {
   isOpen: boolean;
@@ -22,11 +22,9 @@ export default function ImageViewerModal({ isOpen, onClose, imageUrl, altText }:
       </button>
       
       <div className="relative max-w-5xl max-h-[90vh] w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-        {/* We use a regular img tag here for simplicity with external URLs, or we can use Next.js Image if domains are configured */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
-          src={imageUrl} 
-          alt={altText} 
+        <AuthenticatedImage
+          src={imageUrl}
+          alt={altText}
           className="max-w-full max-h-full object-contain rounded-lg shadow-2xl border border-primary/20"
         />
       </div>

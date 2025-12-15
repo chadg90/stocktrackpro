@@ -17,6 +17,7 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Plus, Pencil, Trash2, Search, Truck, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import Modal from '../components/Modal';
 import ImageViewerModal from '../components/ImageViewerModal';
+import AuthenticatedImage from '../components/AuthenticatedImage';
 
 type Vehicle = {
   id: string;
@@ -245,11 +246,10 @@ export default function FleetPage() {
                             className={`w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${vehicle.image_url ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''}`}
                           >
                             {vehicle.image_url ? (
-                              <img
+                              <AuthenticatedImage
                                 src={vehicle.image_url}
                                 alt={vehicle.make || 'Vehicle Image'}
                                 className="w-full h-full object-cover"
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                               />
                             ) : (
                               <Truck className="h-5 w-5 text-white/40" />
