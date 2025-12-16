@@ -9,6 +9,7 @@ import {
   addDoc,
   deleteDoc,
   doc,
+  setDoc,
   serverTimestamp,
 } from 'firebase/firestore';
 import { onAuthStateChanged, createUserWithEmailAndPassword } from 'firebase/auth';
@@ -277,8 +278,8 @@ export default function TeamPage() {
       const userCredential = await createUserWithEmailAndPassword(firebaseAuth, tempEmail.trim(), tempPassword);
       const newUserId = userCredential.user.uid;
 
-      // Create profile in Firestore
-      await addDoc(collection(firebaseDb!, 'profiles'), {
+      // Create profile in Firestore with the user's UID as the document ID
+      await setDoc(doc(firebaseDb!, 'profiles', newUserId), {
         email: tempEmail.trim(),
         company_id: tempCompanyId,
         role: tempRole,
