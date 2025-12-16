@@ -58,9 +58,16 @@ export default function LocationsPage() {
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile(data);
+          // CRITICAL: Always use the logged-in user's company_id for data isolation
+          // Even admins can only see their own company's business data
           if (data.company_id) {
             fetchLocations(data.company_id);
+          } else {
+            setLoading(false);
+            console.error('User profile missing company_id');
           }
+        } else {
+          setLoading(false);
         }
       } else {
         setLoading(false);
@@ -71,9 +78,13 @@ export default function LocationsPage() {
   }, []);
 
   const fetchLocations = async (companyId: string) => {
-    if (!firebaseDb) return;
+    if (!firebaseDb || !companyId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
+      // CRITICAL: Always filter by company_id to ensure company data isolation
       const q = query(collection(firebaseDb!, 'locations'), where('company_id', '==', companyId));
       const snapshot = await getDocs(q);
       const locationsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Location));

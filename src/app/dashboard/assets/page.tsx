@@ -67,9 +67,16 @@ export default function AssetsPage() {
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile(data);
+          // CRITICAL: Always use the logged-in user's company_id for data isolation
+          // Even admins can only see their own company's business data
           if (data.company_id) {
             fetchTools(data.company_id);
+          } else {
+            setLoading(false);
+            console.error('User profile missing company_id');
           }
+        } else {
+          setLoading(false);
         }
       } else {
         setLoading(false);
@@ -80,9 +87,13 @@ export default function AssetsPage() {
   }, []);
 
   const fetchTools = async (companyId: string) => {
-    if (!firebaseDb) return;
+    if (!firebaseDb || !companyId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
+      // CRITICAL: Always filter by company_id to ensure company data isolation
       const q = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId));
       const snapshot = await getDocs(q);
       const toolsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Tool));

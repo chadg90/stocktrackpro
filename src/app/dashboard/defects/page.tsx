@@ -104,9 +104,16 @@ export default function DefectsPage() {
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile(data);
+          // CRITICAL: Always use the logged-in user's company_id for data isolation
+          // Even admins can only see their own company's business data
           if (data.company_id) {
             fetchData(data.company_id);
+          } else {
+            setLoading(false);
+            console.error('User profile missing company_id');
           }
+        } else {
+          setLoading(false);
         }
       } else {
         setLoading(false);
@@ -134,9 +141,13 @@ export default function DefectsPage() {
   };
 
   const fetchData = async (companyId: string) => {
-    if (!firebaseDb) return;
+    if (!firebaseDb || !companyId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
+      // CRITICAL: Always filter by company_id to ensure company data isolation
       // Fetch vehicles first for mapping
       const vehiclesQ = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId));
       const vehiclesSnap = await getDocs(vehiclesQ);

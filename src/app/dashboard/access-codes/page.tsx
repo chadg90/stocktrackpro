@@ -69,9 +69,18 @@ export default function AccessCodesPage() {
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile(data);
+          // CRITICAL: Always use the logged-in user's company_id for data isolation
+          // Even admins can only see their own company's business data
           if (data.company_id && data.role === 'admin') {
             fetchAccessCodes(data.company_id);
+          } else if (!data.company_id) {
+            setLoading(false);
+            console.error('User profile missing company_id');
+          } else {
+            setLoading(false);
           }
+        } else {
+          setLoading(false);
         }
       } else {
         setLoading(false);
@@ -82,9 +91,13 @@ export default function AccessCodesPage() {
   }, []);
 
   const fetchAccessCodes = async (companyId: string) => {
-    if (!firebaseDb) return;
+    if (!firebaseDb || !companyId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
+      // CRITICAL: Always filter by company_id to ensure company data isolation
       const q = query(collection(firebaseDb!, 'access_codes'), where('company_id', '==', companyId));
       const snapshot = await getDocs(q);
       const codesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AccessCode));

@@ -155,10 +155,19 @@ export default function DashboardPage() {
         setError('Firebase is not configured properly');
         return;
       }
+      
+      // CRITICAL: Always validate company_id exists for data isolation
+      if (!companyId) {
+        setError('Company ID is required');
+        setLoading(false);
+        return;
+      }
 
       setLoading(true);
       setError(null);
       try {
+        // CRITICAL: Always filter by company_id to ensure company data isolation
+        // Even admins can only see their own company's business data
         const toolsQ = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId));
         const vehiclesQ = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId));
         const teamQ = query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId));
