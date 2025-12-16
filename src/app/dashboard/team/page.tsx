@@ -75,6 +75,8 @@ export default function TeamPage() {
   // Company info for admin actions
   const [companyName, setCompanyName] = useState<string | undefined>(undefined);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [companiesMap, setCompaniesMap] = useState<Record<string, string>>({});
+  const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>('all'); // For admin filtering
 
   // Check permissions
   const isAdmin = currentUserProfile?.role === 'admin';
@@ -91,12 +93,14 @@ export default function TeamPage() {
           const data = snap.data() as Profile;
           setCurrentUserProfile({...data, id: user.uid});
           if (data.company_id) {
-            fetchTeam(data.company_id);
             fetchInvites(data.company_id);
             fetchCompany(data.company_id);
-            if (data.role === 'admin') {
-              fetchCompanies();
-            }
+          }
+          if (data.role === 'admin') {
+            await fetchCompanies();
+            fetchAllUsers(); // Admins see all users
+          } else if (data.company_id) {
+            fetchTeam(data.company_id);
           }
         }
       } else {
@@ -117,6 +121,21 @@ export default function TeamPage() {
       setTeam(teamData);
     } catch (error) {
       console.error('Error fetching team:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    if (!firebaseDb) return;
+    setLoading(true);
+    try {
+      const q = query(collection(firebaseDb!, 'profiles'));
+      const snapshot = await getDocs(q);
+      const allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Profile));
+      setTeam(allUsers);
+    } catch (error) {
+      console.error('Error fetching all users:', error);
     } finally {
       setLoading(false);
     }
@@ -155,6 +174,12 @@ export default function TeamPage() {
       const snapshot = await getDocs(q);
       const companyList = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as { name?: string }) }));
       setCompanies(companyList);
+      // Create a map for quick company name lookup
+      const map: Record<string, string> = {};
+      companyList.forEach(c => {
+        map[c.id] = c.name || c.id;
+      });
+      setCompaniesMap(map);
     } catch (error) {
       console.error('Error fetching companies:', error);
     }
@@ -180,7 +205,12 @@ export default function TeamPage() {
           company_id: editCompanyId.trim(),
         })
       );
-      if (currentUserProfile?.company_id) fetchTeam(currentUserProfile.company_id);
+      // Refresh team list
+      if (isAdmin) {
+        fetchAllUsers();
+      } else if (currentUserProfile?.company_id) {
+        fetchTeam(currentUserProfile.company_id);
+      }
       setIsEditModalOpen(false);
       setEditingUser(null);
     } catch (error) {
@@ -245,7 +275,12 @@ export default function TeamPage() {
     try {
       // Deleting profile triggers cloud function to delete Auth user
       await deleteDoc(doc(firebaseDb!, 'profiles', userId));
-      if (currentUserProfile?.company_id) fetchTeam(currentUserProfile.company_id);
+      // Refresh team list
+      if (isAdmin) {
+        fetchAllUsers();
+      } else if (currentUserProfile?.company_id) {
+        fetchTeam(currentUserProfile.company_id);
+      }
     } catch (error) {
       console.error('Error removing user:', error);
       alert('Failed to remove user.');
@@ -298,7 +333,10 @@ export default function TeamPage() {
       setTempCompanyId('');
       
       // Refresh team list if viewing the same company
-      if (currentUserProfile?.company_id === tempCompanyId) {
+      // Refresh team list
+      if (isAdmin) {
+        fetchAllUsers();
+      } else if (currentUserProfile?.company_id === tempCompanyId) {
         fetchTeam(tempCompanyId);
       }
       
@@ -320,10 +358,18 @@ export default function TeamPage() {
     return member.displayName || member.name || member.email?.split('@')[0] || 'Unnamed User';
   };
 
-  const filteredTeam = team.filter(member => 
-    displayNameFor(member).toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter team by search term and company (if admin)
+  const filteredTeam = team.filter(member => {
+    const matchesSearch = displayNameFor(member).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // If admin and company filter is set, also filter by company
+    if (isAdmin && selectedCompanyFilter !== 'all') {
+      return matchesSearch && member.company_id === selectedCompanyFilter;
+    }
+    
+    return matchesSearch;
+  });
 
   return (
     <div>
@@ -363,18 +409,36 @@ export default function TeamPage() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="mb-6 relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-white/30" />
+      {/* Search and Company Filter */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-white/30" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search team members..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 w-full bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+          />
         </div>
-        <input
-          type="text"
-          placeholder="Search team members..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-full md:w-96 bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
-        />
+        {isAdmin && (
+          <div className="sm:w-64">
+            <select
+              value={selectedCompanyFilter}
+              onChange={(e) => setSelectedCompanyFilter(e.target.value)}
+              className="w-full bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+            >
+              <option value="all">All Companies</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name || c.id}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Team Table */}
@@ -386,19 +450,20 @@ export default function TeamPage() {
                 <th className="px-6 py-4 font-medium">Member</th>
                 <th className="px-6 py-4 font-medium">Role</th>
                 <th className="px-6 py-4 font-medium">Email</th>
+                {isAdmin && <th className="px-6 py-4 font-medium">Company</th>}
                 <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-white/50">
+                  <td colSpan={isAdmin ? 5 : 4} className="px-6 py-8 text-center text-white/50">
                     Loading team...
                   </td>
                 </tr>
               ) : filteredTeam.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-white/50">
+                  <td colSpan={isAdmin ? 5 : 4} className="px-6 py-8 text-center text-white/50">
                     No team members found.
                   </td>
                 </tr>
@@ -432,6 +497,11 @@ export default function TeamPage() {
                     <td className="px-6 py-4 text-white/70 text-sm">
                       {member.email}
                     </td>
+                    {isAdmin && (
+                      <td className="px-6 py-4 text-white/70 text-sm">
+                        {member.company_id ? (companiesMap[member.company_id] || member.company_id) : 'No Company'}
+                      </td>
+                    )}
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {isAdmin && (
