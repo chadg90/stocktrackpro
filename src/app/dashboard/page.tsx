@@ -14,6 +14,7 @@ import {
   getDoc,
   getDocs,
   getCountFromServer,
+  deleteDoc,
   query,
   where,
   orderBy,
@@ -25,7 +26,7 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 
 // Check if Firebase is properly initialized
 const isFirebaseAvailable = firebaseAuth && firebaseDb;
-import { RefreshCw, Shield, Users, Truck, Package, AlertTriangle } from 'lucide-react';
+import { RefreshCw, Shield, Users, Truck, Package, AlertTriangle, Trash2 } from 'lucide-react';
 
 type Profile = {
   company_id?: string;
@@ -309,6 +310,36 @@ export default function DashboardPage() {
     setInspectionsCount(null);
   };
 
+  const handleDeleteInspection = async (inspectionId: string) => {
+    if (!isAdmin) {
+      alert('Only admins can delete inspections.');
+      return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this inspection? This action cannot be undone.') || !isFirebaseAvailable) return;
+    
+    try {
+      await deleteDoc(doc(firebaseDb!, 'vehicle_inspections', inspectionId));
+      
+      // Update local state
+      setInspections(prev => prev.filter(i => i.id !== inspectionId));
+      if (inspectionsCount !== null) {
+        setInspectionsCount(Math.max(0, inspectionsCount - 1));
+      }
+      alert('Inspection deleted successfully.');
+      
+      // Refresh data to update counts
+      if (profile?.company_id) {
+        fetchData(profile.company_id);
+      }
+    } catch (error) {
+      console.error('Error deleting inspection:', error);
+      alert('Failed to delete inspection.');
+    }
+  };
+
+  const isAdmin = profile?.role === 'admin';
+  
   const isAuthedManager = useMemo(() => {
     return !!authUser && profile && (profile.role === 'manager' || profile.role === 'admin') && profile.company_id;
   }, [authUser, profile]);
@@ -422,14 +453,27 @@ export default function DashboardPage() {
                     return (
                       <div key={insp.id} className="rounded-lg border border-primary/15 p-3">
                         <div className="flex items-center justify-between">
-                          <p className="text-white text-sm font-semibold">
-                            Vehicle: {vehicle ? `${vehicle.registration} (${vehicle.make} ${vehicle.model})` : (insp.vehicle_id ?? '—')}
-                          </p>
-                          {insp.has_defect && (
-                            <span className="text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
-                              Defect
-                            </span>
-                          )}
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="text-white text-sm font-semibold">
+                                Vehicle: {vehicle ? `${vehicle.registration} (${vehicle.make} ${vehicle.model})` : (insp.vehicle_id ?? '—')}
+                              </p>
+                              {isAdmin && (
+                                <button
+                                  onClick={() => handleDeleteInspection(insp.id)}
+                                  className="p-1.5 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                                  title="Delete Inspection (Admin Only)"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
+                            {insp.has_defect && (
+                              <span className="inline-block mt-1 text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
+                                Defect
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <p className="text-white/70 text-xs mt-1">Inspected at: {formatDate(insp.inspected_at)}</p>
                         <p className="text-white/60 text-xs">Inspector: {insp.inspected_by ?? '—'}</p>

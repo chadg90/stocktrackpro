@@ -7,6 +7,7 @@ import {
   where,
   getDocs,
   updateDoc,
+  deleteDoc,
   doc,
   serverTimestamp,
   orderBy,
@@ -16,7 +17,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Search, AlertTriangle, CheckCircle, Clock, Filter, Truck } from 'lucide-react';
+import { Search, AlertTriangle, CheckCircle, Clock, Filter, Truck, Trash2 } from 'lucide-react';
 import ImageViewerModal from '../components/ImageViewerModal';
 
 type Defect = {
@@ -89,6 +90,9 @@ export default function DefectsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'resolved'>('pending');
+  
+  // Check if user is admin
+  const isAdmin = profile?.role === 'admin';
   
   // Image viewer state
   const [viewingImage, setViewingImage] = useState<string | null>(null);
@@ -236,6 +240,26 @@ export default function DefectsPage() {
     } catch (error) {
       console.error('Error resolving defect:', error);
       alert('Failed to resolve defect');
+    }
+  };
+
+  const handleDeleteDefect = async (defectId: string) => {
+    if (!isAdmin) {
+      alert('Only admins can delete defects.');
+      return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this defect? This action cannot be undone.') || !firebaseDb) return;
+    
+    try {
+      await deleteDoc(doc(firebaseDb!, 'vehicle_defects', defectId));
+      
+      // Update local state
+      setDefects(prev => prev.filter(d => d.id !== defectId));
+      alert('Defect deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting defect:', error);
+      alert('Failed to delete defect.');
     }
   };
 
@@ -425,14 +449,25 @@ export default function DefectsPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {defect.status !== 'resolved' && (
-                          <button
-                            onClick={() => handleResolveDefect(defect.id)}
-                            className="text-sm bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/30 px-3 py-1.5 rounded-lg transition-colors"
-                          >
-                            Resolve
-                          </button>
-                        )}
+                        <div className="flex items-center justify-end gap-2">
+                          {defect.status !== 'resolved' && (
+                            <button
+                              onClick={() => handleResolveDefect(defect.id)}
+                              className="text-sm bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/30 px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                              Resolve
+                            </button>
+                          )}
+                          {isAdmin && (
+                            <button
+                              onClick={() => handleDeleteDefect(defect.id)}
+                              className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                              title="Delete Defect (Admin Only)"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
