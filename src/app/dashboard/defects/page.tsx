@@ -49,8 +49,14 @@ type Inspection = {
 };
 
 type Profile = {
+  id: string;
   company_id?: string;
   role?: string;
+  displayName?: string;
+  name?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
 };
 
 const formatDate = (value?: string | Timestamp) => {
@@ -86,6 +92,7 @@ const firstPhotoUrl = (defect: any): string | null => {
 export default function DefectsPage() {
   const [defects, setDefects] = useState<Defect[]>([]);
   const [vehicles, setVehicles] = useState<Record<string, Vehicle>>({});
+  const [users, setUsers] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -160,6 +167,15 @@ export default function DefectsPage() {
         vehiclesMap[doc.id] = { id: doc.id, ...doc.data() } as Vehicle;
       });
       setVehicles(vehiclesMap);
+
+      // Fetch users for mapping reported_by to names
+      const usersQ = query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId));
+      const usersSnap = await getDocs(usersQ);
+      const usersMap: Record<string, Profile> = {};
+      usersSnap.docs.forEach(doc => {
+        usersMap[doc.id] = { id: doc.id, ...doc.data() } as Profile;
+      });
+      setUsers(usersMap);
 
       // Fetch recent inspections to get photos
       const inspectionsQ = query(
@@ -261,6 +277,20 @@ export default function DefectsPage() {
       console.error('Error deleting defect:', error);
       alert('Failed to delete defect.');
     }
+  };
+
+  // Helper to get user display name
+  const displayNameFor = (userId?: string): string => {
+    if (!userId) return 'Unknown User';
+    const user = users[userId];
+    if (!user) return userId;
+    
+    // Try first_name + last_name first
+    if (user.first_name || user.last_name) {
+      return `${user.first_name || ''} ${user.last_name || ''}`.trim();
+    }
+    // Fall back to displayName, name, email prefix
+    return user.displayName || user.name || user.email?.split('@')[0] || userId;
   };
 
   const filteredDefects = defects.filter(d => {
@@ -430,23 +460,37 @@ export default function DefectsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-white/70 text-sm">
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5 opacity-50" />
-                          {formatDate(defect.reported_at)}
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5 opacity-50" />
+                            {formatDate(defect.reported_at)}
+                          </div>
+                          {defect.reported_by && (
+                            <p className="text-xs text-white/50">
+                              By: {displayNameFor(defect.reported_by)}
+                            </p>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        {defect.status === 'resolved' ? (
-                          <span className="inline-flex items-center gap-1.5 text-green-400 text-sm">
-                            <CheckCircle className="h-4 w-4" />
-                            Resolved
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-yellow-400 text-sm">
-                            <AlertTriangle className="h-4 w-4" />
-                            Pending
-                          </span>
-                        )}
+                        <div className="flex flex-col gap-1">
+                          {defect.status === 'resolved' ? (
+                            <span className="inline-flex items-center gap-1.5 text-green-400 text-sm">
+                              <CheckCircle className="h-4 w-4" />
+                              Resolved
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-yellow-400 text-sm">
+                              <AlertTriangle className="h-4 w-4" />
+                              Pending
+                            </span>
+                          )}
+                          {defect.status === 'resolved' && defect.resolved_by && (
+                            <p className="text-xs text-white/50">
+                              By: {displayNameFor(defect.resolved_by)}
+                            </p>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">

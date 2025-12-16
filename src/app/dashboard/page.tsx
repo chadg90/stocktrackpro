@@ -29,9 +29,13 @@ const isFirebaseAvailable = firebaseAuth && firebaseDb;
 import { RefreshCw, Shield, Users, Truck, Package, AlertTriangle, Trash2 } from 'lucide-react';
 
 type Profile = {
+  id: string;
   company_id?: string;
   role?: string;
   displayName?: string;
+  name?: string;
+  first_name?: string;
+  last_name?: string;
   email?: string;
 };
 
@@ -104,6 +108,7 @@ export default function DashboardPage() {
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [accessCodes, setAccessCodes] = useState<AccessCode[]>([]);
   const [vehicles, setVehicles] = useState<Record<string, Vehicle>>({});
+  const [users, setUsers] = useState<Record<string, Profile>>({});
 
   useEffect(() => {
     if (!isFirebaseAvailable) {
@@ -193,6 +198,14 @@ export default function DashboardPage() {
           vehiclesMap[doc.id] = { id: doc.id, ...doc.data() } as Vehicle;
         });
         setVehicles(vehiclesMap);
+
+        // Fetch users for mapping inspected_by to names
+        const usersSnap = await getDocs(teamQ);
+        const usersMap: Record<string, Profile> = {};
+        usersSnap.docs.forEach(doc => {
+          usersMap[doc.id] = { id: doc.id, ...doc.data() } as Profile;
+        });
+        setUsers(usersMap);
 
         const recentInspectionsQ = query(
           collection(firebaseDb!, 'vehicle_inspections'),
@@ -340,6 +353,20 @@ export default function DashboardPage() {
 
   const isAdmin = profile?.role === 'admin';
   
+  // Helper to get user display name
+  const displayNameFor = (userId?: string): string => {
+    if (!userId) return 'Unknown User';
+    const user = users[userId];
+    if (!user) return userId;
+    
+    // Try first_name + last_name first
+    if (user.first_name || user.last_name) {
+      return `${user.first_name || ''} ${user.last_name || ''}`.trim();
+    }
+    // Fall back to displayName, name, email prefix
+    return user.displayName || user.name || user.email?.split('@')[0] || userId;
+  };
+  
   const isAuthedManager = useMemo(() => {
     return !!authUser && profile && (profile.role === 'manager' || profile.role === 'admin') && profile.company_id;
   }, [authUser, profile]);
@@ -476,7 +503,7 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <p className="text-white/70 text-xs mt-1">Inspected at: {formatDate(insp.inspected_at)}</p>
-                        <p className="text-white/60 text-xs">Inspector: {insp.inspected_by ?? '—'}</p>
+                        <p className="text-white/60 text-xs">Inspector: {insp.inspected_by ? displayNameFor(insp.inspected_by) : '—'}</p>
                       </div>
                     );
                   })}
