@@ -18,6 +18,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Plus, Pencil, Trash2, Search, Truck, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import Modal from '../components/Modal';
+import ExportButton from '../components/ExportButton';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
 
@@ -257,16 +258,43 @@ export default function FleetPage() {
           <h1 className="text-3xl font-bold text-white">Fleet</h1>
           <p className="text-white/70 text-sm mt-1">Manage your vehicles and inspections</p>
         </div>
-        <button
-          onClick={() => {
-            setFormData({});
-            setIsAddModalOpen(true);
-          }}
-          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
-        >
-          <Plus className="h-5 w-5" />
-          Add Vehicle
-        </button>
+        <div className="flex items-center gap-3">
+          <ExportButton
+            data={vehicles.map(v => ({
+              id: v.id,
+              registration: v.registration || '',
+              make: v.make || '',
+              model: v.model || '',
+              year: v.year || '',
+              vin: v.vin || '',
+              mileage: v.mileage || '',
+              color: v.color || '',
+              status: v.status || '',
+            }))}
+            filename="fleet"
+            fieldMappings={{
+              id: 'ID',
+              registration: 'Registration',
+              make: 'Make',
+              model: 'Model',
+              year: 'Year',
+              vin: 'VIN',
+              mileage: 'Mileage',
+              color: 'Color',
+              status: 'Status',
+            }}
+          />
+          <button
+            onClick={() => {
+              setFormData({});
+              setIsAddModalOpen(true);
+            }}
+            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
+          >
+            <Plus className="h-5 w-5" />
+            Add Vehicle
+          </button>
+        </div>
       </div>
 
       {/* Search */}

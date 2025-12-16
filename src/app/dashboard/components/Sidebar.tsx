@@ -3,18 +3,20 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History, MapPin, Key, Building2, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History, MapPin, Key, Building2, Menu, X, BarChart3 } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import Image from 'next/image';
+import NotificationBell from './NotificationBell';
 
 const navigation = [
   { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Assets', href: '/dashboard/assets', icon: Package },
   { name: 'Fleet', href: '/dashboard/fleet', icon: Truck },
-  { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle },
+  { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },
   { name: 'History', href: '/dashboard/history', icon: History },
+  { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
   { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
   { name: 'Team', href: '/dashboard/team', icon: Users },
   { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key, adminOnly: true },
@@ -72,7 +74,7 @@ export default function Sidebar() {
       <div className={`flex h-full w-64 flex-col fixed inset-y-0 z-50 bg-black border-r border-primary/20 transition-transform lg:translate-x-0 ${
         mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}>
-        <div className="flex h-20 items-center px-6 border-b border-primary/20">
+        <div className="flex h-20 items-center justify-between px-6 border-b border-primary/20">
           <Link href="/" className="relative w-40 h-10" onClick={() => setMobileMenuOpen(false)}>
             <Image
               src="/logo.png"
@@ -82,12 +84,19 @@ export default function Sidebar() {
               priority
             />
           </Link>
+          <div className="lg:hidden">
+            <NotificationBell />
+          </div>
         </div>
       
       <div className="flex-1 overflow-y-auto py-6 px-4">
         <nav className="space-y-2">
           {navigation
-            .filter(item => !item.adminOnly || userRole === 'admin')
+            .filter(item => {
+              if (item.adminOnly && userRole !== 'admin') return false;
+              if (item.managerOnly && userRole !== 'manager') return false;
+              return true;
+            })
             .map((item) => {
               const isActive = pathname === item.href;
               return (

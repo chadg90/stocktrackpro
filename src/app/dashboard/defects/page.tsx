@@ -15,10 +15,12 @@ import {
   Timestamp,
   DocumentData,
 } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Search, AlertTriangle, CheckCircle, Clock, Filter, Truck, Trash2 } from 'lucide-react';
 import ImageViewerModal from '../components/ImageViewerModal';
+import ExportButton from '../components/ExportButton';
+import { createNotificationForCompanyManagers } from '@/lib/notificationUtils';
 
 type Defect = {
   id: string;
@@ -95,11 +97,12 @@ export default function DefectsPage() {
   const [users, setUsers] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'resolved'>('pending');
   
-  // Check if user is admin
-  const isAdmin = profile?.role === 'admin';
+  // Check if user is manager (only managers can view and resolve defects)
+  const isManager = profile?.role === 'manager';
   
   // Image viewer state
   const [viewingImage, setViewingImage] = useState<string | null>(null);
@@ -110,13 +113,22 @@ export default function DefectsPage() {
 
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user && firebaseDb) {
+        setCurrentUser(user);
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
         const snap = await import('firebase/firestore').then(mod => mod.getDoc(profileRef));
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile(data);
+          // Only managers can access defects page
+          if (data.role !== 'manager') {
+            setLoading(false);
+            alert('Access denied. Only managers can view defects.');
+            if (typeof window !== 'undefined') {
+              window.location.href = '/dashboard';
+            }
+            return;
+          }
           // CRITICAL: Always use the logged-in user's company_id for data isolation
-          // Even admins can only see their own company's business data
           if (data.company_id) {
             fetchData(data.company_id);
           } else {
@@ -239,13 +251,15 @@ export default function DefectsPage() {
   };
 
   const handleResolveDefect = async (defectId: string) => {
-    if (!confirm('Mark this defect as resolved?') || !firebaseDb) return;
+    if (!confirm('Mark this defect as resolved?') || !firebaseDb || !profile?.company_id) return;
     
     try {
+      const defect = defects.find(d => d.id === defectId);
       const defectRef = doc(firebaseDb!, 'vehicle_defects', defectId);
       await updateDoc(defectRef, {
         status: 'resolved',
         resolved_at: serverTimestamp(),
+        resolved_by: currentUser?.uid || null,
         updated_at: serverTimestamp(),
       });
       
@@ -253,6 +267,20 @@ export default function DefectsPage() {
       setDefects(prev => prev.map(d => 
         d.id === defectId ? { ...d, status: 'resolved' } : d
       ));
+
+      // Create notification for defect resolution
+      if (defect) {
+        const vehicle = defect.vehicle_id ? vehicles[defect.vehicle_id] : null;
+        const vehicleInfo = vehicle ? `${vehicle.registration} (${vehicle.make} ${vehicle.model})` : 'Unknown Vehicle';
+        await createNotificationForCompanyManagers({
+          type: 'defect_resolved',
+          title: 'Defect Resolved',
+          message: `Defect on ${vehicleInfo} has been resolved`,
+          company_id: profile.company_id,
+          link: '/dashboard/defects',
+          metadata: { defect_id: defectId, vehicle_id: defect.vehicle_id },
+        });
+      }
     } catch (error) {
       console.error('Error resolving defect:', error);
       alert('Failed to resolve defect');
@@ -260,8 +288,8 @@ export default function DefectsPage() {
   };
 
   const handleDeleteDefect = async (defectId: string) => {
-    if (!isAdmin) {
-      alert('Only admins can delete defects.');
+    if (!isManager) {
+      alert('Only managers can delete defects.');
       return;
     }
     
@@ -321,6 +349,38 @@ export default function DefectsPage() {
           <h1 className="text-3xl font-bold text-white">Defect Management</h1>
           <p className="text-white/70 text-sm mt-1">Track and resolve reported vehicle issues</p>
         </div>
+        <ExportButton
+          data={filteredDefects.map(defect => {
+            const vehicle = defect.vehicle_id ? vehicles[defect.vehicle_id] : null;
+            return {
+              id: defect.id,
+              severity: defect.severity || 'low',
+              vehicle_registration: vehicle?.registration || defect.vehicle_id || 'Unknown',
+              vehicle_make: vehicle?.make || '',
+              vehicle_model: vehicle?.model || '',
+              description: defect.description || '',
+              status: defect.status,
+              reported_at: defect.reported_at,
+              reported_by: defect.reported_by,
+              resolved_at: defect.resolved_at,
+              resolved_by: defect.resolved_by,
+            };
+          })}
+          filename="defects"
+          fieldMappings={{
+            id: 'ID',
+            severity: 'Severity',
+            vehicle_registration: 'Vehicle Registration',
+            vehicle_make: 'Vehicle Make',
+            vehicle_model: 'Vehicle Model',
+            description: 'Description',
+            status: 'Status',
+            reported_at: 'Reported At',
+            reported_by: 'Reported By',
+            resolved_at: 'Resolved At',
+            resolved_by: 'Resolved By',
+          }}
+        />
       </div>
 
       {/* Filters */}
@@ -494,7 +554,7 @@ export default function DefectsPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {defect.status !== 'resolved' && (
+                          {defect.status !== 'resolved' && isManager && (
                             <button
                               onClick={() => handleResolveDefect(defect.id)}
                               className="text-sm bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/30 px-3 py-1.5 rounded-lg transition-colors"
@@ -502,11 +562,11 @@ export default function DefectsPage() {
                               Resolve
                             </button>
                           )}
-                          {isAdmin && (
+                          {isManager && (
                             <button
                               onClick={() => handleDeleteDefect(defect.id)}
                               className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Delete Defect (Admin Only)"
+                              title="Delete Defect (Manager Only)"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>

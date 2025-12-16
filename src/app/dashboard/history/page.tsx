@@ -15,6 +15,7 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Clock, Search, Filter } from 'lucide-react';
+import ExportButton from '../components/ExportButton';
 
 type HistoryItem = {
   id: string;
@@ -157,16 +158,52 @@ export default function HistoryPage() {
       </div>
 
       {/* Search */}
-      <div className="mb-6 relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-white/30" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="relative flex-1">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-white/30" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search by action, asset ID, or user..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 w-full bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+          />
         </div>
-        <input
-          type="text"
-          placeholder="Search by action, asset ID, or user..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-full md:w-96 bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+        <ExportButton
+          data={filteredHistory.map(item => {
+            const tool = item.tool_id ? tools[item.tool_id] : null;
+            const user = item.user_id ? users[item.user_id] : null;
+            let userName = 'Unknown';
+            if (user) {
+              if (user.first_name || user.last_name) {
+                userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+              } else {
+                userName = user.displayName || user.name || user.email?.split('@')[0] || 'Unknown';
+              }
+            } else if (item.user_id) {
+              userName = item.user_id;
+            }
+            const toolName = tool ? (tool.name || `${tool.brand} ${tool.model}`.trim() || item.tool_id) : (item.tool_id || '—');
+            return {
+              id: item.id,
+              timestamp: item.timestamp,
+              action: item.action || '',
+              tool_name: toolName,
+              user_name: userName,
+              details: item.details || '',
+            };
+          })}
+          filename="history"
+          fieldMappings={{
+            id: 'ID',
+            timestamp: 'Timestamp',
+            action: 'Action',
+            tool_name: 'Tool/Asset',
+            user_name: 'User',
+            details: 'Details',
+          }}
         />
       </div>
 

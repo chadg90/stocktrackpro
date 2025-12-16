@@ -5,6 +5,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import Sidebar from './components/Sidebar';
+import NotificationBell from './components/NotificationBell';
 import { useRouter, usePathname } from 'next/navigation';
 
 type Profile = {
@@ -45,10 +46,12 @@ export default function DashboardLayout({
         
         if (snap.exists()) {
           const data = snap.data() as Profile;
-          // Check if user is manager or admin
+          // Only allow managers and admins to access dashboard
+          // Block users with role "user"
           if (data.role === 'manager' || data.role === 'admin') {
             setAuthorized(true);
           } else {
+            // User role or any other role is not allowed
             setAuthorized(false);
           }
         } else {
@@ -99,6 +102,11 @@ export default function DashboardLayout({
       <Sidebar />
       <main className="lg:pl-64 min-h-screen">
         <div className="p-4 sm:p-6 lg:p-8">
+          <div className="flex justify-end mb-4">
+            <div className="hidden lg:block">
+              <NotificationBell />
+            </div>
+          </div>
           {children}
         </div>
       </main>

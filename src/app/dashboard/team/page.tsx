@@ -11,6 +11,7 @@ import {
   doc,
   setDoc,
   serverTimestamp,
+  Timestamp,
 } from 'firebase/firestore';
 import { onAuthStateChanged, createUserWithEmailAndPassword } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -27,6 +28,7 @@ type Profile = {
   last_name?: string;
   email?: string;
   phone?: string;
+  last_login?: Timestamp | string;
 };
 
 type Company = {
@@ -358,6 +360,18 @@ export default function TeamPage() {
     return member.displayName || member.name || member.email?.split('@')[0] || 'Unnamed User';
   };
 
+  const formatDate = (value?: string | Timestamp) => {
+    if (!value) return 'Never';
+    try {
+      if (value instanceof Timestamp) {
+        return value.toDate().toLocaleString();
+      }
+      return new Date(value).toLocaleString();
+    } catch {
+      return typeof value === 'string' ? value : 'Never';
+    }
+  };
+
   // Filter team by search term and company (if admin)
   const filteredTeam = team.filter(member => {
     const matchesSearch = displayNameFor(member).toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -451,19 +465,20 @@ export default function TeamPage() {
                 <th className="px-6 py-4 font-medium">Role</th>
                 <th className="px-6 py-4 font-medium">Email</th>
                 {isAdmin && <th className="px-6 py-4 font-medium">Company</th>}
+                {isAdmin && <th className="px-6 py-4 font-medium">Last Login</th>}
                 <th className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
                 <tr>
-                  <td colSpan={isAdmin ? 5 : 4} className="px-6 py-8 text-center text-white/50">
+                  <td colSpan={isAdmin ? 6 : 4} className="px-6 py-8 text-center text-white/50">
                     Loading team...
                   </td>
                 </tr>
               ) : filteredTeam.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 5 : 4} className="px-6 py-8 text-center text-white/50">
+                  <td colSpan={isAdmin ? 6 : 4} className="px-6 py-8 text-center text-white/50">
                     No team members found.
                   </td>
                 </tr>
@@ -500,6 +515,11 @@ export default function TeamPage() {
                     {isAdmin && (
                       <td className="px-6 py-4 text-white/70 text-sm">
                         {member.company_id ? (companiesMap[member.company_id] || member.company_id) : 'No Company'}
+                      </td>
+                    )}
+                    {isAdmin && (
+                      <td className="px-6 py-4 text-white/70 text-sm">
+                        {formatDate(member.last_login)}
                       </td>
                     )}
                     <td className="px-6 py-4 text-right">

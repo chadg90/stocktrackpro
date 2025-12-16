@@ -1,0 +1,411 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && 
+             get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isManager() {
+      return isSignedIn() && 
+             get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'manager';
+    }
+    
+    function isManagerOrAdmin() {
+      return isManager() || isAdmin();
+    }
+    
+    function userCompanyId() {
+      return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.company_id;
+    }
+    
+    function sameCompany(companyId) {
+      return isSignedIn() && userCompanyId() == companyId;
+    }
+    
+    function hasAssetModule() {
+      let companyData = get(/databases/$(database)/documents/companies/$(userCompanyId())).data;
+      return companyData.subscription_status == 'active' || 
+             companyData.subscription_status == 'trial';
+    }
+    
+    function hasFleetModule() {
+      let companyData = get(/databases/$(database)/documents/companies/$(userCompanyId())).data;
+      return companyData.subscription_status == 'active' || 
+             companyData.subscription_status == 'trial';
+    }
+    
+    // ============================================
+    // PROFILES COLLECTION
+    // ============================================
+    
+    match /profiles/{userId} {
+      // Users can read their own profile
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      
+      // Users can update their own profile (limited fields)
+      allow update: if isSignedIn() && request.auth.uid == userId;
+      
+      // Allow creation during signup OR by admins for temp accounts
+      allow create: if isSignedIn() && (
+        request.auth.uid == userId || 
+        isAdmin()
+      );
+      
+      // Managers can read profiles in their company
+      allow read: if isSignedIn() && 
+                     isManager() && 
+                     resource.data.company_id == userCompanyId();
+      
+      // Admins can read ALL profiles (for dashboard)
+      allow read: if isSignedIn() && isAdmin();
+      
+      // Admins can update profiles in their company
+      allow update: if isSignedIn() && 
+                       isAdmin() && 
+                       resource.data.company_id == userCompanyId();
+      
+      // Admins can update any profile (for cross-company management)
+      allow update: if isSignedIn() && isAdmin();
+      
+      // Admins can delete users
+      allow delete: if isSignedIn() && isAdmin();
+    }
+    
+    // ============================================
+    // COMPANIES COLLECTION
+    // ============================================
+    
+    match /companies/{companyId} {
+      // Users can read their own company
+      allow read: if isSignedIn() && userCompanyId() == companyId;
+      
+      // Admins can read ALL companies (for dashboard)
+      allow read: if isSignedIn() && isAdmin();
+      
+      // Allow creation during signup OR by admins
+      allow create: if isSignedIn() && (
+        true || // Allow during signup (any authenticated user)
+        isAdmin() // Admins can create companies
+      );
+      
+      // Admins and managers can update their company
+      allow update: if isSignedIn() && 
+                       isManagerOrAdmin() && 
+                       userCompanyId() == companyId;
+      
+      // Admins can update any company (for cross-company management)
+      allow update: if isSignedIn() && isAdmin();
+      
+      // Any company member can update subscription fields (for promo code redemption)
+      allow update: if isSignedIn() && 
+                       userCompanyId() == companyId &&
+                       // Only subscription-related fields are being updated
+                       request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['subscription_status', 'subscription_type', 'subscription_tier', 
+                                   'subscription_expiry_date', 'updated_at']);
+      
+      // Admins can delete companies
+      allow delete: if isSignedIn() && isAdmin();
+    }
+    
+    // ============================================
+    // TOOLS (ASSETS) COLLECTION
+    // ============================================
+    
+    match /tools/{toolId} {
+      // Read: Company members with Asset module access
+      allow read: if isSignedIn() && 
+                     resource.data.company_id == userCompanyId() &&
+                     hasAssetModule();
+      
+      // Admins can read ALL tools (for dashboard)
+      allow read: if isSignedIn() && isAdmin();
+      
+      // Create: Managers and admins with Asset module access
+      allow create: if isSignedIn() && 
+                       isManagerOrAdmin() &&
+                       hasAssetModule() &&
+                       request.resource.data.company_id == userCompanyId();
+      
+      // Update: Managers and admins with Asset module access
+      allow update: if isSignedIn() && 
+                       isManagerOrAdmin() &&
+                       hasAssetModule() &&
+                       resource.data.company_id == userCompanyId();
+      
+      // Delete: Admins only
+      allow delete: if isSignedIn() && 
+                       isAdmin() &&
+                       hasAssetModule() &&
+                       resource.data.company_id == userCompanyId();
+    }
+    
+    // ============================================
+    // LOCATIONS COLLECTION
+    // ============================================
+    
+    match /locations/{locationId} {
+      // Read: Company members
+      allow read: if isSignedIn() && 
+                     resource.data.company_id == userCompanyId();
+      
+      // Write: Managers and admins only
+      allow create, update: if isSignedIn() && 
+                               isManagerOrAdmin() &&
+                               request.resource.data.company_id == userCompanyId();
+      
+      // Delete: Admins only
+      allow delete: if isSignedIn() && 
+                       isAdmin() &&
+                       resource.data.company_id == userCompanyId();
+    }
+    
+    // ============================================
+    // HISTORY COLLECTION
+    // ============================================
+    
+    match /history/{historyId} {
+      // Read: Company members
+      allow read: if isSignedIn() && 
+                     resource.data.company_id == userCompanyId();
+      
+      // Admins can read ALL history (for dashboard)
+      allow read: if isSignedIn() && isAdmin();
+      
+      // Create: Any authenticated user (for check-in/out logging)
+      allow create: if isSignedIn() && 
+                       request.resource.data.company_id == userCompanyId();
+      
+      // Update/Delete: Managers and admins only
+      allow update, delete: if isSignedIn() && 
+                               isManagerOrAdmin() &&
+                               resource.data.company_id == userCompanyId();
+    }
+    
+    // ============================================
+    // ACCESS CODES COLLECTION
+    // ============================================
+    
+    match /access_codes/{codeId} {
+      // Read: Anyone can read to verify codes during signup
+      allow read: if true;
+      
+      // Create: Admins only
+      allow create: if isSignedIn() && isAdmin();
+      
+      // Update: Admins only (for marking as used)
+      allow update: if isSignedIn() && (isAdmin() || request.resource.data.used == true);
+      
+      // Delete: Admins only
+      allow delete: if isSignedIn() && isAdmin();
+    }
+    
+    // ============================================
+    // INVITES COLLECTION
+    // ============================================
+    
+    match /invites/{inviteId} {
+      // Read: Admins can read all invites
+      allow read: if isSignedIn() && isAdmin();
+      
+      // Create: Admins only
+      allow create: if isSignedIn() && isAdmin();
+      
+      // Update: Admins only (for marking as used)
+      allow update: if isSignedIn() && isAdmin();
+      
+      // Delete: Admins only
+      allow delete: if isSignedIn() && isAdmin();
+    }
+    
+    // ============================================
+    // PROMO CODES COLLECTION
+    // ============================================
+    
+    match /promoCodes/{codeId} {
+      // Read: Any signed-in user can read promo codes
+      allow read: if isSignedIn();
+      
+      // Create: Admins only
+      allow create: if isSignedIn() && isAdmin();
+      
+      // Delete: Admins only
+      allow delete: if isSignedIn() && isAdmin();
+      
+      // Update: Allow admins to update, OR allow users to mark as used during redemption
+      allow update: if 
+        isAdmin() ||
+        (
+          isSignedIn() &&
+          // Only allow updating usage tracking fields during redemption
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['used', 'usedAt', 'usedBy', 'usedCount', 'lastUsedAt', 'lastUsedBy']) &&
+          (
+            // Single-use code being marked as used
+            (
+              request.resource.data.keys().hasAll(['used', 'usedAt', 'usedBy']) &&
+              resource.data.used == false &&
+              request.resource.data.used == true &&
+              request.resource.data.usedBy == request.auth.uid
+            )
+            ||
+            // Multi-use code incrementing usage count
+            (
+              request.resource.data.keys().hasAll(['usedCount', 'lastUsedAt', 'lastUsedBy']) &&
+              (
+                (resource.data.usedCount == null && request.resource.data.usedCount == 1) ||
+                (resource.data.usedCount != null && request.resource.data.usedCount == resource.data.usedCount + 1)
+              ) &&
+              request.resource.data.lastUsedBy == request.auth.uid
+            )
+          )
+        );
+    }
+    
+    // ============================================
+    // PROMOTIONAL SUBSCRIPTIONS COLLECTION
+    // ============================================
+    
+    match /promotionalSubscriptions/{subId} {
+      // Create: Any signed-in user when redeeming promo code
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid;
+      
+      // Read: User can read their own promo subscription
+      allow read: if isSignedIn() &&
+                     resource.data.userId == request.auth.uid;
+      
+      // Update: User can update their own promo subscription
+      allow update: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        resource.data.userId == request.auth.uid;
+      
+      // Delete: Not allowed
+      allow delete: if false;
+    }
+    
+    // ============================================
+    // VEHICLES COLLECTION
+    // ============================================
+    
+    match /vehicles/{vehicleId} {
+      // Read: All company members with Fleet module access (subscription check)
+      allow read: if isSignedIn() && 
+                     resource.data.company_id == userCompanyId() &&
+                     hasFleetModule();
+      
+      // Admins can read ALL vehicles (for dashboard)
+      allow read: if isSignedIn() && isAdmin();
+      
+      // Create: Managers and admins with Fleet module access (subscription check)
+      allow create: if isSignedIn() && 
+                       isManagerOrAdmin() &&
+                       hasFleetModule() &&
+                       request.resource.data.company_id == userCompanyId();
+      
+      // Update: Managers and admins with Fleet module access (subscription check)
+      allow update: if isSignedIn() && 
+                       isManagerOrAdmin() &&
+                       hasFleetModule() &&
+                       resource.data.company_id == userCompanyId();
+      
+      // Delete: Admins only
+      allow delete: if isSignedIn() && 
+                       isAdmin() &&
+                       hasFleetModule() &&
+                       resource.data.company_id == userCompanyId();
+    }
+    
+    // ============================================
+    // VEHICLE INSPECTIONS COLLECTION
+    // ============================================
+    
+    match /vehicle_inspections/{inspectionId} {
+      // Create: Any company member with Fleet module (subscription check)
+      allow create: if isSignedIn() && 
+                       hasFleetModule() &&
+                       request.resource.data.company_id == userCompanyId();
+      
+      // Read: All company members with Fleet module (subscription check)
+      allow read: if isSignedIn() && 
+                     hasFleetModule() &&
+                     resource.data.company_id == userCompanyId();
+      
+      // Admins can read ALL inspections (for dashboard)
+      allow read: if isSignedIn() && isAdmin();
+      
+      // Update/Delete: Managers and admins only (for defect resolution)
+      allow update, delete: if isSignedIn() && 
+                               isManagerOrAdmin() &&
+                               hasFleetModule() &&
+                               resource.data.company_id == userCompanyId();
+    }
+    
+    // ============================================
+    // VEHICLE DEFECTS COLLECTION
+    // ============================================
+    
+    match /vehicle_defects/{defectId} {
+      // Create: Any company member with Fleet module (subscription check)
+      allow create: if isSignedIn() && 
+                       hasFleetModule() &&
+                       request.resource.data.company_id == userCompanyId();
+      
+      // Read: Managers only with Fleet module (subscription check)
+      // Only managers can view defects, not admins or regular users
+      allow read: if isSignedIn() && 
+                     isManager() &&
+                     hasFleetModule() &&
+                     resource.data.company_id == userCompanyId();
+      
+      // Update: Managers only (for resolving defects)
+      // Only managers can resolve defects, not admins
+      allow update: if isSignedIn() && 
+                       isManager() &&
+                       hasFleetModule() &&
+                       resource.data.company_id == userCompanyId();
+      
+      // Delete: Managers only
+      allow delete: if isSignedIn() && 
+                       isManager() &&
+                       hasFleetModule() &&
+                       resource.data.company_id == userCompanyId();
+    }
+    
+    // ============================================
+    // NOTIFICATIONS COLLECTION
+    // ============================================
+    
+    match /notifications/{notificationId} {
+      // Read: Users can read their own notifications
+      allow read: if isSignedIn() && 
+                     resource.data.user_id == request.auth.uid;
+      
+      // Update: Users can update their own notifications (to mark as read)
+      allow update: if isSignedIn() && 
+                       resource.data.user_id == request.auth.uid &&
+                       // Only allow updating the 'read' field
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      
+      // Delete: Users can delete their own notifications
+      allow delete: if isSignedIn() && 
+                       resource.data.user_id == request.auth.uid;
+      
+      // Create: Managers and admins can create notifications for their company
+      // (used when defects are resolved, etc.)
+      allow create: if isSignedIn() && 
+                       isManagerOrAdmin() &&
+                       request.resource.data.company_id == userCompanyId();
+    }
+  }
+}

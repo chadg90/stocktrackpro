@@ -15,6 +15,8 @@ import {
   getDocs,
   getCountFromServer,
   deleteDoc,
+  updateDoc,
+  serverTimestamp,
   query,
   where,
   orderBy,
@@ -136,8 +138,9 @@ export default function DashboardPage() {
         throw new Error('Profile not found for this account.');
       }
       const data = snap.data() as Profile;
+      // Only allow managers and admins - block users with role "user"
       if (data.role !== 'manager' && data.role !== 'admin') {
-        throw new Error('Access restricted to managers.');
+        throw new Error('Access restricted. Only managers and admins can access the dashboard.');
       }
       setProfile(data);
       return data;
@@ -301,6 +304,18 @@ export default function DashboardPage() {
         throw new Error('Firebase is not configured properly');
       }
       const cred = await signInWithEmailAndPassword(firebaseAuth!, email.trim(), password);
+      
+      // Update last_login timestamp in user's profile
+      try {
+        const profileRef = doc(firebaseDb!, 'profiles', cred.user.uid);
+        await updateDoc(profileRef, {
+          last_login: serverTimestamp(),
+        });
+      } catch (updateError) {
+        // Log but don't fail login if last_login update fails
+        console.error('Failed to update last_login:', updateError);
+      }
+      
       await loadProfile(cred.user);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Sign-in failed');

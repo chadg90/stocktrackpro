@@ -17,6 +17,7 @@ import { Pencil, Trash2, Search, QrCode, Image as ImageIcon, Eye } from 'lucide-
 import Modal from '../components/Modal';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
+import ExportButton from '../components/ExportButton';
 
 type Tool = {
   id: string;
@@ -164,6 +165,31 @@ export default function AssetsPage() {
           <h1 className="text-3xl font-bold text-white">Assets</h1>
           <p className="text-white/70 text-sm mt-1">View and edit your tools and equipment inventory</p>
         </div>
+        <ExportButton
+          data={filteredTools.map(tool => ({
+            id: tool.id,
+            name: tool.name || '',
+            brand: tool.brand || '',
+            model: tool.model || '',
+            qr_code: tool.qr_code || '',
+            location: tool.location || '',
+            status: tool.status || '',
+            condition: tool.condition || '',
+            notes: tool.notes || '',
+          }))}
+          filename="assets"
+          fieldMappings={{
+            id: 'ID',
+            name: 'Name',
+            brand: 'Brand',
+            model: 'Model',
+            qr_code: 'QR Code',
+            location: 'Location',
+            status: 'Status',
+            condition: 'Condition',
+            notes: 'Notes',
+          }}
+        />
       </div>
 
       {/* Search and Filter */}
