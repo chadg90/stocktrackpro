@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History, MapPin, Key, Building2 } from 'lucide-react';
+import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History, MapPin, Key, Building2, Menu, X } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -24,6 +24,7 @@ const navigation = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -49,18 +50,39 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="flex h-full w-64 flex-col fixed inset-y-0 z-50 bg-black border-r border-primary/20">
-      <div className="flex h-20 items-center px-6 border-b border-primary/20">
-        <Link href="/" className="relative w-40 h-10">
-          <Image
-            src="/logo.png"
-            alt="Stock Track PRO"
-            fill
-            style={{ objectFit: 'contain' }}
-            priority
-          />
-        </Link>
-      </div>
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-black/80 border border-primary/30 rounded-lg text-white hover:bg-primary/10 transition-colors"
+        aria-label="Toggle menu"
+      >
+        {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </button>
+
+      {/* Mobile Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-[55]"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`flex h-full w-64 flex-col fixed inset-y-0 z-50 bg-black border-r border-primary/20 transition-transform lg:translate-x-0 ${
+        mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        <div className="flex h-20 items-center px-6 border-b border-primary/20">
+          <Link href="/" className="relative w-40 h-10" onClick={() => setMobileMenuOpen(false)}>
+            <Image
+              src="/logo.png"
+              alt="Stock Track PRO"
+              fill
+              style={{ objectFit: 'contain' }}
+              priority
+            />
+          </Link>
+        </div>
       
       <div className="flex-1 overflow-y-auto py-6 px-4">
         <nav className="space-y-2">
@@ -72,6 +94,7 @@ export default function Sidebar() {
                 <Link
                   key={item.name}
                   href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                     isActive
                       ? 'bg-primary/10 text-primary border border-primary/20'
@@ -95,6 +118,7 @@ export default function Sidebar() {
           Sign Out
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

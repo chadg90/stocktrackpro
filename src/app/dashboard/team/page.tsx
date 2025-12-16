@@ -11,7 +11,7 @@ import {
   doc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, createUserWithEmailAndPassword } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Trash2, Search, Mail, User as UserIcon, Pencil, ShieldOff } from 'lucide-react';
 import Modal from '../components/Modal';
@@ -61,6 +61,15 @@ export default function TeamPage() {
   const [editDisplayName, setEditDisplayName] = useState('');
   const [editRole, setEditRole] = useState<Profile['role']>('user');
   const [editCompanyId, setEditCompanyId] = useState('');
+
+  // Temp account creation modal (admin only)
+  const [isTempAccountModalOpen, setIsTempAccountModalOpen] = useState(false);
+  const [tempEmail, setTempEmail] = useState('');
+  const [tempPassword, setTempPassword] = useState('');
+  const [tempFirstName, setTempFirstName] = useState('');
+  const [tempLastName, setTempLastName] = useState('');
+  const [tempRole, setTempRole] = useState<Profile['role']>('user');
+  const [tempCompanyId, setTempCompanyId] = useState('');
 
   // Company info for admin actions
   const [companyName, setCompanyName] = useState<string | undefined>(undefined);
@@ -253,6 +262,54 @@ export default function TeamPage() {
     }
   };
 
+  const handleCreateTempAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firebaseAuth || !firebaseDb || !isAdmin) return;
+    
+    if (!tempEmail || !tempPassword || !tempCompanyId) {
+      alert('Please fill in email, password, and select a company.');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(firebaseAuth, tempEmail.trim(), tempPassword);
+      const newUserId = userCredential.user.uid;
+
+      // Create profile in Firestore
+      await addDoc(collection(firebaseDb!, 'profiles'), {
+        email: tempEmail.trim(),
+        company_id: tempCompanyId,
+        role: tempRole,
+        first_name: tempFirstName.trim() || null,
+        last_name: tempLastName.trim() || null,
+        displayName: tempFirstName.trim() || tempLastName.trim() ? `${tempFirstName.trim()} ${tempLastName.trim()}`.trim() : null,
+        created_at: serverTimestamp(),
+      });
+
+      setIsTempAccountModalOpen(false);
+      setTempEmail('');
+      setTempPassword('');
+      setTempFirstName('');
+      setTempLastName('');
+      setTempRole('user');
+      setTempCompanyId('');
+      
+      // Refresh team list if viewing the same company
+      if (currentUserProfile?.company_id === tempCompanyId) {
+        fetchTeam(tempCompanyId);
+      }
+      
+      alert(`Temporary account created successfully! User can now login with:\nEmail: ${tempEmail}\nPassword: [as set]`);
+    } catch (error: any) {
+      console.error('Error creating temp account:', error);
+      alert(error.message || 'Failed to create temporary account. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const displayNameFor = (member: Profile) => {
     // Try first_name + last_name first
     if (member.first_name || member.last_name) {
@@ -274,16 +331,26 @@ export default function TeamPage() {
           <h1 className="text-3xl font-bold text-white">Team Management</h1>
           <p className="text-white/70 text-sm mt-1">Manage your team members and permissions</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {isAdmin && (
-            <button
-              onClick={handleDeleteCompany}
-              className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-red-400/40 text-red-200 hover:border-red-300 hover:text-red-100 transition-colors"
-              title="Admin only: delete this company record"
-            >
-              <ShieldOff className="h-4 w-4" />
-              Delete Company
-            </button>
+            <>
+              <button
+                onClick={() => setIsTempAccountModalOpen(true)}
+                className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-primary/40 text-primary hover:border-primary hover:bg-primary/10 transition-colors"
+                title="Admin only: create temporary account"
+              >
+                <UserIcon className="h-4 w-4" />
+                Create Temp Account
+              </button>
+              <button
+                onClick={handleDeleteCompany}
+                className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-red-400/40 text-red-200 hover:border-red-300 hover:text-red-100 transition-colors"
+                title="Admin only: delete this company record"
+              >
+                <ShieldOff className="h-4 w-4" />
+                Delete Company
+              </button>
+            </>
           )}
         <button
           onClick={() => setIsInviteModalOpen(true)}
@@ -545,6 +612,111 @@ export default function TeamPage() {
               className="px-4 py-2 rounded-lg bg-primary text-black font-semibold hover:bg-primary-light disabled:opacity-60"
             >
               {processing ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Create Temp Account Modal (Admin Only) */}
+      <Modal
+        isOpen={isTempAccountModalOpen}
+        onClose={() => setIsTempAccountModalOpen(false)}
+        title="Create Temporary Account"
+      >
+        <form onSubmit={handleCreateTempAccount} className="space-y-4">
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-4">
+            <p className="text-yellow-200 text-xs">
+              This creates a temporary account that the user can login with immediately. Use this while setting up Google Play Store access.
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Email Address *</label>
+            <input
+              type="email"
+              required
+              value={tempEmail}
+              onChange={(e) => setTempEmail(e.target.value)}
+              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              placeholder="user@example.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Password *</label>
+            <input
+              type="password"
+              required
+              value={tempPassword}
+              onChange={(e) => setTempPassword(e.target.value)}
+              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              placeholder="Minimum 6 characters"
+              minLength={6}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-white/70 mb-1">First Name</label>
+              <input
+                type="text"
+                value={tempFirstName}
+                onChange={(e) => setTempFirstName(e.target.value)}
+                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                placeholder="John"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-white/70 mb-1">Last Name</label>
+              <input
+                type="text"
+                value={tempLastName}
+                onChange={(e) => setTempLastName(e.target.value)}
+                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                placeholder="Doe"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Role *</label>
+            <select
+              value={tempRole}
+              onChange={(e) => setTempRole(e.target.value as Profile['role'])}
+              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              required
+            >
+              <option value="user">User</option>
+              <option value="manager">Manager</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Company *</label>
+            <select
+              value={tempCompanyId}
+              onChange={(e) => setTempCompanyId(e.target.value)}
+              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              required
+            >
+              <option value="" disabled>Select company</option>
+              {companies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name || c.id}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="pt-2 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsTempAccountModalOpen(false)}
+              className="px-4 py-2 rounded-lg border border-white/20 text-white/80 hover:border-white/40"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={processing}
+              className="px-4 py-2 rounded-lg bg-primary text-black font-semibold hover:bg-primary-light disabled:opacity-60"
+            >
+              {processing ? 'Creating...' : 'Create Account'}
             </button>
           </div>
         </form>
