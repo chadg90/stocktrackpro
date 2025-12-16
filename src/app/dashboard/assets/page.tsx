@@ -174,8 +174,8 @@ export default function AssetsPage() {
             qr_code: tool.qr_code || '',
             location: tool.location || '',
             status: tool.status || '',
-            condition: tool.condition || '',
-            notes: tool.notes || '',
+            condition: (tool as any).condition || '',
+            notes: (tool as any).notes || '',
           }))}
           filename="assets"
           fieldMappings={{

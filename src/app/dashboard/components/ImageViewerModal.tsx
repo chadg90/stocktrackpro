@@ -13,10 +13,10 @@ export default function ImageViewerModal({ isOpen, onClose, imageUrl, altText }:
   if (!isOpen || !imageUrl) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm" onClick={onClose}>
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/50 p-2 rounded-full transition-colors z-50"
+        className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/50 p-2 rounded-full transition-colors z-[120]"
       >
         <X className="h-8 w-8" />
       </button>

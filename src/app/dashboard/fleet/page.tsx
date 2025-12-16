@@ -265,11 +265,11 @@ export default function FleetPage() {
               registration: v.registration || '',
               make: v.make || '',
               model: v.model || '',
-              year: v.year || '',
-              vin: v.vin || '',
-              mileage: v.mileage || '',
-              color: v.color || '',
-              status: v.status || '',
+              year: (v as any).year || '',
+              vin: (v as any).vin || '',
+              mileage: (v as any).mileage || '',
+              color: (v as any).color || '',
+              status: (v as any).status || '',
             }))}
             filename="fleet"
             fieldMappings={{

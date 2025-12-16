@@ -62,8 +62,9 @@ export default function AnalyticsPage() {
 
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user && firebaseDb) {
-        const profileRef = await import('firebase/firestore').then(mod => mod.doc(firebaseDb, 'profiles', user.uid));
-        const snap = await import('firebase/firestore').then(mod => mod.getDoc(profileRef));
+        const { doc, getDoc } = await import('firebase/firestore');
+        const profileRef = doc(firebaseDb, 'profiles', user.uid);
+        const snap = await getDoc(profileRef);
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile(data);
@@ -341,7 +342,7 @@ export default function AnalyticsPage() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"

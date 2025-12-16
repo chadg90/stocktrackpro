@@ -381,7 +381,7 @@ export default function DashboardPage() {
     // Fall back to displayName, name, email prefix
     return user.displayName || user.name || user.email?.split('@')[0] || userId;
   };
-  
+
   const isAuthedManager = useMemo(() => {
     return !!authUser && profile && (profile.role === 'manager' || profile.role === 'admin') && profile.company_id;
   }, [authUser, profile]);
@@ -437,11 +437,11 @@ export default function DashboardPage() {
                 Managers only. Contact your admin if you need access.
               </p>
             </div>
-          </div>
-        )}
+            </div>
+          )}
 
-        {isAuthedManager && (
-          <div className="space-y-8">
+          {isAuthedManager && (
+            <div className="space-y-8">
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h1 className="text-3xl font-bold text-white">Dashboard Overview</h1>
@@ -459,37 +459,37 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { title: 'Assets', value: assetsCount, icon: Package },
-                { title: 'Vehicles', value: vehiclesCount, icon: Truck },
-                { title: 'Team Members', value: teamCount, icon: Users },
-                { title: 'Inspections', value: inspectionsCount, icon: Shield },
-              ].map((item) => (
-                <div key={item.title} className="bg-black border border-primary/25 rounded-xl p-5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <item.icon className="h-5 w-5 text-primary" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { title: 'Assets', value: assetsCount, icon: Package },
+                  { title: 'Vehicles', value: vehiclesCount, icon: Truck },
+                  { title: 'Team Members', value: teamCount, icon: Users },
+                  { title: 'Inspections', value: inspectionsCount, icon: Shield },
+                ].map((item) => (
+                  <div key={item.title} className="bg-black border border-primary/25 rounded-xl p-5 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-white/70 text-sm">{item.title}</p>
+                      <p className="text-white text-xl font-semibold">
+                        {item.value === null ? '—' : item.value}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-white/70 text-sm">{item.title}</p>
-                    <p className="text-white text-xl font-semibold">
-                      {item.value === null ? '—' : item.value}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-white text-lg font-semibold">Recent Inspections</h3>
-                  <span className="text-xs text-white/50">Latest 5</span>
-                </div>
-                <div className="space-y-3">
-                  {inspections.length === 0 && (
-                    <p className="text-white/60 text-sm">No inspections found.</p>
-                  )}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-white text-lg font-semibold">Recent Inspections</h3>
+                    <span className="text-xs text-white/50">Latest 5</span>
+                  </div>
+                  <div className="space-y-3">
+                    {inspections.length === 0 && (
+                      <p className="text-white/60 text-sm">No inspections found.</p>
+                    )}
                   {inspections.map((insp) => {
                     const vehicle = insp.vehicle_id ? vehicles[insp.vehicle_id] : null;
                     return (
@@ -510,11 +510,11 @@ export default function DashboardPage() {
                                 </button>
                               )}
                             </div>
-                            {insp.has_defect && (
+                          {insp.has_defect && (
                               <span className="inline-block mt-1 text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
-                                Defect
-                              </span>
-                            )}
+                              Defect
+                            </span>
+                          )}
                           </div>
                         </div>
                         <p className="text-white/70 text-xs mt-1">Inspected at: {formatDate(insp.inspected_at)}</p>
@@ -522,16 +522,16 @@ export default function DashboardPage() {
                       </div>
                     );
                   })}
+                  </div>
                 </div>
-              </div>
 
-              <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-white text-lg font-semibold">Defects</h3>
-                  <span className="text-xs text-white/50">Latest 5</span>
-                </div>
-                <div className="space-y-3">
-                  {defects.length === 0 && <p className="text-white/60 text-sm">No defects reported.</p>}
+                <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-white text-lg font-semibold">Defects</h3>
+                    <span className="text-xs text-white/50">Latest 5</span>
+                  </div>
+                  <div className="space-y-3">
+                    {defects.length === 0 && <p className="text-white/60 text-sm">No defects reported.</p>}
                   {defects.map((d) => {
                     const vehicle = d.vehicle_id ? vehicles[d.vehicle_id] : null;
                     return (
@@ -550,59 +550,59 @@ export default function DashboardPage() {
                       </div>
                     );
                   })}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-white text-lg font-semibold">Tool History</h3>
-                  <span className="text-xs text-white/50">Latest 5</span>
-                </div>
-                <div className="space-y-3">
-                  {historyItems.length === 0 && <p className="text-white/60 text-sm">No history available.</p>}
-                  {historyItems.map((h) => (
-                    <div key={h.id} className="rounded-lg border border-primary/15 p-3">
-                      <p className="text-white text-sm font-semibold">Tool: {h.tool_id ?? '—'}</p>
-                      <p className="text-white/70 text-xs">Action: {h.action ?? '—'}</p>
-                      <p className="text-white/70 text-xs">User: {h.user_id ?? '—'}</p>
-                      <p className="text-white/60 text-xs mt-1">When: {formatDate(h.timestamp)}</p>
-                    </div>
-                  ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-white text-lg font-semibold">Access Codes (read-only)</h3>
-                  <span className="text-xs text-white/50">Latest 5</span>
-                </div>
-                <p className="text-white/60 text-sm mb-3">
-                  Codes are generated in the app. Displayed here for reference only.
-                </p>
-                <div className="space-y-3">
-                  {accessCodes.length === 0 && <p className="text-white/60 text-sm">No access codes found.</p>}
-                  {accessCodes.map((c) => (
-                    <div key={c.id} className="rounded-lg border border-primary/15 p-3 flex items-center justify-between">
-                      <div>
-                        <p className="text-white text-sm font-semibold">Code: {c.id}</p>
-                        <p className="text-white/70 text-xs">Expires: {formatDate(c.expiresAt)}</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-white text-lg font-semibold">Tool History</h3>
+                    <span className="text-xs text-white/50">Latest 5</span>
+                  </div>
+                  <div className="space-y-3">
+                    {historyItems.length === 0 && <p className="text-white/60 text-sm">No history available.</p>}
+                    {historyItems.map((h) => (
+                      <div key={h.id} className="rounded-lg border border-primary/15 p-3">
+                        <p className="text-white text-sm font-semibold">Tool: {h.tool_id ?? '—'}</p>
+                        <p className="text-white/70 text-xs">Action: {h.action ?? '—'}</p>
+                        <p className="text-white/70 text-xs">User: {h.user_id ?? '—'}</p>
+                        <p className="text-white/60 text-xs mt-1">When: {formatDate(h.timestamp)}</p>
                       </div>
-                      <span
-                        className={`text-xs px-2 py-1 rounded ${
-                          c.used ? 'bg-white/10 text-white/70' : 'bg-primary/20 text-primary'
-                        }`}
-                      >
-                        {c.used ? 'Used' : 'Active'}
-                      </span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-white text-lg font-semibold">Access Codes (read-only)</h3>
+                    <span className="text-xs text-white/50">Latest 5</span>
+                  </div>
+                  <p className="text-white/60 text-sm mb-3">
+                    Codes are generated in the app. Displayed here for reference only.
+                  </p>
+                  <div className="space-y-3">
+                    {accessCodes.length === 0 && <p className="text-white/60 text-sm">No access codes found.</p>}
+                    {accessCodes.map((c) => (
+                      <div key={c.id} className="rounded-lg border border-primary/15 p-3 flex items-center justify-between">
+                        <div>
+                          <p className="text-white text-sm font-semibold">Code: {c.id}</p>
+                          <p className="text-white/70 text-xs">Expires: {formatDate(c.expiresAt)}</p>
+                        </div>
+                        <span
+                          className={`text-xs px-2 py-1 rounded ${
+                            c.used ? 'bg-white/10 text-white/70' : 'bg-primary/20 text-primary'
+                          }`}
+                        >
+                          {c.used ? 'Used' : 'Active'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
         </div>
       </div>
     </div>

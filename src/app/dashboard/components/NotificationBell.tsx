@@ -6,7 +6,6 @@ import {
   collection,
   query,
   where,
-  getDocs,
   updateDoc,
   deleteDoc,
   doc,
@@ -33,8 +32,9 @@ export default function NotificationBell() {
 
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user && firebaseDb) {
-        const profileRef = await import('firebase/firestore').then(mod => mod.doc(firebaseDb, 'profiles', user.uid));
-        const snap = await import('firebase/firestore').then(mod => mod.getDoc(profileRef));
+        const { doc, getDoc } = await import('firebase/firestore');
+        const profileRef = doc(firebaseDb, 'profiles', user.uid);
+        const snap = await getDoc(profileRef);
         if (snap.exists()) {
           const data = snap.data();
           if (data.company_id) {
@@ -103,7 +103,9 @@ export default function NotificationBell() {
   const handleMarkAsRead = async (id: string) => {
     if (!firebaseDb) return;
     try {
-      const notificationRef = doc(firebaseDb, 'notifications', id);
+      const { doc, updateDoc } = await import('firebase/firestore');
+      const db = firebaseDb; // TypeScript guard
+      const notificationRef = doc(db, 'notifications', id);
       await updateDoc(notificationRef, { read: true });
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -113,7 +115,9 @@ export default function NotificationBell() {
   const handleDelete = async (id: string) => {
     if (!firebaseDb) return;
     try {
-      await deleteDoc(doc(firebaseDb, 'notifications', id));
+      const { doc, deleteDoc } = await import('firebase/firestore');
+      const db = firebaseDb; // TypeScript guard
+      await deleteDoc(doc(db, 'notifications', id));
     } catch (error) {
       console.error('Error deleting notification:', error);
     }
@@ -130,9 +134,11 @@ export default function NotificationBell() {
     if (!firebaseDb) return;
     const unreadNotifications = notifications.filter(n => !n.read);
     try {
+      const { doc, updateDoc } = await import('firebase/firestore');
+      const db = firebaseDb; // TypeScript guard
       await Promise.all(
         unreadNotifications.map(notif =>
-          updateDoc(doc(firebaseDb, 'notifications', notif.id), { read: true })
+          updateDoc(doc(db, 'notifications', notif.id), { read: true })
         )
       );
     } catch (error) {
@@ -156,7 +162,7 @@ export default function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-black border border-primary/30 rounded-xl shadow-xl z-50 max-h-[500px] flex flex-col">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-black border border-primary/30 rounded-xl shadow-xl z-[100] max-h-[500px] flex flex-col">
           <div className="flex items-center justify-between p-4 border-b border-primary/20">
             <h3 className="text-white font-semibold">Notifications</h3>
             {unreadCount > 0 && (

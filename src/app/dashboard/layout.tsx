@@ -100,7 +100,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-black">
       <Sidebar />
-      <main className="lg:pl-64 min-h-screen">
+      <main className="min-h-screen pt-20 lg:pt-0 lg:pl-64">
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="flex justify-end mb-4">
             <div className="hidden lg:block">
