@@ -218,27 +218,101 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>You can request deletion of your data by contacting us</span>
+                  <span>Inactive accounts (no login activity for 90 consecutive days) will be automatically deleted along with all associated data</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>You can delete your account and data at any time using the in-app account deletion feature</span>
                 </li>
               </ul>
             </div>
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">9. Children's Privacy</h2>
+              <h2 className="text-2xl font-semibold text-white mb-4">9. How to Delete Your Account and Data</h2>
+              <p className="text-white/80 mb-4">You have full control over your data and can delete your account at any time directly from the app:</p>
+              
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-4">
+                <h3 className="text-lg font-semibold text-white mb-3">Account Deletion Steps:</h3>
+                <ol className="space-y-3 text-white/80">
+                  <li className="flex items-start space-x-3">
+                    <span className="text-primary font-semibold">1.</span>
+                    <span>Open the StockTrackPro app and navigate to the <strong className="text-white">Account Tab</strong></span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="text-primary font-semibold">2.</span>
+                    <span>Tap on <strong className="text-white">"Manage Account"</strong></span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="text-primary font-semibold">3.</span>
+                    <span>When the alert appears asking "Choose an action", tap <strong className="text-white">"Delete Account"</strong></span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="text-primary font-semibold">4.</span>
+                    <span>Confirm your decision by tapping <strong className="text-white">"Delete"</strong> in the confirmation alert</span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <span className="text-primary font-semibold">5.</span>
+                    <span>Your account and all associated data will be permanently deleted</span>
+                  </li>
+                </ol>
+              </div>
+
+              <h3 className="text-xl font-semibold text-white mb-3">What Gets Deleted:</h3>
+              <p className="text-white/80 mb-3">When you delete your account, the following data is permanently removed:</p>
+              <ul className="space-y-3 text-white/80 mb-4">
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>Your user profile and account information</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>All company data and settings</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>Asset and inventory records</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>Vehicle fleet data and inspection records</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>All uploaded photos and documents</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>Team member information</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>Location and access code data</span>
+                </li>
+              </ul>
+
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
+                <p className="text-yellow-200/90 text-sm">
+                  <strong className="text-yellow-100">Important:</strong> Account deletion is permanent and cannot be undone. Please ensure you have exported any data you wish to keep before deleting your account. Note that subscription cancellations must be managed separately through your Apple App Store account settings.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-white mb-4">10. Children's Privacy</h2>
               <p className="text-white/80">
                 Our service is not intended for and does not target children under 13. We do not knowingly collect information from children under 13.
               </p>
             </div>
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">10. Changes to Privacy Policy</h2>
+              <h2 className="text-2xl font-semibold text-white mb-4">11. Changes to Privacy Policy</h2>
               <p className="text-white/80">
                 We may update this Privacy Policy periodically. We will notify you of any material changes through the app or via email.
               </p>
             </div>
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">11. Contact Us</h2>
+              <h2 className="text-2xl font-semibold text-white mb-4">12. Contact Us</h2>
               <p className="text-white/80 mb-4">If you have questions about this Privacy Policy, please contact us at:</p>
               <ul className="space-y-3 text-white/80">
                 <li className="flex items-start space-x-2">
@@ -253,7 +327,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">12. App Store Requirements</h2>
+              <h2 className="text-2xl font-semibold text-white mb-4">13. App Store Requirements</h2>
               <p className="text-white/80">
                 This app is distributed through the Apple App Store and follows all Apple's privacy and data collection guidelines.
               </p>
