@@ -86,24 +86,24 @@ export default function Pricing() {
           </p>
 
           {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8 max-w-8xl mx-auto relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8 max-w-8xl mx-auto relative pt-8 overflow-visible">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 blur-3xl rounded-3xl"></div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
             {tiers.map((tier, index) => (
               <div
                 key={tier.name}
-                className={`relative bg-black/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 border transition-all duration-500 hover:border-primary/60 hover:scale-[1.02] hover:shadow-2xl flex flex-col group ${
+                className={`relative bg-black/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 border transition-all duration-500 hover:border-primary/60 hover:scale-[1.02] hover:shadow-2xl flex flex-col group overflow-visible ${
                   index === 2 
                     ? 'border-primary shadow-2xl shadow-primary/20 ring-2 ring-primary/20' 
                     : 'border-primary/30 hover:shadow-xl hover:shadow-primary/10'
                 }`}
               >
+                {index === 2 && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                    <span className="bg-primary text-black px-4 py-1.5 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">Most Popular</span>
+                  </div>
+                )}
                 <div className="text-center mb-6">
-                  {index === 2 && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <span className="bg-primary text-black px-4 py-1 rounded-full text-sm font-bold">Most Popular</span>
-                    </div>
-                  )}
                   <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 text-center">{tier.name}</h3>
                   <p className="text-white/70 mb-6 text-sm sm:text-base text-center leading-relaxed">{tier.description}</p>
                   <div className="mb-6">
