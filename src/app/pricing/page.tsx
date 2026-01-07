@@ -113,14 +113,14 @@ export default function Pricing() {
                     <div className="text-white/60 text-sm mt-2">per month</div>
                   </div>
                   <Link
-                    href="/download"
+                    href="/contact"
                     className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold ${
                       index === 2
                         ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
                         : 'bg-primary/10 hover:bg-primary/20 text-white border border-primary/20 hover:border-primary/40'
                     }`}
                   >
-                    Start Free Trial
+                    Contact
                   </Link>
                 </div>
                 <div className="flex-1 space-y-2">

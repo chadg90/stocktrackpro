@@ -81,9 +81,9 @@ export default function PricingSection() {
                   </span>
                   <span className="text-base font-medium text-gray-500">/month</span>
                 </p>
-                <button className="mt-6 w-full bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 transition-colors text-sm">
-                  Start Free Trial
-                </button>
+                <a href="/contact" className="mt-6 w-full bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 transition-colors text-sm text-center block">
+                  Contact
+                </a>
               </div>
               <div className="p-6 flex-1">
                 <ul className="space-y-3">

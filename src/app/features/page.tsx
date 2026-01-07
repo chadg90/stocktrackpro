@@ -98,10 +98,10 @@ export default function Features() {
           <p className="text-white/80 mb-6">New users receive a 7-day free trial. Subscriptions are managed in the app.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href="/pricing"
+              href="/contact"
               className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors text-sm sm:text-base"
             >
-              Start Free Trial
+              Contact
             </Link>
             <Link
               href="/contact"

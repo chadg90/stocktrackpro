@@ -26,10 +26,10 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 sm:mt-8 justify-center">
               <Link
-                href="/pricing"
+                href="/contact"
                 className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-primary text-white rounded-lg bg-primary hover:bg-primary-light transition-colors text-sm sm:text-base"
               >
-                Start Free Trial
+                Contact
               </Link>
               <Link
                 href="/contact"
@@ -196,10 +196,10 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Link
-                href="/pricing"
+                href="/contact"
               className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 text-white bg-primary hover:bg-primary-light rounded-lg transition-colors text-sm sm:text-base"
             >
-                Start Free Trial
+                Contact
               </Link>
               <Link
                 href="/pricing"
