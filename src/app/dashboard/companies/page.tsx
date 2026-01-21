@@ -18,7 +18,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Pencil, Trash2, Search, Building2, Users, Truck, Package, Plus, RefreshCw } from 'lucide-react';
+import { Pencil, Trash2, Search, Building2, Users, Truck, Package, Plus, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 import Modal from '../components/Modal';
 
 type Company = {
@@ -108,7 +108,13 @@ export default function CompaniesPage() {
         inspectionsCount,
         defectsCount,
         defectsResolvedCount,
-        assetsCheckedOutCount
+        assetsCheckedOutCount,
+        activeVehiclesCount,
+        maintenanceVehiclesCount,
+        serviceDueVehiclesCount,
+        activeAssetsCount,
+        maintenanceAssetsCount,
+        retiredAssetsCount
       ] = await Promise.all([
         getCountFromServer(query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId))).then(snap => snap.data().count).catch(() => 0),
         getCountFromServer(query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId))).then(snap => snap.data().count).catch(() => 0),
@@ -117,27 +123,43 @@ export default function CompaniesPage() {
         getCountFromServer(query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId))).then(snap => snap.data().count).catch(() => 0),
         getCountFromServer(query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId), where('status', '==', 'resolved'))).then(snap => snap.data().count).catch(() => 0),
         getCountFromServer(query(collection(firebaseDb!, 'tool_history'), where('company_id', '==', companyId))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId), where('status', '==', 'active'))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId), where('status', '==', 'maintenance'))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId), where('status', '==', 'service_due'))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId), where('status', '==', 'active'))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId), where('status', '==', 'maintenance'))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId), where('status', '==', 'retired'))).then(snap => snap.data().count).catch(() => 0),
       ]);
 
-      // Fetch recent inspections
+      // Fetch recent inspections (more than 3)
       const recentInspectionsQ = query(
         collection(firebaseDb!, 'vehicle_inspections'),
         where('company_id', '==', companyId),
         orderBy('inspected_at', 'desc'),
-        limit(3)
+        limit(10)
       );
       const inspectionsSnap = await getDocs(recentInspectionsQ);
       const recentInspections = inspectionsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      // Fetch recent defects
+      // Fetch recent defects (more than 3)
       const recentDefectsQ = query(
         collection(firebaseDb!, 'vehicle_defects'),
         where('company_id', '==', companyId),
         orderBy('reported_at', 'desc'),
-        limit(3)
+        limit(10)
       );
       const defectsSnap = await getDocs(recentDefectsQ);
       const recentDefects = defectsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Fetch recent tool history
+      const recentToolHistoryQ = query(
+        collection(firebaseDb!, 'tool_history'),
+        where('company_id', '==', companyId),
+        orderBy('timestamp', 'desc'),
+        limit(10)
+      );
+      const toolHistorySnap = await getDocs(recentToolHistoryQ);
+      const recentToolHistory = toolHistorySnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
       // Fetch team members
       const teamQ = query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId));
@@ -153,10 +175,17 @@ export default function CompaniesPage() {
           inspectionsCount,
           defectsCount,
           defectsResolvedCount,
-          assetsCheckedOutCount
+          assetsCheckedOutCount,
+          activeVehiclesCount,
+          maintenanceVehiclesCount,
+          serviceDueVehiclesCount,
+          activeAssetsCount,
+          maintenanceAssetsCount,
+          retiredAssetsCount
         },
         recentInspections,
         recentDefects,
+        recentToolHistory,
         teamMembers
       });
     } catch (error) {
@@ -362,22 +391,53 @@ export default function CompaniesPage() {
           ) : (
             <>
               {/* Company Overview Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {[
-                  { title: 'Assets', value: companyDetails.stats.assetsCount, icon: Package },
-                  { title: 'Vehicles', value: companyDetails.stats.vehiclesCount, icon: Truck },
+                  { title: 'Total Assets', value: companyDetails.stats.assetsCount, icon: Package, subtitle: `${companyDetails.stats.activeAssetsCount} active` },
+                  { title: 'Total Vehicles', value: companyDetails.stats.vehiclesCount, icon: Truck, subtitle: `${companyDetails.stats.activeVehiclesCount} active` },
                   { title: 'Team Members', value: companyDetails.stats.usersCount, icon: Users },
                   { title: 'Inspections', value: companyDetails.stats.inspectionsCount, icon: Building2 },
                 ].map((item) => (
-                  <div key={item.title} className="bg-black border border-primary/25 rounded-xl p-5 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <item.icon className="h-5 w-5 text-primary" />
+                  <div key={item.title} className="bg-black border border-primary/25 rounded-xl p-5">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <item.icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-white/70 text-sm">{item.title}</p>
+                        <p className="text-white text-xl font-semibold">
+                          {item.value || 0}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-white/70 text-sm">{item.title}</p>
-                      <p className="text-white text-xl font-semibold">
-                        {item.value || 0}
-                      </p>
+                    {item.subtitle && (
+                      <p className="text-white/50 text-xs">{item.subtitle}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Detailed Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {[
+                  { title: 'Active Vehicles', value: companyDetails.stats.activeVehiclesCount, icon: Truck, color: 'text-green-400' },
+                  { title: 'Vehicles in Service', value: companyDetails.stats.maintenanceVehiclesCount, icon: Truck, color: 'text-yellow-400' },
+                  { title: 'Service Due', value: companyDetails.stats.serviceDueVehiclesCount, icon: Truck, color: 'text-orange-400' },
+                  { title: 'Active Assets', value: companyDetails.stats.activeAssetsCount, icon: Package, color: 'text-green-400' },
+                  { title: 'Assets in Maintenance', value: companyDetails.stats.maintenanceAssetsCount, icon: Package, color: 'text-yellow-400' },
+                  { title: 'Retired Assets', value: companyDetails.stats.retiredAssetsCount, icon: Package, color: 'text-gray-400' },
+                  { title: 'Open Defects', value: companyDetails.stats.defectsCount - companyDetails.stats.defectsResolvedCount, icon: AlertTriangle, color: 'text-red-400' },
+                  { title: 'Resolved Defects', value: companyDetails.stats.defectsResolvedCount, icon: CheckCircle, color: 'text-green-400' },
+                ].map((item) => (
+                  <div key={item.title} className="bg-black border border-primary/20 rounded-lg p-4">
+                    <div className="flex items-center gap-2">
+                      <item.icon className={`h-4 w-4 ${item.color}`} />
+                      <div>
+                        <p className="text-white/60 text-xs">{item.title}</p>
+                        <p className="text-white font-semibold">
+                          {item.value || 0}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -408,18 +468,30 @@ export default function CompaniesPage() {
                 </div>
 
                 <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                  <h3 className="text-white text-lg font-semibold mb-4">Recent Activity</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-white/70 text-sm">Defects</p>
-                      <p className="text-white">{companyDetails.stats.defectsCount} total ({companyDetails.stats.defectsResolvedCount} resolved)</p>
+                  <h3 className="text-white text-lg font-semibold mb-4">Activity Summary</h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-white/70 text-sm">Total Inspections</p>
+                        <p className="text-white font-semibold">{companyDetails.stats.inspectionsCount}</p>
+                      </div>
+                      <div>
+                        <p className="text-white/70 text-sm">Asset Checkouts</p>
+                        <p className="text-white font-semibold">{companyDetails.stats.assetsCheckedOutCount}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-white/70 text-sm">Asset Checkouts</p>
-                      <p className="text-white">{companyDetails.stats.assetsCheckedOutCount}</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-white/70 text-sm">Total Defects</p>
+                        <p className="text-white font-semibold">{companyDetails.stats.defectsCount}</p>
+                      </div>
+                      <div>
+                        <p className="text-white/70 text-sm">Resolved Defects</p>
+                        <p className="text-white font-semibold text-green-400">{companyDetails.stats.defectsResolvedCount}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-white/70 text-sm">Created</p>
+                    <div className="pt-2 border-t border-primary/20">
+                      <p className="text-white/70 text-sm">Company Created</p>
                       <p className="text-white">{companyDetails.created_at ? new Date(companyDetails.created_at.seconds * 1000).toLocaleDateString() : 'Unknown'}</p>
                     </div>
                   </div>
@@ -428,29 +500,117 @@ export default function CompaniesPage() {
 
               {/* Recent Inspections */}
               <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <h3 className="text-white text-lg font-semibold mb-4">Recent Inspections</h3>
-                <div className="space-y-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white text-lg font-semibold">Recent Inspections</h3>
+                  <span className="text-xs text-white/50">Showing {Math.min(10, companyDetails.recentInspections.length)} most recent</span>
+                </div>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
                   {companyDetails.recentInspections.length === 0 ? (
-                    <p className="text-white/60 text-sm">No recent inspections found.</p>
+                    <p className="text-white/60 text-sm">No inspections found.</p>
                   ) : (
                     companyDetails.recentInspections.map((inspection: any) => (
-                      <div key={inspection.id} className="rounded-lg border border-primary/15 p-3">
-                        <div className="flex items-center justify-between">
+                      <div key={inspection.id} className="rounded-lg border border-primary/15 p-3 hover:bg-white/5 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
                           <p className="text-white text-sm font-semibold">
                             Vehicle: {inspection.vehicle_id || 'Unknown'}
                           </p>
-                          {inspection.has_defect && (
-                            <span className="inline-block text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
-                              Defect Found
+                          <div className="flex items-center gap-2">
+                            {inspection.has_defect && (
+                              <span className="inline-block text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
+                                Defect Found
+                              </span>
+                            )}
+                            <span className="text-xs text-white/50">
+                              {inspection.inspected_at ? new Date(inspection.inspected_at.seconds * 1000).toLocaleDateString() : 'Unknown'}
                             </span>
-                          )}
+                          </div>
                         </div>
-                        <p className="text-white/70 text-xs mt-1">
-                          Inspected: {inspection.inspected_at ? new Date(inspection.inspected_at.seconds * 1000).toLocaleString() : 'Unknown'}
+                        <p className="text-white/60 text-xs">
+                          Inspector: {inspection.inspected_by || 'Unknown'} • {inspection.inspected_at ? new Date(inspection.inspected_at.seconds * 1000).toLocaleTimeString() : ''}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Recent Defects */}
+              <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white text-lg font-semibold">Recent Defects</h3>
+                  <span className="text-xs text-white/50">Showing {Math.min(10, companyDetails.recentDefects.length)} most recent</span>
+                </div>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {companyDetails.recentDefects.length === 0 ? (
+                    <p className="text-white/60 text-sm">No defects found.</p>
+                  ) : (
+                    companyDetails.recentDefects.map((defect: any) => (
+                      <div key={defect.id} className="rounded-lg border border-primary/15 p-3 hover:bg-white/5 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <p className="text-white text-sm font-semibold">
+                              Vehicle: {defect.vehicle_id || 'Unknown'}
+                            </p>
+                            <span className={`inline-block text-xs px-2 py-0.5 rounded capitalize
+                              ${defect.severity === 'critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                                defect.severity === 'high' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
+                                defect.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                                'bg-blue-500/20 text-blue-400 border border-blue-500/30'}`}
+                            >
+                              {defect.severity || 'low'}
+                            </span>
+                            <span className={`inline-block text-xs px-2 py-0.5 rounded capitalize
+                              ${defect.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
+                                defect.status === 'investigating' ? 'bg-yellow-500/20 text-yellow-400' :
+                                'bg-red-500/20 text-red-400'}`}
+                            >
+                              {defect.status || 'pending'}
+                            </span>
+                          </div>
+                          <span className="text-xs text-white/50">
+                            {defect.reported_at ? new Date(defect.reported_at.seconds * 1000).toLocaleDateString() : 'Unknown'}
+                          </span>
+                        </div>
+                        <p className="text-white/70 text-sm mb-2 line-clamp-2">
+                          {defect.description || 'No description'}
                         </p>
                         <p className="text-white/60 text-xs">
-                          Inspector: {inspection.inspected_by || 'Unknown'}
+                          Reported by: {defect.reported_by || 'Unknown'} • {defect.reported_at ? new Date(defect.reported_at.seconds * 1000).toLocaleTimeString() : ''}
                         </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Recent Tool History */}
+              <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-white text-lg font-semibold">Recent Tool Activity</h3>
+                  <span className="text-xs text-white/50">Showing {Math.min(10, companyDetails.recentToolHistory.length)} most recent</span>
+                </div>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {companyDetails.recentToolHistory.length === 0 ? (
+                    <p className="text-white/60 text-sm">No tool activity found.</p>
+                  ) : (
+                    companyDetails.recentToolHistory.map((activity: any) => (
+                      <div key={activity.id} className="rounded-lg border border-primary/15 p-3 hover:bg-white/5 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-white text-sm font-semibold">
+                            Tool: {activity.tool_id || 'Unknown'}
+                          </p>
+                          <span className="text-xs text-white/50">
+                            {activity.timestamp ? new Date(activity.timestamp.seconds * 1000).toLocaleDateString() : 'Unknown'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-white/70 text-sm capitalize">
+                            Action: {activity.action || 'Unknown'}
+                          </p>
+                          <p className="text-white/60 text-xs">
+                            User: {activity.user_id || 'Unknown'} • {activity.timestamp ? new Date(activity.timestamp.seconds * 1000).toLocaleTimeString() : ''}
+                          </p>
+                        </div>
                       </div>
                     ))
                   )}
