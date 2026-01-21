@@ -70,7 +70,9 @@ export default function TeamPage() {
 
   // Check permissions
   const isAdmin = currentUserProfile?.role === 'admin';
-  const canDelete = isAdmin; // per request, delete/edit is admin only now
+  const isManager = currentUserProfile?.role === 'manager';
+  const canEditUsers = isAdmin || isManager; // Managers can edit basic user info
+  const canDeleteUsers = isAdmin; // Only admins can delete user accounts
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -173,16 +175,23 @@ export default function TeamPage() {
 
   const handleEditUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firebaseDb || !editingUser || !isAdmin) return;
+    if (!firebaseDb || !editingUser || !canEditUsers) return;
     setProcessing(true);
     try {
+      const updateData: any = {
+        displayName: editDisplayName.trim() || null,
+      };
+
+      // Only admins can change roles and company assignments
+      if (isAdmin) {
+        updateData.role = editRole;
+        updateData.company_id = editCompanyId.trim();
+      }
+
       await import('firebase/firestore').then(mod =>
-        mod.updateDoc(mod.doc(firebaseDb!, 'profiles', editingUser.id), {
-          displayName: editDisplayName.trim() || null,
-          role: editRole,
-          company_id: editCompanyId.trim(),
-        })
+        mod.updateDoc(mod.doc(firebaseDb!, 'profiles', editingUser.id), updateData)
       );
+
       // Refresh team list
       if (isAdmin) {
         fetchAllUsers();
@@ -457,16 +466,16 @@ export default function TeamPage() {
                     )}
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {isAdmin && (
+                        {canEditUsers && (
                           <button
                             onClick={() => openEditUser(member)}
                             className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                            title="Edit User"
+                            title={isManager ? "Edit User Info" : "Edit User"}
                           >
                             <Pencil className="h-4 w-4" />
                           </button>
                         )}
-                        {canDelete && member.id !== currentUserProfile?.id && (
+                        {canDeleteUsers && member.id !== currentUserProfile?.id && (
                           <button 
                             onClick={() => handleRemoveUser(member.id)}
                             className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
@@ -504,35 +513,39 @@ export default function TeamPage() {
               placeholder="Name"
             />
           </div>
-          <div>
-            <label className="block text-sm text-white/70 mb-1">Role</label>
-            <select
-              value={editRole}
-              onChange={(e) => setEditRole(e.target.value as Profile['role'])}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-            >
-              <option value="user">User</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm text-white/70 mb-1">Company ID</label>
-            <select
-              value={editCompanyId}
-              onChange={(e) => setEditCompanyId(e.target.value)}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-              required
-            >
-              <option value="" disabled>Select company</option>
-              {companies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name || c.id}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-white/50 mt-1">Admin-only: move user to another company.</p>
-          </div>
+          {isAdmin && (
+            <div>
+              <label className="block text-sm text-white/70 mb-1">Role</label>
+              <select
+                value={editRole}
+                onChange={(e) => setEditRole(e.target.value as Profile['role'])}
+                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              >
+                <option value="user">User</option>
+                <option value="manager">Manager</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          )}
+          {isAdmin && (
+            <div>
+              <label className="block text-sm text-white/70 mb-1">Company ID</label>
+              <select
+                value={editCompanyId}
+                onChange={(e) => setEditCompanyId(e.target.value)}
+                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                required
+              >
+                <option value="" disabled>Select company</option>
+                {companies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name || c.id}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-white/50 mt-1">Admin-only: move user to another company.</p>
+            </div>
+          )}
           <div className="pt-2 flex justify-end gap-2">
             <button
               type="button"
