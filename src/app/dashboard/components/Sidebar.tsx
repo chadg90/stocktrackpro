@@ -19,7 +19,7 @@ const navigation = [
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
   { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
   { name: 'Team', href: '/dashboard/team', icon: Users },
-  { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key, adminOnly: true },
+  { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key },
   { name: 'Companies', href: '/dashboard/companies', icon: Building2, adminOnly: true },
 ];
 

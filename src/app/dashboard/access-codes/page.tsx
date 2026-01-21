@@ -54,6 +54,12 @@ export default function AccessCodesPage() {
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [formRole, setFormRole] = useState<'admin' | 'manager' | 'user'>('user');
+
+  // Reset form when modal opens
+  const openGenerateModal = () => {
+    setFormRole('user'); // Always default to user role
+    setIsAddModalOpen(true);
+  };
   const [processing, setProcessing] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
@@ -70,8 +76,8 @@ export default function AccessCodesPage() {
           const data = snap.data() as Profile;
           setProfile(data);
           // CRITICAL: Always use the logged-in user's company_id for data isolation
-          // Even admins can only see their own company's business data
-          if (data.company_id && data.role === 'admin') {
+          // Managers and admins can access access codes for their company
+          if (data.company_id && (data.role === 'admin' || data.role === 'manager')) {
             fetchAccessCodes(data.company_id);
           } else if (!data.company_id) {
             setLoading(false);
@@ -164,12 +170,15 @@ export default function AccessCodesPage() {
     code.role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (!isAdmin) {
+  const isManager = profile?.role === 'manager';
+  const canManageCodes = isAdmin || isManager;
+
+  if (!canManageCodes) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">Admin Access Required</h2>
-          <p className="text-white/70">Only administrators can manage access codes.</p>
+          <h2 className="text-2xl font-bold text-white mb-4">Access Restricted</h2>
+          <p className="text-white/70">Only managers and administrators can manage access codes.</p>
         </div>
       </div>
     );
@@ -180,10 +189,15 @@ export default function AccessCodesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Access Codes</h1>
-          <p className="text-white/70 text-sm mt-1">Generate codes for new team members to join</p>
+          <p className="text-white/70 text-sm mt-1">
+            {isManager
+              ? "Generate codes for new team members to join your company"
+              : "Generate codes for new team members to join"
+            }
+          </p>
         </div>
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={openGenerateModal}
           className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
         >
           <Plus className="h-5 w-5" />
@@ -302,11 +316,14 @@ export default function AccessCodesPage() {
               className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
             >
               <option value="user">User</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
+              {isAdmin && <option value="manager">Manager</option>}
+              {isAdmin && <option value="admin">Admin</option>}
             </select>
             <p className="text-xs text-white/50 mt-2">
-              The access code will be valid for 30 days and can be used once to create a new account with this role.
+              {isManager
+                ? "The access code will be valid for 30 days and can be used once to create a new user account for your team."
+                : "The access code will be valid for 30 days and can be used once to create a new account with this role."
+              }
             </p>
           </div>
           <div className="pt-4">
