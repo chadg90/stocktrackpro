@@ -87,7 +87,11 @@ export default function CompaniesPage() {
   }, []);
 
   const fetchCompanyDetails = async (companyId: string) => {
-    if (!firebaseDb || !companyId) return;
+    console.log('Fetching company details for:', companyId); // Debug log
+    if (!firebaseDb || !companyId) {
+      console.log('Missing firebaseDb or companyId');
+      return;
+    }
     setLoadingDetails(true);
     try {
       // Fetch company info
@@ -166,6 +170,7 @@ export default function CompaniesPage() {
       const teamSnap = await getDocs(teamQ);
       const teamMembers = teamSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+      console.log('Setting company details for:', companyId); // Debug log
       setCompanyDetails({
         ...companyData,
         stats: {
@@ -188,6 +193,7 @@ export default function CompaniesPage() {
         recentToolHistory,
         teamMembers
       });
+      console.log('Company details set successfully'); // Debug log
     } catch (error) {
       console.error('Error fetching company details:', error);
       setCompanyDetails(null);
@@ -225,6 +231,7 @@ export default function CompaniesPage() {
         })
       );
 
+      console.log('Fetched companies:', companiesWithCounts.length); // Debug log
       setCompanies(companiesWithCounts);
     } catch (error) {
       console.error('Error fetching companies:', error);
@@ -234,6 +241,7 @@ export default function CompaniesPage() {
   };
 
   const handleCompanySelect = (companyId: string) => {
+    console.log('Company selected:', companyId); // Debug log
     setSelectedCompanyId(companyId);
     if (companyId) {
       fetchCompanyDetails(companyId);
@@ -368,21 +376,26 @@ export default function CompaniesPage() {
           <label className="block text-sm text-white/70 mb-2">Select Company for Detailed View</label>
           <select
             value={selectedCompanyId}
-            onChange={(e) => handleCompanySelect(e.target.value)}
+            onChange={(e) => {
+              console.log('Dropdown changed to:', e.target.value); // Debug log
+              handleCompanySelect(e.target.value);
+            }}
             className="w-full md:w-96 bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
           >
             <option value="">Choose a company to view details...</option>
-            {companies.map((company) => (
+            {companies.length > 0 ? companies.map((company) => (
               <option key={company.id} value={company.id}>
                 {company.name || company.id} ({company.usersCount} users, {company.vehiclesCount} vehicles, {company.assetsCount} assets)
               </option>
-            ))}
+            )) : (
+              <option disabled>Loading companies...</option>
+            )}
           </select>
         </div>
       )}
 
       {/* Company Details View */}
-      {selectedCompanyId && companyDetails ? (
+      {selectedCompanyId ? (
         <div className="space-y-6">
           {loadingDetails ? (
             <div className="flex items-center justify-center py-12">
