@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Pencil, Trash2, Search, Building2, Users, Truck, Package, Plus } from 'lucide-react';
+import { Pencil, Trash2, Search, Building2, Users, Truck, Package, Plus, RefreshCw } from 'lucide-react';
 import Modal from '../components/Modal';
 
 type Company = {
@@ -43,7 +43,12 @@ export default function CompaniesPage() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
+  // Admin company selection
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
+  const [companyDetails, setCompanyDetails] = useState<any>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
   // Modal states
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -78,6 +83,87 @@ export default function CompaniesPage() {
     return () => unsub();
   }, []);
 
+  const fetchCompanyDetails = async (companyId: string) => {
+    if (!firebaseDb || !companyId) return;
+    setLoadingDetails(true);
+    try {
+      // Fetch company info
+      const companyRef = doc(firebaseDb!, 'companies', companyId);
+      const companySnap = await getDoc(companyRef);
+      const companyData = companySnap.exists() ? { id: companySnap.id, ...companySnap.data() } : null;
+
+      if (!companyData) {
+        setCompanyDetails(null);
+        return;
+      }
+
+      // Fetch detailed counts and recent data
+      const [
+        vehiclesCount,
+        assetsCount,
+        usersCount,
+        inspectionsCount,
+        defectsCount,
+        defectsResolvedCount,
+        assetsCheckedOutCount
+      ] = await Promise.all([
+        getCountFromServer(query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', companyId))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId), where('status', '==', 'resolved'))).then(snap => snap.data().count).catch(() => 0),
+        getCountFromServer(query(collection(firebaseDb!, 'tool_history'), where('company_id', '==', companyId))).then(snap => snap.data().count).catch(() => 0),
+      ]);
+
+      // Fetch recent inspections
+      const recentInspectionsQ = query(
+        collection(firebaseDb!, 'vehicle_inspections'),
+        where('company_id', '==', companyId),
+        orderBy('inspected_at', 'desc'),
+        limit(3)
+      );
+      const inspectionsSnap = await getDocs(recentInspectionsQ);
+      const recentInspections = inspectionsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Fetch recent defects
+      const recentDefectsQ = query(
+        collection(firebaseDb!, 'vehicle_defects'),
+        where('company_id', '==', companyId),
+        orderBy('reported_at', 'desc'),
+        limit(3)
+      );
+      const defectsSnap = await getDocs(recentDefectsQ);
+      const recentDefects = defectsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Fetch team members
+      const teamQ = query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId));
+      const teamSnap = await getDocs(teamQ);
+      const teamMembers = teamSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      setCompanyDetails({
+        ...companyData,
+        stats: {
+          vehiclesCount,
+          assetsCount,
+          usersCount,
+          inspectionsCount,
+          defectsCount,
+          defectsResolvedCount,
+          assetsCheckedOutCount
+        },
+        recentInspections,
+        recentDefects,
+        teamMembers
+      });
+    } catch (error) {
+      console.error('Error fetching company details:', error);
+      setCompanyDetails(null);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
   const fetchCompanies = async () => {
     if (!firebaseDb) return;
     setLoading(true);
@@ -85,9 +171,9 @@ export default function CompaniesPage() {
       // Fetch all companies
       const companiesQ = query(collection(firebaseDb!, 'companies'));
       const companiesSnap = await getDocs(companiesQ);
-      const companiesData = companiesSnap.docs.map(doc => ({ 
-        id: doc.id, 
-        ...doc.data() 
+      const companiesData = companiesSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
       } as Company));
 
       // Fetch counts for each company
@@ -177,6 +263,15 @@ export default function CompaniesPage() {
     }
   };
 
+  const handleCompanySelect = (companyId: string) => {
+    setSelectedCompanyId(companyId);
+    if (companyId) {
+      fetchCompanyDetails(companyId);
+    } else {
+      setCompanyDetails(null);
+    }
+  };
+
   const handleDeleteCompany = async (companyId: string) => {
     if (!isAdmin) {
       alert('Only admins can delete companies.');
@@ -216,62 +311,241 @@ export default function CompaniesPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Companies</h1>
-          <p className="text-white/70 text-sm mt-1">Manage all companies and view their statistics</p>
+          <h1 className="text-3xl font-bold text-white">
+            {selectedCompanyId ? `Company: ${companyDetails?.name || selectedCompanyId}` : 'Companies'}
+          </h1>
+          <p className="text-white/70 text-sm mt-1">
+            {selectedCompanyId ? 'Detailed company information and management' : 'Manage all companies and view their statistics'}
+          </p>
         </div>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
-        >
-          <Plus className="h-5 w-5" />
-          Create Company
-        </button>
+        <div className="flex items-center gap-3">
+          {!selectedCompanyId && (
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
+            >
+              <Plus className="h-5 w-5" />
+              Create Company
+            </button>
+          )}
+          {selectedCompanyId && (
+            <button
+              onClick={() => handleCompanySelect('')}
+              className="inline-flex items-center gap-2 border border-primary/40 text-primary hover:border-primary hover:bg-primary/10 px-4 py-2 rounded-lg font-semibold transition-colors"
+            >
+              ← Back to Companies
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="mb-6 relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-white/30" />
+      {/* Company Selector */}
+      {!selectedCompanyId && (
+        <div className="mb-6">
+          <label className="block text-sm text-white/70 mb-2">Select Company for Detailed View</label>
+          <select
+            value={selectedCompanyId}
+            onChange={(e) => handleCompanySelect(e.target.value)}
+            className="w-full md:w-96 bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+          >
+            <option value="">Choose a company to view details...</option>
+            {companies.map((company) => (
+              <option key={company.id} value={company.id}>
+                {company.name || company.id} ({company.usersCount} users, {company.vehiclesCount} vehicles, {company.assetsCount} assets)
+              </option>
+            ))}
+          </select>
         </div>
-        <input
-          type="text"
-          placeholder="Search companies..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-full md:w-96 bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
-        />
-      </div>
+      )}
 
-      {/* Table */}
-      <div className="bg-black border border-primary/20 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-white/5 border-b border-primary/20 text-white/70 text-xs sm:text-sm uppercase">
-              <tr>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Company Name</th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium hidden md:table-cell">ID</th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Vehicles</th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Assets</th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Users</th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium hidden lg:table-cell">Subscription</th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/10">
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-white/50">
-                    Loading companies...
-                  </td>
-                </tr>
-              ) : filteredCompanies.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-white/50">
-                    No companies found.
-                  </td>
-                </tr>
-              ) : (
-                filteredCompanies.map((company) => (
+      {/* Company Details View */}
+      {selectedCompanyId && companyDetails ? (
+        <div className="space-y-6">
+          {loadingDetails ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <>
+              {/* Company Overview Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { title: 'Assets', value: companyDetails.stats.assetsCount, icon: Package },
+                  { title: 'Vehicles', value: companyDetails.stats.vehiclesCount, icon: Truck },
+                  { title: 'Team Members', value: companyDetails.stats.usersCount, icon: Users },
+                  { title: 'Inspections', value: companyDetails.stats.inspectionsCount, icon: Building2 },
+                ].map((item) => (
+                  <div key={item.title} className="bg-black border border-primary/25 rounded-xl p-5 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-white/70 text-sm">{item.title}</p>
+                      <p className="text-white text-xl font-semibold">
+                        {item.value || 0}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Company Details */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                  <h3 className="text-white text-lg font-semibold mb-4">Company Information</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-white/70 text-sm">Company ID</p>
+                      <p className="text-white font-mono">{companyDetails.id}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/70 text-sm">Company Name</p>
+                      <p className="text-white">{companyDetails.name || 'Not set'}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/70 text-sm">Subscription Status</p>
+                      <p className="text-white">{companyDetails.subscription_status || 'Not set'}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/70 text-sm">Subscription Type</p>
+                      <p className="text-white">{companyDetails.subscription_type || 'Not set'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                  <h3 className="text-white text-lg font-semibold mb-4">Recent Activity</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-white/70 text-sm">Defects</p>
+                      <p className="text-white">{companyDetails.stats.defectsCount} total ({companyDetails.stats.defectsResolvedCount} resolved)</p>
+                    </div>
+                    <div>
+                      <p className="text-white/70 text-sm">Asset Checkouts</p>
+                      <p className="text-white">{companyDetails.stats.assetsCheckedOutCount}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/70 text-sm">Created</p>
+                      <p className="text-white">{companyDetails.created_at ? new Date(companyDetails.created_at.seconds * 1000).toLocaleDateString() : 'Unknown'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Inspections */}
+              <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                <h3 className="text-white text-lg font-semibold mb-4">Recent Inspections</h3>
+                <div className="space-y-3">
+                  {companyDetails.recentInspections.length === 0 ? (
+                    <p className="text-white/60 text-sm">No recent inspections found.</p>
+                  ) : (
+                    companyDetails.recentInspections.map((inspection: any) => (
+                      <div key={inspection.id} className="rounded-lg border border-primary/15 p-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-white text-sm font-semibold">
+                            Vehicle: {inspection.vehicle_id || 'Unknown'}
+                          </p>
+                          {inspection.has_defect && (
+                            <span className="inline-block text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
+                              Defect Found
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-white/70 text-xs mt-1">
+                          Inspected: {inspection.inspected_at ? new Date(inspection.inspected_at.seconds * 1000).toLocaleString() : 'Unknown'}
+                        </p>
+                        <p className="text-white/60 text-xs">
+                          Inspector: {inspection.inspected_by || 'Unknown'}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Team Members */}
+              <div className="bg-black border border-primary/25 rounded-2xl p-6">
+                <h3 className="text-white text-lg font-semibold mb-4">Team Members ({companyDetails.teamMembers.length})</h3>
+                <div className="space-y-3">
+                  {companyDetails.teamMembers.length === 0 ? (
+                    <p className="text-white/60 text-sm">No team members found.</p>
+                  ) : (
+                    companyDetails.teamMembers.map((member: any) => (
+                      <div key={member.id} className="rounded-lg border border-primary/15 p-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                            <span className="text-white/60 text-sm font-medium">
+                              {(member.first_name || member.displayName || member.email || 'U')[0].toUpperCase()}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-white text-sm font-medium">
+                              {member.first_name && member.last_name ? `${member.first_name} ${member.last_name}` : (member.displayName || member.email?.split('@')[0] || 'Unknown User')}
+                            </p>
+                            <p className="text-white/60 text-xs">{member.email}</p>
+                          </div>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded capitalize ${
+                          member.role === 'admin' ? 'bg-primary/20 text-primary' :
+                          member.role === 'manager' ? 'bg-purple-500/10 text-purple-400' :
+                          'bg-white/10 text-white/60'
+                        }`}>
+                          {member.role}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Search */}
+          <div className="mb-6 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-white/30" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search companies..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-full md:w-96 bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+            />
+          </div>
+
+          {/* Companies Table */}
+          <div className="bg-black border border-primary/20 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-white/5 border-b border-primary/20 text-white/70 text-xs sm:text-sm uppercase">
+                  <tr>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Company Name</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium hidden md:table-cell">ID</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Vehicles</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Assets</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Users</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium hidden lg:table-cell">Subscription</th>
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-8 text-center text-white/50">
+                        Loading companies...
+                      </td>
+                    </tr>
+                  ) : filteredCompanies.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-8 text-center text-white/50">
+                        No companies found.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredCompanies.map((company) => (
                   <tr key={company.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-3 sm:px-6 py-3 sm:py-4">
                       <div className="flex items-center gap-2 sm:gap-3">
@@ -339,6 +613,8 @@ export default function CompaniesPage() {
           </table>
         </div>
       </div>
+      )}
+      )}
 
       {/* Create Company Modal */}
       <Modal

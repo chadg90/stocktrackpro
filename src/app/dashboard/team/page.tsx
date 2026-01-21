@@ -36,26 +36,14 @@ type Company = {
   name?: string;
 };
 
-type Invite = {
-  id: string;
-  email: string;
-  role: string;
-  company_id: string;
-  status: 'pending' | 'accepted' | 'expired';
-  created_at: any;
-};
 
 export default function TeamPage() {
   const [team, setTeam] = useState<Profile[]>([]);
-  const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   
   // Modal states
-  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('user');
   const [processing, setProcessing] = useState(false);
 
   // Edit user modal
@@ -95,7 +83,6 @@ export default function TeamPage() {
           const data = snap.data() as Profile;
           setCurrentUserProfile({...data, id: user.uid});
           if (data.company_id) {
-            fetchInvites(data.company_id);
             fetchCompany(data.company_id);
           }
           if (data.role === 'admin') {
@@ -157,17 +144,6 @@ export default function TeamPage() {
     }
   };
 
-  const fetchInvites = async (companyId: string) => {
-    if (!firebaseDb) return;
-    try {
-      const q = query(collection(firebaseDb!, 'invites'), where('company_id', '==', companyId));
-      const snapshot = await getDocs(q);
-      const invitesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invite));
-      setInvites(invitesData);
-    } catch (error) {
-      console.error('Error fetching invites:', error);
-    }
-  };
 
   const fetchCompanies = async () => {
     if (!firebaseDb) return;
@@ -239,32 +215,6 @@ export default function TeamPage() {
     }
   };
 
-  const handleInviteUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!firebaseDb || !currentUserProfile?.company_id) return;
-    
-    setProcessing(true);
-    try {
-      await addDoc(collection(firebaseDb!, 'invites'), {
-        email: inviteEmail.toLowerCase().trim(),
-        role: inviteRole,
-        company_id: currentUserProfile.company_id,
-        created_at: serverTimestamp(),
-        status: 'pending',
-        token: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15), // Simple token generation
-      });
-      setIsInviteModalOpen(false);
-      setInviteEmail('');
-      setInviteRole('user');
-      fetchInvites(currentUserProfile.company_id);
-      alert('Invitation sent successfully!');
-    } catch (error) {
-      console.error('Error sending invite:', error);
-      alert('Failed to send invitation. Please try again.');
-    } finally {
-      setProcessing(false);
-    }
-  };
 
   const handleRemoveUser = async (userId: string) => {
     if (userId === currentUserProfile?.id) {
@@ -289,16 +239,6 @@ export default function TeamPage() {
     }
   };
 
-  const handleCancelInvite = async (inviteId: string) => {
-    if (!confirm('Cancel this invitation?') || !firebaseDb) return;
-    
-    try {
-      await deleteDoc(doc(firebaseDb!, 'invites', inviteId));
-      if (currentUserProfile?.company_id) fetchInvites(currentUserProfile.company_id);
-    } catch (error) {
-      console.error('Error cancelling invite:', error);
-    }
-  };
 
   const handleCreateTempAccount = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -413,13 +353,6 @@ export default function TeamPage() {
               </button>
             </>
           )}
-        <button
-          onClick={() => setIsInviteModalOpen(true)}
-          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
-        >
-          <Mail className="h-5 w-5" />
-          Invite Member
-        </button>
         </div>
       </div>
 
@@ -552,96 +485,7 @@ export default function TeamPage() {
         </div>
       </div>
 
-      {/* Pending Invites Section */}
-      {invites.length > 0 && (
-        <>
-          <h2 className="text-xl font-bold text-white mb-4">Pending Invites</h2>
-          <div className="bg-black border border-primary/20 rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-white/5 border-b border-primary/20 text-white/70 text-sm uppercase">
-                  <tr>
-                    <th className="px-6 py-4 font-medium">Email</th>
-                    <th className="px-6 py-4 font-medium">Role</th>
-                    <th className="px-6 py-4 font-medium">Status</th>
-                    <th className="px-6 py-4 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10">
-                  {invites.map((invite) => (
-                    <tr key={invite.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4 text-white">
-                        {invite.email}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-white/70 capitalize">{invite.role}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 capitalize">
-                          {invite.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button 
-                          onClick={() => handleCancelInvite(invite.id)}
-                          className="text-red-400 hover:text-red-300 text-sm font-medium"
-                        >
-                          Cancel
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      )}
 
-      {/* Invite Modal */}
-      <Modal
-        isOpen={isInviteModalOpen}
-        onClose={() => setIsInviteModalOpen(false)}
-        title="Invite New Member"
-      >
-        <form onSubmit={handleInviteUser} className="space-y-4">
-          <div>
-            <label className="block text-sm text-white/70 mb-1">Email Address</label>
-            <input
-              type="email"
-              required
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-              placeholder="colleague@company.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-white/70 mb-1">Role</label>
-            <select
-              value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value)}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
-            >
-              <option value="user">User</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
-            </select>
-            <p className="text-xs text-white/50 mt-1">
-              Admins have full access. Managers can manage assets and fleet. Users are read-only or limited.
-            </p>
-          </div>
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={processing}
-              className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
-            >
-              {processing ? 'Sending Invite...' : 'Send Invitation'}
-            </button>
-          </div>
-        </form>
-      </Modal>
 
       {/* Edit User Modal */}
       <Modal
