@@ -128,7 +128,7 @@ export default function AccessCodesPage() {
     try {
       const code = generateCode();
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30); // Expires in 30 days
+      expiresAt.setDate(expiresAt.getDate() + 1); // Expires in 1 day
 
       await addDoc(collection(firebaseDb!, 'access_codes'), {
         code,
@@ -321,8 +321,8 @@ export default function AccessCodesPage() {
             </select>
             <p className="text-xs text-white/50 mt-2">
               {isManager
-                ? "The access code will be valid for 30 days and can be used once to create a new user account for your team."
-                : "The access code will be valid for 30 days and can be used once to create a new account with this role."
+                ? "The access code will be valid for 1 day and can be used once to create a new user account for your team."
+                : "The access code will be valid for 1 day and can be used once to create a new account with this role."
               }
             </p>
           </div>
