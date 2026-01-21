@@ -122,7 +122,7 @@ export default function AccessCodesPage() {
 
   const handleGenerateCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firebaseDb || !profile?.company_id || !isAdmin) return;
+    if (!firebaseDb || !profile?.company_id || !canManageCodes) return;
     
     setProcessing(true);
     try {
