@@ -28,7 +28,7 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 
 // Check if Firebase is properly initialized
 const isFirebaseAvailable = firebaseAuth && firebaseDb;
-import { RefreshCw, Shield, Users, Truck, Package, AlertTriangle, Trash2, TrendingUp, TrendingDown, Activity, CheckCircle, Clock, AlertCircle, BarChart3, Calendar, Target } from 'lucide-react';
+import { RefreshCw, Shield, Users, Truck, Package, AlertTriangle, Trash2, TrendingUp, TrendingDown, Activity, CheckCircle, Clock, AlertCircle, BarChart3, Calendar, Target, Key } from 'lucide-react';
 
 type Profile = {
   id: string;
@@ -78,6 +78,7 @@ type AccessCode = {
   companyId?: string;
   used?: boolean;
   expiresAt?: string;
+  role?: string;
 };
 
 const formatDate = (value?: string | Timestamp) => {
