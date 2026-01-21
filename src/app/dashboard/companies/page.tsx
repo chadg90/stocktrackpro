@@ -185,21 +185,10 @@ export default function CompaniesPage() {
               getCountFromServer(query(collection(firebaseDb!, 'tools'), where('company_id', '==', company.id))).then(snap => snap.data().count).catch(() => 0),
               getCountFromServer(query(collection(firebaseDb!, 'profiles'), where('company_id', '==', company.id))).then(snap => snap.data().count).catch(() => 0),
             ]);
-
-            return {
-              ...company,
-              vehiclesCount,
-              assetsCount,
-              usersCount,
-            } as CompanyWithCounts;
+            return { ...company, vehiclesCount, assetsCount, usersCount };
           } catch (error) {
-            console.error(`Error fetching counts for company ${company.id}:`, error);
-            return {
-              ...company,
-              vehiclesCount: 0,
-              assetsCount: 0,
-              usersCount: 0,
-            } as CompanyWithCounts;
+            console.error('Error fetching counts for company:', company.id, error);
+            return { ...company, vehiclesCount: 0, assetsCount: 0, usersCount: 0 };
           }
         })
       );
@@ -212,57 +201,6 @@ export default function CompaniesPage() {
     }
   };
 
-  const handleCreateCompany = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!firebaseDb || !isAdmin || !newCompanyName.trim()) return;
-    
-    setProcessing(true);
-    try {
-      await addDoc(collection(firebaseDb!, 'companies'), {
-        name: newCompanyName.trim(),
-        subscription_status: 'inactive',
-        created_at: serverTimestamp(),
-      });
-      setIsCreateModalOpen(false);
-      setNewCompanyName('');
-      fetchCompanies();
-      alert('Company created successfully!');
-    } catch (error) {
-      console.error('Error creating company:', error);
-      alert('Failed to create company.');
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const openEditModal = (company: Company) => {
-    setCurrentCompany(company);
-    setEditName(company.name || '');
-    setIsEditModalOpen(true);
-  };
-
-  const handleEditCompany = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!firebaseDb || !currentCompany || !isAdmin) return;
-    
-    setProcessing(true);
-    try {
-      const companyRef = doc(firebaseDb!, 'companies', currentCompany.id);
-      await updateDoc(companyRef, {
-        name: editName.trim(),
-        updated_at: new Date(),
-      });
-      setIsEditModalOpen(false);
-      setCurrentCompany(null);
-      fetchCompanies();
-    } catch (error) {
-      console.error('Error updating company:', error);
-      alert('Failed to update company name.');
-    } finally {
-      setProcessing(false);
-    }
-  };
-
   const handleCompanySelect = (companyId: string) => {
     setSelectedCompanyId(companyId);
     if (companyId) {
@@ -272,18 +210,65 @@ export default function CompaniesPage() {
     }
   };
 
+  const handleCreateCompany = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firebaseDb || !newCompanyName.trim()) return;
+
+    setProcessing(true);
+    try {
+      await addDoc(collection(firebaseDb!, 'companies'), {
+        name: newCompanyName.trim(),
+        subscription_status: 'trial',
+        created_at: serverTimestamp(),
+      });
+      setIsCreateModalOpen(false);
+      setNewCompanyName('');
+      fetchCompanies();
+    } catch (error) {
+      console.error('Error creating company:', error);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleEditCompany = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firebaseDb || !currentCompany || !editName.trim()) return;
+
+    setProcessing(true);
+    try {
+      const companyRef = doc(firebaseDb!, 'companies', currentCompany.id);
+      await updateDoc(companyRef, {
+        name: editName.trim(),
+        updated_at: serverTimestamp(),
+      });
+      setIsEditModalOpen(false);
+      setCurrentCompany(null);
+      setEditName('');
+      fetchCompanies();
+    } catch (error) {
+      console.error('Error updating company:', error);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const handleDeleteCompany = async (companyId: string) => {
     if (!isAdmin) {
       alert('Only admins can delete companies.');
       return;
     }
-    
+
     const company = companies.find(c => c.id === companyId);
-    if (!confirm(`Delete company "${company?.name || companyId}"? This will permanently delete the company and all associated data. This action cannot be undone.`) || !firebaseDb) return;
-    
+    if (!confirm(`Delete company "${company?.name || companyId}"? This will permanently delete the company and all associated data. This action cannot be undone.`)) return;
+
     try {
       await deleteDoc(doc(firebaseDb!, 'companies', companyId));
       fetchCompanies();
+      if (selectedCompanyId === companyId) {
+        setSelectedCompanyId('');
+        setCompanyDetails(null);
+      }
       alert('Company deleted successfully.');
     } catch (error) {
       console.error('Error deleting company:', error);
@@ -291,7 +276,13 @@ export default function CompaniesPage() {
     }
   };
 
-  const filteredCompanies = companies.filter(company => 
+  const openEditModal = (company: Company) => {
+    setCurrentCompany(company);
+    setEditName(company.name || '');
+    setIsEditModalOpen(true);
+  };
+
+  const filteredCompanies = companies.filter(company =>
     company.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     company.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -389,7 +380,7 @@ export default function CompaniesPage() {
                 ))}
               </div>
 
-              {/* Company Details */}
+              {/* Company Information */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-black border border-primary/25 rounded-2xl p-6">
                   <h3 className="text-white text-lg font-semibold mb-4">Company Information</h3>
@@ -546,74 +537,74 @@ export default function CompaniesPage() {
                     </tr>
                   ) : (
                     filteredCompanies.map((company) => (
-                  <tr key={company.id} className="hover:bg-white/5 transition-colors">
-                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                          <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-white/40" />
-                        </div>
-                        <div>
-                          <p className="text-white font-medium text-sm sm:text-base">{company.name || 'Unnamed Company'}</p>
-                          <p className="text-white/50 text-xs font-mono md:hidden">{company.id.substring(0, 8)}...</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-white/70 font-mono text-xs hidden md:table-cell">
-                      {company.id}
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/40" />
-                        <span className="text-white text-sm sm:text-base">{company.vehiclesCount}</span>
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/40" />
-                        <span className="text-white text-sm sm:text-base">{company.assetsCount}</span>
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/40" />
-                        <span className="text-white text-sm sm:text-base">{company.usersCount}</span>
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                        ${company.subscription_status === 'active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
-                          company.subscription_status === 'trial' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                          'bg-white/10 text-white/60 border border-white/20'}`}
-                      >
-                        {company.subscription_status || 'inactive'}
-                      </span>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
-                      <div className="flex items-center justify-end gap-1 sm:gap-2">
-                        <button 
-                          onClick={() => openEditModal(company)}
-                          className="p-1.5 sm:p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
-                          title="Edit Company"
-                        >
-                          <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteCompany(company.id)}
-                          className="p-1.5 sm:p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                          title="Delete Company"
-                        >
-                          <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      )}
+                      <tr key={company.id} className="hover:bg-white/5 transition-colors">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+                              <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-white/40" />
+                            </div>
+                            <div>
+                              <p className="text-white font-medium text-sm sm:text-base">{company.name || 'Unnamed Company'}</p>
+                              <p className="text-white/50 text-xs font-mono md:hidden">{company.id.substring(0, 8)}...</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-white/70 font-mono text-xs hidden md:table-cell">
+                          {company.id}
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/40" />
+                            <span className="text-white text-sm sm:text-base">{company.vehiclesCount}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/40" />
+                            <span className="text-white text-sm sm:text-base">{company.assetsCount}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/40" />
+                            <span className="text-white text-sm sm:text-base">{company.usersCount}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                            ${company.subscription_status === 'active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                              company.subscription_status === 'trial' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                              'bg-white/10 text-white/60 border border-white/20'}`}
+                          >
+                            {company.subscription_status || 'inactive'}
+                          </span>
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
+                          <div className="flex items-center justify-end gap-1 sm:gap-2">
+                            <button
+                              onClick={() => openEditModal(company)}
+                              className="p-1.5 sm:p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                              title="Edit Company"
+                            >
+                              <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCompany(company.id)}
+                              className="p-1.5 sm:p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                              title="Delete Company"
+                            >
+                              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Create Company Modal */}
@@ -656,7 +647,7 @@ export default function CompaniesPage() {
         </form>
       </Modal>
 
-      {/* Edit Modal */}
+      {/* Edit Company Modal */}
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
