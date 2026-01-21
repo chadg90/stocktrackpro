@@ -55,6 +55,7 @@ type Defect = {
   reported_at?: string;
   severity?: string;
   description?: string;
+  status?: 'pending' | 'resolved' | 'investigating';
 };
 
 type Vehicle = {
