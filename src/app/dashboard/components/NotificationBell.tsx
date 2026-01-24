@@ -6,6 +6,7 @@ import {
   collection,
   query,
   where,
+  getDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -32,7 +33,6 @@ export default function NotificationBell() {
 
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user && firebaseDb) {
-        const { doc, getDoc } = await import('firebase/firestore');
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
         const snap = await getDoc(profileRef);
         if (snap.exists()) {
@@ -103,9 +103,7 @@ export default function NotificationBell() {
   const handleMarkAsRead = async (id: string) => {
     if (!firebaseDb) return;
     try {
-      const { doc, updateDoc } = await import('firebase/firestore');
-      const db = firebaseDb; // TypeScript guard
-      const notificationRef = doc(db, 'notifications', id);
+      const notificationRef = doc(firebaseDb, 'notifications', id);
       await updateDoc(notificationRef, { read: true });
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -115,9 +113,7 @@ export default function NotificationBell() {
   const handleDelete = async (id: string) => {
     if (!firebaseDb) return;
     try {
-      const { doc, deleteDoc } = await import('firebase/firestore');
-      const db = firebaseDb; // TypeScript guard
-      await deleteDoc(doc(db, 'notifications', id));
+      await deleteDoc(doc(firebaseDb, 'notifications', id));
     } catch (error) {
       console.error('Error deleting notification:', error);
     }
@@ -134,11 +130,9 @@ export default function NotificationBell() {
     if (!firebaseDb) return;
     const unreadNotifications = notifications.filter(n => !n.read);
     try {
-      const { doc, updateDoc } = await import('firebase/firestore');
-      const db = firebaseDb; // TypeScript guard
       await Promise.all(
         unreadNotifications.map(notif =>
-          updateDoc(doc(db, 'notifications', notif.id), { read: true })
+          updateDoc(doc(firebaseDb!, 'notifications', notif.id), { read: true })
         )
       );
     } catch (error) {

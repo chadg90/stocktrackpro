@@ -6,10 +6,12 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   addDoc,
   deleteDoc,
   doc,
   setDoc,
+  updateDoc,
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
@@ -17,6 +19,7 @@ import { onAuthStateChanged, createUserWithEmailAndPassword } from 'firebase/aut
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Trash2, Search, Mail, User as UserIcon, Pencil, ShieldOff } from 'lucide-react';
 import Modal from '../components/Modal';
+import { useDebounce } from '@/hooks/useDebounce';
 
 type Profile = {
   id: string; // uid
@@ -42,6 +45,7 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true);
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
   // Modal states
   const [processing, setProcessing] = useState(false);
@@ -80,7 +84,7 @@ export default function TeamPage() {
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user && firebaseDb) {
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
-        const snap = await import('firebase/firestore').then(mod => mod.getDoc(profileRef));
+        const snap = await getDoc(profileRef);
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setCurrentUserProfile({...data, id: user.uid});
@@ -136,7 +140,7 @@ export default function TeamPage() {
     if (!firebaseDb || !companyId) return;
     try {
       const companyRef = doc(firebaseDb!, 'companies', companyId);
-      const snap = await import('firebase/firestore').then(mod => mod.getDoc(companyRef));
+      const snap = await getDoc(companyRef);
       if (snap.exists()) {
         const data = snap.data() as { name?: string };
         setCompanyName(data.name);
@@ -188,9 +192,7 @@ export default function TeamPage() {
         updateData.company_id = editCompanyId.trim();
       }
 
-      await import('firebase/firestore').then(mod =>
-        mod.updateDoc(mod.doc(firebaseDb!, 'profiles', editingUser.id), updateData)
-      );
+      await updateDoc(doc(firebaseDb!, 'profiles', editingUser.id), updateData);
 
       // Refresh team list
       if (isAdmin) {
@@ -213,9 +215,7 @@ export default function TeamPage() {
     const companyId = currentUserProfile.company_id;
     if (!confirm(`Delete company "${companyName || companyId}"? This cannot be undone and will orphan related data.`)) return;
     try {
-      await import('firebase/firestore').then(mod =>
-        mod.deleteDoc(mod.doc(firebaseDb!, 'companies', companyId))
-      );
+      await deleteDoc(doc(firebaseDb!, 'companies', companyId));
       alert('Company deleted. Please sign out.');
       setCompanyName(undefined);
     } catch (error) {
@@ -323,8 +323,8 @@ export default function TeamPage() {
 
   // Filter team by search term and company (if admin)
   const filteredTeam = team.filter(member => {
-    const matchesSearch = displayNameFor(member).toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = displayNameFor(member).toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      member.email?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
     
     // If admin and company filter is set, also filter by company
     if (isAdmin && selectedCompanyFilter !== 'all') {

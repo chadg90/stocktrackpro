@@ -1,6 +1,8 @@
 /**
- * Export utilities for converting data to CSV format
+ * Export utilities for converting data to CSV and Excel formats
  */
+
+import * as XLSX from 'xlsx';
 
 /**
  * Converts an array of objects to CSV format
@@ -45,6 +47,79 @@ export function convertToCSV(data: any[], headers?: string[]): string {
   });
 
   return [headerRow, ...dataRows].join('\n');
+}
+
+/**
+ * Exports data to Excel (XLSX) format
+ * @param data Array of objects to export
+ * @param filename Name of the file (without extension)
+ * @param sheetName Optional sheet name
+ * @param fieldMappings Optional mapping of field names to display names
+ */
+export function exportToExcel(
+  data: any[],
+  filename: string,
+  sheetName: string = 'Data',
+  fieldMappings?: Record<string, string>
+): void {
+  if (!data || data.length === 0) {
+    alert('No data to export');
+    return;
+  }
+
+  const formattedData = formatDataForExport(data, fieldMappings);
+  
+  // Create workbook and worksheet
+  const ws = XLSX.utils.json_to_sheet(formattedData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  
+  // Auto-size columns
+  const colWidths = Object.keys(formattedData[0] || {}).map(key => ({
+    wch: Math.max(key.length, ...formattedData.map(row => String(row[key] || '').length)) + 2
+  }));
+  ws['!cols'] = colWidths;
+  
+  // Download the file
+  XLSX.writeFile(wb, `${filename}.xlsx`);
+}
+
+/**
+ * Exports multiple sheets to a single Excel file
+ * @param sheets Array of sheet configurations
+ * @param filename Name of the file
+ */
+export function exportMultipleSheetsToExcel(
+  sheets: Array<{
+    name: string;
+    data: any[];
+    fieldMappings?: Record<string, string>;
+  }>,
+  filename: string
+): void {
+  if (!sheets || sheets.length === 0) {
+    alert('No data to export');
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+  
+  sheets.forEach(sheet => {
+    if (sheet.data && sheet.data.length > 0) {
+      const formattedData = formatDataForExport(sheet.data, sheet.fieldMappings);
+      const ws = XLSX.utils.json_to_sheet(formattedData);
+      
+      // Auto-size columns
+      const colWidths = Object.keys(formattedData[0] || {}).map(key => ({
+        wch: Math.max(key.length, ...formattedData.map(row => String(row[key] || '').length)) + 2
+      }));
+      ws['!cols'] = colWidths;
+      
+      XLSX.utils.book_append_sheet(wb, ws, sheet.name.substring(0, 31)); // Excel limit: 31 chars
+    }
+  });
+  
+  XLSX.writeFile(wb, `${filename}.xlsx`);
 }
 
 /**

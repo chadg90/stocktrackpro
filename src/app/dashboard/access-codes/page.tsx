@@ -6,6 +6,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   addDoc,
   deleteDoc,
   doc,
@@ -71,7 +72,7 @@ export default function AccessCodesPage() {
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user && firebaseDb) {
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
-        const snap = await import('firebase/firestore').then(mod => mod.getDoc(profileRef));
+        const snap = await getDoc(profileRef);
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile(data);

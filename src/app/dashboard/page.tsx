@@ -14,21 +14,24 @@ import {
   getDoc,
   getDocs,
   getCountFromServer,
-  deleteDoc,
   updateDoc,
   serverTimestamp,
   query,
   where,
   orderBy,
   limit,
-  DocumentData,
   Timestamp,
 } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDays } from 'date-fns';
+import ExportButton from './components/ExportButton';
+import PrintButton from './components/PrintButton';
+import ChartErrorBoundary from './components/ChartErrorBoundary';
 
 // Check if Firebase is properly initialized
 const isFirebaseAvailable = firebaseAuth && firebaseDb;
-import { RefreshCw, Shield, Users, Truck, Package, AlertTriangle, Trash2, TrendingUp, TrendingDown, Activity, CheckCircle, Clock, AlertCircle, BarChart3, Calendar, Target, Key } from 'lucide-react';
+import { RefreshCw, Users, Truck, Package, TrendingUp, TrendingDown, Activity, CheckCircle, Clock, BarChart3, Calendar, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 type Profile = {
   id: string;
@@ -39,23 +42,8 @@ type Profile = {
   first_name?: string;
   last_name?: string;
   email?: string;
-};
-
-type Inspection = {
-  id: string;
-  vehicle_id?: string;
-  inspected_at?: string;
-  has_defect?: boolean;
-  inspected_by?: string;
-};
-
-type Defect = {
-  id: string;
-  vehicle_id?: string;
-  reported_at?: string;
-  severity?: string;
-  description?: string;
-  status?: 'pending' | 'resolved' | 'investigating';
+  created_at?: Timestamp | string;
+  last_login?: Timestamp | string;
 };
 
 type Vehicle = {
@@ -63,6 +51,34 @@ type Vehicle = {
   registration?: string;
   make?: string;
   model?: string;
+  status?: string;
+  created_at?: Timestamp | string;
+};
+
+type Asset = {
+  id: string;
+  name?: string;
+  type?: string;
+  status?: string;
+  location?: string;
+  created_at?: Timestamp | string;
+};
+
+type Inspection = {
+  id: string;
+  vehicle_id?: string;
+  inspected_at?: Timestamp | string;
+  has_defect?: boolean;
+  inspected_by?: string;
+};
+
+type Defect = {
+  id: string;
+  vehicle_id?: string;
+  reported_at?: Timestamp | string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
+  description?: string;
+  status?: 'pending' | 'resolved' | 'investigating';
 };
 
 type HistoryItem = {
@@ -70,26 +86,32 @@ type HistoryItem = {
   tool_id?: string;
   action?: string;
   user_id?: string;
-  timestamp?: string;
+  timestamp?: Timestamp | string;
 };
 
-type AccessCode = {
-  id: string;
-  companyId?: string;
-  used?: boolean;
-  expiresAt?: string;
-  role?: string;
-};
+const COLORS = ['#00D9FF', '#FF6B6B', '#FFD93D', '#6BCF7F', '#9B59B6', '#E74C3C', '#3498DB', '#2ECC71'];
 
 const formatDate = (value?: string | Timestamp) => {
   if (!value) return '—';
   try {
-    if (value instanceof Timestamp) {
+    if (value && typeof value === 'object' && 'toDate' in value) {
       return value.toDate().toLocaleString();
     }
-    return new Date(value).toLocaleString();
+    return new Date(value as string).toLocaleString();
   } catch {
     return typeof value === 'string' ? value : '—';
+  }
+};
+
+const formatShortDate = (value?: string | Timestamp) => {
+  if (!value) return '—';
+  try {
+    const date = value && typeof value === 'object' && 'toDate' in value
+      ? value.toDate()
+      : new Date(value as string);
+    return format(date, 'MMM dd');
+  } catch {
+    return '—';
   }
 };
 
@@ -102,25 +124,26 @@ export default function DashboardPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  // Date range filter
+  const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'all'>('30');
+
+  // Analytics data
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [users, setUsers] = useState<Profile[]>([]);
+  const [inspections, setInspections] = useState<Inspection[]>([]);
+  const [defects, setDefects] = useState<Defect[]>([]);
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+
+  // Counts
   const [assetsCount, setAssetsCount] = useState<number | null>(null);
   const [vehiclesCount, setVehiclesCount] = useState<number | null>(null);
   const [teamCount, setTeamCount] = useState<number | null>(null);
   const [inspectionsCount, setInspectionsCount] = useState<number | null>(null);
-
-  // Enhanced metrics
   const [activeAssetsCount, setActiveAssetsCount] = useState<number | null>(null);
   const [activeVehiclesCount, setActiveVehiclesCount] = useState<number | null>(null);
   const [defectsCount, setDefectsCount] = useState<number | null>(null);
   const [resolvedDefectsCount, setResolvedDefectsCount] = useState<number | null>(null);
-  const [todayInspectionsCount, setTodayInspectionsCount] = useState<number | null>(null);
-  const [criticalDefectsCount, setCriticalDefectsCount] = useState<number | null>(null);
-
-  const [inspections, setInspections] = useState<Inspection[]>([]);
-  const [defects, setDefects] = useState<Defect[]>([]);
-  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
-  const [accessCodes, setAccessCodes] = useState<AccessCode[]>([]);
-  const [vehicles, setVehicles] = useState<Record<string, Vehicle>>({});
-  const [users, setUsers] = useState<Record<string, Profile>>({});
 
   useEffect(() => {
     if (!isFirebaseAvailable) {
@@ -148,7 +171,6 @@ export default function DashboardPage() {
         throw new Error('Profile not found for this account.');
       }
       const data = snap.data() as Profile;
-      // Only allow managers and admins - block users with role "user"
       if (data.role !== 'manager' && data.role !== 'admin') {
         throw new Error('Access restricted. Only managers and admins can access the dashboard.');
       }
@@ -175,7 +197,6 @@ export default function DashboardPage() {
         return;
       }
       
-      // CRITICAL: Always validate company_id exists for data isolation
       if (!companyId) {
         setError('Company ID is required');
         setLoading(false);
@@ -185,33 +206,27 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        // CRITICAL: Always filter by company_id to ensure company data isolation
-        // Even admins can only see their own company's business data
+        const now = new Date();
+        let startDate: Date | null = null;
+        
+        if (dateRange !== 'all') {
+          startDate = startOfDay(subDays(now, parseInt(dateRange)));
+        }
+
+        // Base queries for counts
         const toolsQ = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId));
         const vehiclesQ = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId));
         const teamQ = query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId));
         const inspectionsQ = query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', companyId));
-
-        // Enhanced queries for detailed metrics
         const activeToolsQ = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId), where('status', '==', 'active'));
         const activeVehiclesQ = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId), where('status', '==', 'active'));
         const defectsQ = query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId));
         const resolvedDefectsQ = query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId), where('status', '==', 'resolved'));
-        const criticalDefectsQ = query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId), where('severity', '==', 'critical'));
 
-        // Today's inspections
-        const today = new Date();
-        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        const todayInspectionsQ = query(
-          collection(firebaseDb!, 'vehicle_inspections'),
-          where('company_id', '==', companyId),
-          where('inspected_at', '>=', Timestamp.fromDate(startOfDay))
-        );
-
+        // Get counts
         const [
-          toolsCount, vehiclesCountVal, teamCountVal, inspectionsCountVal,
-          activeToolsCount, activeVehiclesCount, defectsCountVal, resolvedDefectsCountVal,
-          todayInspectionsCountVal, criticalDefectsCountVal
+          toolsCountVal, vehiclesCountVal, teamCountVal, inspectionsCountVal,
+          activeToolsCountVal, activeVehiclesCountVal, defectsCountVal, resolvedDefectsCountVal
         ] = await Promise.all([
           safeCount(toolsQ),
           safeCount(vehiclesQ),
@@ -221,140 +236,144 @@ export default function DashboardPage() {
           safeCount(activeVehiclesQ),
           safeCount(defectsQ),
           safeCount(resolvedDefectsQ),
-          safeCount(todayInspectionsQ),
-          safeCount(criticalDefectsQ),
         ]);
 
-        setAssetsCount(toolsCount);
+        setAssetsCount(toolsCountVal);
         setVehiclesCount(vehiclesCountVal);
         setTeamCount(teamCountVal);
         setInspectionsCount(inspectionsCountVal);
-        setActiveAssetsCount(activeToolsCount);
-        setActiveVehiclesCount(activeVehiclesCount);
+        setActiveAssetsCount(activeToolsCountVal);
+        setActiveVehiclesCount(activeVehiclesCountVal);
         setDefectsCount(defectsCountVal);
         setResolvedDefectsCount(resolvedDefectsCountVal);
-        setTodayInspectionsCount(todayInspectionsCountVal);
-        setCriticalDefectsCount(criticalDefectsCountVal);
 
-        // Fetch vehicles for mapping
+        // Fetch full data for analytics
         const vehiclesSnap = await getDocs(vehiclesQ);
-        const vehiclesMap: Record<string, Vehicle> = {};
-        vehiclesSnap.docs.forEach(doc => {
-          vehiclesMap[doc.id] = { id: doc.id, ...doc.data() } as Vehicle;
-        });
-        setVehicles(vehiclesMap);
+        setVehicles(vehiclesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Vehicle)));
 
-        // Fetch users for mapping inspected_by to names
+        const assetsSnap = await getDocs(toolsQ);
+        setAssets(assetsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Asset)));
+
         const usersSnap = await getDocs(teamQ);
-        const usersMap: Record<string, Profile> = {};
-        usersSnap.docs.forEach(doc => {
-          usersMap[doc.id] = { id: doc.id, ...doc.data() } as Profile;
-        });
-        setUsers(usersMap);
+        setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)));
 
-        const recentInspectionsQ = query(
+        // Fetch inspections with date filter
+        let inspQuery = query(
           collection(firebaseDb!, 'vehicle_inspections'),
           where('company_id', '==', companyId),
-          orderBy('inspected_at', 'desc'),
-          limit(5)
+          orderBy('inspected_at', 'desc')
         );
-        const recentDefectsQ = query(
+        if (startDate) {
+          inspQuery = query(
+            collection(firebaseDb!, 'vehicle_inspections'),
+            where('company_id', '==', companyId),
+            where('inspected_at', '>=', Timestamp.fromDate(startDate)),
+            orderBy('inspected_at', 'desc')
+          );
+        }
+        const inspSnap = await getDocs(inspQuery);
+        setInspections(inspSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection)));
+
+        // Fetch defects with date filter
+        let defQuery = query(
           collection(firebaseDb!, 'vehicle_defects'),
           where('company_id', '==', companyId),
-          orderBy('reported_at', 'desc'),
-          limit(5)
+          orderBy('reported_at', 'desc')
         );
-        const historyQ = query(
+        if (startDate) {
+          defQuery = query(
+            collection(firebaseDb!, 'vehicle_defects'),
+            where('company_id', '==', companyId),
+            where('reported_at', '>=', Timestamp.fromDate(startDate)),
+            orderBy('reported_at', 'desc')
+          );
+        }
+        const defSnap = await getDocs(defQuery);
+        setDefects(defSnap.docs.map(d => ({ id: d.id, ...d.data() } as Defect)));
+
+        // Fetch history with date filter
+        let histQuery = query(
           collection(firebaseDb!, 'tool_history'),
           where('company_id', '==', companyId),
           orderBy('timestamp', 'desc'),
-          limit(5)
+          limit(500)
         );
-        const accessCodesQ = query(
-          collection(firebaseDb!, 'access_codes'),
-          where('companyId', '==', companyId),
-          limit(5)
-        );
+        if (startDate) {
+          histQuery = query(
+            collection(firebaseDb!, 'tool_history'),
+            where('company_id', '==', companyId),
+            where('timestamp', '>=', Timestamp.fromDate(startDate)),
+            orderBy('timestamp', 'desc'),
+            limit(500)
+          );
+        }
+        const histSnap = await getDocs(histQuery);
+        setHistoryItems(histSnap.docs.map(d => ({ id: d.id, ...d.data() } as HistoryItem)));
 
-        const [inspSnap, defectsSnap, historySnap, codesSnap] = await Promise.all([
-          getDocs(recentInspectionsQ).catch(() => null),
-          getDocs(recentDefectsQ).catch(() => null),
-          getDocs(historyQ).catch(() => null),
-          getDocs(accessCodesQ).catch(() => null),
-        ]);
-
-        if (inspSnap) {
-          setInspections(
-            inspSnap.docs.map((d) => ({
-              id: d.id,
-              ...(d.data() as DocumentData),
-            }))
-          );
-        }
-        if (defectsSnap) {
-          setDefects(
-            defectsSnap.docs.map((d) => ({
-              id: d.id,
-              ...(d.data() as DocumentData),
-            }))
-          );
-        }
-        if (historySnap) {
-          setHistoryItems(
-            historySnap.docs.map((d) => ({
-              id: d.id,
-              ...(d.data() as DocumentData),
-            }))
-          );
-        }
-        if (codesSnap) {
-          setAccessCodes(
-            codesSnap.docs.map((d) => ({
-              id: d.id,
-              ...(d.data() as DocumentData),
-            }))
-          );
-        }
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Unable to load data');
       } finally {
         setLoading(false);
       }
     },
-    []
+    [dateRange]
   );
 
   useEffect(() => {
     if (!authUser) return;
+    
+    let isMounted = true;
+    
     loadProfile(authUser)
       .then((p) => {
-        if (p.company_id) {
+        if (isMounted && p.company_id && p.company_id.trim()) {
           fetchData(p.company_id);
         }
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Unable to load profile');
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Unable to load profile');
+        }
       });
+      
+    return () => {
+      isMounted = false;
+    };
   }, [authUser, fetchData, loadProfile]);
+
+  // Refetch when date range changes (only if profile is already loaded)
+  useEffect(() => {
+    if (profile?.company_id && profile.company_id.trim()) {
+      fetchData(profile.company_id);
+    }
+    // Note: fetchData already has dateRange in its dependencies, 
+    // so this effect will trigger when dateRange changes
+  }, [dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    
+    // Capture password and clear it from state immediately for security
+    const passwordValue = password;
+    setPassword('');
+    
     try {
       if (!isFirebaseAvailable) {
         throw new Error('Firebase is not configured properly');
       }
-      const cred = await signInWithEmailAndPassword(firebaseAuth!, email.trim(), password);
+      const cred = await signInWithEmailAndPassword(firebaseAuth!, email.trim(), passwordValue);
       
-      // Update last_login timestamp in user's profile
+      // Clear email too after successful login
+      setEmail('');
+      
       try {
         const profileRef = doc(firebaseDb!, 'profiles', cred.user.uid);
         await updateDoc(profileRef, {
           last_login: serverTimestamp(),
         });
       } catch (updateError) {
-        // Log but don't fail login if last_login update fails
         console.error('Failed to update last_login:', updateError);
       }
       
@@ -370,65 +389,261 @@ export default function DashboardPage() {
     if (!isFirebaseAvailable) return;
     await signOut(firebaseAuth!);
     setProfile(null);
+    setVehicles([]);
+    setAssets([]);
+    setUsers([]);
     setInspections([]);
     setDefects([]);
     setHistoryItems([]);
-    setAccessCodes([]);
-    setAssetsCount(null);
-    setVehiclesCount(null);
-    setTeamCount(null);
-    setInspectionsCount(null);
-    setActiveAssetsCount(null);
-    setActiveVehiclesCount(null);
-    setDefectsCount(null);
-    setResolvedDefectsCount(null);
-    setTodayInspectionsCount(null);
-    setCriticalDefectsCount(null);
   };
 
-  const handleDeleteInspection = async (inspectionId: string) => {
-    if (!isAdmin) {
-      alert('Only admins can delete inspections.');
-      return;
-    }
-    
-    if (!confirm('Are you sure you want to delete this inspection? This action cannot be undone.') || !isFirebaseAvailable) return;
-    
-    try {
-      await deleteDoc(doc(firebaseDb!, 'vehicle_inspections', inspectionId));
-      
-      // Update local state
-      setInspections(prev => prev.filter(i => i.id !== inspectionId));
-      if (inspectionsCount !== null) {
-        setInspectionsCount(Math.max(0, inspectionsCount - 1));
-      }
-      alert('Inspection deleted successfully.');
-      
-      // Refresh data to update counts
-      if (profile?.company_id) {
-        fetchData(profile.company_id);
-      }
-    } catch (error) {
-      console.error('Error deleting inspection:', error);
-      alert('Failed to delete inspection.');
-    }
-  };
+  // ============================================
+  // ANALYTICS COMPUTATIONS
+  // ============================================
 
-  const isAdmin = profile?.role === 'admin';
-  
-  // Helper to get user display name
-  const displayNameFor = (userId?: string): string => {
-    if (!userId) return 'Unknown User';
-    const user = users[userId];
-    if (!user) return userId;
+  // Vehicle Analytics
+  const vehicleStatusBreakdown = useMemo(() => {
+    const statusMap: Record<string, number> = {};
+    vehicles.forEach(v => {
+      const status = v.status || 'unknown';
+      statusMap[status] = (statusMap[status] || 0) + 1;
+    });
+    return Object.entries(statusMap).map(([name, value]) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      value
+    }));
+  }, [vehicles]);
+
+  const vehiclesByMake = useMemo(() => {
+    const makeMap: Record<string, number> = {};
+    vehicles.forEach(v => {
+      const make = v.make || 'Unknown';
+      makeMap[make] = (makeMap[make] || 0) + 1;
+    });
+    return Object.entries(makeMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+  }, [vehicles]);
+
+  const inspectionsByVehicle = useMemo(() => {
+    const vehicleMap: Record<string, { count: number; defects: number; name: string }> = {};
+    inspections.forEach(insp => {
+      const vId = insp.vehicle_id || 'unknown';
+      if (!vehicleMap[vId]) {
+        const v = vehicles.find(v => v.id === vId);
+        vehicleMap[vId] = { 
+          count: 0, 
+          defects: 0, 
+          name: v ? `${v.registration}` : vId 
+        };
+      }
+      vehicleMap[vId].count++;
+      if (insp.has_defect) vehicleMap[vId].defects++;
+    });
+    return Object.entries(vehicleMap)
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }, [inspections, vehicles]);
+
+  // Asset Analytics
+  const assetStatusBreakdown = useMemo(() => {
+    const statusMap: Record<string, number> = {};
+    assets.forEach(a => {
+      const status = a.status || 'unknown';
+      statusMap[status] = (statusMap[status] || 0) + 1;
+    });
+    return Object.entries(statusMap).map(([name, value]) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      value
+    }));
+  }, [assets]);
+
+  const assetsByType = useMemo(() => {
+    const typeMap: Record<string, number> = {};
+    assets.forEach(a => {
+      const type = a.type || 'Unknown';
+      typeMap[type] = (typeMap[type] || 0) + 1;
+    });
+    return Object.entries(typeMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+  }, [assets]);
+
+  const assetUsageByAction = useMemo(() => {
+    const actionMap: Record<string, number> = {};
+    historyItems.forEach(h => {
+      const action = h.action || 'unknown';
+      actionMap[action] = (actionMap[action] || 0) + 1;
+    });
+    return Object.entries(actionMap)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [historyItems]);
+
+  // User Analytics
+  const usersByRole = useMemo(() => {
+    const roleMap: Record<string, number> = {};
+    users.forEach(u => {
+      const role = u.role || 'user';
+      roleMap[role] = (roleMap[role] || 0) + 1;
+    });
+    return Object.entries(roleMap).map(([name, value]) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      value
+    }));
+  }, [users]);
+
+  const userActivity = useMemo(() => {
+    const userActionMap: Record<string, { inspections: number; actions: number; name: string }> = {};
     
-    // Try first_name + last_name first
-    if (user.first_name || user.last_name) {
-      return `${user.first_name || ''} ${user.last_name || ''}`.trim();
-    }
-    // Fall back to displayName, name, email prefix
-    return user.displayName || user.name || user.email?.split('@')[0] || userId;
-  };
+    inspections.forEach(insp => {
+      const uId = insp.inspected_by || 'unknown';
+      if (!userActionMap[uId]) {
+        const u = users.find(u => u.id === uId);
+        userActionMap[uId] = {
+          inspections: 0,
+          actions: 0,
+          name: u ? (u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : u.email?.split('@')[0] || uId) : uId
+        };
+      }
+      userActionMap[uId].inspections++;
+    });
+
+    historyItems.forEach(h => {
+      const uId = h.user_id || 'unknown';
+      if (!userActionMap[uId]) {
+        const u = users.find(u => u.id === uId);
+        userActionMap[uId] = {
+          inspections: 0,
+          actions: 0,
+          name: u ? (u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : u.email?.split('@')[0] || uId) : uId
+        };
+      }
+      userActionMap[uId].actions++;
+    });
+
+    return Object.entries(userActionMap)
+      .map(([id, data]) => ({ id, ...data, total: data.inspections + data.actions }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+  }, [inspections, historyItems, users]);
+
+  // Time-based Analytics
+  const inspectionsOverTime = useMemo(() => {
+    const dateMap: Record<string, number> = {};
+    inspections.forEach(insp => {
+      if (!insp.inspected_at) return;
+      const date = insp.inspected_at && typeof insp.inspected_at === 'object' && 'toDate' in insp.inspected_at
+        ? insp.inspected_at.toDate()
+        : new Date(insp.inspected_at as string);
+      const dateKey = format(date, 'MMM dd');
+      dateMap[dateKey] = (dateMap[dateKey] || 0) + 1;
+    });
+    return Object.entries(dateMap)
+      .map(([date, count]) => ({ date, count }))
+      .slice(-14);
+  }, [inspections]);
+
+  const defectsTrend = useMemo(() => {
+    const dateMap: Record<string, { reported: number; resolved: number }> = {};
+    defects.forEach(d => {
+      if (!d.reported_at) return;
+      const date = d.reported_at && typeof d.reported_at === 'object' && 'toDate' in d.reported_at
+        ? d.reported_at.toDate()
+        : new Date(d.reported_at as string);
+      const dateKey = format(date, 'MMM dd');
+      if (!dateMap[dateKey]) dateMap[dateKey] = { reported: 0, resolved: 0 };
+      dateMap[dateKey].reported++;
+      if (d.status === 'resolved') dateMap[dateKey].resolved++;
+    });
+    return Object.entries(dateMap)
+      .map(([date, data]) => ({ date, ...data }))
+      .slice(-14);
+  }, [defects]);
+
+  const defectsBySeverity = useMemo(() => {
+    const severityMap: Record<string, number> = {};
+    defects.forEach(d => {
+      const severity = d.severity || 'low';
+      severityMap[severity] = (severityMap[severity] || 0) + 1;
+    });
+    const order = ['critical', 'high', 'medium', 'low'];
+    return order
+      .filter(s => severityMap[s])
+      .map(name => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        value: severityMap[name]
+      }));
+  }, [defects]);
+
+  // KPI Calculations
+  const fleetUtilization = useMemo(() => {
+    if (!vehiclesCount || vehiclesCount === 0) return 0;
+    return Math.round(((activeVehiclesCount || 0) / vehiclesCount) * 100);
+  }, [vehiclesCount, activeVehiclesCount]);
+
+  const assetUtilization = useMemo(() => {
+    if (!assetsCount || assetsCount === 0) return 0;
+    return Math.round(((activeAssetsCount || 0) / assetsCount) * 100);
+  }, [assetsCount, activeAssetsCount]);
+
+  const defectResolutionRate = useMemo(() => {
+    if (!defectsCount || defectsCount === 0) return 100;
+    return Math.round(((resolvedDefectsCount || 0) / defectsCount) * 100);
+  }, [defectsCount, resolvedDefectsCount]);
+
+  const avgInspectionsPerDay = useMemo(() => {
+    if (inspections.length === 0) return 0;
+    const days = dateRange === 'all' ? 30 : parseInt(dateRange);
+    return (inspections.length / days).toFixed(1);
+  }, [inspections, dateRange]);
+
+  // Export data preparation
+  const exportData = useMemo(() => ({
+    vehicles: vehicles.map(v => ({
+      Registration: v.registration || '',
+      Make: v.make || '',
+      Model: v.model || '',
+      Status: v.status || '',
+      'Created At': formatDate(v.created_at),
+    })),
+    assets: assets.map(a => ({
+      Name: a.name || '',
+      Type: a.type || '',
+      Status: a.status || '',
+      Location: a.location || '',
+      'Created At': formatDate(a.created_at),
+    })),
+    users: users.map(u => ({
+      Name: u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : (u.displayName || u.email || ''),
+      Email: u.email || '',
+      Role: u.role || '',
+      'Last Login': formatDate(u.last_login),
+    })),
+    inspections: inspections.map(i => {
+      const v = vehicles.find(v => v.id === i.vehicle_id);
+      const u = users.find(u => u.id === i.inspected_by);
+      return {
+        Vehicle: v ? v.registration : i.vehicle_id || '',
+        'Inspected At': formatDate(i.inspected_at),
+        'Has Defect': i.has_defect ? 'Yes' : 'No',
+        Inspector: u ? (u.first_name || u.email || '') : i.inspected_by || '',
+      };
+    }),
+    defects: defects.map(d => {
+      const v = vehicles.find(v => v.id === d.vehicle_id);
+      return {
+        Vehicle: v ? v.registration : d.vehicle_id || '',
+        Description: d.description || '',
+        Severity: d.severity || '',
+        Status: d.status || '',
+        'Reported At': formatDate(d.reported_at),
+      };
+    }),
+  }), [vehicles, assets, users, inspections, defects]);
 
   const isAuthedManager = useMemo(() => {
     return !!authUser && profile && (profile.role === 'manager' || profile.role === 'admin') && profile.company_id;
@@ -438,7 +653,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-black">
       {!authUser && <Navbar />}
       <div className={`${!authUser ? 'container mx-auto px-4 pt-28 pb-16' : ''}`}>
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {error && (
             <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
               {error}
@@ -449,8 +664,8 @@ export default function DashboardPage() {
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <div className="bg-black border border-primary/30 rounded-2xl p-8 max-w-md w-full">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Manager Sign In</h2>
-                <p className="text-white/60 text-sm mt-2">Access your organization's dashboard</p>
+                <h2 className="text-2xl font-bold text-white">Analytics Dashboard</h2>
+                <p className="text-white/60 text-sm mt-2">Sign in to view your organization's analytics</p>
               </div>
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div>
@@ -482,457 +697,480 @@ export default function DashboardPage() {
                 </button>
               </form>
               <p className="text-white/60 text-center text-sm mt-4">
-                Managers only. Contact your admin if you need access.
+                Managers and admins only.
               </p>
             </div>
             </div>
           )}
 
           {isAuthedManager && (
-            <div className="space-y-8">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h1 className="text-3xl font-bold text-white">Dashboard Overview</h1>
-                <p className="text-white/70 text-sm mt-1">
-                  Comprehensive view of your organization's fleet and asset management.
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-white/50 text-xs">Last updated</p>
-                  <p className="text-white text-sm">{new Date().toLocaleTimeString()}</p>
+            <div id="analytics-report" className="print-content space-y-8">
+              {/* Header with controls */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 no-print">
+                <div>
+                  <h1 className="text-3xl font-bold text-white">Analytics Dashboard</h1>
+                  <p className="text-white/70 text-sm mt-1">
+                    Comprehensive analytics for vehicles, assets, and team performance
+                  </p>
                 </div>
-                <button
-                  onClick={() => profile?.company_id && fetchData(profile.company_id)}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-primary/40 text-white hover:border-primary transition-colors"
-                  disabled={loading}
-                >
-                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </button>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2 bg-black border border-primary/30 rounded-lg p-1">
+                    {['7', '30', '90', 'all'].map((range) => (
+                      <button
+                        key={range}
+                        onClick={() => setDateRange(range as '7' | '30' | '90' | 'all')}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                          dateRange === range
+                            ? 'bg-primary text-black'
+                            : 'text-white/70 hover:text-white'
+                        }`}
+                      >
+                        {range === 'all' ? 'All' : `${range}d`}
+                      </button>
+                    ))}
+                  </div>
+                  <ExportButton
+                    data={exportData.vehicles}
+                    filename={`analytics-report-${format(new Date(), 'yyyy-MM-dd')}`}
+                    multiSheetData={[
+                      { name: 'Vehicles', data: exportData.vehicles },
+                      { name: 'Assets', data: exportData.assets },
+                      { name: 'Users', data: exportData.users },
+                      { name: 'Inspections', data: exportData.inspections },
+                      { name: 'Defects', data: exportData.defects },
+                    ]}
+                  />
+                  <PrintButton title="Analytics Report" contentId="analytics-report" />
+                  <button
+                    onClick={() => profile?.company_id && fetchData(profile.company_id)}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-primary/40 text-white hover:border-primary transition-colors"
+                    disabled={loading}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Key Metrics Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {[
-                {
-                  title: 'Total Assets',
-                  value: assetsCount,
-                  subtitle: activeAssetsCount ? `${activeAssetsCount} active` : null,
-                  icon: Package,
-                  trend: activeAssetsCount && assetsCount ? (activeAssetsCount / assetsCount) * 100 : null
-                },
-                {
-                  title: 'Total Vehicles',
-                  value: vehiclesCount,
-                  subtitle: activeVehiclesCount ? `${activeVehiclesCount} active` : null,
-                  icon: Truck,
-                  trend: activeVehiclesCount && vehiclesCount ? (activeVehiclesCount / vehiclesCount) * 100 : null
-                },
-                {
-                  title: 'Team Members',
-                  value: teamCount,
-                  icon: Users
-                },
-                {
-                  title: 'Inspections',
-                  value: inspectionsCount,
-                  subtitle: todayInspectionsCount ? `${todayInspectionsCount} today` : null,
-                  icon: Shield
-                },
-              ].map((item) => (
-                <div key={item.title} className="bg-black border border-primary/25 rounded-xl p-5 hover:border-primary/50 transition-colors">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <item.icon className="h-5 w-5 text-primary" />
+              {/* Print Header (hidden on screen) */}
+              <div className="print-header hidden print:block mb-8">
+                <h1 className="text-2xl font-bold">Analytics Report</h1>
+                <p className="text-sm text-gray-600">Generated on {format(new Date(), 'PPP')}</p>
+              </div>
+
+              {/* KPI Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="bg-black border border-primary/25 rounded-xl p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                      <Truck className="h-5 w-5 text-blue-400" />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-white/70 text-sm">{item.title}</p>
-                      <p className="text-white text-2xl font-semibold">
-                        {item.value === null ? '—' : item.value}
-                      </p>
+                    <span className={`inline-flex items-center gap-1 text-xs ${fleetUtilization >= 70 ? 'text-green-400' : 'text-yellow-400'}`}>
+                      {fleetUtilization >= 70 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                      {fleetUtilization}%
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{vehiclesCount ?? '—'}</p>
+                  <p className="text-white/60 text-sm">Fleet Vehicles</p>
+                  <p className="text-white/40 text-xs mt-1">{activeVehiclesCount ?? 0} active</p>
+                </div>
+
+                <div className="bg-black border border-primary/25 rounded-xl p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                      <Package className="h-5 w-5 text-purple-400" />
+                    </div>
+                    <span className={`inline-flex items-center gap-1 text-xs ${assetUtilization >= 70 ? 'text-green-400' : 'text-yellow-400'}`}>
+                      {assetUtilization >= 70 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                      {assetUtilization}%
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{assetsCount ?? '—'}</p>
+                  <p className="text-white/60 text-sm">Total Assets</p>
+                  <p className="text-white/40 text-xs mt-1">{activeAssetsCount ?? 0} active</p>
+                </div>
+
+                <div className="bg-black border border-primary/25 rounded-xl p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-green-400" />
                     </div>
                   </div>
-                  {item.subtitle && (
-                    <p className="text-white/50 text-xs">{item.subtitle}</p>
-                  )}
-                  {item.trend !== null && item.trend !== undefined && (
-                    <div className="flex items-center gap-1 mt-2">
-                      {item.trend >= 80 ? (
-                        <TrendingUp className="h-3 w-3 text-green-400" />
-                      ) : item.trend >= 60 ? (
-                        <Activity className="h-3 w-3 text-yellow-400" />
-                      ) : (
-                        <TrendingDown className="h-3 w-3 text-red-400" />
-                      )}
-                      <span className={`text-xs ${
-                        item.trend >= 80 ? 'text-green-400' :
-                        item.trend >= 60 ? 'text-yellow-400' : 'text-red-400'
-                      }`}>
-                        {Math.round(item.trend)}% active
-                      </span>
-                    </div>
-                  )}
+                  <p className="text-2xl font-bold text-white">{teamCount ?? '—'}</p>
+                  <p className="text-white/60 text-sm">Team Members</p>
+                  <p className="text-white/40 text-xs mt-1">{userActivity.length} active users</p>
                 </div>
-              ))}
-            </div>
 
-            {/* Alerts & Quick Actions */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {/* Critical Alerts */}
-              <div className="bg-black border border-red-500/20 rounded-2xl p-6">
+                <div className="bg-black border border-primary/25 rounded-xl p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                      <Target className="h-5 w-5 text-cyan-400" />
+                    </div>
+                    <span className={`inline-flex items-center gap-1 text-xs ${defectResolutionRate >= 70 ? 'text-green-400' : 'text-red-400'}`}>
+                      {defectResolutionRate}%
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-white">{inspectionsCount ?? '—'}</p>
+                  <p className="text-white/60 text-sm">Total Inspections</p>
+                  <p className="text-white/40 text-xs mt-1">~{avgInspectionsPerDay}/day avg</p>
+                </div>
+              </div>
+
+              {/* Fleet Analytics Section */}
+              <div className="mb-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                    <AlertCircle className="h-4 w-4 text-red-400" />
-                  </div>
-                  <h3 className="text-white text-lg font-semibold">Critical Alerts</h3>
+                  <Truck className="h-6 w-6 text-blue-400" />
+                  <h2 className="text-xl font-bold text-white">Fleet Analytics</h2>
                 </div>
-                <div className="space-y-3">
-                  {criticalDefectsCount && criticalDefectsCount > 0 ? (
-                    <div className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                      <div>
-                        <p className="text-red-400 text-sm font-medium">Critical Defects</p>
-                        <p className="text-red-300/70 text-xs">{criticalDefectsCount} require immediate attention</p>
-                      </div>
-                      <AlertTriangle className="h-5 w-5 text-red-400" />
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                      <div>
-                        <p className="text-green-400 text-sm font-medium">All Clear</p>
-                        <p className="text-green-300/70 text-xs">No critical issues detected</p>
-                      </div>
-                      <CheckCircle className="h-5 w-5 text-green-400" />
-                    </div>
-                  )}
-
-                  {defectsCount && resolvedDefectsCount !== null ? (
-                    <div className="flex items-center justify-between p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                      <div>
-                        <p className="text-blue-400 text-sm font-medium">Defect Resolution</p>
-                        <p className="text-blue-300/70 text-xs">
-                          {resolvedDefectsCount}/{defectsCount} defects resolved
-                        </p>
-                      </div>
-                      <Target className="h-5 w-5 text-blue-400" />
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              {/* Today's Activity */}
-              <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Calendar className="h-4 w-4 text-primary" />
-                  </div>
-                  <h3 className="text-white text-lg font-semibold">Today's Activity</h3>
-                </div>
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-white">{todayInspectionsCount || 0}</p>
-                    <p className="text-white/60 text-sm">Inspections completed</p>
-                  </div>
-                  <div className="flex items-center justify-center gap-4 text-sm">
-                    <div className="text-center">
-                      <p className="text-white font-semibold">{inspections.length}</p>
-                      <p className="text-white/50">Recent</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-white font-semibold">{historyItems.length}</p>
-                      <p className="text-white/50">Tool actions</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Activity className="h-4 w-4 text-primary" />
-                  </div>
-                  <h3 className="text-white text-lg font-semibold">Quick Actions</h3>
-                </div>
-                <div className="space-y-2">
-                  <a
-                    href="/dashboard/assets"
-                    className="flex items-center justify-between p-3 rounded-lg border border-primary/20 hover:border-primary/50 hover:bg-primary/5 transition-colors"
-                  >
-                    <span className="text-white text-sm">Manage Assets</span>
-                    <Package className="h-4 w-4 text-primary" />
-                  </a>
-                  <a
-                    href="/dashboard/fleet"
-                    className="flex items-center justify-between p-3 rounded-lg border border-primary/20 hover:border-primary/50 hover:bg-primary/5 transition-colors"
-                  >
-                    <span className="text-white text-sm">Manage Fleet</span>
-                    <Truck className="h-4 w-4 text-primary" />
-                  </a>
-                  <a
-                    href="/dashboard/defects"
-                    className="flex items-center justify-between p-3 rounded-lg border border-primary/20 hover:border-primary/50 hover:bg-primary/5 transition-colors"
-                  >
-                    <span className="text-white text-sm">View Defects</span>
-                    <AlertTriangle className="h-4 w-4 text-primary" />
-                  </a>
-                  <a
-                    href="/dashboard/analytics"
-                    className="flex items-center justify-between p-3 rounded-lg border border-primary/20 hover:border-primary/50 hover:bg-primary/5 transition-colors"
-                  >
-                    <span className="text-white text-sm">View Analytics</span>
-                    <BarChart3 className="h-4 w-4 text-primary" />
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Activity Feed */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                      <Shield className="h-4 w-4 text-green-400" />
-                    </div>
-                    <h3 className="text-white text-lg font-semibold">Recent Inspections</h3>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-white text-sm font-semibold">{inspections.length}</p>
-                    <p className="text-white/50 text-xs">Last 5</p>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  {inspections.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Shield className="h-12 w-12 text-white/20 mx-auto mb-3" />
-                      <p className="text-white/60 text-sm">No recent inspections</p>
-                    </div>
-                  ) : (
-                    inspections.map((insp) => {
-                      const vehicle = insp.vehicle_id ? vehicles[insp.vehicle_id] : null;
-                      return (
-                        <div key={insp.id} className="rounded-lg border border-primary/15 p-4 hover:bg-white/5 transition-colors">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <p className="text-white text-sm font-semibold">
-                                {vehicle ? `${vehicle.registration} (${vehicle.make} ${vehicle.model})` : (insp.vehicle_id ?? 'Unknown Vehicle')}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Clock className="h-3 w-3 text-white/50" />
-                                <span className="text-white/60 text-xs">{formatDate(insp.inspected_at)}</span>
-                                {insp.has_defect && (
-                                  <span className="inline-block text-xs text-red-300 border border-red-400/50 px-2 py-0.5 rounded">
-                                    Issue Found
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            {isAdmin && (
-                              <button
-                                onClick={() => handleDeleteInspection(insp.id)}
-                                className="p-1.5 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors opacity-0 group-hover:opacity-100"
-                                title="Delete Inspection (Admin Only)"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-3 w-3 text-white/50" />
-                            <span className="text-white/60 text-xs">
-                              Inspector: {insp.inspected_by ? displayNameFor(insp.inspected_by) : 'Unknown'}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                      <AlertTriangle className="h-4 w-4 text-orange-400" />
-                    </div>
-                    <h3 className="text-white text-lg font-semibold">Active Defects</h3>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-white text-sm font-semibold">{defects.length}</p>
-                    <p className="text-white/50 text-xs">Outstanding</p>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  {defects.length === 0 ? (
-                    <div className="text-center py-8">
-                      <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-3" />
-                      <p className="text-green-400 text-sm font-medium">All Clear!</p>
-                      <p className="text-white/60 text-xs">No outstanding defects</p>
-                    </div>
-                  ) : (
-                    defects.map((d) => {
-                      const vehicle = d.vehicle_id ? vehicles[d.vehicle_id] : null;
-                      return (
-                        <div key={d.id} className="rounded-lg border border-primary/15 p-4 hover:bg-white/5 transition-colors">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <p className="text-white text-sm font-semibold">
-                                  {vehicle ? `${vehicle.registration} (${vehicle.make} ${vehicle.model})` : (d.vehicle_id ?? 'Unknown Vehicle')}
-                                </p>
-                                <span className={`inline-block text-xs px-2 py-0.5 rounded capitalize font-medium
-                                  ${d.severity === 'critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                                    d.severity === 'high' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
-                                    d.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                                    'bg-blue-500/20 text-blue-400 border border-blue-500/30'}`}
-                                >
-                                  {d.severity || 'low'}
-                                </span>
-                              </div>
-                              <p className="text-white/70 text-sm line-clamp-2">
-                                {d.description || 'No description provided'}
-                              </p>
-                            </div>
-                            <AlertTriangle className={`h-5 w-5 ${
-                              d.severity === 'critical' ? 'text-red-400' :
-                              d.severity === 'high' ? 'text-orange-400' :
-                              d.severity === 'medium' ? 'text-yellow-400' :
-                              'text-blue-400'
-                            }`} />
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-3 w-3 text-white/50" />
-                              <span className="text-white/60">Reported {formatDate(d.reported_at)}</span>
-                            </div>
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              d.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
-                              d.status === 'investigating' ? 'bg-yellow-500/20 text-yellow-400' :
-                              'bg-red-500/20 text-red-400'
-                            }`}>
-                              {d.status || 'pending'}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Activity Feeds */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                      <Package className="h-4 w-4 text-purple-400" />
-                    </div>
-                    <h3 className="text-white text-lg font-semibold">Tool Activity</h3>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-white text-sm font-semibold">{historyItems.length}</p>
-                    <p className="text-white/50 text-xs">Last 5 actions</p>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  {historyItems.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Package className="h-12 w-12 text-white/20 mx-auto mb-3" />
-                      <p className="text-white/60 text-sm">No recent tool activity</p>
-                    </div>
-                  ) : (
-                    historyItems.map((h) => (
-                      <div key={h.id} className="rounded-lg border border-primary/15 p-4 hover:bg-white/5 transition-colors">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-white text-sm font-semibold">
-                            Tool: {h.tool_id ?? 'Unknown'}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-3 w-3 text-white/50" />
-                            <span className="text-white/60 text-xs">{formatDate(h.timestamp)}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-white/70 text-sm capitalize">
-                              Action: {h.action ?? 'Unknown'}
-                            </p>
-                            <p className="text-white/60 text-xs mt-1">
-                              User: {h.user_id ?? 'Unknown'}
-                            </p>
-                          </div>
-                          <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            (h.action?.toLowerCase().includes('out') || h.action?.toLowerCase().includes('checkout'))
-                              ? 'bg-red-500/20 text-red-400'
-                              : 'bg-green-500/20 text-green-400'
-                          }`}>
-                            {(h.action?.toLowerCase().includes('out') || h.action?.toLowerCase().includes('checkout'))
-                              ? 'Checked Out'
-                              : 'Checked In'}
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-black border border-primary/25 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                      <Key className="h-4 w-4 text-cyan-400" />
-                    </div>
-                    <h3 className="text-white text-lg font-semibold">Access Codes</h3>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-white text-sm font-semibold">{accessCodes.length}</p>
-                    <p className="text-white/50 text-xs">Active codes</p>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  {accessCodes.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Key className="h-12 w-12 text-white/20 mx-auto mb-3" />
-                      <p className="text-white/60 text-sm">No active access codes</p>
-                      <p className="text-white/40 text-xs mt-1">Generate codes to invite team members</p>
-                    </div>
-                  ) : (
-                    accessCodes.map((c) => (
-                      <div key={c.id} className="rounded-lg border border-primary/15 p-4 hover:bg-white/5 transition-colors">
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
-                            <p className="text-white text-sm font-semibold font-mono">{c.id}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Clock className="h-3 w-3 text-white/50" />
-                              <span className="text-white/60 text-xs">Expires {formatDate(c.expiresAt)}</span>
-                            </div>
-                          </div>
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              c.used ? 'bg-gray-500/20 text-gray-400' : 'bg-cyan-500/20 text-cyan-400'
-                            }`}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Vehicle Status */}
+                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                    <h3 className="text-white font-semibold mb-4">Vehicle Status Distribution</h3>
+                    {vehicleStatusBreakdown.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={vehicleStatusBreakdown}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={80}
+                            paddingAngle={2}
+                            dataKey="value"
+                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                           >
-                            {c.used ? 'Used' : 'Active'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Users className="h-3 w-3 text-white/50" />
-                          <span className="text-white/60 text-xs capitalize">
-                            Role: {c.role || 'user'}
-                          </span>
-                        </div>
+                            {vehicleStatusBreakdown.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center text-white/50">No vehicle data</div>
+                    )}
+                  </div>
+
+                  {/* Vehicles by Make */}
+                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                    <h3 className="text-white font-semibold mb-4">Vehicles by Make</h3>
+                    {vehiclesByMake.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={250}>
+                        <BarChart data={vehiclesByMake} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                          <XAxis type="number" stroke="#888" />
+                          <YAxis dataKey="name" type="category" stroke="#888" width={80} />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                          <Bar dataKey="value" fill="#00D9FF" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center text-white/50">No vehicle data</div>
+                    )}
+                  </div>
+
+                  {/* Inspections by Vehicle */}
+                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                    <h3 className="text-white font-semibold mb-4">Top Inspected Vehicles</h3>
+                    {inspectionsByVehicle.length > 0 ? (
+                      <div className="space-y-3 max-h-[250px] overflow-y-auto">
+                        {inspectionsByVehicle.map((v, i) => (
+                          <div key={v.id} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <span className="text-white/50 text-sm w-6">{i + 1}.</span>
+                              <span className="text-white text-sm font-medium">{v.name}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-primary text-sm">{v.count} insp</span>
+                              {v.defects > 0 && (
+                                <span className="text-red-400 text-xs">{v.defects} defects</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))
-                  )}
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center text-white/50">No inspection data</div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+
+              {/* Asset Analytics Section */}
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <Package className="h-6 w-6 text-purple-400" />
+                  <h2 className="text-xl font-bold text-white">Asset Analytics</h2>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Asset Status */}
+                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                    <h3 className="text-white font-semibold mb-4">Asset Status Distribution</h3>
+                    {assetStatusBreakdown.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={assetStatusBreakdown}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={80}
+                            paddingAngle={2}
+                            dataKey="value"
+                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          >
+                            {assetStatusBreakdown.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center text-white/50">No asset data</div>
+                    )}
+                  </div>
+
+                  {/* Assets by Type */}
+                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                    <h3 className="text-white font-semibold mb-4">Assets by Type</h3>
+                    {assetsByType.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={250}>
+                        <BarChart data={assetsByType} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                          <XAxis type="number" stroke="#888" />
+                          <YAxis dataKey="name" type="category" stroke="#888" width={80} />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                          <Bar dataKey="value" fill="#9B59B6" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center text-white/50">No asset data</div>
+                    )}
+                  </div>
+
+                  {/* Asset Usage Actions */}
+                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                    <h3 className="text-white font-semibold mb-4">Asset Activity</h3>
+                    {assetUsageByAction.length > 0 ? (
+                      <div className="space-y-3 max-h-[250px] overflow-y-auto">
+                        {assetUsageByAction.map((a, i) => (
+                          <div key={a.name} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
+                            <span className="text-white text-sm capitalize">{a.name}</span>
+                            <span className="text-purple-400 text-sm font-semibold">{a.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center text-white/50">No activity data</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* User Analytics Section */}
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <Users className="h-6 w-6 text-green-400" />
+                  <h2 className="text-xl font-bold text-white">User Analytics</h2>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Users by Role */}
+                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                    <h3 className="text-white font-semibold mb-4">Team by Role</h3>
+                    {usersByRole.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={usersByRole}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={80}
+                            dataKey="value"
+                            label={({ name, value }) => `${name}: ${value}`}
+                          >
+                            {usersByRole.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center text-white/50">No user data</div>
+                    )}
+                  </div>
+
+                  {/* Top Active Users */}
+                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                    <h3 className="text-white font-semibold mb-4">Most Active Users</h3>
+                    {userActivity.length > 0 ? (
+                      <div className="space-y-3 max-h-[250px] overflow-y-auto">
+                        {userActivity.map((u, i) => (
+                          <div key={u.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-black font-bold text-sm">
+                                {i + 1}
+                              </div>
+                              <span className="text-white text-sm font-medium">{u.name}</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs">
+                              <div className="text-center">
+                                <p className="text-primary font-semibold">{u.inspections}</p>
+                                <p className="text-white/50">inspections</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-purple-400 font-semibold">{u.actions}</p>
+                                <p className="text-white/50">actions</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="h-[250px] flex items-center justify-center text-white/50">No activity data</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Trends Section */}
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <TrendingUp className="h-6 w-6 text-cyan-400" />
+                  <h2 className="text-xl font-bold text-white">Trends & Insights</h2>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Inspections Over Time */}
+                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                    <h3 className="text-white font-semibold mb-4">Inspections Over Time</h3>
+                    {inspectionsOverTime.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart data={inspectionsOverTime}>
+                          <defs>
+                            <linearGradient id="colorInsp" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#00D9FF" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="#00D9FF" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                          <XAxis dataKey="date" stroke="#888" />
+                          <YAxis stroke="#888" />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                          <Area type="monotone" dataKey="count" stroke="#00D9FF" fill="url(#colorInsp)" strokeWidth={2} />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center text-white/50">No data for selected period</div>
+                    )}
+                  </div>
+
+                  {/* Defects Trend */}
+                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                    <h3 className="text-white font-semibold mb-4">Defects Trend</h3>
+                    {defectsTrend.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={defectsTrend}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                          <XAxis dataKey="date" stroke="#888" />
+                          <YAxis stroke="#888" />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                          <Legend />
+                          <Bar dataKey="reported" fill="#FF6B6B" name="Reported" />
+                          <Bar dataKey="resolved" fill="#6BCF7F" name="Resolved" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-[300px] flex items-center justify-center text-white/50">No defect data for selected period</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Defects by Severity */}
+                <div className="mt-6 bg-black border border-primary/25 rounded-xl p-6">
+                  <h3 className="text-white font-semibold mb-4">Defects by Severity</h3>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    {defectsBySeverity.length > 0 ? (
+                      defectsBySeverity.map((d, i) => (
+                        <div 
+                          key={d.name} 
+                          className={`p-4 rounded-xl border ${
+                            d.name === 'Critical' ? 'border-red-500/30 bg-red-500/10' :
+                            d.name === 'High' ? 'border-orange-500/30 bg-orange-500/10' :
+                            d.name === 'Medium' ? 'border-yellow-500/30 bg-yellow-500/10' :
+                            'border-blue-500/30 bg-blue-500/10'
+                          }`}
+                        >
+                          <p className={`text-3xl font-bold ${
+                            d.name === 'Critical' ? 'text-red-400' :
+                            d.name === 'High' ? 'text-orange-400' :
+                            d.name === 'Medium' ? 'text-yellow-400' :
+                            'text-blue-400'
+                          }`}>
+                            {d.value}
+                          </p>
+                          <p className="text-white/70 text-sm">{d.name} Severity</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-4 py-8 text-center text-white/50">
+                        <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-400" />
+                        <p>No defects in selected period</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary Statistics Table */}
+              <div className="bg-black border border-primary/25 rounded-xl p-6">
+                <h3 className="text-white font-semibold mb-4">Summary Statistics</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="border-b border-white/10">
+                      <tr>
+                        <th className="px-4 py-3 text-white/70 text-sm font-medium">Metric</th>
+                        <th className="px-4 py-3 text-white/70 text-sm font-medium">Total</th>
+                        <th className="px-4 py-3 text-white/70 text-sm font-medium">Active</th>
+                        <th className="px-4 py-3 text-white/70 text-sm font-medium">Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      <tr>
+                        <td className="px-4 py-3 text-white">Fleet Vehicles</td>
+                        <td className="px-4 py-3 text-white">{vehiclesCount ?? '—'}</td>
+                        <td className="px-4 py-3 text-primary">{activeVehiclesCount ?? '—'}</td>
+                        <td className="px-4 py-3 text-green-400">{fleetUtilization}%</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 text-white">Assets</td>
+                        <td className="px-4 py-3 text-white">{assetsCount ?? '—'}</td>
+                        <td className="px-4 py-3 text-primary">{activeAssetsCount ?? '—'}</td>
+                        <td className="px-4 py-3 text-green-400">{assetUtilization}%</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 text-white">Inspections ({dateRange === 'all' ? 'All Time' : `Last ${dateRange} Days`})</td>
+                        <td className="px-4 py-3 text-white">{inspections.length}</td>
+                        <td className="px-4 py-3 text-primary">—</td>
+                        <td className="px-4 py-3 text-cyan-400">{avgInspectionsPerDay}/day</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 text-white">Defects</td>
+                        <td className="px-4 py-3 text-white">{defectsCount ?? '—'}</td>
+                        <td className="px-4 py-3 text-green-400">{resolvedDefectsCount ?? '—'} resolved</td>
+                        <td className="px-4 py-3 text-green-400">{defectResolutionRate}% resolved</td>
+                      </tr>
+                      <tr>
+                        <td className="px-4 py-3 text-white">Team Members</td>
+                        <td className="px-4 py-3 text-white">{teamCount ?? '—'}</td>
+                        <td className="px-4 py-3 text-primary">{userActivity.length} active</td>
+                        <td className="px-4 py-3 text-cyan-400">—</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
         </div>

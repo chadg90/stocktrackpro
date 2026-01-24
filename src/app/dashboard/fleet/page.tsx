@@ -6,6 +6,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -21,6 +22,7 @@ import Modal from '../components/Modal';
 import ExportButton from '../components/ExportButton';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
+import { useDebounce } from '@/hooks/useDebounce';
 
 type Vehicle = {
   id: string;
@@ -52,6 +54,7 @@ export default function FleetPage() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -73,7 +76,7 @@ export default function FleetPage() {
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user && firebaseDb) {
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
-        const snap = await import('firebase/firestore').then(mod => mod.getDoc(profileRef));
+        const snap = await getDoc(profileRef);
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile(data);
@@ -239,9 +242,9 @@ export default function FleetPage() {
   };
 
   const filteredVehicles = vehicles.filter(v => 
-    v.registration?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.model?.toLowerCase().includes(searchTerm.toLowerCase())
+    v.registration?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    v.make?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    v.model?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   return (

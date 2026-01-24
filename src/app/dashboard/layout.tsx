@@ -7,6 +7,7 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import Sidebar from './components/Sidebar';
 import NotificationBell from './components/NotificationBell';
 import { useRouter, usePathname } from 'next/navigation';
+import { ToastProvider } from '@/components/Toast';
 
 type Profile = {
   company_id?: string;
@@ -33,16 +34,32 @@ export default function DashboardLayout({
       return;
     }
 
+    // Track if the component is still mounted to prevent race conditions
+    let isMounted = true;
+    // Track current user ID to handle rapid auth state changes
+    let currentUserId: string | null = null;
+
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
+      // If user changed while we were processing, ignore stale results
+      if (!isMounted) return;
+      
       if (!user) {
+        currentUserId = null;
         setAuthorized(false);
         setLoading(false);
         return;
       }
 
+      // Track this user to detect if another auth change happens
+      const thisUserId = user.uid;
+      currentUserId = thisUserId;
+
       try {
         const profileRef = doc(firebaseDb!, 'profiles', user.uid);
         const snap = await getDoc(profileRef);
+        
+        // Check if we're still mounted and this is still the current user
+        if (!isMounted || currentUserId !== thisUserId) return;
         
         if (snap.exists()) {
           const data = snap.data() as Profile;
@@ -58,14 +75,20 @@ export default function DashboardLayout({
           setAuthorized(false);
         }
       } catch (error) {
+        if (!isMounted || currentUserId !== thisUserId) return;
         console.error('Error fetching profile:', error);
         setAuthorized(false);
       } finally {
-        setLoading(false);
+        if (isMounted && currentUserId === thisUserId) {
+          setLoading(false);
+        }
       }
     });
 
-    return () => unsub();
+    return () => {
+      isMounted = false;
+      unsub();
+    };
   }, []);
 
   if (loading) {
@@ -91,25 +114,29 @@ export default function DashboardLayout({
   if (!authorized) {
     // On /dashboard page, show login form without sidebar
     return (
-      <div className="min-h-screen bg-black">
-        {children}
-      </div>
+      <ToastProvider>
+        <div className="min-h-screen bg-black">
+          {children}
+        </div>
+      </ToastProvider>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <Sidebar />
-      <main className="min-h-screen pt-20 lg:pt-0 lg:pl-64">
-        <div className="p-4 sm:p-6 lg:p-8">
-          <div className="flex justify-end mb-4">
-            <div className="hidden lg:block">
-              <NotificationBell />
+    <ToastProvider>
+      <div className="min-h-screen bg-black">
+        <Sidebar />
+        <main className="min-h-screen pt-20 lg:pt-0 lg:pl-64">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="flex justify-end mb-4">
+              <div className="hidden lg:block">
+                <NotificationBell />
+              </div>
             </div>
+            {children}
           </div>
-          {children}
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </ToastProvider>
   );
 }

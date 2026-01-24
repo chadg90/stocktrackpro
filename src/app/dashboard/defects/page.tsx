@@ -6,6 +6,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -101,8 +102,10 @@ export default function DefectsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'resolved'>('pending');
   
-  // Check if user is manager (only managers can view and resolve defects)
+  // Check if user is manager or admin (both can view and resolve defects)
   const isManager = profile?.role === 'manager';
+  const isAdmin = profile?.role === 'admin';
+  const canManageDefects = isManager || isAdmin;
   
   // Image viewer state
   const [viewingImage, setViewingImage] = useState<string | null>(null);
@@ -115,14 +118,14 @@ export default function DefectsPage() {
       if (user && firebaseDb) {
         setCurrentUser(user);
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
-        const snap = await import('firebase/firestore').then(mod => mod.getDoc(profileRef));
+        const snap = await getDoc(profileRef);
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile(data);
-          // Only managers can access defects page
-          if (data.role !== 'manager') {
+          // Managers and admins can access defects page
+          if (data.role !== 'manager' && data.role !== 'admin') {
             setLoading(false);
-            alert('Access denied. Only managers can view defects.');
+            alert('Access denied. Only managers and admins can view defects.');
             if (typeof window !== 'undefined') {
               window.location.href = '/dashboard';
             }
@@ -288,8 +291,8 @@ export default function DefectsPage() {
   };
 
   const handleDeleteDefect = async (defectId: string) => {
-    if (!isManager) {
-      alert('Only managers can delete defects.');
+    if (!canManageDefects) {
+      alert('Only managers and admins can delete defects.');
       return;
     }
     
@@ -554,7 +557,7 @@ export default function DefectsPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {defect.status !== 'resolved' && isManager && (
+                          {defect.status !== 'resolved' && canManageDefects && (
                             <button
                               onClick={() => handleResolveDefect(defect.id)}
                               className="text-sm bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/30 px-3 py-1.5 rounded-lg transition-colors"
@@ -562,11 +565,11 @@ export default function DefectsPage() {
                               Resolve
                             </button>
                           )}
-                          {isManager && (
+                          {canManageDefects && (
                             <button
                               onClick={() => handleDeleteDefect(defect.id)}
                               className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="Delete Defect (Manager Only)"
+                              title="Delete Defect"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>

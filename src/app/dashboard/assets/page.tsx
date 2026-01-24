@@ -6,6 +6,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -18,6 +19,7 @@ import Modal from '../components/Modal';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
 import ExportButton from '../components/ExportButton';
+import { useDebounce } from '@/hooks/useDebounce';
 
 type Tool = {
   id: string;
@@ -43,6 +45,7 @@ export default function AssetsPage() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
   // Modal states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -64,7 +67,7 @@ export default function AssetsPage() {
       if (user && firebaseDb) {
         // Fetch profile
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
-        const snap = await import('firebase/firestore').then(mod => mod.getDoc(profileRef));
+        const snap = await getDoc(profileRef);
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile(data);
@@ -146,9 +149,9 @@ export default function AssetsPage() {
   };
 
   const filteredTools = tools.filter(tool => 
-    tool.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tool.qr_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tool.brand?.toLowerCase().includes(searchTerm.toLowerCase())
+    tool.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    tool.qr_code?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    tool.brand?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   return (

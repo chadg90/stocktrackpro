@@ -11,14 +11,14 @@ import Image from 'next/image';
 import NotificationBell from './NotificationBell';
 
 const navigation = [
-  { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Assets', href: '/dashboard/assets', icon: Package },
-  { name: 'Fleet', href: '/dashboard/fleet', icon: Truck },
-  { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },
-  { name: 'History', href: '/dashboard/history', icon: History },
-  { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  { name: 'Analytics Overview', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Fleet Analytics', href: '/dashboard/fleet', icon: Truck },
+  { name: 'Asset Analytics', href: '/dashboard/assets', icon: Package },
+  { name: 'Detailed Reports', href: '/dashboard/analytics', icon: BarChart3 },
+  { name: 'Defect Reports', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },
+  { name: 'Activity History', href: '/dashboard/history', icon: History },
   { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
-  { name: 'Team', href: '/dashboard/team', icon: Users },
+  { name: 'Team Analytics', href: '/dashboard/team', icon: Users },
   { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key },
   { name: 'Companies', href: '/dashboard/companies', icon: Building2, adminOnly: true },
 ];
@@ -57,7 +57,9 @@ export default function Sidebar() {
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         className="lg:hidden fixed top-4 left-4 z-[100] p-2 bg-black/90 border border-primary/30 rounded-lg text-white hover:bg-primary/10 transition-colors shadow-lg"
-        aria-label="Toggle menu"
+        aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={mobileMenuOpen}
+        aria-controls="sidebar-navigation"
       >
         {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
@@ -71,7 +73,11 @@ export default function Sidebar() {
       )}
 
       {/* Sidebar */}
-      <div className={`flex h-full w-64 flex-col fixed inset-y-0 z-[95] bg-black border-r border-primary/20 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+      <nav 
+        id="sidebar-navigation"
+        role="navigation"
+        aria-label="Main navigation"
+        className={`flex h-full w-64 flex-col fixed inset-y-0 z-[95] bg-black border-r border-primary/20 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
         mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}
       onClick={(e) => {
@@ -98,8 +104,10 @@ export default function Sidebar() {
         <nav className="space-y-2">
           {navigation
             .filter(item => {
+              // Admin-only items: only show to admins
               if (item.adminOnly && userRole !== 'admin') return false;
-              if (item.managerOnly && userRole !== 'manager') return false;
+              // Manager-only items: show to managers AND admins (admins have higher privileges)
+              if (item.managerOnly && userRole !== 'manager' && userRole !== 'admin') return false;
               return true;
             })
             .map((item) => {
@@ -134,7 +142,7 @@ export default function Sidebar() {
           Sign Out
         </button>
       </div>
-      </div>
+      </nav>
     </>
   );
 }
