@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { stripe } from '@/lib/stripe-server';
+import { getStripe } from '@/lib/stripe-server';
 import { getAdminDb } from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(rawBody, signature, secret);
+      event = getStripe().webhooks.constructEvent(rawBody, signature, secret);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Invalid signature';
       console.error('Stripe webhook signature verification failed:', message);
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         const subscriptionId = invoice.subscription as string | null;
         if (!subscriptionId) break;
 
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
         const companyId = subscription.metadata?.company_id;
         const tier = subscription.metadata?.tier;
         if (!companyId) {

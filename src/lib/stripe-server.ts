@@ -1,11 +1,18 @@
 import Stripe from 'stripe';
 
-const secret = process.env.STRIPE_SECRET_KEY;
-if (!secret) {
-  throw new Error('STRIPE_SECRET_KEY is not set');
-}
+let stripeInstance: Stripe | null = null;
 
-export const stripe = new Stripe(secret, { apiVersion: '2025-02-24.acacia' });
+/** Use this instead of a top-level stripe const so the build doesn't fail when STRIPE_SECRET_KEY is unset. */
+export function getStripe(): Stripe {
+  if (!stripeInstance) {
+    const secret = process.env.STRIPE_SECRET_KEY;
+    if (!secret) {
+      throw new Error('STRIPE_SECRET_KEY is not set');
+    }
+    stripeInstance = new Stripe(secret, { apiVersion: '2025-02-24.acacia' });
+  }
+  return stripeInstance;
+}
 
 export type SubscriptionTier = 'PRO_STARTER' | 'PRO_TEAM' | 'PRO_BUSINESS' | 'PRO_ENTERPRISE';
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe, getStripePriceId, type SubscriptionTier } from '@/lib/stripe-server';
+import { getStripe, getStripePriceId, type SubscriptionTier } from '@/lib/stripe-server';
 
 const VALID_TIERS: SubscriptionTier[] = ['PRO_STARTER', 'PRO_TEAM', 'PRO_BUSINESS', 'PRO_ENTERPRISE'];
 
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     const baseUrl = getBaseUrl();
     const priceId = getStripePriceId(tier as SubscriptionTier);
 
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
