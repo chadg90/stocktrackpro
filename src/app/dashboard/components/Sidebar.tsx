@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History, MapPin, Key, Building2, Menu, X, BarChart3, CreditCard, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, Package, Truck, Users, LogOut, AlertTriangle, History, MapPin, Key, Building2, Menu, X, BarChart3, CreditCard, ExternalLink } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -12,13 +12,13 @@ import NotificationBell from './NotificationBell';
 
 const navigation = [
   { name: 'Analytics Overview', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Fleet Analytics', href: '/dashboard/fleet', icon: Truck },
-  { name: 'Asset Analytics', href: '/dashboard/assets', icon: Package },
+  { name: 'Fleet', href: '/dashboard/fleet', icon: Truck },
+  { name: 'Assets', href: '/dashboard/assets', icon: Package },
   { name: 'Detailed Reports', href: '/dashboard/analytics', icon: BarChart3 },
-  { name: 'Defect Reports', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },
+  { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },
   { name: 'Activity History', href: '/dashboard/history', icon: History },
   { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
-  { name: 'Team Analytics', href: '/dashboard/team', icon: Users },
+  { name: 'Team', href: '/dashboard/team', icon: Users },
   { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key },
   { name: 'Companies', href: '/dashboard/companies', icon: Building2, adminOnly: true },
   { name: 'Subscribe', href: '/pricing', icon: CreditCard, managerOnly: true },

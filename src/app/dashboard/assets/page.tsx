@@ -165,7 +165,7 @@ export default function AssetsPage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Assets</h1>
+          <h1 className="text-3xl font-bold text-white">Asset Management</h1>
           <p className="text-white/70 text-sm mt-1">View and edit your tools and equipment inventory</p>
         </div>
         <ExportButton

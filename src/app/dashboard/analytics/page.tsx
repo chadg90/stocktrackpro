@@ -101,7 +101,7 @@ const formatDate = (value?: string | Timestamp) => {
 export default function AnalyticsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'all'>('30');
+  const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'overview' | 'fleet' | 'assets' | 'users'>('overview');
   
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -474,8 +474,10 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 no-print">
         <div>
-          <h1 className="text-3xl font-bold text-white">Detailed Analytics & Reports</h1>
-          <p className="text-white/70 text-sm mt-1">In-depth performance metrics and exportable reports</p>
+          <h1 className="text-3xl font-bold text-white">Detailed Reports</h1>
+          <p className="text-white/70 text-sm mt-1">
+            {dateRange === 'all' ? 'All-time metrics and exportable reports' : `Last ${dateRange} days — change period above to see different ranges`}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 bg-black border border-primary/30 rounded-lg p-1">
@@ -548,13 +550,13 @@ export default function AnalyticsPage() {
             <div className="bg-black border border-primary/25 rounded-xl p-6">
               <h3 className="text-white font-semibold mb-2">Total Inspections</h3>
               <p className="text-3xl font-bold text-primary">{inspections.length}</p>
-              <p className="text-white/50 text-sm">in selected period</p>
+              <p className="text-white/50 text-sm">{dateRange === 'all' ? 'all time' : `last ${dateRange} days`}</p>
             </div>
 
             <div className="bg-black border border-primary/25 rounded-xl p-6">
               <h3 className="text-white font-semibold mb-2">Active Defects</h3>
               <p className="text-3xl font-bold text-red-400">{defects.filter(d => d.status !== 'resolved').length}</p>
-              <p className="text-white/50 text-sm">requiring attention</p>
+              <p className="text-white/50 text-sm">{dateRange === 'all' ? 'all time' : `last ${dateRange} days`}</p>
             </div>
 
             <div className="bg-black border border-primary/25 rounded-xl p-6">
