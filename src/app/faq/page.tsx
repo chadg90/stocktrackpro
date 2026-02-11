@@ -4,8 +4,12 @@ import Navbar from '../components/Navbar';
 export default function FAQ() {
   const faqs = [
     {
+      question: "How do I get an account?",
+      answer: "Download Stock Track PRO from the App Store or Google Play. In the app you can create an account and either join a company using an access code (from your manager) or create a new company. Managers can also sign in on the web dashboard; there is no separate web sign-up—new users start in the app.",
+    },
+    {
       question: "Do I need QR codes to use the app?",
-      answer: "QR code labels are required for tools. Fleet is added manually and users select a vehicle from a dropdown.",
+      answer: "QR codes are used for tools and assets so staff can scan to check in and out. Fleet vehicles are added in the dashboard and selected from a list in the app (e.g. for inspections). You can use fleet only, assets only, or both.",
     },
     {
       question: "Do I need a limited company to use the app?",
@@ -13,19 +17,27 @@ export default function FAQ() {
     },
     {
       question: "Can I use this for fleet only?",
-      answer: "Yes. Subscriptions include both tool and fleet management so you can use either or both.",
+      answer: "Yes. Every plan includes both tool and fleet management; you can use one or both. Vehicle inspections and defect workflow are included where stated on the plan.",
     },
     {
       question: "Does this work on Android and iOS?",
-      answer: "Yes. The app is available on both platforms and includes a web dashboard for managers.",
+      answer: "Yes. The app is on both Android and iOS. Managers also get access to a web dashboard for analytics, team management, and subscription (web payers can manage billing in the dashboard).",
     },
     {
-      question: "Is my data secure?",
-      answer: "All data is encrypted and stored using Firebase on Google Cloud. Access is role-based.",
+      question: "How do I subscribe—app or web?",
+      answer: "Managers can subscribe on the web (Pricing page, pay by card) or in the app (App Store / Google Play). Web subscriptions can be managed or cancelled from the dashboard. In-app subscriptions are managed in your device’s store. New users get a 7-day free trial.",
     },
     {
       question: "Can I cancel anytime?",
-      answer: "Yes. There is no contract. Cancel directly in the App Store or Google Play. New users get a 7-day free trial.",
+      answer: "Yes. There is no long-term contract. If you subscribed on the web, use “Manage subscription” in the dashboard to update or cancel. If you subscribed in the app, cancel via your App Store or Google Play subscription settings.",
+    },
+    {
+      question: "Is my data secure?",
+      answer: "Data is stored in Firebase (Google Cloud) with encryption. Access is role-based: staff see only what they need; managers use the dashboard with company-scoped data.",
+    },
+    {
+      question: "We have a very large fleet or many users. Is there an Enterprise plan?",
+      answer: "Yes. The Enterprise plan includes up to 75 users, 1,500 assets, and 150 vehicles, plus dedicated support and custom onboarding. For larger deployments, contact us for a tailored quote.",
     },
   ];
 

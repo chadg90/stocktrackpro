@@ -99,7 +99,7 @@ export default function Sidebar() {
         id="sidebar-navigation"
         role="navigation"
         aria-label="Main navigation"
-        className={`flex h-full w-64 flex-col fixed inset-y-0 z-[95] bg-black border-r border-primary/20 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`flex h-full w-64 flex-col fixed inset-y-0 z-[95] bg-black border-r border-white/10 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
         mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}
       onClick={(e) => {
@@ -107,23 +107,25 @@ export default function Sidebar() {
         e.stopPropagation();
       }}
       >
-        <div className="flex h-20 items-center justify-between px-6 border-b border-primary/20">
-          <Link href="/" className="relative w-40 h-10" onClick={() => setMobileMenuOpen(false)}>
+        <div className="flex h-20 items-center justify-between px-5 border-b border-white/10 shrink-0">
+          <Link href="/" className="relative w-36 h-9 flex items-center" onClick={() => setMobileMenuOpen(false)}>
             <Image
               src="/logo.png"
               alt="Stock Track PRO"
               fill
               style={{ objectFit: 'contain' }}
               priority
+              className="object-left"
             />
           </Link>
           <div className="lg:hidden">
             <NotificationBell />
           </div>
         </div>
-      
-      <div className="flex-1 overflow-y-auto py-6 px-4">
-        <nav className="space-y-2">
+
+      <div className="flex-1 overflow-y-auto py-5 px-3">
+        <p className="px-3 mb-3 text-xs font-medium uppercase tracking-wider text-white/40">Menu</p>
+        <nav className="space-y-1">
           {navigation
             .filter(item => {
               // Admin-only items: only show to admins
@@ -141,38 +143,38 @@ export default function Sidebar() {
                   onClick={() => {
                     setMobileMenuOpen(false);
                   }}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                  className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-primary/10 text-primary border border-primary/20'
-                      : 'text-white/70 hover:text-white hover:bg-white/5'
+                      ? 'bg-primary/15 text-primary border border-primary/30'
+                      : 'text-white/70 hover:text-white hover:bg-white/5 border border-transparent'
                   }`}
                 >
-                  <item.icon className={`h-5 w-5 ${isActive ? 'text-primary' : 'text-white/50'}`} />
-                  {item.name}
+                  <item.icon className={`h-5 w-5 shrink-0 ${isActive ? 'text-primary' : 'text-white/50'}`} />
+                  <span className="truncate">{item.name}</span>
                 </Link>
               );
             })}
         </nav>
       </div>
 
-      <div className="p-4 border-t border-primary/20 space-y-2">
+      <div className="p-3 border-t border-white/10 space-y-1 shrink-0">
         {(userRole === 'manager' || userRole === 'admin') && (
           <button
             type="button"
             onClick={handleManageSubscription}
             disabled={portalLoading}
-            className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
+            className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-black"
             aria-label="Manage subscription"
           >
-            <ExternalLink className="h-5 w-5 text-white/50" />
-            {portalLoading ? 'Opening…' : 'Manage subscription'}
+            <ExternalLink className="h-5 w-5 shrink-0 text-white/50" />
+            <span className="truncate">{portalLoading ? 'Opening…' : 'Manage subscription'}</span>
           </button>
         )}
         <button
           onClick={handleSignOut}
-          className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
+          className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-black"
         >
-          <LogOut className="h-5 w-5 text-white/50" />
+          <LogOut className="h-5 w-5 shrink-0 text-white/50" />
           Sign Out
         </button>
       </div>

@@ -179,7 +179,7 @@ export default function AccessCodesPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4">Access Restricted</h2>
-          <p className="text-white/70">Only managers and administrators can manage access codes.</p>
+          <p className="text-white/70">Only managers can manage access codes.</p>
         </div>
       </div>
     );

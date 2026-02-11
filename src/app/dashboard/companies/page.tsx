@@ -161,7 +161,7 @@ export default function CompaniesPage() {
 
   const handleDeleteCompany = async (companyId: string) => {
     if (!isAdmin) {
-      alert('Only admins can delete companies.');
+      alert('Only company owners can delete companies.');
       return;
     }
 
@@ -194,7 +194,7 @@ export default function CompaniesPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <p className="text-white/70 text-lg">Access Restricted</p>
-          <p className="text-white/50 text-sm mt-2">Only administrators can view this page.</p>
+          <p className="text-white/50 text-sm mt-2">Restricted to company owners.</p>
         </div>
       </div>
     );

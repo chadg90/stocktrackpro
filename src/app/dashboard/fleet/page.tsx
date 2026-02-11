@@ -23,6 +23,7 @@ import ExportButton from '../components/ExportButton';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
 import { useDebounce } from '@/hooks/useDebounce';
+import { checkCanAddVehicle } from '@/lib/subscriptionLimits';
 
 type Vehicle = {
   id: string;
@@ -181,7 +182,13 @@ export default function FleetPage() {
   const handleAddVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseDb || !profile?.company_id) return;
-    
+
+    const limitCheck = await checkCanAddVehicle(firebaseDb, profile.company_id);
+    if (!limitCheck.allowed) {
+      alert(limitCheck.message ?? 'Vehicle limit reached for your plan.');
+      return;
+    }
+
     setProcessing(true);
     try {
       await addDoc(collection(firebaseDb!, 'vehicles'), {

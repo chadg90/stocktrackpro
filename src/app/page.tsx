@@ -74,7 +74,7 @@ export default function Home() {
               {
                 icon: <Users className="w-6 h-6 text-primary" />,
                 title: "Team and Role Management",
-                description: "Managers oversee companies, admins run the platform, and users work in the field."
+                description: "Managers oversee the company and team; staff work in the field."
               },
               {
                 icon: <Wrench className="w-6 h-6 text-primary" />,
@@ -119,7 +119,7 @@ export default function Home() {
               { title: "Fleet Management", description: "Log every vehicle, inspection, mileage reading, and service date.", icon: <Map className="w-6 h-6 text-primary" /> },
               { title: "Photo Inspections", description: "Capture required inspection photos and attach defect reports on the spot.", icon: <Smartphone className="w-6 h-6 text-primary" /> },
               { title: "Defect Reporting", description: "Flag defects, mark repairs complete, and automatically update vehicle status.", icon: <Wrench className="w-6 h-6 text-primary" /> },
-              { title: "Team Management", description: "Managers control their company; admins run the platform; field users keep work moving.", icon: <Users className="w-6 h-6 text-primary" /> },
+              { title: "Team Management", description: "Managers control their company; field staff keep work moving.", icon: <Users className="w-6 h-6 text-primary" /> },
             ].map((item, index) => (
               <div key={index} className="bg-black border border-primary/20 rounded-xl p-6 sm:p-7 hover:border-primary/50 transition-colors">
                 <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-4">

@@ -126,13 +126,16 @@ export default function DashboardLayout({
     <ToastProvider>
       <div className="min-h-screen bg-black">
         <Sidebar />
-        <main className="min-h-screen pt-20 lg:pt-0 lg:pl-64">
-          <div className="p-4 sm:p-6 lg:p-8">
-            <div className="flex justify-end mb-4">
-              <div className="hidden lg:block">
-                <NotificationBell />
+        <main className="min-h-screen pt-20 lg:pt-0 lg:pl-64 bg-zinc-950/50">
+          <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+            <header className="flex flex-wrap items-center justify-between gap-4 mb-6 lg:mb-8">
+              <div className="min-w-0 flex-1" aria-hidden />
+              <div className="flex items-center gap-3">
+                <div className="hidden lg:block">
+                  <NotificationBell />
+                </div>
               </div>
-            </div>
+            </header>
             {children}
           </div>
         </main>

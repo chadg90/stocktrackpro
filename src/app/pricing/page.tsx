@@ -16,6 +16,7 @@ type Tier = {
   description: string;
   price: number;
   features: string[];
+  enterpriseNote?: boolean;
 };
 
 export default function Pricing() {
@@ -121,7 +122,7 @@ export default function Pricing() {
       price: 49.99,
       features: [
         "Up to 40 users",
-        "Unlimited assets",
+        "Up to 1,500 assets",
         "Up to 40 vehicles",
         "All features included",
         "Admin and manager roles",
@@ -135,14 +136,15 @@ export default function Pricing() {
       description: "For large enterprises",
       price: 119.99,
       features: [
-        "Unlimited users",
-        "Unlimited assets",
-        "Unlimited vehicles",
+        "Up to 75 users",
+        "Up to 1,500 assets",
+        "Up to 150 vehicles",
         "Custom onboarding",
         "Dedicated support",
         "All features included",
         "7-day free trial for new users",
-      ]
+      ],
+      enterpriseNote: true,
     }
   ];
 
@@ -240,6 +242,11 @@ export default function Pricing() {
                       <span className="text-white/85 text-sm leading-relaxed">{feature}</span>
                     </div>
                   ))}
+                  {tier.enterpriseNote && (
+                    <p className="text-white/50 text-xs mt-3 pt-2 border-t border-white/10">
+                      Very large fleets or user counts? <Link href="/contact" className="text-primary hover:underline">Contact us</Link> for a tailored quote.
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
@@ -274,6 +281,13 @@ export default function Pricing() {
                 <span>Enterprise is available in-app and can be purchased here for your company</span>
               </li>
             </ul>
+          </div>
+
+          {/* New user / sign-up */}
+          <div className="mt-8 text-center">
+            <p className="text-sm text-white/60">
+              New to Stock Track PRO? <Link href="/how-to" className="text-primary hover:underline">See how to get started</Link> in the app or <Link href="/contact" className="text-primary hover:underline">contact us</Link>.
+            </p>
           </div>
 
           {/* Pricing Notice */}

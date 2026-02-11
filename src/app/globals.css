@@ -29,6 +29,20 @@ body {
       linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 60px 60px;
   }
+
+  /* Dashboard: consistent card and section styling */
+  .dashboard-card {
+    @apply rounded-xl border border-white/10 bg-black/40 backdrop-blur-sm;
+  }
+  .dashboard-section-title {
+    @apply text-lg font-semibold tracking-tight text-white;
+  }
+  .dashboard-kpi-value {
+    @apply text-2xl font-bold tabular-nums text-white;
+  }
+  .dashboard-kpi-label {
+    @apply text-sm text-white/60;
+  }
 }
 
 @layer utilities {

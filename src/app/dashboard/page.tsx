@@ -172,7 +172,7 @@ export default function DashboardPage() {
       }
       const data = snap.data() as Profile;
       if (data.role !== 'manager' && data.role !== 'admin') {
-        throw new Error('Access restricted. Only managers and admins can access the dashboard.');
+        throw new Error('Access restricted. Only managers can access the dashboard.');
       }
       setProfile(data);
       return data;
@@ -655,49 +655,59 @@ export default function DashboardPage() {
       <div className={`${!authUser ? 'container mx-auto px-4 pt-28 pb-16' : ''}`}>
         <div className="max-w-7xl mx-auto">
           {error && (
-            <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-              {error}
+            <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex flex-wrap items-center justify-between gap-2" role="alert">
+              <span>{error}</span>
+              {profile?.company_id && (
+                <button
+                  type="button"
+                  onClick={() => { setError(null); fetchData(profile.company_id); }}
+                  className="text-primary hover:underline font-medium whitespace-nowrap"
+                >
+                  Try again
+                </button>
+              )}
             </div>
           )}
 
           {!authUser && (
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
-            <div className="bg-black border border-primary/30 rounded-2xl p-8 max-w-md w-full">
+            <div className="dashboard-card p-8 max-w-md w-full shadow-xl">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Analytics Dashboard</h2>
-                <p className="text-white/60 text-sm mt-2">Sign in to view your organization's analytics</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-white">Analytics Dashboard</h2>
+                <p className="text-white/60 text-sm mt-2">Sign in to view your organisation’s analytics</p>
               </div>
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div>
-                  <label className="block text-sm text-white/80 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-white/80 mb-1.5">Email</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg bg-black border border-primary/30 px-3 py-2 text-white focus:border-primary outline-none"
+                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-white/80 mb-1">Password</label>
+                  <label className="block text-sm font-medium text-white/80 mb-1.5">Password</label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg bg-black border border-primary/30 px-3 py-2 text-white focus:border-primary outline-none"
+                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
                     required
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-2 transition-colors disabled:opacity-60"
+                  className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
                   disabled={loading}
                 >
-                  {loading ? 'Signing in...' : 'Sign In'}
+                  {loading ? 'Signing in…' : 'Sign in'}
                 </button>
               </form>
-              <p className="text-white/60 text-center text-sm mt-4">
-                Managers and admins only.
+              <p className="text-white/60 text-center text-sm mt-4">Managers only.</p>
+              <p className="text-white/50 text-center text-xs mt-2">
+                New user? Download the app to create an account with an access code, or <a href="/contact" className="text-primary hover:underline">contact us</a>.
               </p>
             </div>
             </div>
@@ -706,28 +716,32 @@ export default function DashboardPage() {
           {isAuthedManager && (
             <div id="analytics-report" className="print-content space-y-8">
               {/* Header with controls */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 no-print">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 no-print">
                 <div>
-                  <h1 className="text-3xl font-bold text-white">Analytics Dashboard</h1>
-                  <p className="text-white/70 text-sm mt-1">
-                    Comprehensive analytics for vehicles, assets, and team performance
+                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Analytics Dashboard</h1>
+                  <p className="text-white/60 text-sm mt-1">
+                    Vehicles, assets and team performance at a glance
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-2 bg-black border border-primary/30 rounded-lg p-1">
-                    {['7', '30', '90', 'all'].map((range) => (
-                      <button
-                        key={range}
-                        onClick={() => setDateRange(range as '7' | '30' | '90' | 'all')}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                          dateRange === range
-                            ? 'bg-primary text-black'
-                            : 'text-white/70 hover:text-white'
-                        }`}
-                      >
-                        {range === 'all' ? 'All' : `${range}d`}
-                      </button>
-                    ))}
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/50 text-sm hidden sm:inline">Period</span>
+                    <div className="flex items-center gap-0.5 bg-white/5 border border-white/10 rounded-lg p-0.5">
+                      {['7', '30', '90', 'all'].map((range) => (
+                        <button
+                          key={range}
+                          onClick={() => setDateRange(range as '7' | '30' | '90' | 'all')}
+                          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+                            dateRange === range
+                              ? 'bg-primary text-black'
+                              : 'text-white/70 hover:text-white'
+                          }`}
+                          aria-label={range === 'all' ? 'All time' : `Last ${range} days`}
+                        >
+                          {range === 'all' ? 'All' : `${range}d`}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <ExportButton
                     data={exportData.vehicles}
@@ -743,10 +757,10 @@ export default function DashboardPage() {
                   <PrintButton title="Analytics Report" contentId="analytics-report" />
                   <button
                     onClick={() => profile?.company_id && fetchData(profile.company_id)}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-primary/40 text-white hover:border-primary transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-white/20 text-white hover:bg-white/5 transition-colors disabled:opacity-60"
                     disabled={loading}
                   >
-                    <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`h-4 w-4 shrink-0 ${loading ? 'animate-spin' : ''}`} />
                     Refresh
                   </button>
                 </div>
@@ -758,60 +772,68 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-600">Generated on {format(new Date(), 'PPP')}</p>
               </div>
 
+              {/* Loading overlay for data */}
+              {loading && vehicles.length === 0 && assets.length === 0 && (
+                <div className="mb-8 flex items-center gap-3 text-white/60 text-sm">
+                  <RefreshCw className="h-4 w-4 animate-spin" aria-hidden />
+                  <span>Loading analytics…</span>
+                </div>
+              )}
+
               {/* KPI Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="bg-black border border-primary/25 rounded-xl p-5">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <div className="dashboard-card p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-500/15 flex items-center justify-center">
                       <Truck className="h-5 w-5 text-blue-400" />
                     </div>
-                    <span className={`inline-flex items-center gap-1 text-xs ${fleetUtilization >= 70 ? 'text-green-400' : 'text-yellow-400'}`}>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${fleetUtilization >= 70 ? 'text-green-400' : 'text-amber-400'}`}>
                       {fleetUtilization >= 70 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                       {fleetUtilization}%
                     </span>
                   </div>
-                  <p className="text-2xl font-bold text-white">{vehiclesCount ?? '—'}</p>
-                  <p className="text-white/60 text-sm">Fleet Vehicles</p>
+                  <p className="dashboard-kpi-value">{vehiclesCount ?? '—'}</p>
+                  <p className="dashboard-kpi-label">Fleet vehicles</p>
                   <p className="text-white/40 text-xs mt-1">{activeVehiclesCount ?? 0} active</p>
                 </div>
 
-                <div className="bg-black border border-primary/25 rounded-xl p-5">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <div className="dashboard-card p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-500/15 flex items-center justify-center">
                       <Package className="h-5 w-5 text-purple-400" />
                     </div>
-                    <span className={`inline-flex items-center gap-1 text-xs ${assetUtilization >= 70 ? 'text-green-400' : 'text-yellow-400'}`}>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${assetUtilization >= 70 ? 'text-green-400' : 'text-amber-400'}`}>
                       {assetUtilization >= 70 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                       {assetUtilization}%
                     </span>
                   </div>
-                  <p className="text-2xl font-bold text-white">{assetsCount ?? '—'}</p>
-                  <p className="text-white/60 text-sm">Total Assets</p>
+                  <p className="dashboard-kpi-value">{assetsCount ?? '—'}</p>
+                  <p className="dashboard-kpi-label">Total assets</p>
                   <p className="text-white/40 text-xs mt-1">{activeAssetsCount ?? 0} active</p>
                 </div>
 
-                <div className="bg-black border border-primary/25 rounded-xl p-5">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-green-400" />
+                <div className="dashboard-card p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-emerald-400" />
                     </div>
                   </div>
-                  <p className="text-2xl font-bold text-white">{teamCount ?? '—'}</p>
-                  <p className="text-white/60 text-sm">Team Members</p>
-                  <p className="text-white/40 text-xs mt-1">{userActivity.length} active users</p>
+                  <p className="dashboard-kpi-value">{teamCount ?? '—'}</p>
+                  <p className="dashboard-kpi-label">Team members</p>
+                  <p className="text-white/40 text-xs mt-1">{userActivity.length} active</p>
                 </div>
 
-                <div className="bg-black border border-primary/25 rounded-xl p-5">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                <div className="dashboard-card p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-cyan-500/15 flex items-center justify-center">
                       <Target className="h-5 w-5 text-cyan-400" />
                     </div>
-                    <span className={`inline-flex items-center gap-1 text-xs ${defectResolutionRate >= 70 ? 'text-green-400' : 'text-red-400'}`}>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${defectResolutionRate >= 70 ? 'text-green-400' : 'text-red-400'}`}>
                       {defectResolutionRate}%
                     </span>
                   </div>
-                  <p className="text-2xl font-bold text-white">{inspectionsCount ?? '—'}</p>
-                  <p className="text-white/60 text-sm">Total Inspections</p>
+                  <p className="dashboard-kpi-value">{inspectionsCount ?? '—'}</p>
+                  <p className="dashboard-kpi-label">Total inspections</p>
                   <p className="text-white/40 text-xs mt-1">~{avgInspectionsPerDay}/day avg</p>
                 </div>
               </div>
@@ -819,12 +841,13 @@ export default function DashboardPage() {
               {/* Fleet Analytics Section */}
               <div className="mb-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <Truck className="h-6 w-6 text-blue-400" />
-                  <h2 className="text-xl font-bold text-white">Fleet Analytics</h2>
+                  <Truck className="h-5 w-5 text-blue-400 shrink-0" />
+                  <h2 className="dashboard-section-title">Fleet analytics</h2>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Vehicle Status */}
-                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                  <ChartErrorBoundary>
+                  <div className="dashboard-card p-6">
                     <h3 className="text-white font-semibold mb-4">Vehicle Status Distribution</h3>
                     {vehicleStatusBreakdown.length > 0 ? (
                       <ResponsiveContainer width="100%" height={250}>
@@ -850,10 +873,11 @@ export default function DashboardPage() {
                       <div className="h-[250px] flex items-center justify-center text-white/50">No vehicle data</div>
                     )}
                   </div>
+                  </ChartErrorBoundary>
 
                   {/* Vehicles by Make */}
-                  <div className="bg-black border border-primary/25 rounded-xl p-6">
-                    <h3 className="text-white font-semibold mb-4">Vehicles by Make</h3>
+                  <div className="dashboard-card p-6">
+                    <h3 className="text-white font-semibold mb-4">Vehicles by make</h3>
                     {vehiclesByMake.length > 0 ? (
                       <ResponsiveContainer width="100%" height={250}>
                         <BarChart data={vehiclesByMake} layout="vertical">
@@ -870,8 +894,8 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Inspections by Vehicle */}
-                  <div className="bg-black border border-primary/25 rounded-xl p-6">
-                    <h3 className="text-white font-semibold mb-4">Top Inspected Vehicles</h3>
+                  <div className="dashboard-card p-6">
+                    <h3 className="text-white font-semibold mb-4">Top inspected vehicles</h3>
                     {inspectionsByVehicle.length > 0 ? (
                       <div className="space-y-3 max-h-[250px] overflow-y-auto">
                         {inspectionsByVehicle.map((v, i) => (
@@ -899,12 +923,12 @@ export default function DashboardPage() {
               {/* Asset Analytics Section */}
               <div className="mb-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <Package className="h-6 w-6 text-purple-400" />
-                  <h2 className="text-xl font-bold text-white">Asset Analytics</h2>
+                  <Package className="h-5 w-5 text-purple-400 shrink-0" />
+                  <h2 className="dashboard-section-title">Asset analytics</h2>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Asset Status */}
-                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                  <div className="dashboard-card p-6">
                     <h3 className="text-white font-semibold mb-4">Asset Status Distribution</h3>
                     {assetStatusBreakdown.length > 0 ? (
                       <ResponsiveContainer width="100%" height={250}>
@@ -932,8 +956,8 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Assets by Type */}
-                  <div className="bg-black border border-primary/25 rounded-xl p-6">
-                    <h3 className="text-white font-semibold mb-4">Assets by Type</h3>
+                  <div className="dashboard-card p-6">
+                    <h3 className="text-white font-semibold mb-4">Assets by type</h3>
                     {assetsByType.length > 0 ? (
                       <ResponsiveContainer width="100%" height={250}>
                         <BarChart data={assetsByType} layout="vertical">
@@ -950,8 +974,8 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Asset Usage Actions */}
-                  <div className="bg-black border border-primary/25 rounded-xl p-6">
-                    <h3 className="text-white font-semibold mb-4">Asset Activity</h3>
+                  <div className="dashboard-card p-6">
+                    <h3 className="text-white font-semibold mb-4">Asset activity</h3>
                     {assetUsageByAction.length > 0 ? (
                       <div className="space-y-3 max-h-[250px] overflow-y-auto">
                         {assetUsageByAction.map((a, i) => (
@@ -971,13 +995,13 @@ export default function DashboardPage() {
               {/* User Analytics Section */}
               <div className="mb-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <Users className="h-6 w-6 text-green-400" />
-                  <h2 className="text-xl font-bold text-white">User Analytics</h2>
+                  <Users className="h-5 w-5 text-emerald-400 shrink-0" />
+                  <h2 className="dashboard-section-title">User analytics</h2>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Users by Role */}
-                  <div className="bg-black border border-primary/25 rounded-xl p-6">
-                    <h3 className="text-white font-semibold mb-4">Team by Role</h3>
+                  <div className="dashboard-card p-6">
+                    <h3 className="text-white font-semibold mb-4">Team by role</h3>
                     {usersByRole.length > 0 ? (
                       <ResponsiveContainer width="100%" height={250}>
                         <PieChart>
@@ -1003,8 +1027,8 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Top Active Users */}
-                  <div className="bg-black border border-primary/25 rounded-xl p-6">
-                    <h3 className="text-white font-semibold mb-4">Most Active Users</h3>
+                  <div className="dashboard-card p-6">
+                    <h3 className="text-white font-semibold mb-4">Most active users</h3>
                     {userActivity.length > 0 ? (
                       <div className="space-y-3 max-h-[250px] overflow-y-auto">
                         {userActivity.map((u, i) => (
@@ -1038,12 +1062,12 @@ export default function DashboardPage() {
               {/* Trends Section */}
               <div className="mb-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <TrendingUp className="h-6 w-6 text-cyan-400" />
-                  <h2 className="text-xl font-bold text-white">Trends & Insights</h2>
+                  <TrendingUp className="h-5 w-5 text-cyan-400 shrink-0" />
+                  <h2 className="dashboard-section-title">Trends & insights</h2>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Inspections Over Time */}
-                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                  <div className="dashboard-card p-6">
                     <h3 className="text-white font-semibold mb-4">Inspections Over Time</h3>
                     {inspectionsOverTime.length > 0 ? (
                       <ResponsiveContainer width="100%" height={300}>
@@ -1067,7 +1091,7 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Defects Trend */}
-                  <div className="bg-black border border-primary/25 rounded-xl p-6">
+                  <div className="dashboard-card p-6">
                     <h3 className="text-white font-semibold mb-4">Defects Trend</h3>
                     {defectsTrend.length > 0 ? (
                       <ResponsiveContainer width="100%" height={300}>
@@ -1088,7 +1112,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Defects by Severity */}
-                <div className="mt-6 bg-black border border-primary/25 rounded-xl p-6">
+                <div className="mt-6 dashboard-card p-6">
                   <h3 className="text-white font-semibold mb-4">Defects by Severity</h3>
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {defectsBySeverity.length > 0 ? (
@@ -1124,8 +1148,8 @@ export default function DashboardPage() {
               </div>
 
               {/* Summary Statistics Table */}
-              <div className="bg-black border border-primary/25 rounded-xl p-6">
-                <h3 className="text-white font-semibold mb-4">Summary Statistics</h3>
+              <div className="dashboard-card p-6">
+                <h3 className="text-white font-semibold mb-4">Summary statistics</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead className="border-b border-white/10">

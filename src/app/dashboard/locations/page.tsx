@@ -142,7 +142,7 @@ export default function LocationsPage() {
 
   const handleDeleteLocation = async (locationId: string) => {
     if (!canDelete) {
-      alert('Only admins can delete locations.');
+      alert('Only company owners can delete locations.');
       return;
     }
     if (!confirm('Are you sure you want to delete this location? This action cannot be undone.') || !firebaseDb) return;

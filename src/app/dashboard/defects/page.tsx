@@ -125,7 +125,7 @@ export default function DefectsPage() {
           // Managers and admins can access defects page
           if (data.role !== 'manager' && data.role !== 'admin') {
             setLoading(false);
-            alert('Access denied. Only managers and admins can view defects.');
+            alert('Access denied. Only managers can view defects.');
             if (typeof window !== 'undefined') {
               window.location.href = '/dashboard';
             }
@@ -292,7 +292,7 @@ export default function DefectsPage() {
 
   const handleDeleteDefect = async (defectId: string) => {
     if (!canManageDefects) {
-      alert('Only managers and admins can delete defects.');
+      alert('Only managers can delete defects.');
       return;
     }
     
