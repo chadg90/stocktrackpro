@@ -2,9 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe-server';
 import { getAdminDb } from '@/lib/firebase-admin';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
+const WEBHOOK_WINDOW_MS = 60 * 1000;
+const WEBHOOK_MAX_REQUESTS = 120; // Stripe may retry
+
+const PROCESSED_EVENTS_COLLECTION = 'stripe_webhook_events';
+
+async function alreadyProcessed(db: ReturnType<typeof getAdminDb>, eventId: string): Promise<boolean> {
+  const ref = db.collection(PROCESSED_EVENTS_COLLECTION).doc(eventId);
+  const snap = await ref.get();
+  return snap.exists;
+}
+
+async function markProcessed(db: ReturnType<typeof getAdminDb>, eventId: string): Promise<void> {
+  await db.collection(PROCESSED_EVENTS_COLLECTION).doc(eventId).set({
+    processed_at: new Date().toISOString(),
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    if (!rateLimit(ip, 'stripe-webhook', WEBHOOK_WINDOW_MS, WEBHOOK_MAX_REQUESTS)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const rawBody = await request.text();
     const signature = request.headers.get('stripe-signature');
     if (!signature) {
@@ -26,6 +48,12 @@ export async function POST(request: NextRequest) {
 
     const db = getAdminDb();
 
+    // Idempotency: skip if we already processed this event (Stripe retries)
+    const eventId = event.id;
+    if (await alreadyProcessed(db, eventId)) {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
     switch (event.type) {
       case 'invoice.paid': {
         const invoice = event.data.object as Stripe.Invoice;
@@ -44,6 +72,7 @@ export async function POST(request: NextRequest) {
         const expiryDate = periodEnd
           ? new Date(periodEnd * 1000).toISOString().split('T')[0]
           : null;
+        const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
 
         await db.collection('companies').doc(companyId).set(
           {
@@ -52,6 +81,7 @@ export async function POST(request: NextRequest) {
             ...(tier && { subscription_tier: tier }),
             ...(expiryDate && { subscription_expiry_date: expiryDate }),
             stripe_subscription_id: subscription.id,
+            ...(customerId && { stripe_customer_id: customerId }),
             updated_at: new Date().toISOString(),
           },
           { merge: true }
@@ -72,6 +102,7 @@ export async function POST(request: NextRequest) {
         const expiryDate = periodEnd
           ? new Date(periodEnd * 1000).toISOString().split('T')[0]
           : null;
+        const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
 
         await db.collection('companies').doc(companyId).set(
           {
@@ -80,6 +111,7 @@ export async function POST(request: NextRequest) {
             ...(tier && { subscription_tier: tier }),
             ...(expiryDate && { subscription_expiry_date: expiryDate }),
             stripe_subscription_id: subscription.id,
+            ...(customerId && { stripe_customer_id: customerId }),
             updated_at: new Date().toISOString(),
           },
           { merge: true }
@@ -106,10 +138,10 @@ export async function POST(request: NextRequest) {
       }
 
       default:
-        // Unhandled event type
         break;
     }
 
+    await markProcessed(db, eventId);
     return NextResponse.json({ received: true });
   } catch (err) {
     console.error('Stripe webhook error:', err);

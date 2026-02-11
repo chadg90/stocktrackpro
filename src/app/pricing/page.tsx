@@ -20,8 +20,10 @@ type Tier = {
 
 export default function Pricing() {
   const [profile, setProfile] = useState<{ company_id?: string; role?: string } | null>(null);
+  const [authUser, setAuthUser] = useState<{ getIdToken: () => Promise<string> } | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<TierId | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) {
@@ -32,9 +34,11 @@ export default function Pricing() {
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
       if (!user || !db) {
         setProfile(null);
+        setAuthUser(null);
         setAuthLoading(false);
         return;
       }
+      setAuthUser(user);
       try {
         const snap = await getDoc(doc(db, 'profiles', user.uid));
         setProfile(snap.exists() ? (snap.data() as { company_id?: string; role?: string }) : null);
@@ -53,12 +57,17 @@ export default function Pricing() {
   );
 
   const handleSubscribe = async (tier: TierId) => {
-    if (!profile?.company_id) return;
+    if (!profile?.company_id || !authUser) return;
+    setCheckoutError(null);
     setCheckoutLoading(tier);
     try {
+      const token = await authUser.getIdToken();
       const res = await fetch('/api/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ tier, company_id: profile.company_id }),
       });
       const data = await res.json();
@@ -66,8 +75,9 @@ export default function Pricing() {
       if (data.url) window.location.href = data.url;
       else throw new Error('No checkout URL');
     } catch (e) {
+      const message = e instanceof Error ? e.message : 'Something went wrong';
+      setCheckoutError(message);
       console.error(e);
-      alert(e instanceof Error ? e.message : 'Something went wrong');
     } finally {
       setCheckoutLoading(null);
     }
@@ -156,6 +166,17 @@ export default function Pricing() {
             Simple, transparent pricing. Managers can subscribe here with a card. Staff use the app. New users receive a 7-day free trial.
           </p>
 
+          {/* Checkout error - announced to screen readers */}
+          {checkoutError && (
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-center"
+            >
+              {checkoutError}
+            </div>
+          )}
+
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8 max-w-8xl mx-auto relative pt-8 overflow-visible">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 blur-3xl rounded-3xl"></div>
@@ -188,22 +209,25 @@ export default function Pricing() {
                       type="button"
                       onClick={() => handleSubscribe(tier.id)}
                       disabled={checkoutLoading !== null}
-                      className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold disabled:opacity-60 ${
+                      className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black ${
                         index === 2
                           ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
                           : 'bg-primary/10 hover:bg-primary/20 text-white border border-primary/20 hover:border-primary/40'
                       }`}
+                      aria-busy={checkoutLoading === tier.id}
+                      aria-label={checkoutLoading === tier.id ? 'Redirecting to checkout' : `Subscribe to ${tier.name}`}
                     >
                       {checkoutLoading === tier.id ? 'Redirecting…' : 'Subscribe'}
                     </button>
                   ) : (
                     <Link
                       href={authLoading ? '#' : (profile ? '/contact' : '/dashboard')}
-                      className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold text-center ${
+                      className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold text-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black ${
                         index === 2
                           ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
                           : 'bg-primary/10 hover:bg-primary/20 text-white border border-primary/20 hover:border-primary/40'
                       }`}
+                      aria-label={authLoading ? 'Loading' : profile ? 'Contact us to subscribe' : 'Log in to subscribe'}
                     >
                       {authLoading ? '…' : profile ? 'Contact' : 'Log in to subscribe'}
                     </Link>

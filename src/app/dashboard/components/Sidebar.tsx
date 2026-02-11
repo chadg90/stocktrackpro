@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History, MapPin, Key, Building2, Menu, X, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Package, Truck, Users, Settings, LogOut, AlertTriangle, History, MapPin, Key, Building2, Menu, X, BarChart3, CreditCard, ExternalLink } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -21,12 +21,14 @@ const navigation = [
   { name: 'Team Analytics', href: '/dashboard/team', icon: Users },
   { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key },
   { name: 'Companies', href: '/dashboard/companies', icon: Building2, adminOnly: true },
+  { name: 'Subscribe', href: '/pricing', icon: CreditCard, managerOnly: true },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -43,6 +45,26 @@ export default function Sidebar() {
 
     return () => unsub();
   }, []);
+
+  const handleManageSubscription = async () => {
+    if (!firebaseAuth?.currentUser) return;
+    setPortalLoading(true);
+    try {
+      const token = await firebaseAuth.currentUser.getIdToken();
+      const res = await fetch('/api/billing-portal', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to open billing');
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : 'Could not open billing portal. Subscribe first from the pricing page.');
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   const handleSignOut = async () => {
     if (firebaseAuth) {
@@ -133,10 +155,22 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <div className="p-4 border-t border-primary/20">
+      <div className="p-4 border-t border-primary/20 space-y-2">
+        {(userRole === 'manager' || userRole === 'admin') && (
+          <button
+            type="button"
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+            className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
+            aria-label="Manage subscription"
+          >
+            <ExternalLink className="h-5 w-5 text-white/50" />
+            {portalLoading ? 'Opening…' : 'Manage subscription'}
+          </button>
+        )}
         <button
           onClick={handleSignOut}
-          className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+          className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
         >
           <LogOut className="h-5 w-5 text-white/50" />
           Sign Out

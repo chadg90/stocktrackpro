@@ -1,31 +1,53 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogIn, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { firebaseAuth } from '@/lib/firebase';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navigation = [
+  useEffect(() => {
+    if (!firebaseAuth) {
+      setAuthChecked(true);
+      return;
+    }
+    const unsub = onAuthStateChanged(firebaseAuth, (user) => {
+      setIsLoggedIn(!!user);
+      setAuthChecked(true);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleSignOut = async () => {
+    if (firebaseAuth) await signOut(firebaseAuth);
+    setIsMenuOpen(false);
+  };
+
+  const baseNavigation = [
     { name: 'Home', href: '/' },
     { name: 'Features', href: '/features' },
     { name: 'Pricing', href: '/pricing' },
     { name: 'FAQ', href: '/faq' },
     { name: 'Contact', href: '/contact' },
-    { name: 'Dashboard', href: '/dashboard' },
   ];
+  const navigation = authChecked && isLoggedIn
+    ? [...baseNavigation, { name: 'Dashboard', href: '/dashboard' }]
+    : baseNavigation;
 
   return (
     <nav 
@@ -57,7 +79,7 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black ${
                     item.name === 'Contact'
                       ? 'text-white bg-primary hover:bg-primary-light'
                       : 'text-white/90 hover:text-primary'
@@ -65,8 +87,29 @@ const Navbar = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
-              </Link>
+                </Link>
               ))}
+              {authChecked && (
+                isLoggedIn ? (
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
+                  >
+                    <LogOut className="h-4 w-4" aria-hidden />
+                    Log out
+                  </button>
+                ) : (
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <LogIn className="h-4 w-4" aria-hidden />
+                    Log in
+                  </Link>
+                )
+              )}
             </div>
           </div>
 
@@ -74,8 +117,9 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-white/90 hover:text-primary hover:bg-black/50 focus:outline-none"
-              aria-expanded="false"
+              className="inline-flex items-center justify-center p-2 rounded-md text-white/90 hover:text-primary hover:bg-black/50 focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             >
               <span className="sr-only">Open main menu</span>
               {isMenuOpen ? (
@@ -89,13 +133,13 @@ const Navbar = () => {
       </div>
 
       {/* Mobile menu */}
-      <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+      <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <div className="px-2 pt-2 pb-3 space-y-1 bg-black/95 backdrop-blur-sm border-t border-primary/10">
           {navigation.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
+              className={`block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:ring-2 focus:ring-primary ${
                 item.name === 'Contact'
                   ? 'text-white bg-primary hover:bg-primary-light'
                   : 'text-white/90 hover:text-primary'
@@ -103,8 +147,29 @@ const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               {item.name}
-          </Link>
+            </Link>
           ))}
+          {authChecked && (
+            isLoggedIn ? (
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <LogOut className="h-4 w-4" aria-hidden />
+                Log out
+              </button>
+            ) : (
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <LogIn className="h-4 w-4" aria-hidden />
+                Log in
+              </Link>
+            )
+          )}
         </div>
       </div>
     </nav>

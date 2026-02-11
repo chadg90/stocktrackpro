@@ -2,6 +2,9 @@
   "name": "tool-management-website",
   "version": "0.1.0",
   "private": true,
+  "browserslist": [
+    "defaults"
+  ],
   "scripts": {
     "dev": "next dev",
     "dev:https": "NODE_ENV=development HTTPS=true SSL_CRT_FILE=localhost.crt SSL_KEY_FILE=localhost.key next dev",
@@ -38,7 +41,7 @@
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.1.0",
+    "eslint-config-next": "15.1.11",
     "typescript": "^5"
   }
 }
