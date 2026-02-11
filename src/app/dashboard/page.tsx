@@ -660,7 +660,7 @@ export default function DashboardPage() {
               {profile?.company_id && (
                 <button
                   type="button"
-                  onClick={() => { setError(null); fetchData(profile.company_id); }}
+                  onClick={() => { setError(null); if (profile?.company_id) fetchData(profile.company_id); }}
                   className="text-primary hover:underline font-medium whitespace-nowrap"
                 >
                   Try again
