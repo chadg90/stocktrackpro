@@ -1,13 +1,81 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import { Check } from 'lucide-react';
 import Link from 'next/link';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { firebaseAuth, firebaseDb } from '@/lib/firebase';
+
+type TierId = 'PRO_STARTER' | 'PRO_TEAM' | 'PRO_BUSINESS' | 'PRO_ENTERPRISE';
+
+type Tier = {
+  id: TierId;
+  name: string;
+  description: string;
+  price: number;
+  features: string[];
+};
 
 export default function Pricing() {
-  const tiers = [
+  const [profile, setProfile] = useState<{ company_id?: string; role?: string } | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState<TierId | null>(null);
+
+  useEffect(() => {
+    if (!firebaseAuth || !firebaseDb) {
+      setAuthLoading(false);
+      return;
+    }
+    const db = firebaseDb;
+    const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
+      if (!user || !db) {
+        setProfile(null);
+        setAuthLoading(false);
+        return;
+      }
+      try {
+        const snap = await getDoc(doc(db, 'profiles', user.uid));
+        setProfile(snap.exists() ? (snap.data() as { company_id?: string; role?: string }) : null);
+      } catch {
+        setProfile(null);
+      } finally {
+        setAuthLoading(false);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  const canSubscribe = Boolean(
+    profile?.company_id &&
+    (profile?.role === 'manager' || profile?.role === 'admin')
+  );
+
+  const handleSubscribe = async (tier: TierId) => {
+    if (!profile?.company_id) return;
+    setCheckoutLoading(tier);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier, company_id: profile.company_id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Checkout failed');
+      if (data.url) window.location.href = data.url;
+      else throw new Error('No checkout URL');
+    } catch (e) {
+      console.error(e);
+      alert(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
+  const tiers: Tier[] = [
     {
+      id: 'PRO_STARTER',
       name: "Starter",
       description: "Perfect for individual users",
       price: 19.99,
@@ -22,6 +90,7 @@ export default function Pricing() {
       ]
     },
     {
+      id: 'PRO_TEAM',
       name: "Team",
       description: "Ideal for small teams",
       price: 34.99,
@@ -36,6 +105,7 @@ export default function Pricing() {
       ]
     },
     {
+      id: 'PRO_BUSINESS',
       name: "Business",
       description: "For growing businesses",
       price: 49.99,
@@ -50,6 +120,7 @@ export default function Pricing() {
       ]
     },
     {
+      id: 'PRO_ENTERPRISE',
       name: "Enterprise",
       description: "For large enterprises",
       price: 119.99,
@@ -82,7 +153,7 @@ export default function Pricing() {
             Simple, Transparent <span className="text-primary bg-gradient-to-r from-primary to-yellow-400 bg-clip-text text-transparent">Pricing</span>
           </h1>
           <p className="text-xl sm:text-2xl text-white/90 mb-12 sm:mb-16 max-w-3xl mx-auto leading-relaxed">
-            Simple, transparent pricing. All subscriptions are managed in the app. New users receive a 7-day free trial.
+            Simple, transparent pricing. Managers can subscribe here with a card. Staff use the app. New users receive a 7-day free trial.
           </p>
 
           {/* Pricing Cards */}
@@ -91,7 +162,7 @@ export default function Pricing() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
             {tiers.map((tier, index) => (
               <div
-                key={tier.name}
+                key={tier.id}
                 className={`relative bg-black/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 border transition-all duration-500 hover:border-primary/60 hover:scale-[1.02] hover:shadow-2xl flex flex-col group overflow-visible ${
                   index === 2 
                     ? 'border-primary shadow-2xl shadow-primary/20 ring-2 ring-primary/20' 
@@ -112,16 +183,31 @@ export default function Pricing() {
                     </span>
                     <div className="text-white/60 text-sm mt-2">per month</div>
                   </div>
-                  <Link
-                    href="/contact"
-                    className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold ${
-                      index === 2
-                        ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
-                        : 'bg-primary/10 hover:bg-primary/20 text-white border border-primary/20 hover:border-primary/40'
-                    }`}
-                  >
-                    Contact
-                  </Link>
+                  {canSubscribe ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSubscribe(tier.id)}
+                      disabled={checkoutLoading !== null}
+                      className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold disabled:opacity-60 ${
+                        index === 2
+                          ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
+                          : 'bg-primary/10 hover:bg-primary/20 text-white border border-primary/20 hover:border-primary/40'
+                      }`}
+                    >
+                      {checkoutLoading === tier.id ? 'Redirecting…' : 'Subscribe'}
+                    </button>
+                  ) : (
+                    <Link
+                      href={authLoading ? '#' : (profile ? '/contact' : '/dashboard')}
+                      className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold text-center ${
+                        index === 2
+                          ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
+                          : 'bg-primary/10 hover:bg-primary/20 text-white border border-primary/20 hover:border-primary/40'
+                      }`}
+                    >
+                      {authLoading ? '…' : profile ? 'Contact' : 'Log in to subscribe'}
+                    </Link>
+                  )}
                 </div>
                 <div className="flex-1 space-y-2">
                   {tier.features.map((feature) => (
@@ -157,11 +243,11 @@ export default function Pricing() {
               </li>
               <li className="flex items-start">
                 <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
-                <span>Manage subscriptions through your App Store or Google Play account settings</span>
+                <span>Managers can subscribe or renew here with a card; in-app subscriptions use App Store or Google Play</span>
               </li>
               <li className="flex items-start">
                 <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
-                <span>Enterprise is available in-app and follows the same in-app subscription flow</span>
+                <span>Enterprise is available in-app and can be purchased here for your company</span>
               </li>
             </ul>
           </div>
