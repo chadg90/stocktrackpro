@@ -173,12 +173,7 @@ export default function AnalyticsPage() {
       setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)));
 
       // Fetch inspections with date filter
-      let inspectionsQuery = query(
-        collection(firebaseDb, 'vehicle_inspections'),
-        where('company_id', '==', companyId),
-        orderBy('inspected_at', 'desc')
-      );
-      
+      let inspectionsQuery;
       if (startDate) {
         inspectionsQuery = query(
           collection(firebaseDb, 'vehicle_inspections'),
@@ -186,10 +181,51 @@ export default function AnalyticsPage() {
           where('inspected_at', '>=', Timestamp.fromDate(startDate)),
           orderBy('inspected_at', 'desc')
         );
+      } else {
+        inspectionsQuery = query(
+          collection(firebaseDb, 'vehicle_inspections'),
+          where('company_id', '==', companyId),
+          orderBy('inspected_at', 'desc')
+        );
       }
       
-      const inspectionsSnap = await getDocs(inspectionsQuery);
-      setInspections(inspectionsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection)));
+      try {
+        const inspectionsSnap = await getDocs(inspectionsQuery);
+        const inspectionsData = inspectionsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
+        console.log('[Analytics] Fetched inspections:', inspectionsData.length, inspectionsData.map(i => ({ id: i.id, vehicle_id: i.vehicle_id, inspected_at: i.inspected_at })));
+        setInspections(inspectionsData);
+      } catch (inspError: any) {
+        console.error('[Analytics] Error fetching inspections (may need Firestore index):', inspError);
+        // If index error, try fallback query without orderBy
+        if (inspError?.code === 'failed-precondition' || inspError?.message?.includes('index')) {
+          console.warn('[Analytics] Missing Firestore index, using fallback query without orderBy');
+          try {
+            const fallbackQuery = query(
+              collection(firebaseDb, 'vehicle_inspections'),
+              where('company_id', '==', companyId)
+            );
+            const fallbackSnap = await getDocs(fallbackQuery);
+            const inspectionsData = fallbackSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
+            // Sort manually by inspected_at descending
+            inspectionsData.sort((a, b) => {
+              const aDate = getDateValue(a.inspected_at);
+              const bDate = getDateValue(b.inspected_at);
+              if (!aDate && !bDate) return 0;
+              if (!aDate) return 1;
+              if (!bDate) return -1;
+              return bDate.getTime() - aDate.getTime();
+            });
+            console.log('[Analytics] Fetched inspections (fallback, no orderBy):', inspectionsData.length);
+            setInspections(inspectionsData);
+          } catch (fallbackError) {
+            console.error('[Analytics] Fallback query also failed:', fallbackError);
+            setInspections([]);
+          }
+        } else {
+          // Other error, set empty array
+          setInspections([]);
+        }
+      }
 
       // Fetch defects
       let defectsQuery = query(
@@ -231,6 +267,13 @@ export default function AnalyticsPage() {
 
     } catch (error) {
       console.error('Error fetching analytics:', error);
+      // If it's an index error, log it clearly
+      if (error instanceof Error && error.message.includes('index')) {
+        console.error('Firestore index missing. Create composite index for:', {
+          collection: 'vehicle_inspections',
+          fields: ['company_id', 'inspected_at']
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -319,9 +362,17 @@ export default function AnalyticsPage() {
       };
     });
 
+    // Debug: log vehicle IDs and inspection vehicle_ids
+    if (inspections.length > 0) {
+      console.log('[Analytics] Vehicle IDs:', vehicles.map(v => v.id));
+      console.log('[Analytics] Inspection vehicle_ids:', inspections.map(i => i.vehicle_id));
+    }
+
     inspections.forEach(i => {
       if (i.vehicle_id && vehicleStats[i.vehicle_id]) {
         vehicleStats[i.vehicle_id].inspections++;
+      } else if (i.vehicle_id) {
+        console.warn('[Analytics] Inspection has vehicle_id but no matching vehicle:', i.vehicle_id, 'Available vehicle IDs:', Object.keys(vehicleStats));
       }
     });
 

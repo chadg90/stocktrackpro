@@ -33,11 +33,16 @@ export function getStripePriceId(tier: SubscriptionTier): string {
 }
 
 /** Create a Stripe Customer Portal session for managing subscription. Requires company to have stripe_customer_id. */
-export async function createBillingPortalSession(customerId: string, returnUrl: string): Promise<string> {
+export async function createBillingPortalSession(
+  customerId: string,
+  returnUrl: string,
+  configurationId?: string
+): Promise<string> {
   const stripe = getStripe();
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
     return_url: returnUrl,
+    ...(configurationId && { configuration: configurationId }),
   });
   if (!session.url) throw new Error('No portal URL');
   return session.url;

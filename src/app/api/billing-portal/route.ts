@@ -51,7 +51,9 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = getBaseUrl();
     const returnUrl = `${baseUrl}/dashboard`;
-    const url = await createBillingPortalSession(customerId, returnUrl);
+    // Optional: use custom portal configuration if set in env
+    const portalConfigId = process.env.STRIPE_PORTAL_CONFIGURATION_ID;
+    const url = await createBillingPortalSession(customerId, returnUrl, portalConfigId);
     return NextResponse.json({ url });
   } catch (err) {
     console.error('Billing portal error:', err);
