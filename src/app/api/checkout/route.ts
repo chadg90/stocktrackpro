@@ -3,6 +3,9 @@ import { getStripe, getStripePriceId, type SubscriptionTier } from '@/lib/stripe
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
+// Increase timeout for Vercel (max 60s on Pro, 10s on Hobby)
+export const maxDuration = 60;
+
 const VALID_TIERS: SubscriptionTier[] = ['PRO_STARTER', 'PRO_TEAM', 'PRO_BUSINESS', 'PRO_ENTERPRISE'];
 
 const CHECKOUT_WINDOW_MS = 60 * 1000; // 1 minute
@@ -10,10 +13,13 @@ const CHECKOUT_MAX_REQUESTS = 10;
 
 function getBaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL;
-  if (url) {
-    return url.startsWith('http') ? url : `https://${url}`;
+  if (url && url.trim()) {
+    const trimmed = url.trim();
+    return trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
   }
-  return 'https://stocktrackpro.com';
+  // Default fallback - but warn if not set
+  console.warn('NEXT_PUBLIC_APP_URL not set, using default. Set this in environment variables.');
+  return 'https://stocktrackpro.co.uk';
 }
 
 function getSuccessPath(): string {
@@ -45,7 +51,10 @@ function isAllowedOrigin(request: NextRequest): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
   try {
+    console.log('[Checkout] Request started');
+    
     // CORS / referrer check
     if (!isAllowedOrigin(request)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -97,14 +106,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('[Checkout] Fetching profile for uid:', uid);
+    // Initialize Firebase Admin early (may be slow on cold start)
+    const dbStart = Date.now();
     const db = getAdminDb();
+    console.log('[Checkout] Firebase Admin initialized in', Date.now() - dbStart, 'ms');
+    
     const profileSnap = await db.collection('profiles').doc(uid).get();
     if (!profileSnap.exists) {
+      console.error('[Checkout] Profile not found for uid:', uid);
       return NextResponse.json({ error: 'Profile not found' }, { status: 403 });
     }
     const profile = profileSnap.data();
     const profileCompanyId = profile?.company_id;
     const role = profile?.role;
+    console.log('[Checkout] Profile loaded:', { company_id: profileCompanyId, role });
+    
     const allowedRoles = ['manager', 'admin'];
     if (!profileCompanyId || profileCompanyId.trim() !== companyId.trim()) {
       return NextResponse.json(
@@ -122,26 +139,108 @@ export async function POST(request: NextRequest) {
     const baseUrl = getBaseUrl();
     const successUrl = `${baseUrl}${getSuccessPath()}?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${baseUrl}${getCancelPath()}`;
-    const priceId = getStripePriceId(tier as SubscriptionTier);
+    
+    // Validate URLs are absolute
+    if (!successUrl.startsWith('http://') && !successUrl.startsWith('https://')) {
+      console.error('Invalid success URL:', successUrl);
+      return NextResponse.json(
+        { error: 'Invalid success URL configuration' },
+        { status: 500 }
+      );
+    }
+    if (!cancelUrl.startsWith('http://') && !cancelUrl.startsWith('https://')) {
+      console.error('Invalid cancel URL:', cancelUrl);
+      return NextResponse.json(
+        { error: 'Invalid cancel URL configuration' },
+        { status: 500 }
+      );
+    }
+
+    let priceId: string;
+    try {
+      priceId = getStripePriceId(tier as SubscriptionTier);
+    } catch (priceError) {
+      console.error('Price ID error:', priceError);
+      return NextResponse.json(
+        { error: priceError instanceof Error ? priceError.message : 'Invalid price configuration' },
+        { status: 500 }
+      );
+    }
+
+    // Validate price ID format (Stripe price IDs start with price_)
+    if (!priceId.startsWith('price_')) {
+      console.error('Invalid price ID format:', priceId);
+      return NextResponse.json(
+        { error: 'Invalid price ID format. Price IDs must start with "price_".' },
+        { status: 500 }
+      );
+    }
+
+    // Log configuration for debugging
+    const secretKey = process.env.STRIPE_SECRET_KEY || '';
+    const isLiveMode = secretKey.startsWith('sk_live_');
+    console.log('[Checkout] Configuration:', {
+      mode: isLiveMode ? 'LIVE' : 'TEST',
+      tier,
+      priceId,
+      baseUrl,
+      successUrl,
+      cancelUrl,
+      companyId: companyId.trim(),
+    });
+
+    // Validate metadata values (Stripe requires strings, max 500 chars each)
+    const trimmedCompanyId = companyId.trim();
+    if (trimmedCompanyId.length > 500) {
+      return NextResponse.json(
+        { error: 'Company ID too long for Stripe metadata' },
+        { status: 400 }
+      );
+    }
+    if (tier.length > 500) {
+      return NextResponse.json(
+        { error: 'Tier value too long for Stripe metadata' },
+        { status: 400 }
+      );
+    }
 
     const stripe = getStripe();
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      payment_method_types: ['card'],
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      metadata: {
-        company_id: companyId.trim(),
-        tier,
-      },
-      subscription_data: {
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create({
+        mode: 'subscription',
+        payment_method_types: ['card'],
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: successUrl,
+        cancel_url: cancelUrl,
         metadata: {
-          company_id: companyId.trim(),
-          tier,
+          company_id: trimmedCompanyId,
+          tier: tier,
         },
-      },
-    });
+        subscription_data: {
+          metadata: {
+            company_id: trimmedCompanyId,
+            tier: tier,
+          },
+        },
+      });
+    } catch (stripeError: any) {
+      console.error('Stripe API error:', {
+        message: stripeError?.message,
+        type: stripeError?.type,
+        code: stripeError?.code,
+        param: stripeError?.param,
+        priceId,
+        successUrl,
+        cancelUrl,
+      });
+      // Return more specific error message
+      const errorMessage = stripeError?.message || 'Stripe checkout failed';
+      return NextResponse.json(
+        { error: errorMessage },
+        { status: 400 }
+      );
+    }
 
     if (!session.url) {
       return NextResponse.json(
@@ -150,9 +249,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const duration = Date.now() - startTime;
+    console.log('[Checkout] Success, duration:', duration, 'ms');
     return NextResponse.json({ url: session.url });
   } catch (err) {
-    console.error('Checkout error:', err);
+    const duration = Date.now() - startTime;
+    console.error('[Checkout] Error after', duration, 'ms:', err);
+    
+    // Handle timeout specifically
+    if (err instanceof Error && (err.message.includes('timeout') || err.message.includes('504'))) {
+      return NextResponse.json(
+        { error: 'Request timed out. Please try again. If this persists, check your Vercel function timeout settings.' },
+        { status: 504 }
+      );
+    }
+    
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Checkout failed' },
       { status: 500 }

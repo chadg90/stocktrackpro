@@ -392,8 +392,14 @@ export default function AnalyticsPage() {
     });
 
     return Object.values(vehicleStats)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
+      .sort((a, b) => {
+        // Sort by inspections first (most active), then by score
+        if (b.inspections !== a.inspections) {
+          return b.inspections - a.inspections;
+        }
+        return b.score - a.score;
+      });
+    // Removed .slice(0, 10) to show all vehicles
   }, [vehicles, inspections, defects]);
 
   // User performance
@@ -659,21 +665,33 @@ export default function AnalyticsPage() {
         <div className="space-y-6">
           {/* Vehicle Performance Rankings */}
           <div className="bg-black border border-primary/25 rounded-xl p-6">
-            <h3 className="text-white font-semibold mb-4">Vehicle Performance Rankings</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-white/10">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-white/70 text-sm">Rank</th>
-                    <th className="px-4 py-3 text-left text-white/70 text-sm">Vehicle</th>
-                    <th className="px-4 py-3 text-right text-white/70 text-sm">Inspections</th>
-                    <th className="px-4 py-3 text-right text-white/70 text-sm">Defects</th>
-                    <th className="px-4 py-3 text-right text-white/70 text-sm">Resolved</th>
-                    <th className="px-4 py-3 text-right text-white/70 text-sm">Health Score</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {vehiclePerformance.map((v, i) => (
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-semibold">Vehicle Performance Rankings</h3>
+              {vehiclePerformance.length > 0 && (
+                <span className="text-white/50 text-sm">
+                  Showing {vehiclePerformance.length} {vehiclePerformance.length === 1 ? 'vehicle' : 'vehicles'}
+                </span>
+              )}
+            </div>
+            {vehiclePerformance.length === 0 ? (
+              <div className="py-8 text-center text-white/50">
+                No vehicles found. Add vehicles in the Fleet page.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b border-white/10">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-white/70 text-sm">Rank</th>
+                      <th className="px-4 py-3 text-left text-white/70 text-sm">Vehicle</th>
+                      <th className="px-4 py-3 text-right text-white/70 text-sm">Inspections</th>
+                      <th className="px-4 py-3 text-right text-white/70 text-sm">Defects</th>
+                      <th className="px-4 py-3 text-right text-white/70 text-sm">Resolved</th>
+                      <th className="px-4 py-3 text-right text-white/70 text-sm">Health Score</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {vehiclePerformance.map((v, i) => (
                     <tr key={v.id} className="hover:bg-white/5">
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
@@ -700,9 +718,10 @@ export default function AnalyticsPage() {
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           {/* Defect Analysis */}

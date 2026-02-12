@@ -122,22 +122,66 @@ export default function HistoryPage() {
       setUsers(usersMap);
 
       // Fetch tool_history
-      const historyQ = query(
-        collection(firebaseDb!, 'tool_history'),
-        where('company_id', '==', companyId),
-        orderBy('timestamp', 'desc'),
-        limit(50) // Limit to last 50 events for performance
-      );
-      
-      const historySnap = await getDocs(historyQ);
-      const historyData = historySnap.docs.map(doc => ({ 
-        id: doc.id, 
-        ...doc.data() 
-      } as HistoryItem));
-      
-      setHistory(historyData);
-    } catch (error) {
-      console.error('Error fetching history:', error);
+      let historyQ;
+      try {
+        historyQ = query(
+          collection(firebaseDb!, 'tool_history'),
+          where('company_id', '==', companyId),
+          orderBy('timestamp', 'desc'),
+          limit(500) // Increased limit to show more history
+        );
+        
+        const historySnap = await getDocs(historyQ);
+        const historyData = historySnap.docs.map(doc => ({ 
+          id: doc.id, 
+          ...doc.data() 
+        } as HistoryItem));
+        
+        console.log('[History] Fetched history items:', historyData.length);
+        setHistory(historyData);
+      } catch (historyError: any) {
+        console.error('[History] Error fetching history (may need Firestore index):', historyError);
+        // Fallback: fetch without orderBy if index missing
+        if (historyError?.code === 'failed-precondition' || historyError?.message?.includes('index')) {
+          console.warn('[History] Missing Firestore index, fetching without orderBy');
+          try {
+            const fallbackQ = query(
+              collection(firebaseDb!, 'tool_history'),
+              where('company_id', '==', companyId),
+              limit(500)
+            );
+            const fallbackSnap = await getDocs(fallbackQ);
+            const historyData = fallbackSnap.docs.map(doc => ({ 
+              id: doc.id, 
+              ...doc.data() 
+            } as HistoryItem));
+            // Sort manually by timestamp descending
+            historyData.sort((a, b) => {
+              const aTime = a.timestamp instanceof Timestamp ? a.timestamp.toMillis() : 
+                           (a.timestamp ? new Date(a.timestamp as string).getTime() : 0);
+              const bTime = b.timestamp instanceof Timestamp ? b.timestamp.toMillis() : 
+                           (b.timestamp ? new Date(b.timestamp as string).getTime() : 0);
+              return bTime - aTime;
+            });
+            console.log('[History] Fetched history items (fallback):', historyData.length);
+            setHistory(historyData);
+          } catch (fallbackError) {
+            console.error('[History] Fallback query also failed:', fallbackError);
+            setHistory([]);
+          }
+        } else {
+          setHistory([]);
+        }
+      }
+    } catch (error: any) {
+      console.error('[History] Error fetching history:', error);
+      // If it's an index error, log it clearly
+      if (error?.code === 'failed-precondition' || error?.message?.includes('index')) {
+        console.error('[History] Firestore index missing. Create composite index for:', {
+          collection: 'tool_history',
+          fields: ['company_id', 'timestamp']
+        });
+      }
     } finally {
       setLoading(false);
     }

@@ -63,6 +63,7 @@ export default function Pricing() {
     setCheckoutLoading(tier);
     try {
       const token = await authUser.getIdToken();
+      console.log('[Pricing] Starting checkout:', { tier, company_id: profile.company_id });
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
@@ -70,15 +71,45 @@ export default function Pricing() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ tier, company_id: profile.company_id }),
+        // Add timeout signal
+        signal: AbortSignal.timeout(25000), // 25s timeout (less than Vercel's 30s)
       });
+      
+      // Handle non-JSON responses (like 504 HTML error page)
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await res.text();
+        console.error('[Pricing] Non-JSON response:', { status: res.status, contentType, text: text.substring(0, 200) });
+        throw new Error(`Server error (${res.status}). ${res.status === 504 ? 'Request timed out. Please try again.' : 'Please check server logs.'}`);
+      }
+      
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Checkout failed');
+      console.log('[Pricing] Checkout response:', { ok: res.ok, status: res.status, data });
+      if (!res.ok) {
+        const errorMsg = data.error || `Checkout failed (${res.status})`;
+        console.error('[Pricing] Checkout API error:', { status: res.status, error: errorMsg, data });
+        throw new Error(errorMsg);
+      }
       if (data.url) window.location.href = data.url;
       else throw new Error('No checkout URL');
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Something went wrong';
+      let message = 'Something went wrong';
+      if (e instanceof Error) {
+        // Handle AbortError (timeout)
+        if (e.name === 'AbortError' || e.message.includes('timeout')) {
+          message = 'Request timed out. The server may be slow. Please try again.';
+        } else {
+          message = e.message;
+        }
+        console.error('[Pricing] Checkout error:', {
+          message: e.message,
+          name: e.name,
+          stack: e.stack,
+        });
+      } else {
+        console.error('[Pricing] Unknown checkout error:', e);
+      }
       setCheckoutError(message);
-      console.error(e);
     } finally {
       setCheckoutLoading(null);
     }
