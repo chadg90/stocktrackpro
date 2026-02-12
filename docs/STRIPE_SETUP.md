@@ -176,6 +176,26 @@ NEXT_PUBLIC_APP_URL=https://stocktrackpro.co.uk
 - Check Firestore security rules allow webhook updates
 - Review server logs for webhook processing errors
 
+### "Could not load the default credentials" error
+
+This means `FIREBASE_SERVICE_ACCOUNT_JSON` is not set correctly in Vercel.
+
+**Fix:**
+1. Go to **Vercel Dashboard** → Your Project → **Settings** → **Environment Variables**
+2. Find or add `FIREBASE_SERVICE_ACCOUNT_JSON`
+3. **Important:** The JSON must be on a **single line** (no line breaks)
+   - Copy the entire JSON from Firebase Console
+   - Remove all line breaks/newlines
+   - Paste it as one continuous string
+   - Example: `{"type":"service_account","project_id":"...","private_key":"...","client_email":"..."}`
+4. Make sure it's set for **Production** environment (and Preview if needed)
+5. **Redeploy** your site after adding/updating the variable
+
+**To convert multi-line JSON to single line:**
+- Use an online JSON minifier, or
+- Copy the JSON and remove all newlines manually, or
+- Use this command: `cat service-account.json | jq -c .` (if you have jq installed)
+
 ### Billing portal says "No subscription linked"
 - Ensure company has `stripe_customer_id` set
 - This is set automatically when checkout completes
