@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
     // Check if company is new (hasn't had a Stripe subscription before)
     // Apply 7-day free trial for new companies
     const companySnap = await db.collection('companies').doc(trimmedCompanyId).get();
-    const companyData = companySnap.exists() ? companySnap.data() : null;
+    const companyData = companySnap.exists ? companySnap.data() : null;
     const hasPreviousStripeSubscription = companyData?.stripe_subscription_id != null;
     const isNewCompany = !hasPreviousStripeSubscription && 
       (companyData?.subscription_status === 'trial' || companyData?.subscription_status == null);

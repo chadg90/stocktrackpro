@@ -144,6 +144,10 @@ export default function DashboardPage() {
   const [activeVehiclesCount, setActiveVehiclesCount] = useState<number | null>(null);
   const [defectsCount, setDefectsCount] = useState<number | null>(null);
   const [resolvedDefectsCount, setResolvedDefectsCount] = useState<number | null>(null);
+  
+  // Company subscription info
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+  const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isFirebaseAvailable) {
@@ -246,6 +250,18 @@ export default function DashboardPage() {
         setActiveVehiclesCount(activeVehiclesCountVal);
         setDefectsCount(defectsCountVal);
         setResolvedDefectsCount(resolvedDefectsCountVal);
+
+        // Fetch company subscription status
+        try {
+          const companySnap = await getDoc(doc(firebaseDb!, 'companies', companyId));
+          if (companySnap.exists()) {
+            const companyData = companySnap.data();
+            setSubscriptionStatus(companyData.subscription_status || null);
+            setSubscriptionTier(companyData.subscription_tier || null);
+          }
+        } catch (err) {
+          console.error('Error fetching company subscription:', err);
+        }
 
         // Fetch full data for analytics
         const vehiclesSnap = await getDocs(vehiclesQ);
@@ -745,7 +761,19 @@ export default function DashboardPage() {
               {/* Header with controls */}
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 no-print">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Dashboard</h1>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Dashboard</h1>
+                    {subscriptionStatus === 'trial' && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        7-Day Free Trial
+                      </span>
+                    )}
+                    {subscriptionStatus === 'active' && subscriptionTier && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                        {subscriptionTier.replace('PRO_', '')}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-white/60 text-sm mt-1">
                     Vehicles, assets and team performance at a glance
                   </p>
