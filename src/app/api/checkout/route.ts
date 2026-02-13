@@ -204,6 +204,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if company is new (hasn't had a Stripe subscription before)
+    // Apply 7-day free trial for new companies
+    const companySnap = await db.collection('companies').doc(trimmedCompanyId).get();
+    const companyData = companySnap.exists() ? companySnap.data() : null;
+    const hasPreviousStripeSubscription = companyData?.stripe_subscription_id != null;
+    const isNewCompany = !hasPreviousStripeSubscription && 
+      (companyData?.subscription_status === 'trial' || companyData?.subscription_status == null);
+    
+    console.log('[Checkout] Company subscription status:', {
+      companyId: trimmedCompanyId,
+      subscription_status: companyData?.subscription_status,
+      stripe_subscription_id: companyData?.stripe_subscription_id,
+      isNewCompany,
+      willApplyTrial: isNewCompany,
+    });
+
     const stripe = getStripe();
     let session;
     try {
@@ -222,6 +238,8 @@ export async function POST(request: NextRequest) {
             company_id: trimmedCompanyId,
             tier: tier,
           },
+          // Apply 7-day free trial for new companies
+          ...(isNewCompany && { trial_period_days: 7 }),
         },
       });
     } catch (stripeError: any) {
