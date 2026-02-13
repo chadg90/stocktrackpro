@@ -120,6 +120,7 @@ export default function SubscriptionPage() {
   const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
   const [promoCodeValidating, setPromoCodeValidating] = useState(false);
   const [validatedPromoCode, setValidatedPromoCode] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) {
@@ -177,6 +178,35 @@ export default function SubscriptionPage() {
       alert(err instanceof Error ? err.message : 'Could not open billing portal. Subscribe first from the pricing page.');
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const handleSyncSubscription = async () => {
+    if (!authUser) return;
+    setSyncing(true);
+    try {
+      const token = await authUser.getIdToken();
+      const res = await fetch('/api/sync-subscription', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to sync subscription');
+      }
+      // Reload page data
+      if (profile?.company_id && firebaseDb) {
+        const companySnap = await getDoc(doc(firebaseDb, 'companies', profile.company_id));
+        if (companySnap.exists()) {
+          setCompany(companySnap.data() as Company);
+        }
+      }
+      alert('Subscription synced successfully!');
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : 'Could not sync subscription.');
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -411,14 +441,33 @@ export default function SubscriptionPage() {
 
         <div className="flex flex-wrap gap-4">
           {canManage && company?.stripe_customer_id && (
-            <button
-              onClick={handleManageBilling}
-              disabled={portalLoading}
-              className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors disabled:opacity-60 shadow-lg shadow-primary/20"
-            >
-              <ExternalLink className="w-4 h-4" />
-              {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
-            </button>
+            <>
+              <button
+                onClick={handleManageBilling}
+                disabled={portalLoading}
+                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors disabled:opacity-60 shadow-lg shadow-primary/20"
+              >
+                <ExternalLink className="w-4 h-4" />
+                {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
+              </button>
+              <button
+                onClick={handleSyncSubscription}
+                disabled={syncing}
+                className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-colors disabled:opacity-60"
+              >
+                {syncing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                    Syncing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Sync Subscription
+                  </>
+                )}
+              </button>
+            </>
           )}
         </div>
 

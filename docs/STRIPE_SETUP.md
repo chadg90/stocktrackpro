@@ -61,9 +61,10 @@ This guide walks you through completing the Stripe integration for Stock Track P
    - Replace `yourdomain.com` with your actual domain (e.g., `stocktrackpro.co.uk`)
    - For local testing: Use Stripe CLI (see below)
 4. **Events to send:** Select these events:
-   - `invoice.paid`
-   - `customer.subscription.updated`
-   - `customer.subscription.deleted`
+   - `checkout.session.completed` (fires immediately after checkout, including trials)
+   - `invoice.paid` (fires when invoice is paid, including after trial ends)
+   - `customer.subscription.updated` (fires when subscription changes)
+   - `customer.subscription.deleted` (fires when subscription is canceled)
 5. Click **Add endpoint**
 6. **Copy the Signing secret** (starts with `whsec_...`)
 7. Add to `.env.local`:

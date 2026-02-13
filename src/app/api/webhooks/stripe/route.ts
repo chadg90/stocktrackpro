@@ -55,6 +55,58 @@ export async function POST(request: NextRequest) {
     }
 
     switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const subscriptionId = session.subscription as string | null;
+        const companyId = session.metadata?.company_id;
+        const tier = session.metadata?.tier;
+        
+        if (!subscriptionId || !companyId) {
+          console.warn('Stripe webhook: checkout.session.completed missing subscription_id or company_id');
+          break;
+        }
+
+        const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
+        const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
+        const status = subscription.status;
+        
+        // Determine subscription status: 'trialing' -> 'trial', 'active' -> 'active', etc.
+        let firebaseStatus: string;
+        if (status === 'trialing') {
+          firebaseStatus = 'trial';
+        } else if (status === 'active') {
+          firebaseStatus = 'active';
+        } else {
+          firebaseStatus = status;
+        }
+
+        const periodEnd = subscription.current_period_end;
+        const expiryDate = periodEnd
+          ? new Date(periodEnd * 1000).toISOString().split('T')[0]
+          : null;
+        
+        const trialEnd = subscription.trial_end;
+        const trialEndDate = trialEnd
+          ? new Date(trialEnd * 1000)
+          : null;
+
+        await db.collection('companies').doc(companyId).set(
+          {
+            subscription_status: firebaseStatus,
+            subscription_type: 'stripe',
+            ...(tier && { subscription_tier: tier }),
+            ...(expiryDate && { subscription_expiry_date: expiryDate }),
+            ...(trialEndDate && { trial_end_date: trialEndDate }),
+            stripe_subscription_id: subscription.id,
+            ...(customerId && { stripe_customer_id: customerId }),
+            updated_at: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+        console.log('Updated company', companyId, 'subscription from checkout.session.completed', { status: firebaseStatus, tier });
+        break;
+      }
+
       case 'invoice.paid': {
         const invoice = event.data.object as Stripe.Invoice;
         const subscriptionId = invoice.subscription as string | null;
@@ -97,26 +149,45 @@ export async function POST(request: NextRequest) {
         if (!companyId) break;
 
         const status = subscription.status;
-        const active = status === 'active';
+        
+        // Map Stripe status to Firebase status
+        let firebaseStatus: string;
+        if (status === 'trialing') {
+          firebaseStatus = 'trial';
+        } else if (status === 'active') {
+          firebaseStatus = 'active';
+        } else if (status === 'canceled' || status === 'unpaid' || status === 'past_due') {
+          firebaseStatus = 'inactive';
+        } else {
+          firebaseStatus = status;
+        }
+        
         const periodEnd = subscription.current_period_end;
         const expiryDate = periodEnd
           ? new Date(periodEnd * 1000).toISOString().split('T')[0]
           : null;
+        
+        const trialEnd = subscription.trial_end;
+        const trialEndDate = trialEnd
+          ? new Date(trialEnd * 1000)
+          : null;
+        
         const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
 
         await db.collection('companies').doc(companyId).set(
           {
-            subscription_status: active ? 'active' : status,
+            subscription_status: firebaseStatus,
             subscription_type: 'stripe',
             ...(tier && { subscription_tier: tier }),
             ...(expiryDate && { subscription_expiry_date: expiryDate }),
+            ...(trialEndDate && { trial_end_date: trialEndDate }),
             stripe_subscription_id: subscription.id,
             ...(customerId && { stripe_customer_id: customerId }),
             updated_at: new Date().toISOString(),
           },
           { merge: true }
         );
-        console.log('Updated company', companyId, 'subscription (customer.subscription.updated)', status);
+        console.log('Updated company', companyId, 'subscription (customer.subscription.updated)', { stripeStatus: status, firebaseStatus, tier });
         break;
       }
 
