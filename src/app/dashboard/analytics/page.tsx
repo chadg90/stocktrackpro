@@ -25,6 +25,8 @@ type Profile = {
   role?: string;
   first_name?: string;
   last_name?: string;
+  displayName?: string;
+  name?: string;
   email?: string;
   created_at?: Timestamp | string;
 };
@@ -454,9 +456,23 @@ export default function AnalyticsPage() {
     }> = {};
 
     users.forEach(u => {
+      // Prioritize name display: first_name + last_name > displayName > name > email prefix > id
+      let userName = 'Unknown';
+      if (u.first_name || u.last_name) {
+        userName = `${u.first_name || ''} ${u.last_name || ''}`.trim();
+      } else if (u.displayName) {
+        userName = u.displayName;
+      } else if (u.name) {
+        userName = u.name;
+      } else if (u.email) {
+        userName = u.email.split('@')[0];
+      } else if (u.id) {
+        userName = u.id;
+      }
+      
       userStats[u.id || ''] = {
         id: u.id || '',
-        name: u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : (u.email?.split('@')[0] || u.id || 'Unknown'),
+        name: userName,
         inspections: 0,
         actions: 0,
         defectsFound: 0,

@@ -645,9 +645,21 @@ export default function SubscriptionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {tiers.map((tier) => {
             const isCurrentTier = currentTier === tier.id;
+            
+            // Determine tier order for upgrade/downgrade detection
+            const tierOrder: Record<TierId, number> = {
+              'PRO_STARTER': 1,
+              'PRO_TEAM': 2,
+              'PRO_BUSINESS': 3,
+              'PRO_ENTERPRISE': 4,
+            };
+            
             const isUpgrade = currentTier && 
-              ['PRO_STARTER', 'PRO_TEAM', 'PRO_BUSINESS'].includes(currentTier) &&
-              ['PRO_TEAM', 'PRO_BUSINESS', 'PRO_ENTERPRISE'].includes(tier.id) &&
+              tierOrder[currentTier as TierId] < tierOrder[tier.id] &&
+              tier.id !== currentTier;
+            
+            const isDowngrade = currentTier && 
+              tierOrder[currentTier as TierId] > tierOrder[tier.id] &&
               tier.id !== currentTier;
             
             return (
@@ -689,6 +701,8 @@ export default function SubscriptionPage() {
                         ? 'bg-white/10 text-white/60 cursor-not-allowed'
                         : isUpgrade
                         ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/20'
+                        : isDowngrade
+                        ? 'bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30'
                         : subscriptionStatus !== 'active' && subscriptionStatus !== 'trial'
                         ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/20'
                         : 'bg-white/10 hover:bg-white/20 text-white'
@@ -700,6 +714,8 @@ export default function SubscriptionPage() {
                       ? 'Current Plan'
                       : isUpgrade
                       ? 'Upgrade Now'
+                      : isDowngrade
+                      ? 'Downgrade'
                       : subscriptionStatus !== 'active' && subscriptionStatus !== 'trial'
                       ? 'Subscribe Now'
                       : 'Change Plan'}
