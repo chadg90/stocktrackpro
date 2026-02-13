@@ -186,6 +186,11 @@ export default function SubscriptionPage() {
       return;
     }
 
+    if (!profile?.company_id || !authUser) {
+      setPromoCodeError('Please log in to use a promo code');
+      return;
+    }
+
     setPromoCodeValidating(true);
     setPromoCodeError(null);
     
@@ -197,6 +202,7 @@ export default function SubscriptionPage() {
       if (!promoSnap.exists()) {
         setPromoCodeError('Invalid promo code');
         setValidatedPromoCode(null);
+        setPromoCodeValidating(false);
         return;
       }
       
@@ -208,6 +214,7 @@ export default function SubscriptionPage() {
         if (expiresAt < new Date()) {
           setPromoCodeError('This promo code has expired');
           setValidatedPromoCode(null);
+          setPromoCodeValidating(false);
           return;
         }
       }
@@ -216,6 +223,7 @@ export default function SubscriptionPage() {
       if (promoData?.maxUses && promoData?.usedCount >= promoData.maxUses) {
         setPromoCodeError('This promo code has reached its usage limit');
         setValidatedPromoCode(null);
+        setPromoCodeValidating(false);
         return;
       }
       
@@ -223,12 +231,24 @@ export default function SubscriptionPage() {
       if (promoData?.used === true && !promoData?.maxUses) {
         setPromoCodeError('This promo code has already been used');
         setValidatedPromoCode(null);
+        setPromoCodeValidating(false);
         return;
       }
       
-      // Valid promo code
+      // Valid promo code - immediately start checkout
       setValidatedPromoCode(trimmedCode);
       setPromoCodeError(null);
+      
+      // Determine which tier to use
+      // If no active subscription, default to Starter
+      // If has subscription, use current tier (for renewal/upgrade)
+      const tierToUse = subscriptionStatus === 'active' || subscriptionStatus === 'trial' 
+        ? (currentTier as TierId) || 'PRO_STARTER'
+        : 'PRO_STARTER';
+      
+      // Start checkout immediately
+      await handleSubscribe(tierToUse);
+      
     } catch (error) {
       console.error('Error validating promo code:', error);
       setPromoCodeError('Failed to validate promo code. Please try again.');
@@ -417,9 +437,9 @@ export default function SubscriptionPage() {
         <div className="dashboard-card p-8">
           <h2 className="text-2xl font-semibold text-white mb-2 flex items-center gap-3">
             <Tag className="w-6 h-6 text-primary" />
-            Promo Code
+            Promo Code Checkout
           </h2>
-          <p className="text-white/60 mb-6">Enter a promo code to apply discounts when subscribing to a plan</p>
+          <p className="text-white/60 mb-6">Enter a promo code to validate and proceed directly to checkout</p>
           
           <div className="flex gap-3">
             <div className="flex-1 relative">
@@ -432,7 +452,7 @@ export default function SubscriptionPage() {
                   setValidatedPromoCode(null);
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && promoCode.trim()) {
+                  if (e.key === 'Enter' && promoCode.trim() && !promoCodeValidating) {
                     validatePromoCode();
                   }
                 }}
@@ -452,30 +472,30 @@ export default function SubscriptionPage() {
                 </div>
               )}
             </div>
-            {validatedPromoCode ? (
-              <button
-                onClick={clearPromoCode}
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-semibold flex items-center gap-2"
-              >
-                <X className="w-4 h-4" />
-                Clear
-              </button>
-            ) : (
-              <button
-                onClick={validatePromoCode}
-                disabled={!promoCode.trim() || promoCodeValidating}
-                className="px-6 py-3 bg-primary hover:bg-primary-light text-black rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
-              >
-                {promoCodeValidating ? 'Validating...' : 'Validate'}
-              </button>
-            )}
+            <button
+              onClick={validatePromoCode}
+              disabled={!promoCode.trim() || promoCodeValidating}
+              className="px-6 py-3 bg-primary hover:bg-primary-light text-black rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 flex items-center gap-2"
+            >
+              {promoCodeValidating ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-black"></div>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  Validate & Checkout
+                </>
+              )}
+            </button>
           </div>
           
           {validatedPromoCode && (
             <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
               <p className="text-green-400 text-sm flex items-center gap-2">
                 <Check className="w-4 h-4 shrink-0" />
-                Promo code <span className="font-semibold">{validatedPromoCode}</span> is valid and will be applied at checkout
+                Promo code <span className="font-semibold">{validatedPromoCode}</span> validated. Redirecting to checkout...
               </p>
             </div>
           )}
@@ -488,6 +508,12 @@ export default function SubscriptionPage() {
               </p>
             </div>
           )}
+          
+          <p className="text-white/40 text-sm mt-4">
+            {subscriptionStatus === 'active' || subscriptionStatus === 'trial' 
+              ? `Checkout will use your current plan (${formatTierName(currentTier)})`
+              : 'Checkout will use the Starter plan by default'}
+          </p>
         </div>
       )}
 
