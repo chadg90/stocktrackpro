@@ -91,6 +91,8 @@ export default function HistoryPage() {
   const [users, setUsers] = useState<Record<string, Profile>>({});
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [viewingImageAlt, setViewingImageAlt] = useState<string>('');
+  const [viewingImages, setViewingImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -499,14 +501,24 @@ export default function HistoryPage() {
                   const vehicle = item.vehicle_id ? vehicles[item.vehicle_id] : null;
                   const user = item.inspected_by ? users[item.inspected_by] : null;
                   
+                  // Prioritize name display: first_name + last_name > displayName > name > email prefix > id
                   let userName = '—';
                   if (user) {
                     if (user.first_name || user.last_name) {
                       userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                    } else if (user.displayName) {
+                      userName = user.displayName;
+                    } else if (user.name) {
+                      userName = user.name;
+                    } else if (user.email) {
+                      userName = user.email.split('@')[0];
+                    } else if (user.id) {
+                      userName = user.id;
                     } else {
-                      userName = user.displayName || user.name || user.email?.split('@')[0] || 'Unknown';
+                      userName = 'Unknown';
                     }
                   } else if (item.inspected_by) {
+                    // If user not found, show ID (not email)
                     userName = item.inspected_by;
                   }
                   
@@ -551,6 +563,8 @@ export default function HistoryPage() {
                                 <button
                                   key={idx}
                                   onClick={() => {
+                                    setViewingImages(photoUrls);
+                                    setCurrentImageIndex(idx);
                                     setViewingImage(url);
                                     setViewingImageAlt(`${vehicleName} - Inspection ${idx + 1}`);
                                   }}
@@ -565,9 +579,17 @@ export default function HistoryPage() {
                               ))}
                             </div>
                             {photoUrls.length > 3 && (
-                              <span className="text-xs text-white/50">
+                              <button
+                                onClick={() => {
+                                  setViewingImages(photoUrls);
+                                  setCurrentImageIndex(0);
+                                  setViewingImage(photoUrls[0]);
+                                  setViewingImageAlt(`${vehicleName} - All Inspection Images`);
+                                }}
+                                className="text-xs text-primary hover:text-primary-light hover:underline cursor-pointer"
+                              >
                                 +{photoUrls.length - 3} more
-                              </span>
+                              </button>
                             )}
                           </div>
                         ) : (
@@ -592,9 +614,17 @@ export default function HistoryPage() {
         onClose={() => {
           setViewingImage(null);
           setViewingImageAlt('');
+          setViewingImages([]);
+          setCurrentImageIndex(0);
         }}
         imageUrl={viewingImage || ''}
         altText={viewingImageAlt}
+        images={viewingImages.length > 0 ? viewingImages : undefined}
+        currentIndex={currentImageIndex}
+        onIndexChange={(index) => {
+          setCurrentImageIndex(index);
+          setViewingImage(viewingImages[index]);
+        }}
       />
     </div>
   );
