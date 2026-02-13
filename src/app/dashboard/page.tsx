@@ -707,7 +707,7 @@ export default function DashboardPage() {
               </form>
               <p className="text-white/60 text-center text-sm mt-4">Managers only.</p>
               <p className="text-white/50 text-center text-xs mt-2">
-                New user? Download the app to create an account with an access code, or <a href="/contact" className="text-primary hover:underline">contact us</a>.
+                New user? <a href="/onboarding" className="text-primary hover:underline">Create an account</a> or download the app to get started.
               </p>
             </div>
             </div>
