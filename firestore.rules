@@ -86,7 +86,7 @@ service cloud.firestore {
             !('company_id' in resource.data)
           ) &&
           request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['expoPushToken', 'pushTokenUpdatedAt', 'display_name', 'photo_url', 'phone', 'updated_at', 'company_id'])
+            .hasOnly(['expoPushToken', 'pushTokenUpdatedAt', 'display_name', 'photo_url', 'phone', 'updated_at', 'company_id', 'role'])
         ) ||
         (
           isManager() && userCompanyId() == resource.data.company_id &&
