@@ -10,8 +10,21 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import Image from 'next/image';
 import NotificationBell from './NotificationBell';
 
+type NavigationItem = {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  managerOnly?: boolean;
+  adminOnly?: boolean;
+};
+
+type NavigationGroup = {
+  label: string;
+  items: NavigationItem[];
+};
+
 // Organized navigation groups
-const navigationGroups = [
+const navigationGroups: NavigationGroup[] = [
   {
     label: 'Overview',
     items: [
