@@ -14,6 +14,11 @@ type Profile = {
   role?: string;
 };
 
+type Company = {
+  subscription_status?: string;
+  subscription_tier?: string;
+};
+
 export default function DashboardLayout({
   children,
 }: {
@@ -21,6 +26,7 @@ export default function DashboardLayout({
 }) {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const isDashboardRoot = pathname === '/dashboard' || pathname === '/dashboard/';
@@ -66,7 +72,38 @@ export default function DashboardLayout({
           // Only allow managers and admins to access dashboard
           // Block users with role "user"
           if (data.role === 'manager' || data.role === 'admin') {
-            setAuthorized(true);
+            // Check subscription status
+            if (data.company_id) {
+              try {
+                const companyRef = doc(firebaseDb!, 'companies', data.company_id);
+                const companySnap = await getDoc(companyRef);
+                if (companySnap.exists()) {
+                  const companyData = companySnap.data() as Company;
+                  const status = companyData.subscription_status;
+                  setSubscriptionStatus(status || null);
+                  
+                  // Allow access if subscription is active or trial
+                  if (status === 'active' || status === 'trial') {
+                    setAuthorized(true);
+                  } else {
+                    // No active subscription - lock out
+                    setAuthorized(false);
+                  }
+                } else {
+                  // Company not found - lock out
+                  setSubscriptionStatus(null);
+                  setAuthorized(false);
+                }
+              } catch (companyError) {
+                console.error('Error fetching company:', companyError);
+                setSubscriptionStatus(null);
+                setAuthorized(false);
+              }
+            } else {
+              // No company_id - lock out
+              setSubscriptionStatus(null);
+              setAuthorized(false);
+            }
           } else {
             // User role or any other role is not allowed
             setAuthorized(false);
@@ -100,6 +137,47 @@ export default function DashboardLayout({
   }
 
   if (!authorized && !isDashboardRoot) {
+    // Subscription lockout or unauthorized - show upgrade prompt or redirect
+    if (subscriptionStatus !== 'active' && subscriptionStatus !== 'trial') {
+      // Subscription lockout - show upgrade prompt
+      return (
+        <ToastProvider>
+          <div className="min-h-screen bg-black flex items-center justify-center p-4">
+            <div className="max-w-md w-full">
+              <div className="dashboard-card p-8 text-center">
+                <div className="mb-6">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-semibold text-white mb-2">Subscription Required</h2>
+                  <p className="text-white/60 text-sm">
+                    {subscriptionStatus === null || subscriptionStatus === 'inactive' 
+                      ? 'Your subscription has expired or is inactive.'
+                      : 'An active subscription is required to access the dashboard.'}
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <a
+                    href="/pricing"
+                    className="block w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-3 px-6 transition-colors"
+                  >
+                    Subscribe Now
+                  </a>
+                  <a
+                    href="/contact"
+                    className="block w-full text-white/60 hover:text-white text-sm transition-colors"
+                  >
+                    Contact Support
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ToastProvider>
+      );
+    }
     // Redirect sub-pages to main dashboard for login
     if (typeof window !== 'undefined') {
       router.push('/dashboard');

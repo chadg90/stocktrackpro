@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { tier, company_id: companyId } = body as { tier?: string; company_id?: string };
+    const { tier, company_id: companyId, promo_code } = body as { tier?: string; company_id?: string; promo_code?: string };
 
     if (!tier || !VALID_TIERS.includes(tier as SubscriptionTier)) {
       return NextResponse.json(
@@ -212,18 +212,74 @@ export async function POST(request: NextRequest) {
     const isNewCompany = !hasPreviousStripeSubscription && 
       (companyData?.subscription_status === 'trial' || companyData?.subscription_status == null);
     
+    // Validate promo code if provided
+    let stripePromoCode: string | undefined = undefined;
+    if (promo_code && promo_code.trim()) {
+      const trimmedPromoCode = promo_code.trim().toUpperCase();
+      try {
+        const promoCodeSnap = await db.collection('promoCodes').doc(trimmedPromoCode).get();
+        if (!promoCodeSnap.exists) {
+          return NextResponse.json(
+            { error: 'Invalid promo code' },
+            { status: 400 }
+          );
+        }
+        const promoData = promoCodeSnap.data();
+        
+        // Check if code is expired
+        if (promoData?.expiresAt) {
+          const expiresAt = promoData.expiresAt.toDate ? promoData.expiresAt.toDate() : new Date(promoData.expiresAt);
+          if (expiresAt < new Date()) {
+            return NextResponse.json(
+              { error: 'This promo code has expired' },
+              { status: 400 }
+            );
+          }
+        }
+        
+        // Check if code has reached max uses
+        if (promoData?.maxUses && promoData?.usedCount >= promoData.maxUses) {
+          return NextResponse.json(
+            { error: 'This promo code has reached its usage limit' },
+            { status: 400 }
+          );
+        }
+        
+        // Check if code is already used (single-use codes)
+        if (promoData?.used === true && !promoData?.maxUses) {
+          return NextResponse.json(
+            { error: 'This promo code has already been used' },
+            { status: 400 }
+          );
+        }
+        
+        // Use the promo code ID as the Stripe coupon/promo code
+        // Note: Stripe promo codes are created in Stripe dashboard and referenced by ID
+        // For now, we'll store the promo code in metadata and handle discount in webhook
+        stripePromoCode = trimmedPromoCode;
+        console.log('[Checkout] Valid promo code:', trimmedPromoCode);
+      } catch (promoError: any) {
+        console.error('[Checkout] Error validating promo code:', promoError);
+        return NextResponse.json(
+          { error: 'Failed to validate promo code. Please try again.' },
+          { status: 500 }
+        );
+      }
+    }
+    
     console.log('[Checkout] Company subscription status:', {
       companyId: trimmedCompanyId,
       subscription_status: companyData?.subscription_status,
       stripe_subscription_id: companyData?.stripe_subscription_id,
       isNewCompany,
       willApplyTrial: isNewCompany,
+      promoCode: stripePromoCode || null,
     });
 
     const stripe = getStripe();
     let session;
     try {
-      session = await stripe.checkout.sessions.create({
+      const sessionParams: any = {
         mode: 'subscription',
         payment_method_types: ['card'],
         line_items: [{ price: priceId, quantity: 1 }],
@@ -232,16 +288,29 @@ export async function POST(request: NextRequest) {
         metadata: {
           company_id: trimmedCompanyId,
           tier: tier,
+          ...(stripePromoCode && { promo_code: stripePromoCode }),
         },
         subscription_data: {
           metadata: {
             company_id: trimmedCompanyId,
             tier: tier,
+            ...(stripePromoCode && { promo_code: stripePromoCode }),
           },
           // Apply 7-day free trial for new companies
           ...(isNewCompany && { trial_period_days: 7 }),
         },
-      });
+      };
+      
+      // If promo code is provided, add it to allow_promotion_codes
+      // Note: Stripe Checkout supports promotion codes via allow_promotion_codes: true
+      // or by specifying discounts. For custom promo codes stored in Firestore,
+      // we'll handle the discount in the webhook after subscription creation.
+      if (stripePromoCode) {
+        // Store promo code in metadata - webhook will apply discount
+        sessionParams.allow_promotion_codes = false; // We handle custom codes via webhook
+      }
+      
+      session = await stripe.checkout.sessions.create(sessionParams);
     } catch (stripeError: any) {
       console.error('Stripe API error:', {
         message: stripeError?.message,
