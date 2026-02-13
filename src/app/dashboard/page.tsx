@@ -700,7 +700,7 @@ export default function DashboardPage() {
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <div className="dashboard-card p-8 max-w-md w-full shadow-xl">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-semibold tracking-tight text-white">Analytics Dashboard</h2>
+                <h2 className="text-2xl font-semibold tracking-tight text-white">Dashboard</h2>
                 <p className="text-white/60 text-sm mt-2">Sign in to view your organisation’s analytics</p>
               </div>
               <form onSubmit={handleSignIn} className="space-y-4">
@@ -745,7 +745,7 @@ export default function DashboardPage() {
               {/* Header with controls */}
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 no-print">
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Analytics Dashboard</h1>
+                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Dashboard</h1>
                   <p className="text-white/60 text-sm mt-1">
                     Vehicles, assets and team performance at a glance
                   </p>
