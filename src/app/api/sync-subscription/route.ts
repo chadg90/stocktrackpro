@@ -41,18 +41,81 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Company not found' }, { status: 404 });
     }
     const company = companySnap.data();
-    const subscriptionId = company?.stripe_subscription_id;
+    let subscriptionId = company?.stripe_subscription_id;
 
-    if (!subscriptionId || typeof subscriptionId !== 'string') {
-      return NextResponse.json({ 
-        error: 'No Stripe subscription found. Please subscribe first.',
-        hasSubscription: false 
-      }, { status: 400 });
-    }
-
-    // Fetch subscription from Stripe
     const stripe = getStripe();
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    let subscription;
+
+    // If we have subscription_id, use it
+    if (subscriptionId && typeof subscriptionId === 'string') {
+      subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    } else {
+      // Try to find subscription by customer email or company metadata
+      const userRecord = await getAdminAuth().getUser(uid);
+      const userEmail = userRecord.email;
+      
+      if (!userEmail) {
+        return NextResponse.json({ 
+          error: 'No Stripe subscription found and cannot lookup by email. Please subscribe first.',
+          hasSubscription: false 
+        }, { status: 400 });
+      }
+
+      // Search for customer by email
+      const customers = await stripe.customers.list({
+        email: userEmail,
+        limit: 10,
+      });
+
+      if (customers.data.length === 0) {
+        return NextResponse.json({ 
+          error: 'No Stripe customer found. Please complete checkout first.',
+          hasSubscription: false 
+        }, { status: 400 });
+      }
+
+      // Find subscription for this company
+      let foundSubscription = null;
+      for (const customer of customers.data) {
+        const subscriptions = await stripe.subscriptions.list({
+          customer: customer.id,
+          limit: 10,
+        });
+        
+        for (const sub of subscriptions.data) {
+          if (sub.metadata?.company_id === companyId) {
+            foundSubscription = sub;
+            subscriptionId = sub.id;
+            break;
+          }
+        }
+        if (foundSubscription) break;
+      }
+
+      if (!foundSubscription) {
+        // Try to get the most recent subscription for this customer
+        const mostRecentCustomer = customers.data[0];
+        const subscriptions = await stripe.subscriptions.list({
+          customer: mostRecentCustomer.id,
+          limit: 1,
+          status: 'all',
+        });
+        
+        if (subscriptions.data.length > 0) {
+          foundSubscription = subscriptions.data[0];
+          subscriptionId = foundSubscription.id;
+        }
+      }
+
+      if (!foundSubscription) {
+        return NextResponse.json({ 
+          error: 'No Stripe subscription found for this company. Please complete checkout first.',
+          hasSubscription: false 
+        }, { status: 400 });
+      }
+
+      subscription = foundSubscription;
+    }
     const companyIdFromMeta = subscription.metadata?.company_id;
     const tier = subscription.metadata?.tier;
 

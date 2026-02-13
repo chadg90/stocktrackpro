@@ -462,16 +462,18 @@ export default function SubscriptionPage() {
         </div>
 
         <div className="flex flex-wrap gap-4">
-          {canManage && company?.stripe_customer_id && (
+          {canManage && (
             <>
-              <button
-                onClick={handleManageBilling}
-                disabled={portalLoading}
-                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors disabled:opacity-60 shadow-lg shadow-primary/20"
-              >
-                <ExternalLink className="w-4 h-4" />
-                {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
-              </button>
+              {company?.stripe_customer_id && (
+                <button
+                  onClick={handleManageBilling}
+                  disabled={portalLoading}
+                  className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors disabled:opacity-60 shadow-lg shadow-primary/20"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
+                </button>
+              )}
               <button
                 onClick={handleSyncSubscription}
                 disabled={syncing}
@@ -485,7 +487,7 @@ export default function SubscriptionPage() {
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    Sync Subscription
+                    {company?.stripe_subscription_id ? 'Sync Subscription' : 'Find & Sync Subscription'}
                   </>
                 )}
               </button>
