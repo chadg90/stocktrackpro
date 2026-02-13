@@ -91,7 +91,27 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { tier, company_id: companyId, promo_code } = body as { tier?: string; company_id?: string; promo_code?: string };
+    let { tier, company_id: companyId, promo_code } = body as { tier?: string; company_id?: string; promo_code?: string };
+
+    // If promo code is provided, check if it has a tier restriction and use that tier
+    if (promo_code && promo_code.trim()) {
+      try {
+        const db = getAdminDb();
+        const trimmedPromoCode = promo_code.trim().toUpperCase();
+        const promoCodeSnap = await db.collection('promoCodes').doc(trimmedPromoCode).get();
+        if (promoCodeSnap.exists) {
+          const promoData = promoCodeSnap.data();
+          // If promo code has a tier restriction, use that tier instead of the requested tier
+          if (promoData?.tier && VALID_TIERS.includes(promoData.tier as SubscriptionTier)) {
+            console.log('[Checkout] Promo code tier restriction:', promoData.tier, 'overriding requested tier:', tier);
+            tier = promoData.tier;
+          }
+        }
+      } catch (promoTierError) {
+        console.error('[Checkout] Error checking promo code tier:', promoTierError);
+        // Continue with original tier if check fails
+      }
+    }
 
     if (!tier || !VALID_TIERS.includes(tier as SubscriptionTier)) {
       return NextResponse.json(
@@ -226,12 +246,13 @@ export async function POST(request: NextRequest) {
         }
         const promoData = promoCodeSnap.data();
         
-        // Check if promo code has a tier restriction and validate it matches requested tier
+        // Note: Tier validation already happened earlier - if promo code has a tier restriction,
+        // the tier was already set to match the promo code's tier. This check is just for logging.
         if (promoData?.tier && promoData.tier !== tier) {
-          return NextResponse.json(
-            { error: `This promo code is only valid for the ${promoData.tier} plan` },
-            { status: 400 }
-          );
+          console.warn('[Checkout] Promo code tier mismatch - this should not happen:', {
+            promoCodeTier: promoData.tier,
+            requestedTier: tier
+          });
         }
         
         // Check if code is expired
