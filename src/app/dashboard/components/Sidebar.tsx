@@ -10,18 +10,44 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import Image from 'next/image';
 import NotificationBell from './NotificationBell';
 
-const navigation = [
-  { name: 'Analytics Overview', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Fleet', href: '/dashboard/fleet', icon: Truck },
-  { name: 'Assets', href: '/dashboard/assets', icon: Package },
-  { name: 'Detailed Reports', href: '/dashboard/analytics', icon: BarChart3 },
-  { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },
-  { name: 'Activity History', href: '/dashboard/history', icon: History },
-  { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
-  { name: 'Team', href: '/dashboard/team', icon: Users },
-  { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key },
-  { name: 'Companies', href: '/dashboard/companies', icon: Building2, adminOnly: true },
-  { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCard, managerOnly: true },
+// Organized navigation groups
+const navigationGroups = [
+  {
+    label: 'Overview',
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    ]
+  },
+  {
+    label: 'Assets & Fleet',
+    items: [
+      { name: 'Fleet', href: '/dashboard/fleet', icon: Truck },
+      { name: 'Assets', href: '/dashboard/assets', icon: Package },
+      { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
+    ]
+  },
+  {
+    label: 'Reports & Analytics',
+    items: [
+      { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+      { name: 'Activity History', href: '/dashboard/history', icon: History },
+      { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },
+    ]
+  },
+  {
+    label: 'Team & Access',
+    items: [
+      { name: 'Team', href: '/dashboard/team', icon: Users },
+      { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key },
+    ]
+  },
+  {
+    label: 'Settings',
+    items: [
+      { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCard, managerOnly: true },
+      { name: 'Companies', href: '/dashboard/companies', icon: Building2, adminOnly: true },
+    ]
+  },
 ];
 
 export default function Sidebar() {
@@ -124,36 +150,52 @@ export default function Sidebar() {
         </div>
 
       <div className="flex-1 overflow-y-auto py-5 px-3">
-        <p className="px-3 mb-3 text-xs font-medium uppercase tracking-wider text-white/40">Menu</p>
-        <nav className="space-y-1">
-          {navigation
-            .filter(item => {
+        <nav className="space-y-6">
+          {navigationGroups.map((group) => {
+            // Filter items based on role
+            const visibleItems = group.items.filter(item => {
               // Admin-only items: only show to admins
               if (item.adminOnly && userRole !== 'admin') return false;
               // Manager-only items: show to managers AND admins (admins have higher privileges)
               if (item.managerOnly && userRole !== 'manager' && userRole !== 'admin') return false;
               return true;
-            })
-            .map((item) => {
-              const isActive = pathname === item.href || (item.href === '/dashboard' && pathname?.startsWith('/dashboard'));
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-primary/15 text-primary border border-primary/30'
-                      : 'text-white/70 hover:text-white hover:bg-white/5 border border-transparent'
-                  }`}
-                >
-                  <item.icon className={`h-5 w-5 shrink-0 ${isActive ? 'text-primary' : 'text-white/50'}`} />
-                  <span className="truncate">{item.name}</span>
-                </Link>
-              );
-            })}
+            });
+
+            // Don't render group if no items are visible
+            if (visibleItems.length === 0) return null;
+
+            return (
+              <div key={group.label}>
+                <p className="px-3 mb-2 text-xs font-medium uppercase tracking-wider text-white/40">
+                  {group.label}
+                </p>
+                <div className="space-y-1">
+                  {visibleItems.map((item) => {
+                    const isActive = pathname === item.href || 
+                      (item.href === '/dashboard' && pathname === '/dashboard') ||
+                      (item.href !== '/dashboard' && pathname?.startsWith(item.href));
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                          isActive
+                            ? 'bg-primary/15 text-primary border border-primary/30'
+                            : 'text-white/70 hover:text-white hover:bg-white/5 border border-transparent'
+                        }`}
+                      >
+                        <item.icon className={`h-5 w-5 shrink-0 ${isActive ? 'text-primary' : 'text-white/50'}`} />
+                        <span className="truncate">{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </nav>
       </div>
 
