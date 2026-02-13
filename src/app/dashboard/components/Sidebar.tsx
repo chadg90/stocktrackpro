@@ -21,7 +21,7 @@ const navigation = [
   { name: 'Team', href: '/dashboard/team', icon: Users },
   { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key },
   { name: 'Companies', href: '/dashboard/companies', icon: Building2, adminOnly: true },
-  { name: 'Subscribe', href: '/pricing', icon: CreditCard, managerOnly: true },
+  { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCard, managerOnly: true },
 ];
 
 export default function Sidebar() {
