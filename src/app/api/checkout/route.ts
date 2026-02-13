@@ -226,6 +226,14 @@ export async function POST(request: NextRequest) {
         }
         const promoData = promoCodeSnap.data();
         
+        // Check if promo code has a tier restriction and validate it matches requested tier
+        if (promoData?.tier && promoData.tier !== tier) {
+          return NextResponse.json(
+            { error: `This promo code is only valid for the ${promoData.tier} plan` },
+            { status: 400 }
+          );
+        }
+        
         // Check if code is expired
         if (promoData?.expiresAt) {
           const expiresAt = promoData.expiresAt.toDate ? promoData.expiresAt.toDate() : new Date(promoData.expiresAt);

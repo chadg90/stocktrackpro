@@ -22,6 +22,8 @@ type Company = {
 
 type TierId = 'PRO_STARTER' | 'PRO_TEAM' | 'PRO_BUSINESS' | 'PRO_ENTERPRISE';
 
+const VALID_TIERS: TierId[] = ['PRO_STARTER', 'PRO_TEAM', 'PRO_BUSINESS', 'PRO_ENTERPRISE'];
+
 type Tier = {
   id: TierId;
   name: string;
@@ -120,6 +122,8 @@ export default function SubscriptionPage() {
   const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
   const [promoCodeValidating, setPromoCodeValidating] = useState(false);
   const [validatedPromoCode, setValidatedPromoCode] = useState<string | null>(null);
+  const [promoCodeTier, setPromoCodeTier] = useState<TierId | null>(null);
+  const [selectedTierForPromo, setSelectedTierForPromo] = useState<TierId | null>(null);
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
@@ -265,19 +269,25 @@ export default function SubscriptionPage() {
         return;
       }
       
-      // Valid promo code - immediately start checkout
+      // Check if promo code has a tier restriction
+      const promoCodeRestrictedTier = promoData?.tier as TierId | null | undefined;
+      
+      // Valid promo code
       setValidatedPromoCode(trimmedCode);
+      setPromoCodeTier(promoCodeRestrictedTier || null);
       setPromoCodeError(null);
       
-      // Determine which tier to use
-      // If no active subscription, default to Starter
-      // If has subscription, use current tier (for renewal/upgrade)
-      const tierToUse = subscriptionStatus === 'active' || subscriptionStatus === 'trial' 
-        ? (currentTier as TierId) || 'PRO_STARTER'
-        : 'PRO_STARTER';
-      
-      // Start checkout immediately
-      await handleSubscribe(tierToUse);
+      // If promo code has a tier restriction, use that tier immediately
+      if (promoCodeRestrictedTier && VALID_TIERS.includes(promoCodeRestrictedTier)) {
+        // Start checkout immediately with restricted tier
+        await handleSubscribe(promoCodeRestrictedTier);
+      } else {
+        // No tier restriction - user needs to select tier
+        // Use company's selected tier if available, otherwise default to Starter
+        const defaultTier = (currentTier as TierId) || 'PRO_STARTER';
+        setSelectedTierForPromo(defaultTier);
+        // Don't auto-checkout - let user select tier first
+      }
       
     } catch (error) {
       console.error('Error validating promo code:', error);
@@ -291,7 +301,19 @@ export default function SubscriptionPage() {
   const clearPromoCode = () => {
     setPromoCode('');
     setValidatedPromoCode(null);
+    setPromoCodeTier(null);
+    setSelectedTierForPromo(null);
     setPromoCodeError(null);
+  };
+
+  const handlePromoCodeCheckout = async () => {
+    if (!validatedPromoCode) return;
+    
+    // Determine which tier to use
+    const tierToUse = promoCodeTier || selectedTierForPromo || (currentTier as TierId) || 'PRO_STARTER';
+    
+    // Start checkout
+    await handleSubscribe(tierToUse);
   };
 
   const handleSubscribe = async (tier: TierId) => {
@@ -488,7 +510,7 @@ export default function SubscriptionPage() {
             <Tag className="w-6 h-6 text-primary" />
             Promo Code Checkout
           </h2>
-          <p className="text-white/60 mb-6">Enter a promo code to validate and proceed directly to checkout</p>
+          <p className="text-white/60 mb-6">Enter a promo code to validate and proceed to checkout</p>
           
           <div className="flex gap-3">
             <div className="flex-1 relative">
@@ -499,6 +521,8 @@ export default function SubscriptionPage() {
                   setPromoCode(e.target.value.toUpperCase());
                   setPromoCodeError(null);
                   setValidatedPromoCode(null);
+                  setPromoCodeTier(null);
+                  setSelectedTierForPromo(null);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && promoCode.trim() && !promoCodeValidating) {
@@ -506,7 +530,7 @@ export default function SubscriptionPage() {
                   }
                 }}
                 placeholder="Enter promo code"
-                disabled={promoCodeValidating}
+                disabled={promoCodeValidating || validatedPromoCode !== null}
                 className={`w-full rounded-lg bg-white/5 border px-4 py-3 pr-10 text-white placeholder:text-white/40 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase font-medium ${
                   validatedPromoCode 
                     ? 'border-green-500/50 bg-green-500/10' 
@@ -521,30 +545,74 @@ export default function SubscriptionPage() {
                 </div>
               )}
             </div>
-            <button
-              onClick={validatePromoCode}
-              disabled={!promoCode.trim() || promoCodeValidating}
-              className="px-6 py-3 bg-primary hover:bg-primary-light text-black rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 flex items-center gap-2"
-            >
-              {promoCodeValidating ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-black"></div>
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  Validate & Checkout
-                </>
-              )}
-            </button>
+            {!validatedPromoCode ? (
+              <button
+                onClick={validatePromoCode}
+                disabled={!promoCode.trim() || promoCodeValidating}
+                className="px-6 py-3 bg-primary hover:bg-primary-light text-black rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 flex items-center gap-2"
+              >
+                {promoCodeValidating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-black"></div>
+                    Validating...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Validate
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={clearPromoCode}
+                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-semibold flex items-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Clear
+              </button>
+            )}
           </div>
           
-          {validatedPromoCode && (
+          {/* Tier Selection (shown if promo code doesn't restrict tier) */}
+          {validatedPromoCode && !promoCodeTier && (
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-white/80 mb-3">
+                Select Plan for Trial
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {tiers.map((tier) => (
+                  <button
+                    key={tier.id}
+                    type="button"
+                    onClick={() => setSelectedTierForPromo(tier.id)}
+                    className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                      selectedTierForPromo === tier.id
+                        ? 'border-primary bg-primary/10'
+                        : 'border-white/10 bg-white/5 hover:border-white/20'
+                    }`}
+                  >
+                    <div className="font-semibold text-white text-sm mb-1">{tier.name}</div>
+                    <div className="text-white/60 text-xs">{formatPrice(tier.price)}/mo</div>
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handlePromoCodeCheckout}
+                disabled={!selectedTierForPromo}
+                className="mt-4 w-full px-6 py-3 bg-primary hover:bg-primary-light text-black rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                Proceed to Checkout
+              </button>
+            </div>
+          )}
+          
+          {validatedPromoCode && promoCodeTier && (
             <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
               <p className="text-green-400 text-sm flex items-center gap-2">
                 <Check className="w-4 h-4 shrink-0" />
-                Promo code <span className="font-semibold">{validatedPromoCode}</span> validated. Redirecting to checkout...
+                Promo code <span className="font-semibold">{validatedPromoCode}</span> is valid for <span className="font-semibold">{formatTierName(promoCodeTier)}</span> plan. Redirecting to checkout...
               </p>
             </div>
           )}
@@ -557,12 +625,6 @@ export default function SubscriptionPage() {
               </p>
             </div>
           )}
-          
-          <p className="text-white/40 text-sm mt-4">
-            {subscriptionStatus === 'active' || subscriptionStatus === 'trial' 
-              ? `Checkout will use your current plan (${formatTierName(currentTier)})`
-              : 'Checkout will use the Starter plan by default'}
-          </p>
         </div>
       )}
 

@@ -37,6 +37,7 @@ export default function OnboardingPage() {
   const [companyOption, setCompanyOption] = useState<'join' | 'create'>('join');
   const [accessCode, setAccessCode] = useState('');
   const [companyName, setCompanyName] = useState('');
+  const [selectedTier, setSelectedTier] = useState<'PRO_STARTER' | 'PRO_TEAM' | 'PRO_BUSINESS' | 'PRO_ENTERPRISE'>('PRO_STARTER');
   
   // UI state
   const [loading, setLoading] = useState(false);
@@ -230,10 +231,11 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Create company
+      // Create company with selected tier
       const companyRef = await addDoc(collection(firebaseDb, 'companies'), {
         name: companyName.trim(),
         subscription_status: 'trial',
+        subscription_tier: selectedTier,
         created_at: serverTimestamp(),
         created_by: user.uid,
       });
@@ -473,6 +475,65 @@ export default function OnboardingPage() {
                     />
                     <p className="text-white/50 text-xs mt-1">
                       You'll become the manager of this company
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-2">
+                      Choose Your Plan (7-Day Free Trial)
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTier('PRO_STARTER')}
+                        className={`p-3 rounded-lg border-2 text-left transition-colors ${
+                          selectedTier === 'PRO_STARTER'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-white/10 bg-white/5 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="font-semibold text-white text-sm">Starter</div>
+                        <div className="text-white/60 text-xs">£19.99/mo</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTier('PRO_TEAM')}
+                        className={`p-3 rounded-lg border-2 text-left transition-colors ${
+                          selectedTier === 'PRO_TEAM'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-white/10 bg-white/5 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="font-semibold text-white text-sm">Team</div>
+                        <div className="text-white/60 text-xs">£34.99/mo</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTier('PRO_BUSINESS')}
+                        className={`p-3 rounded-lg border-2 text-left transition-colors ${
+                          selectedTier === 'PRO_BUSINESS'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-white/10 bg-white/5 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="font-semibold text-white text-sm">Business</div>
+                        <div className="text-white/60 text-xs">£49.99/mo</div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTier('PRO_ENTERPRISE')}
+                        className={`p-3 rounded-lg border-2 text-left transition-colors ${
+                          selectedTier === 'PRO_ENTERPRISE'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-white/10 bg-white/5 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="font-semibold text-white text-sm">Enterprise</div>
+                        <div className="text-white/60 text-xs">£119.99/mo</div>
+                      </button>
+                    </div>
+                    <p className="text-white/50 text-xs mt-2">
+                      You can upgrade or change your plan anytime after the trial
                     </p>
                   </div>
 
