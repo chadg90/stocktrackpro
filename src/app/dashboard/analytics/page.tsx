@@ -191,9 +191,34 @@ export default function AnalyticsPage() {
       
       try {
         const inspectionsSnap = await getDocs(inspectionsQuery);
-        const inspectionsData = inspectionsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
-        console.log('[Analytics] Fetched inspections:', inspectionsData.length, inspectionsData.map(i => ({ id: i.id, vehicle_id: i.vehicle_id, inspected_at: i.inspected_at })));
-        setInspections(inspectionsData);
+        let inspectionsData = inspectionsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
+        
+        // Limit to 8 most recent inspections per user (matching app behavior)
+        const inspectionsByUser: Record<string, Inspection[]> = {};
+        inspectionsData.forEach(insp => {
+          const userId = insp.inspected_by || 'unknown';
+          if (!inspectionsByUser[userId]) {
+            inspectionsByUser[userId] = [];
+          }
+          inspectionsByUser[userId].push(insp);
+        });
+        
+        // Sort each user's inspections by date (most recent first) and take top 8
+        const filteredInspections: Inspection[] = [];
+        Object.values(inspectionsByUser).forEach(userInspections => {
+          userInspections.sort((a, b) => {
+            const aDate = getDateValue(a.inspected_at);
+            const bDate = getDateValue(b.inspected_at);
+            if (!aDate && !bDate) return 0;
+            if (!aDate) return 1;
+            if (!bDate) return -1;
+            return bDate.getTime() - aDate.getTime();
+          });
+          filteredInspections.push(...userInspections.slice(0, 8));
+        });
+        
+        console.log('[Analytics] Fetched inspections:', inspectionsData.length, 'Filtered to 8 per user:', filteredInspections.length);
+        setInspections(filteredInspections);
       } catch (inspError: any) {
         console.error('[Analytics] Error fetching inspections (may need Firestore index):', inspError);
         // If index error, try fallback query without orderBy
@@ -205,18 +230,34 @@ export default function AnalyticsPage() {
               where('company_id', '==', companyId)
             );
             const fallbackSnap = await getDocs(fallbackQuery);
-            const inspectionsData = fallbackSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
-            // Sort manually by inspected_at descending
-            inspectionsData.sort((a, b) => {
-              const aDate = getDateValue(a.inspected_at);
-              const bDate = getDateValue(b.inspected_at);
-              if (!aDate && !bDate) return 0;
-              if (!aDate) return 1;
-              if (!bDate) return -1;
-              return bDate.getTime() - aDate.getTime();
+            let inspectionsData = fallbackSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
+            
+            // Limit to 8 most recent inspections per user (matching app behavior)
+            const inspectionsByUser: Record<string, Inspection[]> = {};
+            inspectionsData.forEach(insp => {
+              const userId = insp.inspected_by || 'unknown';
+              if (!inspectionsByUser[userId]) {
+                inspectionsByUser[userId] = [];
+              }
+              inspectionsByUser[userId].push(insp);
             });
-            console.log('[Analytics] Fetched inspections (fallback, no orderBy):', inspectionsData.length);
-            setInspections(inspectionsData);
+            
+            // Sort each user's inspections by date (most recent first) and take top 8
+            const filteredInspections: Inspection[] = [];
+            Object.values(inspectionsByUser).forEach(userInspections => {
+              userInspections.sort((a, b) => {
+                const aDate = getDateValue(a.inspected_at);
+                const bDate = getDateValue(b.inspected_at);
+                if (!aDate && !bDate) return 0;
+                if (!aDate) return 1;
+                if (!bDate) return -1;
+                return bDate.getTime() - aDate.getTime();
+              });
+              filteredInspections.push(...userInspections.slice(0, 8));
+            });
+            
+            console.log('[Analytics] Fetched inspections (fallback, no orderBy):', inspectionsData.length, 'Filtered to 8 per user:', filteredInspections.length);
+            setInspections(filteredInspections);
           } catch (fallbackError) {
             console.error('[Analytics] Fallback query also failed:', fallbackError);
             setInspections([]);

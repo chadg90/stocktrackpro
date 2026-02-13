@@ -272,7 +272,34 @@ export default function DashboardPage() {
           );
         }
         const inspSnap = await getDocs(inspQuery);
-        setInspections(inspSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection)));
+        let inspectionsData = inspSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
+        
+        // Limit to 8 most recent inspections per user (matching app behavior)
+        const inspectionsByUser: Record<string, Inspection[]> = {};
+        inspectionsData.forEach(insp => {
+          const userId = insp.inspected_by || 'unknown';
+          if (!inspectionsByUser[userId]) {
+            inspectionsByUser[userId] = [];
+          }
+          inspectionsByUser[userId].push(insp);
+        });
+        
+        // Sort each user's inspections by date (most recent first) and take top 8
+        const filteredInspections: Inspection[] = [];
+        Object.values(inspectionsByUser).forEach(userInspections => {
+          userInspections.sort((a, b) => {
+            const aDate = a.inspected_at && typeof a.inspected_at === 'object' && 'toDate' in a.inspected_at
+              ? a.inspected_at.toDate()
+              : (a.inspected_at ? new Date(a.inspected_at as string) : new Date(0));
+            const bDate = b.inspected_at && typeof b.inspected_at === 'object' && 'toDate' in b.inspected_at
+              ? b.inspected_at.toDate()
+              : (b.inspected_at ? new Date(b.inspected_at as string) : new Date(0));
+            return bDate.getTime() - aDate.getTime();
+          });
+          filteredInspections.push(...userInspections.slice(0, 8));
+        });
+        
+        setInspections(filteredInspections);
 
         // Fetch defects with date filter
         let defQuery = query(
