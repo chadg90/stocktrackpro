@@ -117,7 +117,7 @@ export default function Sidebar() {
         id="sidebar-navigation"
         role="navigation"
         aria-label="Main navigation"
-        className={`flex h-full w-64 flex-col fixed inset-y-0 z-[95] bg-black border-r border-white/10 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`flex h-screen w-64 flex-col fixed inset-y-0 z-[95] bg-black border-r border-white/10 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
         mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       }`}
       onClick={(e) => {
@@ -141,7 +141,7 @@ export default function Sidebar() {
           </div>
         </div>
 
-      <div className="flex-1 overflow-y-auto py-3 px-2">
+      <div className="flex-1 overflow-y-auto py-3 px-2 min-h-0">
         <nav className="space-y-4">
           {navigationGroups.map((group) => {
             // Filter items based on role
@@ -191,7 +191,7 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <div className="p-2 border-t border-white/10 shrink-0">
+      <div className="p-2 border-t border-white/10 shrink-0 bg-black">
         <button
           onClick={handleSignOut}
           className="flex w-full items-center gap-2 px-2 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-black"

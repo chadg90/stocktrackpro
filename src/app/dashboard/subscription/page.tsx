@@ -464,16 +464,15 @@ export default function SubscriptionPage() {
         <div className="flex flex-wrap gap-4">
           {canManage && (
             <>
-              {company?.stripe_customer_id && (
-                <button
-                  onClick={handleManageBilling}
-                  disabled={portalLoading}
-                  className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors disabled:opacity-60 shadow-lg shadow-primary/20"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
-                </button>
-              )}
+              <button
+                onClick={handleManageBilling}
+                disabled={portalLoading || !company?.stripe_customer_id}
+                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
+                title={!company?.stripe_customer_id ? 'Subscribe first to manage billing' : 'Open Stripe billing portal'}
+              >
+                <ExternalLink className="w-4 h-4" />
+                {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
+              </button>
               <button
                 onClick={handleSyncSubscription}
                 disabled={syncing}

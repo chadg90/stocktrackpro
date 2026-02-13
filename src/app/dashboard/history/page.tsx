@@ -15,8 +15,10 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Clock, Search, Package, Truck } from 'lucide-react';
+import { Clock, Search, Package, Truck, Image as ImageIcon } from 'lucide-react';
 import ExportButton from '../components/ExportButton';
+import ImageViewerModal from '../components/ImageViewerModal';
+import AuthenticatedImage from '../components/AuthenticatedImage';
 
 type HistoryItem = {
   id: string;
@@ -36,6 +38,7 @@ type InspectionItem = {
   has_defect?: boolean;
   mileage?: number;
   notes?: string;
+  photo_urls?: Record<string, string>;
 };
 
 type Profile = {
@@ -86,6 +89,8 @@ export default function HistoryPage() {
   const [tools, setTools] = useState<Record<string, Tool>>({});
   const [vehicles, setVehicles] = useState<Record<string, Vehicle>>({});
   const [users, setUsers] = useState<Record<string, Profile>>({});
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
+  const [viewingImageAlt, setViewingImageAlt] = useState<string>('');
   
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -425,19 +430,20 @@ export default function HistoryPage() {
                 <th className="px-6 py-4 font-medium">{activeTab === 'assets' ? 'Asset' : 'Vehicle'}</th>
                 <th className="px-6 py-4 font-medium">{activeTab === 'assets' ? 'User' : 'Inspector'}</th>
                 {activeTab === 'fleet' && <th className="px-6 py-4 font-medium">Mileage</th>}
+                {activeTab === 'fleet' && <th className="px-6 py-4 font-medium">Images</th>}
                 <th className="px-6 py-4 font-medium">{activeTab === 'assets' ? 'Details' : 'Notes'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
                 <tr>
-                  <td colSpan={activeTab === 'assets' ? 5 : 6} className="px-6 py-8 text-center text-white/50">
+                  <td colSpan={activeTab === 'assets' ? 5 : 7} className="px-6 py-8 text-center text-white/50">
                     Loading history...
                   </td>
                 </tr>
               ) : (activeTab === 'assets' ? filteredAssetHistory : filteredVehicleInspections).length === 0 ? (
                 <tr>
-                  <td colSpan={activeTab === 'assets' ? 5 : 6} className="px-6 py-8 text-center text-white/50">
+                  <td colSpan={activeTab === 'assets' ? 5 : 7} className="px-6 py-8 text-center text-white/50">
                     No {activeTab === 'assets' ? 'asset history' : 'vehicle inspections'} found.
                   </td>
                 </tr>
@@ -508,6 +514,9 @@ export default function HistoryPage() {
                     ? (vehicle.registration || vehicle.name || `${vehicle.make} ${vehicle.model}`.trim() || item.vehicle_id)
                     : (item.vehicle_id || '—');
                   
+                  const photoUrls = item.photo_urls ? Object.values(item.photo_urls) : [];
+                  const hasImages = photoUrls.length > 0;
+                  
                   return (
                     <tr key={item.id} className="hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4 text-white/70 text-sm whitespace-nowrap">
@@ -534,6 +543,37 @@ export default function HistoryPage() {
                       <td className="px-6 py-4 text-white/60 text-sm">
                         {item.mileage ? `${item.mileage.toLocaleString()} mi` : '—'}
                       </td>
+                      <td className="px-6 py-4">
+                        {hasImages ? (
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1">
+                              {photoUrls.slice(0, 3).map((url, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => {
+                                    setViewingImage(url);
+                                    setViewingImageAlt(`${vehicleName} - Inspection ${idx + 1}`);
+                                  }}
+                                  className="w-10 h-10 rounded border border-primary/30 overflow-hidden hover:ring-2 hover:ring-primary transition-all flex-shrink-0"
+                                >
+                                  <AuthenticatedImage
+                                    src={url}
+                                    alt={`Inspection image ${idx + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </button>
+                              ))}
+                            </div>
+                            {photoUrls.length > 3 && (
+                              <span className="text-xs text-white/50">
+                                +{photoUrls.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-white/40 text-sm">No images</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-white/60 text-sm">
                         {item.notes || (item.has_defect ? 'Defect found' : '—')}
                       </td>
@@ -545,6 +585,17 @@ export default function HistoryPage() {
           </table>
         </div>
       </div>
+
+      {/* Image Viewer Modal */}
+      <ImageViewerModal
+        isOpen={viewingImage !== null}
+        onClose={() => {
+          setViewingImage(null);
+          setViewingImageAlt('');
+        }}
+        imageUrl={viewingImage || ''}
+        altText={viewingImageAlt}
+      />
     </div>
   );
 }
