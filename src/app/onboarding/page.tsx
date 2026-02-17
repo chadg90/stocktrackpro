@@ -6,18 +6,9 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from 'firebase/auth';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  doc,
-  setDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Building2, Key, ArrowRight, Loader2, CheckCircle, Users, MapPin, Package, LayoutDashboard, LogIn } from 'lucide-react';
+import { Building2, ArrowRight, Loader2, CheckCircle, Users, MapPin, Package, LayoutDashboard, LogIn } from 'lucide-react';
 import Link from 'next/link';
 
 type OnboardingStep = 'choice' | 'account' | 'company' | 'success';
@@ -34,15 +25,12 @@ export default function OnboardingPage() {
   
   // Company selection
   const [step, setStep] = useState<OnboardingStep>('choice');
-  const [companyOption, setCompanyOption] = useState<'join' | 'create'>('join');
-  const [accessCode, setAccessCode] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [selectedTier, setSelectedTier] = useState<'PRO_STARTER' | 'PRO_TEAM' | 'PRO_BUSINESS' | 'PRO_ENTERPRISE'>('PRO_STARTER');
   
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [verifyingCode, setVerifyingCode] = useState(false);
   const [createdCompanyName, setCreatedCompanyName] = useState('');
 
   const validateEmail = (email: string) => {
@@ -124,87 +112,6 @@ export default function OnboardingPage() {
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const verifyAccessCode = async () => {
-    if (!accessCode.trim()) {
-      setError('Please enter an access code');
-      return;
-    }
-
-    if (!firebaseDb || !firebaseAuth) {
-      setError('Firebase is not configured properly');
-      return;
-    }
-
-    setVerifyingCode(true);
-    setError(null);
-
-    try {
-      const codesQuery = query(
-        collection(firebaseDb, 'access_codes'),
-        where('code', '==', accessCode.trim().toUpperCase()),
-        where('used', '==', false)
-      );
-
-      const snapshot = await getDocs(codesQuery);
-
-      if (snapshot.empty) {
-        setError('Invalid or expired access code. Please check and try again.');
-        setVerifyingCode(false);
-        return;
-      }
-
-      const codeDoc = snapshot.docs[0];
-      const codeData = codeDoc.data();
-
-      // Check if code is expired
-      if (codeData.expires_at) {
-        const expiresAt = codeData.expires_at.toDate ? codeData.expires_at.toDate() : new Date(codeData.expires_at);
-        if (expiresAt < new Date()) {
-          setError('This access code has expired. Please request a new one.');
-          setVerifyingCode(false);
-          return;
-        }
-      }
-
-      // Update user profile with company and role
-      const user = firebaseAuth.currentUser;
-      if (!user) {
-        setError('User session expired. Please try again.');
-        setVerifyingCode(false);
-        return;
-      }
-
-      await setDoc(
-        doc(firebaseDb, 'profiles', user.uid),
-        {
-          company_id: codeData.company_id,
-          role: codeData.role || 'user',
-          updated_at: serverTimestamp(),
-        },
-        { merge: true }
-      );
-
-      // Mark access code as used
-      await setDoc(
-        doc(firebaseDb, 'access_codes', codeDoc.id),
-        {
-          used: true,
-          used_by: user.uid,
-          used_at: serverTimestamp(),
-        },
-        { merge: true }
-      );
-
-      // Redirect to dashboard
-      router.push('/dashboard');
-    } catch (err: any) {
-      console.error('Access code verification error:', err);
-      setError(err.message || 'Failed to verify access code. Please try again.');
-    } finally {
-      setVerifyingCode(false);
     }
   };
 
@@ -296,13 +203,13 @@ export default function OnboardingPage() {
           <h2 className="text-2xl font-semibold text-white mb-2">
             {step === 'choice' && 'Get started'}
             {step === 'account' && 'Create your account'}
-            {step === 'company' && 'New company or existing?'}
+            {step === 'company' && 'Set up your company'}
             {step === 'success' && "You're all set"}
           </h2>
           <p className="text-white/60 text-sm">
             {step === 'choice' && 'Join as a new company or sign in to your existing account.'}
             {step === 'account' && 'One account for the web dashboard and the app.'}
-            {step === 'company' && 'Setup a new company or log in to an existing one.'}
+            {step === 'company' && 'Create your company and start your free trial.'}
             {step === 'success' && 'Your company is ready. Here’s what to do next.'}
           </p>
         </div>
@@ -339,7 +246,7 @@ export default function OnboardingPage() {
               </Link>
             </div>
             <p className="text-white/50 text-center text-xs">
-              Need to join a company with an access code? Choose &quot;Join as New company&quot;, create your account, then enter your code on the next step.
+              Joining an existing company with an access code? Use the Stock Track PRO app (App Store or Google Play).
             </p>
           </div>
         ) : step === 'success' ? (
@@ -475,93 +382,10 @@ export default function OnboardingPage() {
             </form>
           ) : (
             <div className="space-y-6">
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCompanyOption('join');
-                    setError(null);
-                  }}
-                  className={`flex-1 p-4 rounded-lg border-2 transition-colors ${
-                    companyOption === 'join'
-                      ? 'border-blue-500 bg-blue-500/10'
-                      : 'border-white/10 bg-white/5 hover:border-white/20'
-                  }`}
-                >
-                  <Key className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-                  <h3 className="font-semibold text-white mb-1">Existing company login</h3>
-                  <p className="text-white/60 text-xs">
-                    Use an access code from your manager, or sign in if you already have an account
-                  </p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCompanyOption('create');
-                    setError(null);
-                  }}
-                  className={`flex-1 p-4 rounded-lg border-2 transition-colors ${
-                    companyOption === 'create'
-                      ? 'border-blue-500 bg-blue-500/10'
-                      : 'border-white/10 bg-white/5 hover:border-white/20'
-                  }`}
-                >
-                  <Building2 className="h-6 w-6 mx-auto mb-2 text-blue-500" />
-                  <h3 className="font-semibold text-white mb-1">Setup new company</h3>
-                  <p className="text-white/60 text-xs">
-                    Start your own company. 7-day free trial, then choose a plan
-                  </p>
-                </button>
-              </div>
-
-              {companyOption === 'join' ? (
-                <form onSubmit={(e) => { e.preventDefault(); verifyAccessCode(); }} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/80 mb-1.5">
-                      Access Code
-                    </label>
-                    <input
-                      type="text"
-                      value={accessCode}
-                      onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                      className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors uppercase"
-                      placeholder="ABC123"
-                      required
-                    />
-                    <p className="text-white/50 text-xs mt-1">
-                      Get this code from your manager
-                    </p>
-                  </div>
-
-                  {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                      <p className="text-red-400 text-sm">{error}</p>
-                    </div>
-                  )}
-
-                  <p className="text-white/50 text-xs text-center">
-                    Already have an account? <Link href="/dashboard" className="text-blue-500 hover:underline">Sign in</Link>
-                  </p>
-                  <button
-                    type="submit"
-                    className="w-full text-white font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black flex items-center justify-center gap-2 btn-brand-blue"
-                    disabled={verifyingCode}
-                  >
-                    {verifyingCode ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Verifying...
-                      </>
-                    ) : (
-                      <>
-                        Continue with code <ArrowRight className="h-4 w-4" />
-                      </>
-                    )}
-                  </button>
-                </form>
-              ) : (
-                <form onSubmit={handleCreateCompany} className="space-y-4">
+              <p className="text-white/70 text-sm text-center">
+                Set up your new company. Access code joining is done in the app.
+              </p>
+              <form onSubmit={handleCreateCompany} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-1.5">
                       Company Name
@@ -661,7 +485,6 @@ export default function OnboardingPage() {
                     )}
                   </button>
                 </form>
-              )}
 
               <button
                 type="button"

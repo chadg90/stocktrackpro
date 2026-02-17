@@ -25,9 +25,6 @@ export default function Pricing() {
   const [authLoading, setAuthLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<TierId | null>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [promoCode, setPromoCode] = useState('');
-  const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
-  const [promoCodeValidating, setPromoCodeValidating] = useState(false);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) {
@@ -63,11 +60,9 @@ export default function Pricing() {
   const handleSubscribe = async (tier: TierId) => {
     if (!profile?.company_id || !authUser) return;
     setCheckoutError(null);
-    setPromoCodeError(null);
     setCheckoutLoading(tier);
     try {
       const token = await authUser.getIdToken();
-      console.log('[Pricing] Starting checkout:', { tier, company_id: profile.company_id, promoCode: promoCode.trim() || null });
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
@@ -77,7 +72,6 @@ export default function Pricing() {
         body: JSON.stringify({ 
           tier, 
           company_id: profile.company_id,
-          promo_code: promoCode.trim() || undefined,
         }),
         // Add timeout signal
         signal: AbortSignal.timeout(25000), // 25s timeout (less than Vercel's 30s)
@@ -206,27 +200,6 @@ export default function Pricing() {
           <p className="text-xl sm:text-2xl text-white/90 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed">
             Simple, transparent pricing. Managers can subscribe here with a card. Staff use the app. New users receive a 7-day free trial.
           </p>
-
-          {/* Promo Code Input */}
-          {canSubscribe && (
-            <div className="max-w-md mx-auto mb-8 sm:mb-12">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => {
-                    setPromoCode(e.target.value.toUpperCase());
-                    setPromoCodeError(null);
-                  }}
-                  placeholder="Enter promo code"
-                  className="flex-1 rounded-lg bg-white/5 border border-white/20 px-4 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors uppercase"
-                />
-              </div>
-              {promoCodeError && (
-                <p className="text-red-400 text-sm mt-2 text-center">{promoCodeError}</p>
-              )}
-            </div>
-          )}
 
           {/* Checkout error - announced to screen readers */}
           {checkoutError && (
