@@ -539,6 +539,15 @@ export default function DashboardPage() {
     }));
   }, [users]);
 
+  // Get display name only (never email)
+  const getUserDisplayName = (u: Profile | undefined, fallback: string = 'Unknown') => {
+    if (!u) return fallback;
+    if (u.first_name || u.last_name) return `${u.first_name || ''} ${u.last_name || ''}`.trim();
+    if (u.displayName) return u.displayName;
+    if (u.name) return u.name;
+    return fallback;
+  };
+
   const userActivity = useMemo(() => {
     const userActionMap: Record<string, { inspections: number; actions: number; name: string }> = {};
     
@@ -549,7 +558,7 @@ export default function DashboardPage() {
         userActionMap[uId] = {
           inspections: 0,
           actions: 0,
-          name: u ? (u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : u.email?.split('@')[0] || uId) : uId
+          name: getUserDisplayName(u, uId)
         };
       }
       userActionMap[uId].inspections++;
@@ -562,7 +571,7 @@ export default function DashboardPage() {
         userActionMap[uId] = {
           inspections: 0,
           actions: 0,
-          name: u ? (u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : u.email?.split('@')[0] || uId) : uId
+          name: getUserDisplayName(u, uId)
         };
       }
       userActionMap[uId].actions++;
@@ -661,7 +670,7 @@ export default function DashboardPage() {
       'Created At': formatDate(a.created_at),
     })),
     users: users.map(u => ({
-      Name: u.first_name ? `${u.first_name} ${u.last_name || ''}`.trim() : (u.displayName || u.email || ''),
+      Name: getUserDisplayName(u, ''),
       Email: u.email || '',
       Role: u.role || '',
       'Last Login': formatDate(u.last_login),
@@ -673,7 +682,7 @@ export default function DashboardPage() {
         Vehicle: v ? v.registration : i.vehicle_id || '',
         'Inspected At': formatDate(i.inspected_at),
         'Has Defect': i.has_defect ? 'Yes' : 'No',
-        Inspector: u ? (u.first_name || u.email || '') : i.inspected_by || '',
+        Inspector: getUserDisplayName(u, i.inspected_by || ''),
       };
     }),
     defects: defects.map(d => {

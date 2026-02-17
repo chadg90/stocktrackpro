@@ -456,7 +456,7 @@ export default function AnalyticsPage() {
     }> = {};
 
     users.forEach(u => {
-      // Prioritize name display: first_name + last_name > displayName > name > email prefix > id
+      // Name only: first_name + last_name > displayName > name > Unknown (never show email)
       let userName = 'Unknown';
       if (u.first_name || u.last_name) {
         userName = `${u.first_name || ''} ${u.last_name || ''}`.trim();
@@ -464,12 +464,9 @@ export default function AnalyticsPage() {
         userName = u.displayName;
       } else if (u.name) {
         userName = u.name;
-      } else if (u.email) {
-        userName = u.email.split('@')[0];
-      } else if (u.id) {
-        userName = u.id;
       }
-      
+      if (!userName || !userName.trim()) userName = 'Unknown';
+
       userStats[u.id || ''] = {
         id: u.id || '',
         name: userName,
