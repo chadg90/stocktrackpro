@@ -68,7 +68,7 @@ export function NavbarAuthButtons({
     return (
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
+        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
       >
         <LogIn className="h-4 w-4" aria-hidden />
         Log in
@@ -83,7 +83,7 @@ export function NavbarAuthButtons({
           onSignOut();
           onLinkClick();
         }}
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
+        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
       >
         <LogOut className="h-4 w-4" aria-hidden />
         Log out
@@ -93,7 +93,7 @@ export function NavbarAuthButtons({
   return (
     <Link
       href="/dashboard"
-      className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
+      className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
       onClick={onLinkClick}
     >
       <LogIn className="h-4 w-4" aria-hidden />
@@ -117,7 +117,7 @@ export function NavbarAuthButtonsMobile({
     return (
       <Link
         href="/dashboard"
-        className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+        className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white/90 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
         onClick={onLinkClick}
       >
         <LogIn className="h-4 w-4" aria-hidden />
@@ -133,7 +133,7 @@ export function NavbarAuthButtonsMobile({
           onSignOut();
           onLinkClick();
         }}
-        className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+        className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white/90 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <LogOut className="h-4 w-4" aria-hidden />
         Log out
@@ -143,7 +143,7 @@ export function NavbarAuthButtonsMobile({
   return (
     <Link
       href="/dashboard"
-      className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+      className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white/90 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
       onClick={onLinkClick}
     >
       <LogIn className="h-4 w-4" aria-hidden />
@@ -184,7 +184,7 @@ export function NavbarNavContent({ onLinkClick }: { onLinkClick: () => void }) {
             )}
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-black"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-black"
               onClick={onLinkClick}
             >
               <LogIn className="h-4 w-4" aria-hidden />

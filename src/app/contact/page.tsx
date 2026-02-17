@@ -59,15 +59,15 @@ export default function Contact() {
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-28 sm:pt-36 pb-12 sm:pb-16">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(254,169,23,0.12),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(59,130,246,0.12),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
         <div className="container relative mx-auto px-4">
-          <p className="text-primary font-medium text-sm uppercase tracking-[0.2em] mb-4">
+          <p className="text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">
             Contact
           </p>
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-6 leading-tight">
-              Get in <span className="text-primary">touch</span>
+              Get in <span className="text-blue-500">touch</span>
             </h1>
             <p className="text-lg text-white/75 leading-relaxed">
               Have questions about Stock Track PRO? We&apos;re here to help with any inquiries about our asset management solution.
@@ -83,7 +83,7 @@ export default function Contact() {
             <div className="p-8 sm:p-10 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/15 transition-colors">
               <h2 className="text-xl font-bold text-white mb-6">Send us a message</h2>
               {submitSuccess && (
-                <div role="status" aria-live="polite" className="mb-6 p-4 rounded-xl bg-primary/10 border border-primary/30 text-primary">
+                <div role="status" aria-live="polite" className="mb-6 p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-500">
                   Thanks! We&apos;ll get back to you soon.
                 </div>
               )}
@@ -115,7 +115,7 @@ export default function Contact() {
                     minLength={2}
                     value={formData.name}
                     onChange={e => setFormData(d => ({ ...d, name: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="Your name"
                   />
                 </div>
@@ -128,7 +128,7 @@ export default function Contact() {
                     required
                     value={formData.email}
                     onChange={e => setFormData(d => ({ ...d, email: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -140,7 +140,7 @@ export default function Contact() {
                     type="text"
                     value={formData.subject}
                     onChange={e => setFormData(d => ({ ...d, subject: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="How can we help?"
                   />
                 </div>
@@ -154,14 +154,14 @@ export default function Contact() {
                     rows={5}
                     value={formData.message}
                     onChange={e => setFormData(d => ({ ...d, message: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y transition-colors"
                     placeholder="Your message..."
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={sending}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold transition-all duration-200 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black shadow-lg shadow-primary/20 hover:shadow-primary/30"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black btn-brand-blue"
                   aria-busy={sending}
                 >
                   {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
@@ -180,10 +180,10 @@ export default function Contact() {
             {contactMethods.map((method, index) => (
               <div
                 key={index}
-                className="group p-8 rounded-2xl border border-white/10 bg-black/40 hover:border-primary/25 hover:bg-white/[0.03] transition-all duration-300"
+                className="group p-8 rounded-2xl border border-white/10 bg-black/40 hover:border-blue-500/25 hover:bg-white/[0.03] transition-all duration-300"
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500/20 transition-colors">
                     <Mail className="w-6 h-6" />
                   </div>
                   <div>
@@ -194,7 +194,7 @@ export default function Contact() {
                 <p className="text-white/90 mb-6 break-all">{method.email}</p>
                 <Link
                   href={`mailto:${method.email}`}
-                  className="inline-flex items-center justify-center w-full px-6 py-3 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-primary/30"
+                  className="inline-flex items-center justify-center w-full px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 btn-brand-blue"
                 >
                   {method.actionText}
                 </Link>
@@ -211,15 +211,15 @@ export default function Contact() {
             <h3 className="text-xl font-semibold text-white mb-6">What to expect</h3>
             <ul className="space-y-4 text-white/80">
               <li className="flex items-start gap-3">
-                <span className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                 <span>We aim to respond to all inquiries within 24 hours during business days.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                 <span>For urgent matters, please mention &quot;Urgent&quot; in your email subject.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                 <span>Business hours: Monday–Friday, 9am–5pm GMT.</span>
               </li>
             </ul>

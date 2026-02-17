@@ -52,10 +52,10 @@ export default function Features() {
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-28 sm:pt-36 pb-16 sm:pb-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(254,169,23,0.12),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(59,130,246,0.12),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
         <div className="container relative mx-auto px-4">
-          <p className="text-primary font-medium text-sm uppercase tracking-[0.2em] mb-4">
+          <p className="text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">
             Features
           </p>
           <div className="max-w-3xl mx-auto text-center">
@@ -76,9 +76,9 @@ export default function Features() {
             {featureBlocks.map((feature) => (
               <div
                 key={feature.title}
-                className="group p-7 sm:p-8 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all duration-300 hover:shadow-xl hover:shadow-primary/5"
+                className="group p-7 sm:p-8 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-blue-500/30 hover:bg-white/[0.04] transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/5"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 text-primary group-hover:bg-primary/20 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-5 text-blue-500 group-hover:bg-blue-500/20 transition-colors">
                   <feature.icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
@@ -92,9 +92,9 @@ export default function Features() {
       {/* Manager Dashboard block */}
       <section className="py-16 sm:py-20 bg-white/[0.02] border-t border-white/10">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto p-8 sm:p-10 rounded-2xl border border-white/10 bg-black/40 hover:border-primary/20 transition-all duration-300">
+          <div className="max-w-6xl mx-auto p-8 sm:p-10 rounded-2xl border border-white/10 bg-black/40 hover:border-blue-500/20 transition-all duration-300">
             <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0 text-blue-500">
                 <RefreshCw className="w-6 h-6" />
               </div>
               <div className="flex-1">
@@ -105,7 +105,7 @@ export default function Features() {
                 <ul className="space-y-3 text-white/80">
                   {dashboardHighlights.map((item, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      <span className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                      <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                       <span className="text-sm sm:text-base leading-relaxed">{item}</span>
                     </li>
                   ))}
@@ -118,8 +118,8 @@ export default function Features() {
 
       {/* CTA */}
       <section className="relative py-20 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_100%,rgba(254,169,23,0.1),transparent_70%)]" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_100%,rgba(59,130,246,0.1),transparent_70%)]" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
         <div className="container relative mx-auto px-4 text-center">
           <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">Ready to get started?</h3>
           <p className="text-white/70 max-w-lg mx-auto mb-8">
@@ -128,14 +128,14 @@ export default function Features() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/contact"
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02]"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue"
             >
               Contact
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-primary/50 hover:bg-white/5 transition-all duration-200 font-medium"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-blue-500/50 hover:bg-white/5 transition-all duration-200 font-medium"
             >
               View pricing
             </Link>

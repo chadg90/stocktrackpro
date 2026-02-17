@@ -117,7 +117,7 @@ export default function Home() {
       {/* Features grid — cards with hover */}
       <section className="py-20 sm:py-28 border-t border-white/10">
         <div className="container mx-auto px-4">
-          <p className="text-center text-primary font-medium text-sm uppercase tracking-[0.2em] mb-4">
+          <p className="text-center text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">
             Capabilities
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 text-center max-w-2xl mx-auto">
@@ -137,9 +137,9 @@ export default function Home() {
             ].map((feature, index) => (
               <div
                 key={index}
-                className="group relative p-7 sm:p-8 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all duration-300 hover:shadow-xl hover:shadow-primary/5"
+                className="group relative p-7 sm:p-8 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-blue-500/30 hover:bg-white/[0.04] transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/5"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 text-primary group-hover:bg-primary/20 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-5 text-blue-500 group-hover:bg-blue-500/20 transition-colors">
                   <feature.icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
@@ -153,7 +153,7 @@ export default function Home() {
       {/* Platform views */}
       <section className="py-20 sm:py-28 border-t border-white/10">
         <div className="container mx-auto px-4">
-          <p className="text-center text-primary font-medium text-sm uppercase tracking-[0.2em] mb-4">
+          <p className="text-center text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">
             Product
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 text-center max-w-2xl mx-auto">
@@ -182,7 +182,7 @@ export default function Home() {
       {/* Benefits */}
       <section className="py-20 sm:py-28 bg-white/[0.02] border-t border-white/10">
         <div className="container mx-auto px-4">
-          <p className="text-center text-primary font-medium text-sm uppercase tracking-[0.2em] mb-4">
+          <p className="text-center text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">
             Outcomes
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 text-center max-w-2xl mx-auto">
@@ -200,8 +200,8 @@ export default function Home() {
               "Get audit trails for insurance and compliance.",
               "Use on iOS, Android, and web dashboard.",
             ].map((benefit, index) => (
-              <div key={index} className="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-black/40 hover:border-primary/20 transition-colors">
-                <Check className="w-5 h-5 text-primary flex-shrink-0" />
+              <div key={index} className="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-black/40 hover:border-blue-500/20 transition-colors">
+                <Check className="w-5 h-5 text-blue-500 flex-shrink-0" />
                 <p className="text-white/90 text-sm sm:text-base">{benefit}</p>
               </div>
             ))}
@@ -221,7 +221,7 @@ export default function Home() {
             New users get a 7-day free trial. Subscriptions are managed through the app; managers use the dashboard to review company data.
           </p>
           <p className="text-white/50 text-sm mb-10">
-            New company? <Link href="/onboarding" className="text-primary hover:underline">Create your account and set up in minutes</Link>.
+            New company? <Link href="/onboarding" className="text-blue-500 hover:underline">Create your account and set up in minutes</Link>.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

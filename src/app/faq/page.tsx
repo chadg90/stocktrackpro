@@ -5,7 +5,7 @@ export default function FAQ() {
   const faqs = [
     {
       question: "How do I get an account?",
-      answer: "Download Stock Track PRO from the App Store or Google Play. In the app you can create an account and either join a company using an access code (from your manager) or create a new company. Managers can also sign in on the web dashboard; there is no separate web sign-up—new users start in the app.",
+      answer: "New companies can set up on this website: click Get started, create your account, then choose Setup new company. Existing teams: get an access code from your manager and join in the app (App Store or Google Play), or create an account here and enter the code. Managers sign in on the web dashboard at Log in.",
     },
     {
       question: "Do I need QR codes to use the app?",
@@ -51,7 +51,7 @@ export default function FAQ() {
 
           <div className="space-y-6">
             {faqs.map((item) => (
-              <div key={item.question} className="bg-black border border-primary/25 rounded-2xl p-6 sm:p-7">
+              <div key={item.question} className="bg-black border border-blue-500/25 rounded-2xl p-6 sm:p-7">
                 <h3 className="text-xl font-semibold text-white mb-2">{item.question}</h3>
                 <p className="text-white/80 leading-relaxed text-sm sm:text-base">{item.answer}</p>
               </div>

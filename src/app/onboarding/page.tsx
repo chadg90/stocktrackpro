@@ -281,13 +281,13 @@ export default function OnboardingPage() {
                 <React.Fragment key={s.key}>
                   <div
                     className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold transition-colors ${
-                      currentStepIndex >= i ? 'bg-primary text-black' : 'bg-white/10 text-white/50'
+                      currentStepIndex >= i ? 'bg-blue-500 text-white' : 'bg-white/10 text-white/50'
                     }`}
                   >
                     {i + 1}
                   </div>
                   {i < stepLabels.length - 1 && (
-                    <div className={`w-8 h-0.5 rounded ${currentStepIndex > i ? 'bg-primary' : 'bg-white/20'}`} />
+                    <div className={`w-8 h-0.5 rounded ${currentStepIndex > i ? 'bg-blue-500' : 'bg-white/20'}`} />
                   )}
                 </React.Fragment>
               ))}
@@ -295,20 +295,20 @@ export default function OnboardingPage() {
           )}
           <h2 className="text-2xl font-semibold text-white mb-2">
             {step === 'account' && 'Create your account'}
-            {step === 'company' && 'Set up your company'}
+            {step === 'company' && 'New company or existing?'}
             {step === 'success' && "You're all set"}
           </h2>
           <p className="text-white/60 text-sm">
-            {step === 'account' && 'New companies start here. One account for the web dashboard and the app.'}
-            {step === 'company' && 'Join an existing company with a code, or create a new company and start a free trial.'}
+            {step === 'account' && 'One account for the web dashboard and the app.'}
+            {step === 'company' && 'Setup a new company or log in to an existing one.'}
             {step === 'success' && 'Your company is ready. Here’s what to do next.'}
           </p>
         </div>
 
         {step === 'success' ? (
           <div className="dashboard-card p-8 shadow-xl space-y-6">
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 border border-primary/20">
-              <CheckCircle className="w-8 h-8 text-primary flex-shrink-0" />
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <CheckCircle className="w-8 h-8 text-blue-500 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-white">{createdCompanyName}</p>
                 <p className="text-white/60 text-sm">Company created. You’re the manager.</p>
@@ -324,7 +324,7 @@ export default function OnboardingPage() {
                   { icon: Package, text: 'Add your first assets and fleet' },
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3 text-white/80 text-sm">
-                    <item.icon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <item.icon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                     <span>{item.text}</span>
                   </li>
                 ))}
@@ -332,7 +332,7 @@ export default function OnboardingPage() {
             </div>
             <Link
               href="/dashboard"
-              className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-xl py-3.5 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
+              className="flex items-center justify-center gap-2 w-full text-white font-semibold rounded-xl py-3.5 transition-all btn-brand-blue"
             >
               Go to Dashboard
               <ArrowRight className="w-4 h-4" />
@@ -351,7 +351,7 @@ export default function OnboardingPage() {
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                     required
                   />
                 </div>
@@ -363,7 +363,7 @@ export default function OnboardingPage() {
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                     required
                   />
                 </div>
@@ -377,7 +377,7 @@ export default function OnboardingPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                  className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                   required
                 />
               </div>
@@ -390,7 +390,7 @@ export default function OnboardingPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                  className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                   required
                   minLength={6}
                 />
@@ -407,7 +407,7 @@ export default function OnboardingPage() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                  className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                   required
                   minLength={6}
                 />
@@ -421,7 +421,7 @@ export default function OnboardingPage() {
 
               <button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black flex items-center justify-center gap-2"
+                className="w-full text-white font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black flex items-center justify-center gap-2 btn-brand-blue"
                 disabled={loading}
               >
                 {loading ? (
@@ -447,14 +447,14 @@ export default function OnboardingPage() {
                   }}
                   className={`flex-1 p-4 rounded-lg border-2 transition-colors ${
                     companyOption === 'join'
-                      ? 'border-primary bg-primary/10'
+                      ? 'border-blue-500 bg-blue-500/10'
                       : 'border-white/10 bg-white/5 hover:border-white/20'
                   }`}
                 >
-                  <Key className="h-6 w-6 mx-auto mb-2 text-primary" />
-                  <h3 className="font-semibold text-white mb-1">Join Company</h3>
+                  <Key className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                  <h3 className="font-semibold text-white mb-1">Existing company login</h3>
                   <p className="text-white/60 text-xs">
-                    Use an access code from your manager
+                    Use an access code from your manager, or sign in if you already have an account
                   </p>
                 </button>
 
@@ -466,14 +466,14 @@ export default function OnboardingPage() {
                   }}
                   className={`flex-1 p-4 rounded-lg border-2 transition-colors ${
                     companyOption === 'create'
-                      ? 'border-primary bg-primary/10'
+                      ? 'border-blue-500 bg-blue-500/10'
                       : 'border-white/10 bg-white/5 hover:border-white/20'
                   }`}
                 >
-                  <Building2 className="h-6 w-6 mx-auto mb-2 text-primary" />
-                  <h3 className="font-semibold text-white mb-1">Create new company</h3>
+                  <Building2 className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                  <h3 className="font-semibold text-white mb-1">Setup new company</h3>
                   <p className="text-white/60 text-xs">
-                    7-day free trial, then choose a plan
+                    Start your own company. 7-day free trial, then choose a plan
                   </p>
                 </button>
               </div>
@@ -488,7 +488,7 @@ export default function OnboardingPage() {
                       type="text"
                       value={accessCode}
                       onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                      className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors uppercase"
+                      className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors uppercase"
                       placeholder="ABC123"
                       required
                     />
@@ -503,9 +503,12 @@ export default function OnboardingPage() {
                     </div>
                   )}
 
+                  <p className="text-white/50 text-xs text-center">
+                    Already have an account? <Link href="/dashboard" className="text-blue-500 hover:underline">Sign in</Link>
+                  </p>
                   <button
                     type="submit"
-                    className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black flex items-center justify-center gap-2"
+                    className="w-full text-white font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black flex items-center justify-center gap-2 btn-brand-blue"
                     disabled={verifyingCode}
                   >
                     {verifyingCode ? (
@@ -515,7 +518,7 @@ export default function OnboardingPage() {
                       </>
                     ) : (
                       <>
-                        Join Company <ArrowRight className="h-4 w-4" />
+                        Continue with code <ArrowRight className="h-4 w-4" />
                       </>
                     )}
                   </button>
@@ -530,7 +533,7 @@ export default function OnboardingPage() {
                       type="text"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                      className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                       placeholder="Your Company Ltd"
                       required
                     />
@@ -549,7 +552,7 @@ export default function OnboardingPage() {
                         onClick={() => setSelectedTier('PRO_STARTER')}
                         className={`p-3 rounded-lg border-2 text-left transition-colors ${
                           selectedTier === 'PRO_STARTER'
-                            ? 'border-primary bg-primary/10'
+                            ? 'border-blue-500 bg-blue-500/10'
                             : 'border-white/10 bg-white/5 hover:border-white/20'
                         }`}
                       >
@@ -561,7 +564,7 @@ export default function OnboardingPage() {
                         onClick={() => setSelectedTier('PRO_TEAM')}
                         className={`p-3 rounded-lg border-2 text-left transition-colors ${
                           selectedTier === 'PRO_TEAM'
-                            ? 'border-primary bg-primary/10'
+                            ? 'border-blue-500 bg-blue-500/10'
                             : 'border-white/10 bg-white/5 hover:border-white/20'
                         }`}
                       >
@@ -573,7 +576,7 @@ export default function OnboardingPage() {
                         onClick={() => setSelectedTier('PRO_BUSINESS')}
                         className={`p-3 rounded-lg border-2 text-left transition-colors ${
                           selectedTier === 'PRO_BUSINESS'
-                            ? 'border-primary bg-primary/10'
+                            ? 'border-blue-500 bg-blue-500/10'
                             : 'border-white/10 bg-white/5 hover:border-white/20'
                         }`}
                       >
@@ -585,7 +588,7 @@ export default function OnboardingPage() {
                         onClick={() => setSelectedTier('PRO_ENTERPRISE')}
                         className={`p-3 rounded-lg border-2 text-left transition-colors ${
                           selectedTier === 'PRO_ENTERPRISE'
-                            ? 'border-primary bg-primary/10'
+                            ? 'border-blue-500 bg-blue-500/10'
                             : 'border-white/10 bg-white/5 hover:border-white/20'
                         }`}
                       >
@@ -606,7 +609,7 @@ export default function OnboardingPage() {
 
                   <button
                     type="submit"
-                    className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black flex items-center justify-center gap-2"
+                    className="w-full text-white font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black flex items-center justify-center gap-2 btn-brand-blue"
                     disabled={loading}
                   >
                     {loading ? (
@@ -616,7 +619,7 @@ export default function OnboardingPage() {
                       </>
                     ) : (
                       <>
-                        Create Company <ArrowRight className="h-4 w-4" />
+                        Setup new company <ArrowRight className="h-4 w-4" />
                       </>
                     )}
                   </button>
@@ -636,7 +639,7 @@ export default function OnboardingPage() {
           <div className="mt-6 pt-6 border-t border-white/10">
             <p className="text-white/50 text-center text-xs">
               Already have an account?{' '}
-              <Link href="/dashboard" className="text-primary hover:underline">
+              <Link href="/dashboard" className="text-blue-500 hover:underline">
                 Sign in
               </Link>
             </p>

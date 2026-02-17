@@ -198,10 +198,10 @@ export default function Pricing() {
       <div className="container mx-auto px-4 pt-20 sm:pt-32 pb-12 sm:pb-20">
         {/* Header */}
         <div className="text-center max-w-4xl mx-auto relative px-2 sm:px-4">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-primary/15 rounded-full blur-2xl"></div>
-          <div className="absolute top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-primary/5 rounded-full blur-xl"></div>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-blue-500/15 rounded-full blur-2xl"></div>
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-blue-500/5 rounded-full blur-xl"></div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 sm:mb-8 relative leading-tight">
-            Simple, Transparent <span className="text-primary bg-gradient-to-r from-primary to-yellow-400 bg-clip-text text-transparent">Pricing</span>
+            Simple, Transparent <span className="text-blue-500 bg-gradient-to-r from-blue-500 to-blue-400 bg-clip-text text-transparent">Pricing</span>
           </h1>
           <p className="text-xl sm:text-2xl text-white/90 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed">
             Simple, transparent pricing. Managers can subscribe here with a card. Staff use the app. New users receive a 7-day free trial.
@@ -219,7 +219,7 @@ export default function Pricing() {
                     setPromoCodeError(null);
                   }}
                   placeholder="Enter promo code"
-                  className="flex-1 rounded-lg bg-white/5 border border-white/20 px-4 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors uppercase"
+                  className="flex-1 rounded-lg bg-white/5 border border-white/20 px-4 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors uppercase"
                 />
               </div>
               {promoCodeError && (
@@ -241,20 +241,20 @@ export default function Pricing() {
 
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 sm:gap-8 max-w-8xl mx-auto relative pt-8 overflow-visible">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 blur-3xl rounded-3xl"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-blue-500/5 blur-3xl rounded-3xl"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
             {tiers.map((tier, index) => (
               <div
                 key={tier.id}
-                className={`relative bg-black/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 border transition-all duration-500 hover:border-primary/60 hover:scale-[1.02] hover:shadow-2xl flex flex-col group overflow-visible ${
+                className={`relative bg-black/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 border transition-all duration-500 hover:border-blue-500/60 hover:scale-[1.02] hover:shadow-2xl flex flex-col group overflow-visible ${
                   index === 2 
-                    ? 'border-primary shadow-2xl shadow-primary/20 ring-2 ring-primary/20' 
-                    : 'border-primary/30 hover:shadow-xl hover:shadow-primary/10'
+                    ? 'border-blue-500 shadow-2xl shadow-blue-500/20 ring-2 ring-blue-500/20' 
+                    : 'border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/10'
                 }`}
               >
                 {index === 2 && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-                    <span className="bg-primary text-black px-4 py-1.5 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">Most Popular</span>
+                    <span className="bg-blue-500 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">Most Popular</span>
                   </div>
                 )}
                 <div className="text-center mb-6">
@@ -271,10 +271,10 @@ export default function Pricing() {
                       type="button"
                       onClick={() => handleSubscribe(tier.id)}
                       disabled={checkoutLoading !== null}
-                      className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black ${
+                      className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black ${
                         index === 2
-                          ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
-                          : 'bg-primary/10 hover:bg-primary/20 text-white border border-primary/20 hover:border-primary/40'
+                          ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30'
+                          : 'bg-blue-500/10 hover:bg-blue-500/20 text-white border border-blue-500/20 hover:border-blue-500/40'
                       }`}
                       aria-busy={checkoutLoading === tier.id}
                       aria-label={checkoutLoading === tier.id ? 'Redirecting to checkout' : `Subscribe to ${tier.name}`}
@@ -284,10 +284,10 @@ export default function Pricing() {
                   ) : (
                     <Link
                       href={authLoading ? '#' : (profile ? '/contact' : '/dashboard')}
-                      className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold text-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black ${
+                      className={`block w-full py-3 px-6 rounded-xl transition-all duration-300 text-sm font-semibold text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black ${
                         index === 2
-                          ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30'
-                          : 'bg-primary/10 hover:bg-primary/20 text-white border border-primary/20 hover:border-primary/40'
+                          ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30'
+                          : 'bg-blue-500/10 hover:bg-blue-500/20 text-white border border-blue-500/20 hover:border-blue-500/40'
                       }`}
                       aria-label={authLoading ? 'Loading' : profile ? 'Contact us to subscribe' : 'Log in to subscribe'}
                     >
@@ -298,13 +298,13 @@ export default function Pricing() {
                 <div className="flex-1 space-y-2">
                   {tier.features.map((feature) => (
                     <div key={feature} className="flex items-start group-hover:translate-x-1 transition-transform duration-300">
-                      <Check className="h-5 w-5 text-primary shrink-0 mt-0.5 mr-3" />
+                      <Check className="h-5 w-5 text-blue-500 shrink-0 mt-0.5 mr-3" />
                       <span className="text-white/85 text-sm leading-relaxed">{feature}</span>
                     </div>
                   ))}
                   {tier.enterpriseNote && (
                     <p className="text-white/50 text-xs mt-3 pt-2 border-t border-white/10">
-                      Very large fleets or user counts? <Link href="/contact" className="text-primary hover:underline">Contact us</Link> for a tailored quote.
+                      Very large fleets or user counts? <Link href="/contact" className="text-blue-500 hover:underline">Contact us</Link> for a tailored quote.
                     </p>
                   )}
                 </div>
@@ -314,30 +314,30 @@ export default function Pricing() {
 
 
           {/* Subscription Terms */}
-          <div className="mt-12 sm:mt-16 bg-black/60 border border-primary/30 rounded-2xl p-8 text-left backdrop-blur-sm">
+          <div className="mt-12 sm:mt-16 bg-black/60 border border-blue-500/30 rounded-2xl p-8 text-left backdrop-blur-sm">
             <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-              <div className="w-2 h-2 bg-primary rounded-full mr-3"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
               Subscription Terms
             </h3>
             <ul className="space-y-3 text-sm sm:text-base text-white/85">
               <li className="flex items-start">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></div>
                 <span>All subscriptions are auto-renewable and billed monthly</span>
               </li>
               <li className="flex items-start">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></div>
                 <span>New users receive a 7-day free trial</span>
               </li>
               <li className="flex items-start">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></div>
                 <span>Subscriptions automatically renew unless cancelled 24 hours before period end</span>
               </li>
               <li className="flex items-start">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></div>
                 <span>Managers can subscribe or renew here with a card; in-app subscriptions use App Store or Google Play</span>
               </li>
               <li className="flex items-start">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 mr-3 shrink-0"></div>
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></div>
                 <span>Enterprise is available in-app and can be purchased here for your company</span>
               </li>
             </ul>
@@ -346,13 +346,13 @@ export default function Pricing() {
           {/* New user / sign-up */}
           <div className="mt-8 text-center">
             <p className="text-sm text-white/60">
-              New to Stock Track PRO? <Link href="/how-to" className="text-primary hover:underline">See how to get started</Link> in the app or <Link href="/contact" className="text-primary hover:underline">contact us</Link>.
+              New to Stock Track PRO? <Link href="/how-to" className="text-blue-500 hover:underline">See how to get started</Link> in the app or <Link href="/contact" className="text-blue-500 hover:underline">contact us</Link>.
             </p>
           </div>
 
           {/* Pricing Notice */}
           <div className="mt-8 sm:mt-12 text-center">
-            <p className="text-sm sm:text-base text-white/70 bg-black/40 border border-primary/20 rounded-lg px-6 py-3 inline-block">
+            <p className="text-sm sm:text-base text-white/70 bg-black/40 border border-blue-500/20 rounded-lg px-6 py-3 inline-block">
               All prices shown include VAT at 20%
             </p>
           </div>
