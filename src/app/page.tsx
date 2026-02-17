@@ -63,15 +63,19 @@ export default function Home() {
               </div>
             </div>
             <div className="flex-shrink-0 flex justify-center lg:justify-end w-full lg:w-auto min-h-[280px] lg:min-h-0">
-              <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[360px] aspect-[3/4] min-w-[200px]">
-                <Image
-                  src="/website-image-stp.png"
-                  alt="Stock Track PRO app on phone in the field — sign in to manage assets and equipment"
-                  fill
-                  sizes="(max-width: 1024px) 320px, 360px"
-                  className="object-contain drop-shadow-2xl"
-                  priority
-                />
+              <div className="relative">
+                <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl" aria-hidden />
+                <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[380px] aspect-[3/4] min-w-[200px] rounded-2xl overflow-hidden ring-1 ring-white/10">
+                  <Image
+                    src="/website-image-stp.png"
+                    alt="Stock Track PRO app on phone in the field — sign in to manage assets and equipment"
+                    fill
+                    sizes="(max-width: 1024px) 320px, 380px"
+                    className="object-cover object-top drop-shadow-2xl"
+                    priority
+                  />
+                </div>
+                <p className="text-center text-white/50 text-xs mt-3 font-medium">App in the field</p>
               </div>
             </div>
           </div>
