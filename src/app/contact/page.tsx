@@ -40,42 +40,48 @@ export default function Contact() {
 
   const contactMethods = [
     {
-      icon: <Mail className="w-6 h-6 text-primary" />,
       title: "Sales Inquiries",
       description: "For pricing and general enquiries",
       email: "sales@stocktrackpro.co.uk",
-      actionText: "Email Sales Team"
+      actionText: "Email Sales Team",
     },
     {
-      icon: <Mail className="w-6 h-6 text-primary" />,
       title: "Support",
       description: "For technical support and help",
       email: "support@stocktrackpro.co.uk",
-      actionText: "Email Support"
-    }
+      actionText: "Email Support",
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black text-white antialiased">
       <Navbar />
-      
-      <div className="container mx-auto px-4 pt-32 pb-20">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-4xl font-bold text-white mb-6">
-              Get in <span className="text-primary">Touch</span>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden pt-28 sm:pt-36 pb-12 sm:pb-16">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(254,169,23,0.12),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="container relative mx-auto px-4">
+          <p className="text-primary font-medium text-sm uppercase tracking-[0.2em] mb-4">
+            Contact
+          </p>
+          <div className="max-w-2xl mx-auto text-center">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-6 leading-tight">
+              Get in <span className="text-primary">touch</span>
             </h1>
-            <p className="text-xl text-white/80 max-w-2xl mx-auto">
-              Have questions about Stock Track PRO? We're here to help!
-              Our team is ready to assist you with any inquiries about our asset management solution.
+            <p className="text-lg text-white/75 leading-relaxed">
+              Have questions about Stock Track PRO? We&apos;re here to help with any inquiries about our asset management solution.
             </p>
           </div>
+        </div>
+      </section>
 
-          {/* Contact Form */}
-          <div className="max-w-2xl mx-auto mb-16">
-            <div className="bg-black border border-primary/20 rounded-2xl p-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Send us a message</h2>
+      {/* Form card */}
+      <section className="py-12 sm:py-16 border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="p-8 sm:p-10 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/15 transition-colors">
+              <h2 className="text-xl font-bold text-white mb-6">Send us a message</h2>
               {submitSuccess && (
                 <div role="status" aria-live="polite" className="mb-6 p-4 rounded-xl bg-primary/10 border border-primary/30 text-primary">
                   Thanks! We&apos;ll get back to you soon.
@@ -109,7 +115,7 @@ export default function Contact() {
                     minLength={2}
                     value={formData.name}
                     onChange={e => setFormData(d => ({ ...d, name: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-primary/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                     placeholder="Your name"
                   />
                 </div>
@@ -122,7 +128,7 @@ export default function Contact() {
                     required
                     value={formData.email}
                     onChange={e => setFormData(d => ({ ...d, email: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-primary/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -134,7 +140,7 @@ export default function Contact() {
                     type="text"
                     value={formData.subject}
                     onChange={e => setFormData(d => ({ ...d, subject: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-primary/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                     placeholder="How can we help?"
                   />
                 </div>
@@ -148,14 +154,14 @@ export default function Contact() {
                     rows={5}
                     value={formData.message}
                     onChange={e => setFormData(d => ({ ...d, message: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-primary/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-y transition-colors"
                     placeholder="Your message..."
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={sending}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold transition-all duration-200 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black shadow-lg shadow-primary/20 hover:shadow-primary/30"
                   aria-busy={sending}
                 >
                   {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
@@ -164,60 +170,62 @@ export default function Contact() {
               </form>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Contact Methods Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      {/* Contact methods */}
+      <section className="py-12 sm:py-16 bg-white/[0.02] border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {contactMethods.map((method, index) => (
-              <div 
+              <div
                 key={index}
-                className="bg-black border border-primary/20 rounded-2xl p-8 hover:border-primary/50 transition-all duration-300"
+                className="group p-8 rounded-2xl border border-white/10 bg-black/40 hover:border-primary/25 hover:bg-white/[0.03] transition-all duration-300"
               >
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                    {method.icon}
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
+                    <Mail className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white">{method.title}</h3>
-                    <p className="text-white/60">{method.description}</p>
+                    <h3 className="text-lg font-semibold text-white">{method.title}</h3>
+                    <p className="text-white/60 text-sm">{method.description}</p>
                   </div>
                 </div>
-
-                <div className="mb-6">
-                  <div className="text-white break-all">{method.email}</div>
-                </div>
-
+                <p className="text-white/90 mb-6 break-all">{method.email}</p>
                 <Link
                   href={`mailto:${method.email}`}
-                  className="inline-flex items-center justify-center w-full px-6 py-3 bg-primary hover:bg-primary-light text-white rounded-lg transition-colors"
+                  className="inline-flex items-center justify-center w-full px-6 py-3 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-primary/30"
                 >
                   {method.actionText}
                 </Link>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Response Time Info */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <div className="bg-black border border-primary/20 rounded-2xl p-8">
-              <h3 className="text-xl font-semibold text-white mb-4">What to Expect</h3>
-              <ul className="space-y-4 text-white/80">
-                <li className="flex items-start space-x-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>We aim to respond to all inquiries within 24 hours during business days</span>
-                </li>
-                <li className="flex items-start space-x-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>For urgent matters, please mention "Urgent" in your email subject</span>
-                </li>
-                <li className="flex items-start space-x-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Business hours: Monday-Friday, 9am-5pm GMT</span>
-                </li>
-              </ul>
-            </div>
+      {/* What to expect */}
+      <section className="py-12 sm:py-16 border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto p-8 rounded-2xl border border-white/10 bg-white/[0.02]">
+            <h3 className="text-xl font-semibold text-white mb-6">What to expect</h3>
+            <ul className="space-y-4 text-white/80">
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                <span>We aim to respond to all inquiries within 24 hours during business days.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                <span>For urgent matters, please mention &quot;Urgent&quot; in your email subject.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                <span>Business hours: Monday–Friday, 9am–5pm GMT.</span>
+              </li>
+            </ul>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
-} 
+}
