@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Navbar from './components/Navbar';
 import { Wrench, QrCode, Map, Smartphone, Users, ClipboardList, ArrowRight, Check } from 'lucide-react';
 import Link from 'next/link';
@@ -34,30 +35,44 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_80%_50%,rgba(254,169,23,0.08),transparent)]" />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         <div className="container relative mx-auto px-4">
-          <p className="text-primary font-medium text-sm uppercase tracking-[0.2em] mb-6">
-            Fleet & asset management
-          </p>
-          <div className="max-w-3xl">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
-              One app for your tools, vehicles and team.
-            </h1>
-            <p className="text-lg sm:text-xl text-white/75 mb-10 max-w-2xl leading-relaxed">
-              Track equipment, run inspections, report defects and manage your fleet in real time. Built for trades and contractors.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link
-                href="/contact"
-                className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02]"
-              >
-                Get in touch
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-primary/50 hover:bg-white/5 transition-all duration-200 font-medium"
-              >
-                View pricing
-              </Link>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-12 lg:gap-16">
+            <div className="max-w-3xl">
+              <p className="text-primary font-medium text-sm uppercase tracking-[0.2em] mb-6">
+                Fleet & asset management
+              </p>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
+                One app for your tools, vehicles and team.
+              </h1>
+              <p className="text-lg sm:text-xl text-white/75 mb-10 max-w-2xl leading-relaxed">
+                Track equipment, run inspections, report defects and manage your fleet in real time. Built for trades and contractors.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/contact"
+                  className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02]"
+                >
+                  Get in touch
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-primary/50 hover:bg-white/5 transition-all duration-200 font-medium"
+                >
+                  View pricing
+                </Link>
+              </div>
+            </div>
+            <div className="flex-shrink-0 flex justify-center lg:justify-end">
+              <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[360px] aspect-[3/4]">
+                <Image
+                  src="/website%20image%20stp.png"
+                  alt="Stock Track PRO app on phone in the field — sign in to manage assets and equipment"
+                  fill
+                  sizes="(max-width: 1024px) 320px, 360px"
+                  className="object-contain drop-shadow-2xl"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </div>
