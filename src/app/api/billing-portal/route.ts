@@ -42,9 +42,13 @@ export async function POST(request: NextRequest) {
     }
     const company = companySnap.data();
     const customerId = company?.stripe_customer_id;
+    const status = company?.subscription_status;
     if (!customerId || typeof customerId !== 'string') {
+      const message = (status === 'active' || status === 'trial')
+        ? 'Billing is managed via the app or another channel. To manage billing on the web, use the Pricing page to subscribe or link your account.'
+        : 'No Stripe subscription linked. Subscribe first from the pricing page.';
       return NextResponse.json(
-        { error: 'No Stripe subscription linked. Subscribe first from the pricing page.' },
+        { error: message },
         { status: 400 }
       );
     }

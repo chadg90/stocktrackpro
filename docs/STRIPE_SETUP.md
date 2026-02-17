@@ -202,6 +202,22 @@ This means `FIREBASE_SERVICE_ACCOUNT_JSON` is not set correctly in Vercel.
 - This is set automatically when checkout completes
 - If missing, check webhook processed `invoice.paid` event
 
+## App vs website subscriptions
+
+The dashboard shows a subscription as **active** whenever the company document has `subscription_status` set to `'active'` or `'trial'` in Firestore. That can be set in two ways:
+
+1. **Website**: User completes Stripe Checkout → webhooks update the company → `subscription_status` and `stripe_customer_id` are set. "Manage Billing Portal" then works.
+2. **App**: When the user completes a subscription inside the app (e.g. in-app purchase or Stripe in-app), the app should call the **Set subscription status** API so the dashboard shows them as active.
+
+### Set subscription status API (for app use)
+
+- **Endpoint:** `POST /api/subscription/set-status`
+- **Auth:** `Authorization: Bearer <firebase-id-token>` (manager or admin only)
+- **Body:** `{ "subscription_status": "active" | "trial" | "inactive", "subscription_tier": "PRO_STARTER" | "PRO_TEAM" | "PRO_BUSINESS" | "PRO_ENTERPRISE" (optional) }`
+- **Effect:** Updates the company document with `subscription_status` and optional `subscription_tier`, and sets `subscription_type: 'app'`. No Stripe customer is required; the dashboard will show the subscription as active and allow access.
+
+After the app calls this API, the user will see the subscription as active on the dashboard. "Manage Billing Portal" will remain disabled (and show a friendly message) until they also have a Stripe subscription linked via the website.
+
 ## Going Live
 
 1. **Switch to Live Mode** in Stripe Dashboard

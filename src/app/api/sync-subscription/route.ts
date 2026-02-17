@@ -68,8 +68,18 @@ export async function POST(request: NextRequest) {
       });
 
       if (customers.data.length === 0) {
+        // Already active/trial via app or other channel — don't treat as error
+        const currentStatus = company?.subscription_status;
+        if (currentStatus === 'active' || currentStatus === 'trial') {
+          return NextResponse.json({
+            success: true,
+            synced: false,
+            message: 'Your subscription is already active. Billing is managed via the app or another channel. Manage Billing Portal is only available for subscriptions started on the website.',
+            subscription_status: currentStatus,
+          });
+        }
         return NextResponse.json({ 
-          error: 'No Stripe customer found. Please complete checkout first.',
+          error: 'No Stripe customer found. Subscribe on the website (Pricing page) or complete subscription in the app first.',
           hasSubscription: false 
         }, { status: 400 });
       }
@@ -108,8 +118,17 @@ export async function POST(request: NextRequest) {
       }
 
       if (!foundSubscription) {
+        const currentStatus = company?.subscription_status;
+        if (currentStatus === 'active' || currentStatus === 'trial') {
+          return NextResponse.json({
+            success: true,
+            synced: false,
+            message: 'Your subscription is already active. Billing is managed via the app or another channel.',
+            subscription_status: currentStatus,
+          });
+        }
         return NextResponse.json({ 
-          error: 'No Stripe subscription found for this company. Please complete checkout first.',
+          error: 'No Stripe subscription found for this company. Subscribe on the website (Pricing page) or complete subscription in the app first.',
           hasSubscription: false 
         }, { status: 400 });
       }

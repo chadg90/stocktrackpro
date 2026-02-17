@@ -205,7 +205,11 @@ export default function SubscriptionPage() {
           setCompany(companySnap.data() as Company);
         }
       }
-      alert('Subscription synced successfully!');
+      if (data.synced === false && data.message) {
+        alert(data.message);
+      } else {
+        alert('Subscription synced successfully!');
+      }
     } catch (err) {
       console.error(err);
       alert(err instanceof Error ? err.message : 'Could not sync subscription.');
@@ -456,10 +460,24 @@ export default function SubscriptionPage() {
           {company?.stripe_customer_id && (
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Billing</p>
-              <p className="text-white font-semibold text-lg">Stripe</p>
+              <p className="text-white font-semibold text-lg">Stripe (website)</p>
+            </div>
+          )}
+          {((subscriptionStatus === 'active' || subscriptionStatus === 'trial') && !company?.stripe_customer_id) && (
+            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Billing</p>
+              <p className="text-white font-semibold text-lg">App / other</p>
             </div>
           )}
         </div>
+
+        {(subscriptionStatus === 'active' || subscriptionStatus === 'trial') && !company?.stripe_customer_id && (
+          <div className="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+            <p className="text-primary text-sm">
+              You subscribed via the app or another channel. Your subscription is active. To manage billing (payment method, invoices) on the web, subscribe or link your account from the <a href="/pricing" className="underline font-medium">Pricing page</a>.
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-4">
           {canManage && (
@@ -468,7 +486,7 @@ export default function SubscriptionPage() {
                 onClick={handleManageBilling}
                 disabled={portalLoading || !company?.stripe_customer_id}
                 className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
-                title={!company?.stripe_customer_id ? 'Subscribe first to manage billing' : 'Open Stripe billing portal'}
+                title={!company?.stripe_customer_id ? (subscriptionStatus === 'active' || subscriptionStatus === 'trial' ? 'Billing is managed via the app' : 'Subscribe first to manage billing') : 'Open Stripe billing portal'}
               >
                 <ExternalLink className="w-4 h-4" />
                 {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
