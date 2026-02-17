@@ -102,8 +102,9 @@ export default function NotificationItem({
                 }}
                 className="flex-shrink-0 p-1 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
                 title="Delete notification"
+                aria-label="Delete notification"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4" aria-hidden />
               </button>
             )}
           </div>

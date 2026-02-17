@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   collection,
   query,
@@ -17,6 +17,9 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Plus, Pencil, Trash2, Search, MapPin } from 'lucide-react';
 import Modal from '../components/Modal';
+import { EmptyStateTableRow } from '../components/EmptyState';
+import TableSkeleton from '../components/TableSkeleton';
+import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 
 type Location = {
   id: string;
@@ -36,6 +39,7 @@ export default function LocationsPage() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -166,6 +170,15 @@ export default function LocationsPage() {
     loc.address?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const paginatedLocations = useMemo(
+    () => filteredLocations.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredLocations, currentPage]
+  );
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -214,19 +227,11 @@ export default function LocationsPage() {
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
-                <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-white/50">
-                    Loading locations...
-                  </td>
-                </tr>
+                <TableSkeleton cols={3} />
               ) : filteredLocations.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-white/50">
-                    No locations found. Add your first location to get started.
-                  </td>
-                </tr>
+                <EmptyStateTableRow colSpan={3} message="No locations found. Add your first location to get started." />
               ) : (
-                filteredLocations.map((location) => (
+                paginatedLocations.map((location) => (
                   <tr key={location.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -246,8 +251,9 @@ export default function LocationsPage() {
                             onClick={() => openEditModal(location)}
                             className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                             title="Edit Location"
+                            aria-label="Edit location"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-4 w-4" aria-hidden />
                           </button>
                         )}
                         {canDelete && (
@@ -255,8 +261,9 @@ export default function LocationsPage() {
                             onClick={() => handleDeleteLocation(location.id)}
                             className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Delete Location"
+                            aria-label="Delete location"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" aria-hidden />
                           </button>
                         )}
                       </div>
@@ -267,6 +274,11 @@ export default function LocationsPage() {
             </tbody>
           </table>
         </div>
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filteredLocations.length}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* Add Modal */}

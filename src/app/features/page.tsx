@@ -104,10 +104,10 @@ export default function Features() {
               Contact
             </Link>
             <Link
-              href="/contact"
+              href="/pricing"
               className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border border-primary/30 hover:border-primary/50 text-white rounded-lg transition-colors text-sm sm:text-base"
             >
-              Book a Demo
+              View Pricing
             </Link>
           </div>
         </div>

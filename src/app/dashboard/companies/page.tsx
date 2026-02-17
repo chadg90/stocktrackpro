@@ -308,15 +308,17 @@ export default function CompaniesPage() {
                           onClick={() => openEditModal(company)}
                           className="p-1.5 sm:p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                           title="Edit Company"
+                          aria-label="Edit company"
                         >
-                          <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
                         </button>
                         <button
                           onClick={() => handleDeleteCompany(company.id)}
                           className="p-1.5 sm:p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                           title="Delete Company"
+                          aria-label="Delete company"
                         >
-                          <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
                         </button>
                       </div>
                     </td>

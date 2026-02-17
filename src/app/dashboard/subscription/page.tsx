@@ -125,6 +125,32 @@ export default function SubscriptionPage() {
   const [promoCodeTier, setPromoCodeTier] = useState<TierId | null>(null);
   const [selectedTierForPromo, setSelectedTierForPromo] = useState<TierId | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadSubscriptionData = async (user: User) => {
+    if (!firebaseDb) return;
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const profileSnap = await getDoc(doc(firebaseDb, 'profiles', user.uid));
+      if (profileSnap.exists()) {
+        const profileData = profileSnap.data() as Profile;
+        setProfile(profileData);
+
+        if (profileData.company_id) {
+          const companySnap = await getDoc(doc(firebaseDb, 'companies', profileData.company_id));
+          if (companySnap.exists()) {
+            setCompany(companySnap.data() as Company);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setLoadError(err instanceof Error ? err.message : 'Failed to load subscription data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) {
@@ -137,29 +163,13 @@ export default function SubscriptionPage() {
         setProfile(null);
         setCompany(null);
         setAuthUser(null);
+        setLoadError(null);
         setLoading(false);
         return;
       }
 
       setAuthUser(user);
-      try {
-        const profileSnap = await getDoc(doc(firebaseDb, 'profiles', user.uid));
-        if (profileSnap.exists()) {
-          const profileData = profileSnap.data() as Profile;
-          setProfile(profileData);
-
-          if (profileData.company_id) {
-            const companySnap = await getDoc(doc(firebaseDb, 'companies', profileData.company_id));
-            if (companySnap.exists()) {
-              setCompany(companySnap.data() as Company);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
+      loadSubscriptionData(user);
     });
 
     return () => unsub();
@@ -423,6 +433,18 @@ export default function SubscriptionPage() {
 
   return (
     <div className="space-y-8">
+      {loadError && authUser && (
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex flex-wrap items-center justify-between gap-2" role="alert">
+          <span>{loadError}</span>
+          <button
+            type="button"
+            onClick={() => loadSubscriptionData(authUser)}
+            className="text-primary hover:underline font-medium whitespace-nowrap"
+          >
+            Try again
+          </button>
+        </div>
+      )}
       {/* Page Header */}
       <div className="border-b border-white/10 pb-6">
         <h1 className="text-3xl font-bold text-white mb-2">Subscription Management</h1>
@@ -487,14 +509,16 @@ export default function SubscriptionPage() {
                 disabled={portalLoading || !company?.stripe_customer_id}
                 className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
                 title={!company?.stripe_customer_id ? (subscriptionStatus === 'active' || subscriptionStatus === 'trial' ? 'Billing is managed via the app' : 'Subscribe first to manage billing') : 'Open Stripe billing portal'}
+                aria-label={portalLoading ? 'Opening billing portal' : (!company?.stripe_customer_id ? 'Billing managed via app' : 'Open Stripe billing portal')}
               >
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-4 h-4" aria-hidden />
                 {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
               </button>
               <button
                 onClick={handleSyncSubscription}
                 disabled={syncing}
                 className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-colors disabled:opacity-60"
+                aria-label={syncing ? 'Syncing subscription' : 'Sync subscription with Stripe'}
               >
                 {syncing ? (
                   <>

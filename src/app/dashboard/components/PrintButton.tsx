@@ -117,6 +117,7 @@ export default function PrintButton({
       disabled={disabled || printing}
       className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-primary/40 text-primary hover:border-primary hover:bg-primary/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       title="Print Report"
+      aria-label={printing ? 'Preparing print' : 'Print report'}
     >
       {printing ? (
         <>

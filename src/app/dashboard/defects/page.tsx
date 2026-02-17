@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   collection,
   query,
@@ -21,6 +21,9 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Search, AlertTriangle, CheckCircle, Clock, Filter, Truck, Trash2 } from 'lucide-react';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
+import { EmptyStateTableRow } from '../components/EmptyState';
+import TableSkeleton from '../components/TableSkeleton';
+import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import ExportButton from '../components/ExportButton';
 import { createNotificationForCompanyManagers } from '@/lib/notificationUtils';
 
@@ -118,6 +121,9 @@ export default function DefectsPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'resolved'>('pending');
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [resolvedAnnouncement, setResolvedAnnouncement] = useState<string | null>(null);
   
   // Check if user is manager or admin (both can view and resolve defects)
   const isManager = profile?.role === 'manager';
@@ -191,6 +197,7 @@ export default function DefectsPage() {
       return;
     }
     setLoading(true);
+    setError(null);
     try {
       // CRITICAL: Always filter by company_id to ensure company data isolation
       // Fetch vehicles first for mapping
@@ -266,8 +273,9 @@ export default function DefectsPage() {
       });
       
       setDefects(enrichedDefects);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load defects');
     } finally {
       setLoading(false);
     }
@@ -290,6 +298,9 @@ export default function DefectsPage() {
       setDefects(prev => prev.map(d => 
         d.id === defectId ? { ...d, status: 'resolved' } : d
       ));
+
+      setResolvedAnnouncement('Defect marked as resolved');
+      setTimeout(() => setResolvedAnnouncement(null), 4000);
 
       // Create notification for defect resolution
       if (defect) {
@@ -358,6 +369,15 @@ export default function DefectsPage() {
     return matchesSearch && matchesStatus;
   });
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
+  const paginatedDefects = useMemo(
+    () => filteredDefects.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredDefects, currentPage]
+  );
+
   return (
     <div>
       <ImageViewerModal 
@@ -369,6 +389,22 @@ export default function DefectsPage() {
         currentIndex={viewingIndex}
         onIndexChange={setViewingIndex}
       />
+
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {resolvedAnnouncement}
+      </div>
+      {error && profile?.company_id && (
+        <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex flex-wrap items-center justify-between gap-2" role="alert">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => { setError(null); fetchData(profile.company_id!); }}
+            className="text-primary hover:underline font-medium whitespace-nowrap"
+          >
+            Try again
+          </button>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
@@ -473,19 +509,11 @@ export default function DefectsPage() {
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-white/50">
-                    Loading defects...
-                  </td>
-                </tr>
+                <TableSkeleton cols={6} />
               ) : filteredDefects.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-white/50">
-                    No defects found matching your criteria.
-                  </td>
-                </tr>
+                <EmptyStateTableRow colSpan={6} message="No defects found matching your criteria." />
               ) : (
-                filteredDefects.map((defect) => {
+                paginatedDefects.map((defect) => {
                   const vehicle = defect.vehicle_id ? vehicles[defect.vehicle_id] : null;
                   return (
                     <tr key={defect.id} className="hover:bg-white/5 transition-colors">
@@ -608,6 +636,7 @@ export default function DefectsPage() {
                             <button
                               onClick={() => handleResolveDefect(defect.id)}
                               className="text-sm bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/30 px-3 py-1.5 rounded-lg transition-colors"
+                              aria-label="Mark defect as resolved"
                             >
                               Resolve
                             </button>
@@ -617,8 +646,9 @@ export default function DefectsPage() {
                               onClick={() => handleDeleteDefect(defect.id)}
                               className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                               title="Delete Defect"
+                              aria-label="Delete defect"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" aria-hidden />
                             </button>
                           )}
                         </div>
@@ -630,6 +660,11 @@ export default function DefectsPage() {
             </tbody>
           </table>
         </div>
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filteredDefects.length}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   collection,
   query,
@@ -17,6 +17,9 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Trash2, Search, Mail, User as UserIcon, Pencil, ShieldOff } from 'lucide-react';
 import Modal from '../components/Modal';
+import { EmptyStateTableRow } from '../components/EmptyState';
+import TableSkeleton from '../components/TableSkeleton';
+import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import { useDebounce } from '@/hooks/useDebounce';
 
 type Profile = {
@@ -61,12 +64,14 @@ export default function TeamPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [companiesMap, setCompaniesMap] = useState<Record<string, string>>({});
   const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>('all'); // For admin filtering
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Check permissions
   const isAdmin = currentUserProfile?.role === 'admin';
   const isManager = currentUserProfile?.role === 'manager';
   const canEditUsers = isAdmin || isManager; // Managers can edit basic user info
   const canDeleteUsers = isAdmin; // Only admins can delete user accounts
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -99,13 +104,15 @@ export default function TeamPage() {
   const fetchTeam = async (companyId: string) => {
     if (!firebaseDb) return;
     setLoading(true);
+    setError(null);
     try {
       const q = query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId));
       const snapshot = await getDocs(q);
       const teamData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Profile));
       setTeam(teamData);
-    } catch (error) {
-      console.error('Error fetching team:', error);
+    } catch (err) {
+      console.error('Error fetching team:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load team');
     } finally {
       setLoading(false);
     }
@@ -114,13 +121,15 @@ export default function TeamPage() {
   const fetchAllUsers = async () => {
     if (!firebaseDb) return;
     setLoading(true);
+    setError(null);
     try {
       const q = query(collection(firebaseDb!, 'profiles'));
       const snapshot = await getDocs(q);
       const allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Profile));
       setTeam(allUsers);
-    } catch (error) {
-      console.error('Error fetching all users:', error);
+    } catch (err) {
+      console.error('Error fetching all users:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load team');
     } finally {
       setLoading(false);
     }
@@ -272,8 +281,31 @@ export default function TeamPage() {
     return matchesSearch;
   });
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm, selectedCompanyFilter]);
+
+  const paginatedTeam = useMemo(
+    () => filteredTeam.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredTeam, currentPage]
+  );
+
+  const handleRetry = () => {
+    setError(null);
+    if (isAdmin) fetchAllUsers();
+    else if (currentUserProfile?.company_id) fetchTeam(currentUserProfile.company_id);
+  };
+
   return (
     <div>
+      {error && (
+        <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex flex-wrap items-center justify-between gap-2" role="alert">
+          <span>{error}</span>
+          <button type="button" onClick={handleRetry} className="text-primary hover:underline font-medium whitespace-nowrap">
+            Try again
+          </button>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Team Management</h1>
@@ -341,19 +373,11 @@ export default function TeamPage() {
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
-                <tr>
-                  <td colSpan={isAdmin ? 6 : 4} className="px-6 py-8 text-center text-white/50">
-                    Loading team...
-                  </td>
-                </tr>
+                <TableSkeleton cols={isAdmin ? 6 : 4} />
               ) : filteredTeam.length === 0 ? (
-                <tr>
-                  <td colSpan={isAdmin ? 6 : 4} className="px-6 py-8 text-center text-white/50">
-                    No team members found.
-                  </td>
-                </tr>
+                <EmptyStateTableRow colSpan={isAdmin ? 6 : 4} message="No team members found." />
               ) : (
-                filteredTeam.map((member) => (
+                paginatedTeam.map((member) => (
                   <tr key={member.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -399,8 +423,9 @@ export default function TeamPage() {
                             onClick={() => openEditUser(member)}
                             className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                             title={isManager ? "Edit User Info" : "Edit User"}
+                            aria-label={isManager ? "Edit user info" : "Edit user"}
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-4 w-4" aria-hidden />
                           </button>
                         )}
                         {canDeleteUsers && member.id !== currentUserProfile?.id && (
@@ -408,8 +433,9 @@ export default function TeamPage() {
                             onClick={() => handleRemoveUser(member.id)}
                             className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Remove User"
+                            aria-label="Remove user from team"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" aria-hidden />
                           </button>
                         )}
                       </div>
@@ -420,9 +446,12 @@ export default function TeamPage() {
             </tbody>
           </table>
         </div>
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filteredTeam.length}
+          onPageChange={setCurrentPage}
+        />
       </div>
-
-
 
       {/* Edit User Modal */}
       <Modal

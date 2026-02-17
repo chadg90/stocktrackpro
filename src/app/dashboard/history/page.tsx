@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   collection,
   query,
@@ -19,6 +19,9 @@ import { Clock, Search, Package, Truck, Image as ImageIcon } from 'lucide-react'
 import ExportButton from '../components/ExportButton';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
+import { EmptyStateTableRow } from '../components/EmptyState';
+import TableSkeleton from '../components/TableSkeleton';
+import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 
 type HistoryItem = {
   id: string;
@@ -87,6 +90,7 @@ export default function HistoryPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'assets' | 'fleet'>('assets');
+  const [currentPage, setCurrentPage] = useState(1);
   const [tools, setTools] = useState<Record<string, Tool>>({});
   const [vehicles, setVehicles] = useState<Record<string, Vehicle>>({});
   const [users, setUsers] = useState<Record<string, Profile>>({});
@@ -290,6 +294,20 @@ export default function HistoryPage() {
     (item.has_defect && 'defect'.includes(searchTerm.toLowerCase()))
   );
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchTerm]);
+
+  const currentListLength = activeTab === 'assets' ? filteredAssetHistory.length : filteredVehicleInspections.length;
+  const paginatedAssetHistory = useMemo(
+    () => filteredAssetHistory.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredAssetHistory, currentPage]
+  );
+  const paginatedVehicleInspections = useMemo(
+    () => filteredVehicleInspections.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredVehicleInspections, currentPage]
+  );
+
   const getCurrentData = () => {
     if (activeTab === 'assets') {
       return filteredAssetHistory.map(item => {
@@ -443,19 +461,14 @@ export default function HistoryPage() {
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
-                <tr>
-                  <td colSpan={activeTab === 'assets' ? 5 : 7} className="px-6 py-8 text-center text-white/50">
-                    Loading history...
-                  </td>
-                </tr>
+                <TableSkeleton cols={activeTab === 'assets' ? 5 : 7} />
               ) : (activeTab === 'assets' ? filteredAssetHistory : filteredVehicleInspections).length === 0 ? (
-                <tr>
-                  <td colSpan={activeTab === 'assets' ? 5 : 7} className="px-6 py-8 text-center text-white/50">
-                    No {activeTab === 'assets' ? 'asset history' : 'vehicle inspections'} found.
-                  </td>
-                </tr>
+                <EmptyStateTableRow
+                  colSpan={activeTab === 'assets' ? 5 : 7}
+                  message={activeTab === 'assets' ? 'No asset history found.' : 'No vehicle inspections found.'}
+                />
               ) : activeTab === 'assets' ? (
-                filteredAssetHistory.map((item) => {
+                paginatedAssetHistory.map((item) => {
                   const tool = item.tool_id ? tools[item.tool_id] : null;
                   const user = item.user_id ? users[item.user_id] : null;
                   
@@ -504,7 +517,7 @@ export default function HistoryPage() {
                   );
                 })
               ) : (
-                filteredVehicleInspections.map((item) => {
+                paginatedVehicleInspections.map((item) => {
                   const vehicle = item.vehicle_id ? vehicles[item.vehicle_id] : null;
                   const user = item.inspected_by ? users[item.inspected_by] : null;
                   
@@ -614,6 +627,11 @@ export default function HistoryPage() {
             </tbody>
           </table>
         </div>
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={currentListLength}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* Image Viewer Modal */}

@@ -16,7 +16,10 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://stocktrackpro.com'),
-  title: "Stock Track PRO | Professional Asset & Equipment Management System",
+  title: {
+    default: "Stock Track PRO | Professional Asset & Equipment Management System",
+    template: "%s | Stock Track PRO",
+  },
   description: "Transform your equipment management with Stock Track PRO. Our QR-based tracking system helps construction companies, workshops, and industrial facilities manage assets efficiently. Trusted by UK businesses.",
   keywords: "asset tracking, equipment management, QR code tracking, construction assets, workshop management, industrial equipment tracking, UK asset management, asset tracking software",
   authors: [{ name: "Stock Track PRO" }],

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   collection,
   query,
@@ -17,6 +17,9 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Plus, Trash2, Search, Key, Copy, Check } from 'lucide-react';
 import Modal from '../components/Modal';
+import { EmptyStateTableRow } from '../components/EmptyState';
+import TableSkeleton from '../components/TableSkeleton';
+import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 
 type AccessCode = {
   id: string;
@@ -51,6 +54,7 @@ export default function AccessCodesPage() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -171,6 +175,15 @@ export default function AccessCodesPage() {
     code.role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const paginatedCodes = useMemo(
+    () => filteredCodes.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredCodes, currentPage]
+  );
+
   const isManager = profile?.role === 'manager';
   const canManageCodes = isAdmin || isManager;
 
@@ -235,19 +248,11 @@ export default function AccessCodesPage() {
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-white/50">
-                    Loading access codes...
-                  </td>
-                </tr>
+                <TableSkeleton cols={5} />
               ) : filteredCodes.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-white/50">
-                    No access codes found. Generate one to get started.
-                  </td>
-                </tr>
+                <EmptyStateTableRow colSpan={5} message="No access codes found. Generate one to get started." />
               ) : (
-                filteredCodes.map((code) => (
+                paginatedCodes.map((code) => (
                   <tr key={code.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -257,6 +262,7 @@ export default function AccessCodesPage() {
                           onClick={() => copyToClipboard(code.code)}
                           className="p-1.5 text-white/60 hover:text-primary hover:bg-primary/10 rounded transition-colors"
                           title="Copy Code"
+                          aria-label="Copy code"
                         >
                           {copiedCode === code.code ? (
                             <Check className="h-4 w-4 text-green-400" />
@@ -290,8 +296,9 @@ export default function AccessCodesPage() {
                         onClick={() => handleDeleteCode(code.id)}
                         className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                         title="Delete Code"
+                        aria-label="Delete access code"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" aria-hidden />
                       </button>
                     </td>
                   </tr>
@@ -300,6 +307,11 @@ export default function AccessCodesPage() {
             </tbody>
           </table>
         </div>
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filteredCodes.length}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* Generate Modal */}

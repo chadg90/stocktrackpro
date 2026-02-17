@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   collection,
   query,
@@ -19,6 +19,9 @@ import Modal from '../components/Modal';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
 import ExportButton from '../components/ExportButton';
+import EmptyState, { EmptyStateTableRow } from '../components/EmptyState';
+import TableSkeleton from '../components/TableSkeleton';
+import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import { useDebounce } from '@/hooks/useDebounce';
 
 type Tool = {
@@ -52,6 +55,7 @@ export default function AssetsPage() {
   const [currentTool, setCurrentTool] = useState<Tool | null>(null);
   const [formData, setFormData] = useState<Partial<Tool>>({});
   const [processing, setProcessing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Image viewer state
   const [viewingImage, setViewingImage] = useState<string | null>(null);
@@ -154,6 +158,16 @@ export default function AssetsPage() {
     tool.brand?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
+
+  const totalPages = Math.ceil(filteredTools.length / PAGE_SIZE);
+  const paginatedTools = useMemo(
+    () => filteredTools.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredTools, currentPage]
+  );
+
   return (
     <div>
       <ImageViewerModal 
@@ -224,19 +238,11 @@ export default function AssetsPage() {
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-white/50">
-                    Loading assets...
-                  </td>
-                </tr>
+                <TableSkeleton cols={5} />
               ) : filteredTools.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-white/50">
-                    No assets found. Add your first asset to get started.
-                  </td>
-                </tr>
+                <EmptyStateTableRow colSpan={5} message="No assets found. Add your first asset to get started." />
               ) : (
-                filteredTools.map((tool) => (
+                paginatedTools.map((tool) => (
                   <tr key={tool.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -307,16 +313,18 @@ export default function AssetsPage() {
                           onClick={() => openEditModal(tool)}
                           className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                           title="Edit Asset"
+                          aria-label="Edit asset"
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" aria-hidden />
                         </button>
                         {canDelete && (
                           <button 
                             onClick={() => handleDeleteTool(tool.id)}
                             className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Delete Asset"
+                            aria-label="Delete asset"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" aria-hidden />
                           </button>
                         )}
                       </div>
@@ -327,6 +335,11 @@ export default function AssetsPage() {
             </tbody>
           </table>
         </div>
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filteredTools.length}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* Edit Modal */}

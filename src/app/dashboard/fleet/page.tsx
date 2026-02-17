@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   collection,
   query,
@@ -22,6 +22,9 @@ import Modal from '../components/Modal';
 import ExportButton from '../components/ExportButton';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
+import { EmptyStateTableRow } from '../components/EmptyState';
+import TableSkeleton from '../components/TableSkeleton';
+import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import { useDebounce } from '@/hooks/useDebounce';
 import { checkCanAddVehicle } from '@/lib/subscriptionLimits';
 
@@ -56,6 +59,7 @@ export default function FleetPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -254,6 +258,15 @@ export default function FleetPage() {
     v.model?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
+
+  const paginatedVehicles = useMemo(
+    () => filteredVehicles.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredVehicles, currentPage]
+  );
+
   return (
     <div>
       <ImageViewerModal 
@@ -336,19 +349,11 @@ export default function FleetPage() {
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-white/50">
-                    Loading vehicles...
-                  </td>
-                </tr>
+                <TableSkeleton cols={5} />
               ) : filteredVehicles.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-white/50">
-                    No vehicles found. Add your first vehicle to get started.
-                  </td>
-                </tr>
+                <EmptyStateTableRow colSpan={5} message="No vehicles found. Add your first vehicle to get started." />
               ) : (
-                filteredVehicles.map((vehicle) => (
+                paginatedVehicles.map((vehicle) => (
                   <tr key={vehicle.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -414,16 +419,18 @@ export default function FleetPage() {
                           onClick={() => openEditModal(vehicle)}
                           className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                           title="Edit Vehicle"
+                          aria-label="Edit vehicle"
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" aria-hidden />
                         </button>
                         {canDelete && (
                           <button 
                             onClick={() => handleDeleteVehicle(vehicle.id)}
                             className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Delete Vehicle"
+                            aria-label="Delete vehicle"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" aria-hidden />
                           </button>
                         )}
                       </div>
@@ -434,6 +441,11 @@ export default function FleetPage() {
             </tbody>
           </table>
         </div>
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filteredVehicles.length}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* Add Modal */}

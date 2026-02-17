@@ -826,8 +826,9 @@ export default function DashboardPage() {
                     onClick={() => profile?.company_id && fetchData(profile.company_id)}
                     className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-white/20 text-white hover:bg-white/5 transition-colors disabled:opacity-60"
                     disabled={loading}
+                    aria-label={loading ? 'Refreshing data' : 'Refresh dashboard data'}
                   >
-                    <RefreshCw className={`h-4 w-4 shrink-0 ${loading ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`h-4 w-4 shrink-0 ${loading ? 'animate-spin' : ''}`} aria-hidden />
                     Refresh
                   </button>
                 </div>

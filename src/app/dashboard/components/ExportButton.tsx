@@ -79,6 +79,7 @@ export default function ExportButton({
         disabled={disabled || exporting || !hasData}
         className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-primary/40 text-primary hover:border-primary hover:bg-primary/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
         title="Export Data"
+        aria-label={exporting ? 'Exporting data' : 'Export data'}
       >
         {exporting ? (
           <>

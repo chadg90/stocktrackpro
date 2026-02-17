@@ -104,6 +104,7 @@ const formatDate = (value?: string | Timestamp) => {
 export default function AnalyticsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'overview' | 'fleet' | 'assets' | 'users'>('overview');
   
@@ -152,6 +153,7 @@ export default function AnalyticsPage() {
       return;
     }
     setLoading(true);
+    setError(null);
     try {
       const now = new Date();
       let startDate: Date | null = null;
@@ -309,10 +311,10 @@ export default function AnalyticsPage() {
       const historySnap = await getDocs(historyQuery);
       setHistoryItems(historySnap.docs.map(d => ({ id: d.id, ...d.data() } as HistoryItem)));
 
-    } catch (error) {
-      console.error('Error fetching analytics:', error);
-      // If it's an index error, log it clearly
-      if (error instanceof Error && error.message.includes('index')) {
+    } catch (err) {
+      console.error('Error fetching analytics:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load analytics');
+      if (err instanceof Error && err.message.includes('index')) {
         console.error('Firestore index missing. Create composite index for:', {
           collection: 'vehicle_inspections',
           fields: ['company_id', 'inspected_at']
@@ -587,6 +589,20 @@ export default function AnalyticsPage() {
 
   return (
     <div id="detailed-analytics" className="print-content">
+      {error && (
+        <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex flex-wrap items-center justify-between gap-2 no-print" role="alert">
+          <span>{error}</span>
+          {profile?.company_id && (
+            <button
+              type="button"
+              onClick={() => { setError(null); fetchAnalytics(profile.company_id!); }}
+              className="text-primary hover:underline font-medium whitespace-nowrap"
+            >
+              Try again
+            </button>
+          )}
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 no-print">
         <div>
