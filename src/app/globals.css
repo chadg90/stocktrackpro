@@ -32,9 +32,9 @@ body {
     background-size: 60px 60px;
   }
 
-  /* Dashboard: consistent card and section styling */
+  /* Dashboard: consistent card and section styling (lighter cards for readability) */
   .dashboard-card {
-    @apply rounded-xl border border-white/10 bg-black/40 backdrop-blur-sm;
+    @apply rounded-xl border border-white/15 bg-white/[0.06] backdrop-blur-sm;
   }
 
   .btn-brand-blue {
@@ -52,7 +52,7 @@ body {
     @apply text-2xl font-bold tabular-nums text-white;
   }
   .dashboard-kpi-label {
-    @apply text-sm text-white/60;
+    @apply text-sm text-white/70;
   }
 }
 

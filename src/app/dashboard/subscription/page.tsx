@@ -448,7 +448,7 @@ export default function SubscriptionPage() {
       {/* Page Header */}
       <div className="border-b border-white/10 pb-6">
         <h1 className="text-3xl font-bold text-white mb-2">Subscription Management</h1>
-        <p className="text-white/60">View your subscription status and manage your plan</p>
+        <p className="text-white/75">View your subscription status and manage your plan</p>
       </div>
 
       {/* Current Subscription Status */}
@@ -459,7 +459,7 @@ export default function SubscriptionPage() {
               <CreditCard className="w-6 h-6 text-blue-500" />
               Current Subscription
             </h2>
-            <p className="text-white/60">Your current plan and billing information</p>
+            <p className="text-white/75">Your current plan and billing information</p>
           </div>
           {getStatusBadge(subscriptionStatus)}
         </div>
@@ -553,7 +553,7 @@ export default function SubscriptionPage() {
             <Tag className="w-6 h-6 text-blue-500" />
             Promo Code Checkout
           </h2>
-          <p className="text-white/60 mb-6">Enter a promo code to validate and proceed to checkout</p>
+          <p className="text-white/75 mb-6">Enter a promo code to validate and proceed to checkout</p>
           
           <div className="flex gap-3">
             <div className="flex-1 relative">
@@ -675,7 +675,7 @@ export default function SubscriptionPage() {
       <div>
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-white mb-2">Available Plans</h2>
-          <p className="text-white/60">Choose the plan that best fits your needs</p>
+          <p className="text-white/75">Choose the plan that best fits your needs</p>
         </div>
         {checkoutError && (
           <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 flex items-center gap-2">
@@ -717,10 +717,10 @@ export default function SubscriptionPage() {
                       <span className="text-xs px-3 py-1 bg-blue-500/20 text-blue-500 rounded-full font-semibold">Current</span>
                     )}
                   </div>
-                  <p className="text-white/60 text-sm mb-4">{tier.description}</p>
+                  <p className="text-white/75 text-sm mb-4">{tier.description}</p>
                   <div className="mb-6 pb-6 border-b border-white/10">
                     <span className="text-3xl font-bold text-white">{formatPrice(tier.price)}</span>
-                    <span className="text-white/60 text-sm ml-2">/month</span>
+                    <span className="text-white/75 text-sm ml-2">/month</span>
                   </div>
                 </div>
 
@@ -743,7 +743,7 @@ export default function SubscriptionPage() {
                         : isUpgrade
                         ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                         : isDowngrade
-                        ? 'bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30'
+                        ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/40'
                         : subscriptionStatus !== 'active' && subscriptionStatus !== 'trial'
                         ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                         : 'bg-white/10 hover:bg-white/20 text-white'
@@ -779,7 +779,7 @@ export default function SubscriptionPage() {
       {/* Help Section */}
       <div className="dashboard-card p-8 bg-gradient-to-br from-white/5 to-transparent border-blue-500/20">
         <h2 className="text-2xl font-semibold text-white mb-3">Need Help?</h2>
-        <p className="text-white/60 mb-6">
+        <p className="text-white/80 mb-6">
           If you have questions about your subscription or need assistance, we're here to help.
         </p>
         <div className="flex flex-wrap gap-4">
