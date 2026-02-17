@@ -20,6 +20,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Search, AlertTriangle, CheckCircle, Clock, Filter, Truck, Trash2 } from 'lucide-react';
 import ImageViewerModal from '../components/ImageViewerModal';
+import AuthenticatedImage from '../components/AuthenticatedImage';
 import ExportButton from '../components/ExportButton';
 import { createNotificationForCompanyManagers } from '@/lib/notificationUtils';
 
@@ -93,6 +94,21 @@ const firstPhotoUrl = (defect: any): string | null => {
   return null;
 };
 
+// All photo URLs for a defect (from defect then inspection) for gallery/carousel
+const allPhotoUrls = (defect: any): string[] => {
+  const out: string[] = [];
+  if (defect?.photo_url && typeof defect.photo_url === 'string') {
+    out.push(defect.photo_url);
+  }
+  if (defect?.photo_urls && typeof defect.photo_urls === 'object') {
+    const vals = Object.values(defect.photo_urls).filter((v) => typeof v === 'string') as string[];
+    vals.forEach((v) => {
+      if (v && !out.includes(v)) out.push(v);
+    });
+  }
+  return out;
+};
+
 export default function DefectsPage() {
   const [defects, setDefects] = useState<Defect[]>([]);
   const [vehicles, setVehicles] = useState<Record<string, Vehicle>>({});
@@ -108,9 +124,11 @@ export default function DefectsPage() {
   const isAdmin = profile?.role === 'admin';
   const canManageDefects = isManager || isAdmin;
   
-  // Image viewer state
+  // Image viewer state (single url for backward compat; carousel uses images + index)
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [viewingImageAlt, setViewingImageAlt] = useState('');
+  const [viewingImages, setViewingImages] = useState<string[] | null>(null);
+  const [viewingIndex, setViewingIndex] = useState(0);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -235,11 +253,12 @@ export default function DefectsPage() {
           return defect;
         }
         
-        // Otherwise, try to get photo from vehicle's latest inspection
+        // Otherwise, attach all photos from vehicle's latest inspection
         if (defect.vehicle_id && inspectionsMap[defect.vehicle_id]) {
-          const photoUrl = getInspectionPhoto(inspectionsMap[defect.vehicle_id]);
-          if (photoUrl) {
-            return { ...defect, photo_url: photoUrl };
+          const insp = inspectionsMap[defect.vehicle_id];
+          if (insp?.photo_urls && typeof insp.photo_urls === 'object') {
+            const first = getInspectionPhoto(insp);
+            return { ...defect, photo_url: first || undefined, photo_urls: insp.photo_urls };
           }
         }
         
@@ -343,9 +362,12 @@ export default function DefectsPage() {
     <div>
       <ImageViewerModal 
         isOpen={!!viewingImage} 
-        onClose={() => setViewingImage(null)} 
-        imageUrl={viewingImage} 
-        altText={viewingImageAlt} 
+        onClose={() => { setViewingImage(null); setViewingImages(null); }} 
+        imageUrl={viewingImages?.length ? viewingImages[viewingIndex] ?? viewingImage : viewingImage} 
+        altText={viewingImageAlt}
+        images={viewingImages ?? undefined}
+        currentIndex={viewingIndex}
+        onIndexChange={setViewingIndex}
       />
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -494,33 +516,57 @@ export default function DefectsPage() {
                         <p className="text-white/90 text-sm line-clamp-2 max-w-xs" title={defect.description}>
                           {defect.description}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          {firstPhotoUrl(defect) ? (
-                            <>
-                              <button 
-                                onClick={() => {
-                                  const url = firstPhotoUrl(defect);
-                                  if (url) {
-                                    setViewingImage(url);
-                                    setViewingImageAlt(defect.description || 'Defect Photo');
-                                  }
-                                }}
-                                className="text-primary text-xs hover:underline inline-flex items-center gap-1"
-                              >
-                                View Photo
-                              </button>
-                              <a
-                                href={firstPhotoUrl(defect) || '#'}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-xs text-white/60 hover:text-primary"
-                              >
-                                Open
-                              </a>
-                            </>
-                          ) : (
-                            <span className="text-xs text-white/50">No photo provided</span>
-                          )}
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          {(() => {
+                            const urls = allPhotoUrls(defect);
+                            if (urls.length === 0) {
+                              return <span className="text-xs text-white/50">No photo provided</span>;
+                            }
+                            const showCount = 3;
+                            const thumbUrls = urls.slice(0, showCount);
+                            const rest = urls.length - showCount;
+                            const openViewer = (index: number) => {
+                              setViewingImages(urls);
+                              setViewingIndex(index);
+                              setViewingImage(urls[index] || urls[0]);
+                              setViewingImageAlt(defect.description || 'Defect Photo');
+                            };
+                            return (
+                              <>
+                                <div className="flex items-center gap-1">
+                                  {thumbUrls.map((url, i) => (
+                                    <button
+                                      key={url}
+                                      type="button"
+                                      onClick={() => openViewer(i)}
+                                      className="w-9 h-9 rounded border border-white/20 overflow-hidden flex-shrink-0 hover:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
+                                    >
+                                      <AuthenticatedImage src={url} alt="" className="w-full h-full object-cover" />
+                                    </button>
+                                  ))}
+                                  {rest > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => openViewer(showCount)}
+                                      className="text-primary text-xs hover:underline font-medium"
+                                    >
+                                      +{rest} more
+                                    </button>
+                                  )}
+                                </div>
+                                {urls.length === 1 ? (
+                                  <a
+                                    href={urls[0]}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-xs text-white/60 hover:text-primary"
+                                  >
+                                    Open
+                                  </a>
+                                ) : null}
+                              </>
+                            );
+                          })()}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-white/70 text-sm">
