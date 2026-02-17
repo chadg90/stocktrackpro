@@ -152,7 +152,7 @@ export function NavbarAuthButtonsMobile({
   );
 }
 
-const linkClassBase = 'relative px-3 py-2 rounded-lg text-sm font-medium text-white/85 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-black after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform hover:after:scale-x-100';
+const linkClassBase = 'relative px-3 py-2 rounded-lg text-sm font-medium text-white/85 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-[var(--brand-blue)] after:scale-x-0 after:transition-transform hover:after:scale-x-100';
 const linkClassMobile = 'block px-4 py-3 rounded-xl text-base font-medium text-white/90 hover:text-white hover:bg-white/5 transition-colors';
 
 /** Desktop nav links + auth button. Dynamically imported so Firebase loads in separate chunk. */
@@ -176,7 +176,7 @@ export function NavbarNavContent({ onLinkClick }: { onLinkClick: () => void }) {
             {authChecked && (
               <Link
                 href="/onboarding"
-                className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold text-sm shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02] transition-all duration-200"
+                className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-white font-semibold text-sm hover:scale-[1.02] transition-all duration-200 btn-brand-blue"
                 onClick={onLinkClick}
               >
                 Get started
@@ -244,7 +244,7 @@ export function NavbarMobileNavContent({ onLinkClick }: { onLinkClick: () => voi
         ) : (
           <>
             {authChecked && (
-              <Link href="/onboarding" className="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold" onClick={onLinkClick}>
+              <Link href="/onboarding" className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-white font-semibold btn-brand-blue" onClick={onLinkClick}>
                 Get started
               </Link>
             )}

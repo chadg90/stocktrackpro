@@ -7,6 +7,8 @@
   --background: 0, 0, 0;
   --primary: #fea917;
   --primary-light: #feba46;
+  --brand-blue: #3b82f6;
+  --brand-blue-hover: #2563eb;
   --text-dark: #000000;
   --text-light: #ffffff;
 }
@@ -33,6 +35,15 @@ body {
   /* Dashboard: consistent card and section styling */
   .dashboard-card {
     @apply rounded-xl border border-white/10 bg-black/40 backdrop-blur-sm;
+  }
+
+  .btn-brand-blue {
+    background-color: var(--brand-blue);
+    box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.2);
+  }
+  .btn-brand-blue:hover {
+    background-color: var(--brand-blue-hover);
+    box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.3);
   }
   .dashboard-section-title {
     @apply text-lg font-semibold tracking-tight text-white;

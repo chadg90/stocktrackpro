@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Navbar from './components/Navbar';
-import { Wrench, QrCode, Map, Smartphone, Users, ClipboardList, ArrowRight, Check } from 'lucide-react';
+import { Wrench, QrCode, Map, Smartphone, Users, ClipboardList, ArrowRight, Check, Zap, Droplets, Truck } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -29,66 +29,69 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white antialiased">
       <Navbar />
 
-      {/* Hero — premium */}
-      <section className="relative overflow-hidden pt-28 sm:pt-36 pb-24 sm:pb-32">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(254,169,23,0.15),transparent)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_80%_50%,rgba(254,169,23,0.08),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        <div className="container relative mx-auto px-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-12 lg:gap-16">
-            <div className="max-w-3xl">
-              <p className="text-primary font-medium text-sm uppercase tracking-[0.2em] mb-6">
-                Fleet & asset management
-              </p>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
-                One app for your tools, vehicles and team.
-              </h1>
-              <p className="text-lg sm:text-xl text-white/75 mb-10 max-w-2xl leading-relaxed">
-                Track equipment, run inspections, report defects and manage your fleet in real time. Built for trades and contractors.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/contact"
-                  className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02]"
-                >
-                  Get in touch
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-primary/50 hover:bg-white/5 transition-all duration-200 font-medium"
-                >
-                  View pricing
-                </Link>
-              </div>
-            </div>
-            <div className="flex-shrink-0 flex justify-center lg:justify-end w-full lg:w-auto min-h-[280px] lg:min-h-0">
-              <div className="relative">
-                <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl" aria-hidden />
-                <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[380px] aspect-[3/4] min-w-[200px] rounded-2xl overflow-hidden ring-1 ring-white/10">
-                  <Image
-                    src="/website-image-stp.png"
-                    alt="Stock Track PRO app on phone in the field — sign in to manage assets and equipment"
-                    fill
-                    sizes="(max-width: 1024px) 320px, 380px"
-                    className="object-cover object-top drop-shadow-2xl"
-                    priority
-                  />
-                </div>
-                <p className="text-center text-white/50 text-xs mt-3 font-medium">App in the field</p>
-              </div>
-            </div>
+      {/* Hero — split: 50% content, 50% full-bleed image */}
+      <section className="relative overflow-hidden pt-20 sm:pt-28 lg:pt-24 lg:min-h-[calc(100vh-4rem)] grid grid-cols-1 lg:grid-cols-2">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_20%_50%,rgba(59,130,246,0.08),transparent_50%)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="relative flex flex-col justify-center px-4 sm:px-6 lg:px-10 xl:px-16 py-16 lg:py-24 order-2 lg:order-1">
+          <p className="text-[var(--brand-blue)] font-medium text-sm uppercase tracking-[0.2em] mb-5">
+            Fleet & asset management
+          </p>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight text-white mb-8 leading-[1.08]">
+            One app for your tools, vehicles and team.
+          </h1>
+          <p className="text-lg sm:text-xl text-white/80 max-w-2xl leading-loose mb-12">
+            Track equipment, run inspections, report defects and manage your fleet in real time. Built for trades and contractors.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              href="/contact"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black btn-brand-blue"
+            >
+              Get in touch
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
+            >
+              View pricing
+            </Link>
           </div>
+        </div>
+        <div className="relative h-[50vh] min-h-[320px] lg:h-full lg:min-h-[calc(100vh-6rem)] order-1 lg:order-2">
+          <Image
+            src="/website-image-stp.png"
+            alt="Stock Track PRO app on phone in the field — sign in to manage assets and equipment"
+            fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover object-right lg:object-center"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent lg:bg-gradient-to-r from-black/80 via-black/20 to-transparent" aria-hidden />
         </div>
       </section>
 
       {/* Trusted by */}
       <section className="py-14 sm:py-18 border-y border-white/10 bg-white/[0.02]">
         <div className="container mx-auto px-4">
-          <p className="text-center text-white/40 text-xs font-semibold uppercase tracking-[0.25em] mb-4">
+          <p className="text-center text-white/40 text-xs font-semibold uppercase tracking-[0.25em] mb-6">
             Trusted by
           </p>
-          <p className="text-center text-white/80 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 mb-6">
+            {[
+              { icon: Zap, label: 'Electrical' },
+              { icon: Droplets, label: 'Plumbing' },
+              { icon: Truck, label: 'Logistics' },
+              { icon: Wrench, label: 'Trades' },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="flex flex-col items-center gap-2 text-white/50">
+                <Icon className="w-8 h-8 sm:w-10 sm:h-10" strokeWidth={1.5} aria-hidden />
+                <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-white/70 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
             Teams across the UK who want to stop losing tools and keep vehicles compliant.
           </p>
         </div>
@@ -208,8 +211,8 @@ export default function Home() {
 
       {/* CTA — strong close */}
       <section className="relative py-24 sm:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_100%,rgba(254,169,23,0.12),transparent_70%)]" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_100%,rgba(59,130,246,0.12),transparent_70%)]" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--brand-blue)]/40 to-transparent" />
         <div className="container relative mx-auto px-4 text-center">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 max-w-3xl mx-auto leading-tight">
             Start managing your fleet and tools today
@@ -223,19 +226,19 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/onboarding"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02]"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black"
             >
               Get started
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-primary/50 hover:bg-white/5 transition-all duration-200 font-medium"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
             >
               Contact
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-primary/50 hover:bg-white/5 transition-all duration-200 font-medium"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
             >
               View pricing
             </Link>

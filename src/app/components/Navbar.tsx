@@ -31,7 +31,7 @@ function NavbarNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
         <Link
           key={item.name}
           href={item.href}
-          className="relative px-3 py-2 rounded-lg text-sm font-medium text-white/85 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-black after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform hover:after:scale-x-100"
+          className="relative px-3 py-2 rounded-lg text-sm font-medium text-white/85 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-[var(--brand-blue)] after:scale-x-0 after:transition-transform hover:after:scale-x-100"
           onClick={onLinkClick}
         >
           {item.name}
@@ -40,7 +40,7 @@ function NavbarNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
       <div className="ml-4 pl-4 border-l border-white/20 flex items-center gap-2">
         <Link
           href="/onboarding"
-          className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold text-sm shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02] transition-all duration-200"
+          className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-white font-semibold text-sm hover:scale-[1.02] transition-all duration-200 btn-brand-blue"
           onClick={onLinkClick}
         >
           Get started
@@ -74,7 +74,7 @@ function NavbarMobileNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
       <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
         <Link
           href="/onboarding"
-          className="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold"
+          className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-white font-semibold btn-brand-blue"
           onClick={onLinkClick}
         >
           Get started
@@ -107,7 +107,7 @@ const Navbar = () => {
   return (
     <nav 
       className={`fixed w-full z-40 left-0 top-0 transition-all duration-300 ${
-        isScrolled ? 'bg-black/95 backdrop-blur-md border-b border-white/10 shadow-xl shadow-black/20' : 'bg-transparent'
+        isScrolled ? 'bg-black/70 backdrop-blur-xl border-b border-white/10 shadow-xl shadow-black/20' : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
