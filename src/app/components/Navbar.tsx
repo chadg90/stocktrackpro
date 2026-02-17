@@ -26,54 +26,68 @@ const baseNavItems = [
 
 function NavbarNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
   return (
-    <div className="ml-10 flex items-center space-x-4">
+    <div className="ml-10 flex items-center gap-1 sm:gap-2">
       {baseNavItems.map((item) => (
         <Link
           key={item.name}
           href={item.href}
-          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black ${
-            item.name === 'Contact' ? 'text-white bg-primary hover:bg-primary-light' : 'text-white/90 hover:text-primary'
-          }`}
+          className="relative px-3 py-2 rounded-lg text-sm font-medium text-white/85 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-black after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-primary after:scale-x-0 after:transition-transform hover:after:scale-x-100"
           onClick={onLinkClick}
         >
           {item.name}
         </Link>
       ))}
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
-        onClick={onLinkClick}
-      >
-        <LogIn className="h-4 w-4" aria-hidden />
-        Log in
-      </Link>
+      <div className="ml-4 pl-4 border-l border-white/20 flex items-center gap-2">
+        <Link
+          href="/onboarding"
+          className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold text-sm shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02] transition-all duration-200"
+          onClick={onLinkClick}
+        >
+          Get started
+        </Link>
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-black"
+          onClick={onLinkClick}
+        >
+          <LogIn className="h-4 w-4" aria-hidden />
+          Log in
+        </Link>
+      </div>
     </div>
   );
 }
 
 function NavbarMobileNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
   return (
-    <div className="px-2 pt-2 pb-3 space-y-1 bg-black/95 backdrop-blur-sm border-t border-primary/10">
+    <div className="px-4 pt-4 pb-6 space-y-1 bg-black/98 backdrop-blur-md border-t border-white/10">
       {baseNavItems.map((item) => (
         <Link
           key={item.name}
           href={item.href}
-          className={`block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:ring-2 focus:ring-primary ${
-            item.name === 'Contact' ? 'text-white bg-primary hover:bg-primary-light' : 'text-white/90 hover:text-primary'
-          }`}
+          className="block px-4 py-3 rounded-xl text-base font-medium text-white/90 hover:text-white hover:bg-white/5 transition-colors"
           onClick={onLinkClick}
         >
           {item.name}
         </Link>
       ))}
-      <Link
-        href="/dashboard"
-        className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-white/90 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-        onClick={onLinkClick}
-      >
-        <LogIn className="h-4 w-4" aria-hidden />
-        Log in
-      </Link>
+      <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
+        <Link
+          href="/onboarding"
+          className="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold"
+          onClick={onLinkClick}
+        >
+          Get started
+        </Link>
+        <Link
+          href="/dashboard"
+          className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl border border-white/20 text-white/90 hover:text-white hover:bg-white/5"
+          onClick={onLinkClick}
+        >
+          <LogIn className="h-4 w-4" aria-hidden />
+          Log in
+        </Link>
+      </div>
     </div>
   );
 }
@@ -93,7 +107,7 @@ const Navbar = () => {
   return (
     <nav 
       className={`fixed w-full z-40 left-0 top-0 transition-all duration-300 ${
-        isScrolled ? 'bg-black/95 backdrop-blur-sm border-b border-primary/10 shadow-lg' : 'bg-transparent'
+        isScrolled ? 'bg-black/95 backdrop-blur-md border-b border-white/10 shadow-xl shadow-black/20' : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -123,7 +137,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-white/90 hover:text-primary hover:bg-black/50 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="inline-flex items-center justify-center p-2.5 rounded-xl text-white/90 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-primary/50"
               aria-expanded={isMenuOpen}
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             >
@@ -139,7 +153,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile menu (auth chunk loaded lazily) */}
-      <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+      <div className={`md:hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-[calc(100vh-5rem)] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'}`}>
         <NavbarMobileNavContent onLinkClick={closeMenu} />
       </div>
     </nav>

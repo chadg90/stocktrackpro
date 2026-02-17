@@ -221,13 +221,22 @@ export default function Home() {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 max-w-3xl mx-auto leading-tight">
             Start managing your fleet and tools today
           </h2>
-          <p className="text-white/70 max-w-xl mx-auto mb-10 text-lg">
+          <p className="text-white/70 max-w-xl mx-auto mb-4 text-lg">
             New users get a 7-day free trial. Subscriptions are managed through the app; managers use the dashboard to review company data.
+          </p>
+          <p className="text-white/50 text-sm mb-10">
+            New company? <Link href="/onboarding" className="text-primary hover:underline">Create your account and set up in minutes</Link>.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/contact"
+              href="/onboarding"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-primary hover:bg-primary-light text-black font-semibold transition-all duration-200 shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.02]"
+            >
+              Get started
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-primary/50 hover:bg-white/5 transition-all duration-200 font-medium"
             >
               Contact
             </Link>

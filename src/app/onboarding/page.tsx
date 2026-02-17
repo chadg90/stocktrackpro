@@ -17,10 +17,10 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Building2, Key, ArrowRight, Loader2 } from 'lucide-react';
+import { Building2, Key, ArrowRight, Loader2, CheckCircle, Users, MapPin, Package, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 
-type OnboardingStep = 'account' | 'company';
+type OnboardingStep = 'account' | 'company' | 'success';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -43,6 +43,7 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [verifyingCode, setVerifyingCode] = useState(false);
+  const [createdCompanyName, setCreatedCompanyName] = useState('');
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -251,8 +252,8 @@ export default function OnboardingPage() {
         { merge: true }
       );
 
-      // Redirect to dashboard
-      router.push('/dashboard');
+      setCreatedCompanyName(companyName.trim());
+      setStep('success');
     } catch (err: any) {
       console.error('Company creation error:', err);
       setError(err.message || 'Failed to create company. Please try again.');
@@ -261,23 +262,83 @@ export default function OnboardingPage() {
     }
   };
 
+  const stepLabels = [
+    { key: 'account' as const, label: 'Account' },
+    { key: 'company' as const, label: 'Company' },
+  ];
+  const currentStepIndex = step === 'success' ? 2 : step === 'company' ? 1 : 0;
+
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 py-12">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <Link href="/" className="inline-block mb-6">
             <h1 className="text-3xl font-bold text-white">Stock Track PRO</h1>
           </Link>
+          {step !== 'success' && (
+            <div className="flex items-center justify-center gap-2 mb-6">
+              {stepLabels.map((s, i) => (
+                <React.Fragment key={s.key}>
+                  <div
+                    className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold transition-colors ${
+                      currentStepIndex >= i ? 'bg-primary text-black' : 'bg-white/10 text-white/50'
+                    }`}
+                  >
+                    {i + 1}
+                  </div>
+                  {i < stepLabels.length - 1 && (
+                    <div className={`w-8 h-0.5 rounded ${currentStepIndex > i ? 'bg-primary' : 'bg-white/20'}`} />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          )}
           <h2 className="text-2xl font-semibold text-white mb-2">
-            {step === 'account' ? 'Create Your Account' : 'Complete Setup'}
+            {step === 'account' && 'Create your account'}
+            {step === 'company' && 'Set up your company'}
+            {step === 'success' && "You're all set"}
           </h2>
           <p className="text-white/60 text-sm">
-            {step === 'account'
-              ? 'Get started with Stock Track PRO'
-              : 'Join a company or create your own'}
+            {step === 'account' && 'New companies start here. One account for the web dashboard and the app.'}
+            {step === 'company' && 'Join an existing company with a code, or create a new company and start a free trial.'}
+            {step === 'success' && 'Your company is ready. Here’s what to do next.'}
           </p>
         </div>
 
+        {step === 'success' ? (
+          <div className="dashboard-card p-8 shadow-xl space-y-6">
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 border border-primary/20">
+              <CheckCircle className="w-8 h-8 text-primary flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-white">{createdCompanyName}</p>
+                <p className="text-white/60 text-sm">Company created. You’re the manager.</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-white/80 text-sm font-medium mb-3">Next steps in your dashboard:</p>
+              <ul className="space-y-3">
+                {[
+                  { icon: LayoutDashboard, text: 'Open your dashboard and explore your company view' },
+                  { icon: Users, text: 'Create access codes so your team can join the app' },
+                  { icon: MapPin, text: 'Add locations for assets and vehicles' },
+                  { icon: Package, text: 'Add your first assets and fleet' },
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-white/80 text-sm">
+                    <item.icon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span>{item.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Link
+              href="/dashboard"
+              className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-xl py-3.5 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
+            >
+              Go to Dashboard
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        ) : (
         <div className="dashboard-card p-8 shadow-xl">
           {step === 'account' ? (
             <form onSubmit={handleAccountCreation} className="space-y-4">
@@ -410,9 +471,9 @@ export default function OnboardingPage() {
                   }`}
                 >
                   <Building2 className="h-6 w-6 mx-auto mb-2 text-primary" />
-                  <h3 className="font-semibold text-white mb-1">Create Company</h3>
+                  <h3 className="font-semibold text-white mb-1">Create new company</h3>
                   <p className="text-white/60 text-xs">
-                    Start a new company (trial)
+                    7-day free trial, then choose a plan
                   </p>
                 </button>
               </div>
@@ -572,15 +633,18 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <p className="text-white/50 text-center text-xs">
-              Already have an account?{' '}
-              <Link href="/dashboard" className="text-primary hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </div>
+          {step !== 'success' && (
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <p className="text-white/50 text-center text-xs">
+                Already have an account?{' '}
+                <Link href="/dashboard" className="text-primary hover:underline">
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
+        )}
       </div>
     </div>
   );
