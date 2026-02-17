@@ -62,10 +62,10 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-            <div className="flex-shrink-0 flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[360px] aspect-[3/4]">
+            <div className="flex-shrink-0 flex justify-center lg:justify-end w-full lg:w-auto min-h-[280px] lg:min-h-0">
+              <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[360px] aspect-[3/4] min-w-[200px]">
                 <Image
-                  src="/website%20image%20stp.png"
+                  src="/website-image-stp.png"
                   alt="Stock Track PRO app on phone in the field — sign in to manage assets and equipment"
                   fill
                   sizes="(max-width: 1024px) 320px, 360px"
