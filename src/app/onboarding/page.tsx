@@ -17,10 +17,10 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Building2, Key, ArrowRight, Loader2, CheckCircle, Users, MapPin, Package, LayoutDashboard } from 'lucide-react';
+import { Building2, Key, ArrowRight, Loader2, CheckCircle, Users, MapPin, Package, LayoutDashboard, LogIn } from 'lucide-react';
 import Link from 'next/link';
 
-type OnboardingStep = 'account' | 'company' | 'success';
+type OnboardingStep = 'choice' | 'account' | 'company' | 'success';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -33,7 +33,7 @@ export default function OnboardingPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   
   // Company selection
-  const [step, setStep] = useState<OnboardingStep>('account');
+  const [step, setStep] = useState<OnboardingStep>('choice');
   const [companyOption, setCompanyOption] = useState<'join' | 'create'>('join');
   const [accessCode, setAccessCode] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -266,7 +266,7 @@ export default function OnboardingPage() {
     { key: 'account' as const, label: 'Account' },
     { key: 'company' as const, label: 'Company' },
   ];
-  const currentStepIndex = step === 'success' ? 2 : step === 'company' ? 1 : 0;
+  const currentStepIndex = step === 'success' ? 2 : step === 'company' ? 1 : step === 'account' ? 0 : -1;
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 py-12">
@@ -275,7 +275,7 @@ export default function OnboardingPage() {
           <Link href="/" className="inline-block mb-6">
             <h1 className="text-3xl font-bold text-white">Stock Track PRO</h1>
           </Link>
-          {step !== 'success' && (
+          {step !== 'success' && step !== 'choice' && (
             <div className="flex items-center justify-center gap-2 mb-6">
               {stepLabels.map((s, i) => (
                 <React.Fragment key={s.key}>
@@ -294,18 +294,55 @@ export default function OnboardingPage() {
             </div>
           )}
           <h2 className="text-2xl font-semibold text-white mb-2">
+            {step === 'choice' && 'Get started'}
             {step === 'account' && 'Create your account'}
             {step === 'company' && 'New company or existing?'}
             {step === 'success' && "You're all set"}
           </h2>
           <p className="text-white/60 text-sm">
+            {step === 'choice' && 'Join as a new company or sign in to your existing account.'}
             {step === 'account' && 'One account for the web dashboard and the app.'}
             {step === 'company' && 'Setup a new company or log in to an existing one.'}
             {step === 'success' && 'Your company is ready. Here’s what to do next.'}
           </p>
         </div>
 
-        {step === 'success' ? (
+        {step === 'choice' ? (
+          <div className="dashboard-card p-8 shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                type="button"
+                onClick={() => setStep('account')}
+                className="flex-1 p-6 rounded-xl border-2 border-blue-500 bg-blue-500/10 hover:bg-blue-500/20 transition-colors text-left group"
+              >
+                <Building2 className="h-8 w-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-semibold text-white text-lg mb-2">Join as New company</h3>
+                <p className="text-white/60 text-sm">
+                  Create an account and set up your company. 7-day free trial, then choose a plan.
+                </p>
+                <span className="inline-flex items-center gap-1 text-blue-500 font-medium text-sm mt-3">
+                  Get started <ArrowRight className="w-4 h-4" />
+                </span>
+              </button>
+              <Link
+                href="/dashboard"
+                className="flex-1 p-6 rounded-xl border-2 border-white/20 bg-white/5 hover:border-blue-500/50 hover:bg-white/10 transition-colors text-left group flex flex-col"
+              >
+                <LogIn className="h-8 w-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-semibold text-white text-lg mb-2">Login Existing</h3>
+                <p className="text-white/60 text-sm">
+                  Already have an account? Sign in to the dashboard.
+                </p>
+                <span className="inline-flex items-center gap-1 text-blue-500 font-medium text-sm mt-3">
+                  Go to login <ArrowRight className="w-4 h-4" />
+                </span>
+              </Link>
+            </div>
+            <p className="text-white/50 text-center text-xs">
+              Need to join a company with an access code? Choose &quot;Join as New company&quot;, create your account, then enter your code on the next step.
+            </p>
+          </div>
+        ) : step === 'success' ? (
           <div className="dashboard-card p-8 shadow-xl space-y-6">
             <div className="flex items-center gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
               <CheckCircle className="w-8 h-8 text-blue-500 flex-shrink-0" />
@@ -636,14 +673,16 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <p className="text-white/50 text-center text-xs">
-              Already have an account?{' '}
-              <Link href="/dashboard" className="text-blue-500 hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </div>
+          {step !== 'choice' && (
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <p className="text-white/50 text-center text-xs">
+                Already have an account?{' '}
+                <Link href="/dashboard" className="text-blue-500 hover:underline">
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
         )}
       </div>
