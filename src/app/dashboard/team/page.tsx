@@ -23,10 +23,11 @@ type Profile = {
   id: string; // uid
   company_id: string;
   role: 'admin' | 'manager' | 'user';
-  displayName?: string;
-  name?: string;
   first_name?: string;
   last_name?: string;
+  display_name?: string;
+  displayName?: string;
+  name?: string;
   email?: string;
   phone?: string;
   last_login?: Timestamp | string;
@@ -160,7 +161,7 @@ export default function TeamPage() {
 
   const openEditUser = (member: Profile) => {
     setEditingUser(member);
-    setEditDisplayName(member.displayName || member.name || member.email?.split('@')[0] || '');
+    setEditDisplayName(displayNameFor(member) || '');
     setEditRole(member.role);
     setEditCompanyId(member.company_id || '');
     setIsEditModalOpen(true);
@@ -238,11 +239,11 @@ export default function TeamPage() {
   };
 
   const displayNameFor = (member: Profile) => {
-    // Try first_name + last_name first
+    // From profile: first_name + last_name > display_name > displayName > name > email prefix
     if (member.first_name || member.last_name) {
       return `${member.first_name || ''} ${member.last_name || ''}`.trim();
     }
-    // Fall back to displayName, name, email prefix
+    if (member.display_name) return member.display_name.trim();
     return member.displayName || member.name || member.email?.split('@')[0] || 'Unnamed User';
   };
 

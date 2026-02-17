@@ -474,7 +474,7 @@ export default function SubscriptionPage() {
         {(subscriptionStatus === 'active' || subscriptionStatus === 'trial') && !company?.stripe_customer_id && (
           <div className="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
             <p className="text-primary text-sm">
-              You subscribed via the app or another channel. Your subscription is active. To manage billing (payment method, invoices) on the web, subscribe or link your account from the <a href="/pricing" className="underline font-medium">Pricing page</a>.
+              You subscribed via the app or another channel. Your subscription is active. Manage your billing using the chosen method when subscribing.
             </p>
           </div>
         )}

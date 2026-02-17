@@ -25,6 +25,7 @@ type Profile = {
   role?: string;
   first_name?: string;
   last_name?: string;
+  display_name?: string;
   displayName?: string;
   name?: string;
   email?: string;
@@ -456,14 +457,18 @@ export default function AnalyticsPage() {
     }> = {};
 
     users.forEach(u => {
-      // Name only: first_name + last_name > displayName > name > Unknown (never show email)
+      // From profile: first_name + last_name > display_name > displayName > name > email prefix > Unknown
       let userName = 'Unknown';
       if (u.first_name || u.last_name) {
         userName = `${u.first_name || ''} ${u.last_name || ''}`.trim();
+      } else if (u.display_name) {
+        userName = u.display_name.trim();
       } else if (u.displayName) {
         userName = u.displayName;
       } else if (u.name) {
         userName = u.name;
+      } else if (u.email) {
+        userName = u.email.split('@')[0];
       }
       if (!userName || !userName.trim()) userName = 'Unknown';
 

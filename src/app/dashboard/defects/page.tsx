@@ -55,10 +55,11 @@ type Profile = {
   id: string;
   company_id?: string;
   role?: string;
-  displayName?: string;
-  name?: string;
   first_name?: string;
   last_name?: string;
+  display_name?: string;
+  displayName?: string;
+  name?: string;
   email?: string;
 };
 
@@ -316,11 +317,11 @@ export default function DefectsPage() {
     const user = users[userId];
     if (!user) return userId;
     
-    // Try first_name + last_name first
+    // From profile: first_name + last_name > display_name > displayName > name > email prefix
     if (user.first_name || user.last_name) {
       return `${user.first_name || ''} ${user.last_name || ''}`.trim();
     }
-    // Fall back to displayName, name, email prefix
+    if (user.display_name) return user.display_name.trim();
     return user.displayName || user.name || user.email?.split('@')[0] || userId;
   };
 

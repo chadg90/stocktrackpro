@@ -45,10 +45,11 @@ type Profile = {
   id: string;
   company_id?: string;
   role?: string;
-  displayName?: string;
-  name?: string;
   first_name?: string;
   last_name?: string;
+  display_name?: string;
+  displayName?: string;
+  name?: string;
   email?: string;
 };
 
@@ -298,6 +299,8 @@ export default function HistoryPage() {
         if (user) {
           if (user.first_name || user.last_name) {
             userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+          } else if (user.display_name) {
+            userName = user.display_name.trim();
           } else {
             userName = user.displayName || user.name || user.email?.split('@')[0] || 'Unknown';
           }
@@ -322,6 +325,8 @@ export default function HistoryPage() {
         if (user) {
           if (user.first_name || user.last_name) {
             userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+          } else if (user.display_name) {
+            userName = user.display_name.trim();
           } else {
             userName = user.displayName || user.name || user.email?.split('@')[0] || 'Unknown';
           }
@@ -458,6 +463,8 @@ export default function HistoryPage() {
                   if (user) {
                     if (user.first_name || user.last_name) {
                       userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                    } else if (user.display_name) {
+                      userName = user.display_name.trim();
                     } else {
                       userName = user.displayName || user.name || user.email?.split('@')[0] || 'Unknown';
                     }
@@ -501,11 +508,13 @@ export default function HistoryPage() {
                   const vehicle = item.vehicle_id ? vehicles[item.vehicle_id] : null;
                   const user = item.inspected_by ? users[item.inspected_by] : null;
                   
-                  // Prioritize name display: first_name + last_name > displayName > name > email prefix > id
+                  // From profile: first_name + last_name > display_name > displayName > name > email prefix > id
                   let userName = '—';
                   if (user) {
                     if (user.first_name || user.last_name) {
                       userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                    } else if (user.display_name) {
+                      userName = user.display_name.trim();
                     } else if (user.displayName) {
                       userName = user.displayName;
                     } else if (user.name) {
@@ -518,7 +527,6 @@ export default function HistoryPage() {
                       userName = 'Unknown';
                     }
                   } else if (item.inspected_by) {
-                    // If user not found, show ID (not email)
                     userName = item.inspected_by;
                   }
                   

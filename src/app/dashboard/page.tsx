@@ -37,10 +37,11 @@ type Profile = {
   id: string;
   company_id?: string;
   role?: string;
-  displayName?: string;
-  name?: string;
   first_name?: string;
   last_name?: string;
+  display_name?: string;
+  displayName?: string;
+  name?: string;
   email?: string;
   created_at?: Timestamp | string;
   last_login?: Timestamp | string;
@@ -539,12 +540,14 @@ export default function DashboardPage() {
     }));
   }, [users]);
 
-  // Get display name only (never email)
+  // From profile: first_name + last_name > display_name > displayName > name > email prefix > fallback
   const getUserDisplayName = (u: Profile | undefined, fallback: string = 'Unknown') => {
     if (!u) return fallback;
     if (u.first_name || u.last_name) return `${u.first_name || ''} ${u.last_name || ''}`.trim();
+    if (u.display_name) return u.display_name.trim();
     if (u.displayName) return u.displayName;
     if (u.name) return u.name;
+    if (u.email) return u.email.split('@')[0];
     return fallback;
   };
 
