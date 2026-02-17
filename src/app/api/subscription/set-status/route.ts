@@ -76,11 +76,14 @@ export async function POST(request: NextRequest) {
 
     await db.collection('companies').doc(companyId).set(updates, { merge: true });
 
-    return NextResponse.json({
+    const response: { success: true; subscription_status: string; subscription_tier?: string } = {
       success: true,
       subscription_status: status,
-      ...(updates.subscription_tier && { subscription_tier: updates.subscription_tier }),
-    });
+    };
+    if (typeof updates.subscription_tier === 'string') {
+      response.subscription_tier = updates.subscription_tier;
+    }
+    return NextResponse.json(response);
   } catch (err) {
     console.error('Set subscription status error:', err);
     return NextResponse.json(
