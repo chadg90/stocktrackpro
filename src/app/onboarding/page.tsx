@@ -496,16 +496,14 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {step !== 'choice' && (
-            <div className="mt-6 pt-6 border-t border-white/10">
-              <p className="text-white/50 text-center text-xs">
-                Already have an account?{' '}
-                <Link href="/dashboard" className="text-blue-500 hover:underline">
-                  Sign in
-                </Link>
-              </p>
-            </div>
-          )}
+          <div className="mt-6 pt-6 border-t border-white/10">
+            <p className="text-white/50 text-center text-xs">
+              Already have an account?{' '}
+              <Link href="/dashboard" className="text-blue-500 hover:underline">
+                Sign in
+              </Link>
+            </p>
+          </div>
         </div>
         )}
       </div>
