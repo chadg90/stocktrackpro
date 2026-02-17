@@ -89,7 +89,7 @@ export default function Home() {
             Trusted by
           </p>
           <p className="text-center text-white/80 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Trades and contractors across the UK who want to stop losing tools and keep vehicles compliant.
+            Teams across the UK who want to stop losing tools and keep vehicles compliant.
           </p>
         </div>
       </section>
@@ -147,54 +147,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why Stock Track PRO */}
-      <section className="py-20 sm:py-28 bg-white/[0.02] border-t border-white/10">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-primary font-medium text-sm uppercase tracking-[0.2em] mb-4">
-            Why us
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-14 text-center">
-            Why Stock Track PRO
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
-            {[
-              { title: "Asset tracking", description: "Track tools, equipment, and machinery across locations, jobs, and users.", icon: ClipboardList },
-              { title: "QR scanning", description: "Instant check-in and check-out using built-in QR scanning for fast workflows.", icon: QrCode },
-              { title: "Fleet management", description: "Log every vehicle, inspection, mileage reading, and service date.", icon: Map },
-              { title: "Photo inspections", description: "Capture required inspection photos and attach defect reports on the spot.", icon: Smartphone },
-              { title: "Defect reporting", description: "Flag defects, mark repairs complete, and automatically update vehicle status.", icon: Wrench },
-              { title: "Team management", description: "Managers control their company; field staff keep work moving.", icon: Users },
-            ].map((item, index) => (
-              <div key={index} className="flex gap-4 p-5 rounded-xl border border-white/10 bg-black/40 hover:border-primary/20 transition-all duration-300">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary">
-                  <item.icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white mb-1">{item.title}</h3>
-                  <p className="text-white/60 text-sm leading-relaxed">{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Platform views */}
       <section className="py-20 sm:py-28 border-t border-white/10">
         <div className="container mx-auto px-4">
           <p className="text-center text-primary font-medium text-sm uppercase tracking-[0.2em] mb-4">
             Product
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-14 text-center">
-            Platform views
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 text-center max-w-2xl mx-auto">
+            The screens you’ll use
           </h2>
+          <p className="text-white/55 text-center max-w-xl mx-auto mb-14">
+            Dashboard, app, and key workflows in one place.
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
-              { title: "Manager dashboard", description: "At-a-glance metrics for total assets, vehicles, and team members." },
-              { title: "Vehicle inspection", description: "Guided checklist with required photos and defect logging." },
-              { title: "QR scan", description: "Fast scan to check items in or out and record who has them." },
-              { title: "Asset list", description: "Filtered views of tools and equipment across locations and projects." },
-              { title: "Vehicle status", description: "Status by vehicle including active, maintenance, and defects." },
+              { title: "Manager dashboard", description: "Totals for assets, vehicles, and team at a glance." },
+              { title: "Vehicle inspection", description: "Checklist, photos, and defect logging." },
+              { title: "QR scan", description: "Check items in or out and see who has them." },
+              { title: "Asset list", description: "Tools and equipment by location or project." },
+              { title: "Vehicle status", description: "Active, in maintenance, or defects." },
             ].map((item, index) => (
               <div key={index} className="p-6 rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-colors">
                 <h3 className="font-semibold text-white mb-2">{item.title}</h3>
@@ -211,9 +182,12 @@ export default function Home() {
           <p className="text-center text-primary font-medium text-sm uppercase tracking-[0.2em] mb-4">
             Outcomes
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-14 text-center">
-            Why companies choose Stock Track PRO
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 text-center max-w-2xl mx-auto">
+            Why companies choose us
           </h2>
+          <p className="text-white/55 text-center max-w-xl mx-auto mb-14">
+            Clear outcomes from day one.
+          </p>
           <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               "Stop losing tools and assets.",
