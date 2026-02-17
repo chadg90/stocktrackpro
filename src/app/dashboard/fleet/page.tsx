@@ -312,7 +312,7 @@ export default function FleetPage() {
               setFormData({});
               setIsAddModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
+            className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
           >
             <Plus className="h-5 w-5" />
             Add Vehicle
@@ -330,15 +330,15 @@ export default function FleetPage() {
           placeholder="Search by registration, make, or model..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-full md:w-96 bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+          className="pl-10 w-full md:w-96 bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-black border border-primary/20 rounded-xl overflow-hidden">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-white/5 border-b border-primary/20 text-white/70 text-sm uppercase">
+            <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">
               <tr>
                 <th className="px-6 py-4 font-medium">Vehicle Details</th>
                 <th className="px-6 py-4 font-medium">Registration</th>
@@ -365,7 +365,7 @@ export default function FleetPage() {
                                 setViewingImageAlt(`${vehicle.make} ${vehicle.model}`);
                               }
                             }}
-                            className={`w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${vehicle.image_url ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''}`}
+                            className={`w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${vehicle.image_url ? 'hover:ring-2 hover:ring-blue-500 cursor-pointer' : ''}`}
                           >
                             {vehicle.image_url ? (
                               <AuthenticatedImage
@@ -385,7 +385,7 @@ export default function FleetPage() {
                               href={vehicle.image_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-xs text-primary hover:underline"
+                              className="text-xs text-blue-500 hover:underline"
                             >
                               Open image
                             </a>
@@ -417,7 +417,7 @@ export default function FleetPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => openEditModal(vehicle)}
-                          className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          className="p-2 text-white/60 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
                           title="Edit Vehicle"
                           aria-label="Edit vehicle"
                         >
@@ -463,7 +463,7 @@ export default function FleetPage() {
                 required
                 value={formData.make || ''}
                 onChange={(e) => setFormData({...formData, make: e.target.value})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
                 placeholder="e.g. Ford"
               />
             </div>
@@ -474,7 +474,7 @@ export default function FleetPage() {
                 required
                 value={formData.model || ''}
                 onChange={(e) => setFormData({...formData, model: e.target.value})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
                 placeholder="e.g. Transit"
               />
             </div>
@@ -485,7 +485,7 @@ export default function FleetPage() {
               type="text"
               value={formData.image_url || ''}
               onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               placeholder="https://example.com/image.jpg"
             />
           </div>
@@ -496,7 +496,7 @@ export default function FleetPage() {
               required
               value={formData.registration || ''}
               onChange={(e) => setFormData({...formData, registration: e.target.value.toUpperCase()})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               placeholder="e.g. AB12 CDE"
             />
           </div>
@@ -506,7 +506,7 @@ export default function FleetPage() {
               type="text"
               value={formData.vin || ''}
               onChange={(e) => setFormData({...formData, vin: e.target.value.toUpperCase()})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -516,7 +516,7 @@ export default function FleetPage() {
                 type="number"
                 value={formData.mileage || ''}
                 onChange={(e) => setFormData({...formData, mileage: Number(e.target.value)})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               />
             </div>
             <div>
@@ -524,7 +524,7 @@ export default function FleetPage() {
               <select
                 value={formData.status || 'active'}
                 onChange={(e) => setFormData({...formData, status: e.target.value as any})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               >
                 <option value="active">Active</option>
                 <option value="maintenance">Maintenance</option>
@@ -537,7 +537,7 @@ export default function FleetPage() {
             <button
               type="submit"
               disabled={processing}
-              className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
             >
               {processing ? 'Adding Vehicle...' : 'Add Vehicle'}
             </button>
@@ -560,7 +560,7 @@ export default function FleetPage() {
                 required
                 value={formData.make || ''}
                 onChange={(e) => setFormData({...formData, make: e.target.value})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               />
             </div>
             <div>
@@ -570,7 +570,7 @@ export default function FleetPage() {
                 required
                 value={formData.model || ''}
                 onChange={(e) => setFormData({...formData, model: e.target.value})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               />
             </div>
           </div>
@@ -580,7 +580,7 @@ export default function FleetPage() {
               type="text"
               value={formData.image_url || ''}
               onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
             />
           </div>
           <div>
@@ -590,7 +590,7 @@ export default function FleetPage() {
               required
               value={formData.registration || ''}
               onChange={(e) => setFormData({...formData, registration: e.target.value.toUpperCase()})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
             />
           </div>
           <div>
@@ -599,7 +599,7 @@ export default function FleetPage() {
               type="text"
               value={formData.vin || ''}
               onChange={(e) => setFormData({...formData, vin: e.target.value.toUpperCase()})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -609,7 +609,7 @@ export default function FleetPage() {
                 type="number"
                 value={formData.mileage || ''}
                 onChange={(e) => setFormData({...formData, mileage: Number(e.target.value)})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               />
             </div>
             <div>
@@ -617,7 +617,7 @@ export default function FleetPage() {
               <select
                 value={formData.status || 'active'}
                 onChange={(e) => setFormData({...formData, status: e.target.value as any})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               >
                 <option value="active">Active</option>
                 <option value="maintenance">Maintenance</option>
@@ -630,7 +630,7 @@ export default function FleetPage() {
             <button
               type="submit"
               disabled={processing}
-              className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
             >
               {processing ? 'Saving Changes...' : 'Save Changes'}
             </button>

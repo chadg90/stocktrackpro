@@ -209,7 +209,7 @@ export default function CompaniesPage() {
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
+          className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
         >
           <Plus className="h-5 w-5" />
           Create Company
@@ -226,15 +226,15 @@ export default function CompaniesPage() {
           placeholder="Search companies..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-full md:w-96 bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+          className="pl-10 w-full md:w-96 bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
         />
       </div>
 
       {/* Companies Table */}
-      <div className="bg-black border border-primary/20 rounded-xl overflow-hidden">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-white/5 border-b border-primary/20 text-white/70 text-xs sm:text-sm uppercase">
+            <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-xs sm:text-sm uppercase">
               <tr>
                 <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Company Name</th>
                 <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium hidden md:table-cell">ID</th>
@@ -306,7 +306,7 @@ export default function CompaniesPage() {
                       <div className="flex items-center justify-end gap-1 sm:gap-2">
                         <button
                           onClick={() => openEditModal(company)}
-                          className="p-1.5 sm:p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          className="p-1.5 sm:p-2 text-white/60 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
                           title="Edit Company"
                           aria-label="Edit company"
                         >
@@ -344,7 +344,7 @@ export default function CompaniesPage() {
               required
               value={newCompanyName}
               onChange={(e) => setNewCompanyName(e.target.value)}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               placeholder="Company Name"
             />
           </div>
@@ -362,7 +362,7 @@ export default function CompaniesPage() {
             <button
               type="submit"
               disabled={processing}
-              className="px-4 py-2 rounded-lg bg-primary text-black font-semibold hover:bg-primary-light disabled:opacity-60"
+              className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-60"
             >
               {processing ? 'Creating...' : 'Create Company'}
             </button>
@@ -384,7 +384,7 @@ export default function CompaniesPage() {
               required
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               placeholder="Company Name"
             />
           </div>
@@ -399,7 +399,7 @@ export default function CompaniesPage() {
             <button
               type="submit"
               disabled={processing}
-              className="px-4 py-2 rounded-lg bg-primary text-black font-semibold hover:bg-primary-light disabled:opacity-60"
+              className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-60"
             >
               {processing ? 'Saving...' : 'Save Changes'}
             </button>

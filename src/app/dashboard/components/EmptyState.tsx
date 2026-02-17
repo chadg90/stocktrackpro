@@ -138,9 +138,9 @@ export default function EmptyState({
     <div className="flex flex-col items-center justify-center py-12 px-4">
       {/* Icon with gradient background */}
       <div className="relative mb-6">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full blur-xl" />
-        <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 flex items-center justify-center">
-          <Icon className="h-10 w-10 text-primary/60" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-xl" />
+        <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 flex items-center justify-center">
+          <Icon className="h-10 w-10 text-blue-500/60" />
         </div>
       </div>
 
@@ -158,7 +158,7 @@ export default function EmptyState({
       {showAction && displayActionLabel && onAction && (
         <button
           onClick={onAction}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
         >
           <Plus className="h-4 w-4" />
           {displayActionLabel}

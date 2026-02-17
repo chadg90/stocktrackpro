@@ -192,7 +192,7 @@ export default function LocationsPage() {
               setFormData({});
               setIsAddModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-black px-4 py-2 rounded-lg font-semibold transition-colors"
+            className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
           >
             <Plus className="h-5 w-5" />
             Add Location
@@ -210,15 +210,15 @@ export default function LocationsPage() {
           placeholder="Search locations..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-full md:w-96 bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+          className="pl-10 w-full md:w-96 bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-black border border-primary/20 rounded-xl overflow-hidden">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-white/5 border-b border-primary/20 text-white/70 text-sm uppercase">
+            <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">
               <tr>
                 <th className="px-6 py-4 font-medium">Location Name</th>
                 <th className="px-6 py-4 font-medium">Address</th>
@@ -249,7 +249,7 @@ export default function LocationsPage() {
                         {canManage && (
                           <button 
                             onClick={() => openEditModal(location)}
-                            className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                            className="p-2 text-white/60 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
                             title="Edit Location"
                             aria-label="Edit location"
                           >
@@ -295,7 +295,7 @@ export default function LocationsPage() {
               required
               value={formData.name || ''}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               placeholder="e.g. Warehouse A"
             />
           </div>
@@ -304,7 +304,7 @@ export default function LocationsPage() {
             <textarea
               value={formData.address || ''}
               onChange={(e) => setFormData({...formData, address: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               rows={3}
               placeholder="Full address"
             />
@@ -313,7 +313,7 @@ export default function LocationsPage() {
             <button
               type="submit"
               disabled={processing}
-              className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
             >
               {processing ? 'Adding Location...' : 'Add Location'}
             </button>
@@ -335,7 +335,7 @@ export default function LocationsPage() {
               required
               value={formData.name || ''}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
             />
           </div>
           <div>
@@ -343,7 +343,7 @@ export default function LocationsPage() {
             <textarea
               value={formData.address || ''}
               onChange={(e) => setFormData({...formData, address: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               rows={3}
             />
           </div>
@@ -351,7 +351,7 @@ export default function LocationsPage() {
             <button
               type="submit"
               disabled={processing}
-              className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
             >
               {processing ? 'Saving Changes...' : 'Save Changes'}
             </button>

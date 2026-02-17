@@ -382,7 +382,7 @@ export default function HistoryPage() {
           onClick={() => setActiveTab('assets')}
           className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${
             activeTab === 'assets'
-              ? 'border-primary text-primary'
+              ? 'border-blue-500 text-blue-500'
               : 'border-transparent text-white/60 hover:text-white'
           }`}
         >
@@ -395,7 +395,7 @@ export default function HistoryPage() {
           onClick={() => setActiveTab('fleet')}
           className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${
             activeTab === 'fleet'
-              ? 'border-primary text-primary'
+              ? 'border-blue-500 text-blue-500'
               : 'border-transparent text-white/60 hover:text-white'
           }`}
         >
@@ -419,7 +419,7 @@ export default function HistoryPage() {
               : "Search by vehicle, inspector, or defect..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+            className="pl-10 w-full bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
           />
         </div>
         <ExportButton
@@ -445,10 +445,10 @@ export default function HistoryPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-black border border-primary/20 rounded-xl overflow-hidden">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-white/5 border-b border-primary/20 text-white/70 text-sm uppercase">
+            <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">
               <tr>
                 <th className="px-6 py-4 font-medium">Timestamp</th>
                 <th className="px-6 py-4 font-medium">{activeTab === 'assets' ? 'Action' : 'Status'}</th>
@@ -589,7 +589,7 @@ export default function HistoryPage() {
                                     setViewingImage(url);
                                     setViewingImageAlt(`${vehicleName} - Inspection ${idx + 1}`);
                                   }}
-                                  className="w-10 h-10 rounded border border-primary/30 overflow-hidden hover:ring-2 hover:ring-primary transition-all flex-shrink-0"
+                                  className="w-10 h-10 rounded border border-blue-500/30 overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all flex-shrink-0"
                                 >
                                   <AuthenticatedImage
                                     src={url}
@@ -607,7 +607,7 @@ export default function HistoryPage() {
                                   setViewingImage(photoUrls[0]);
                                   setViewingImageAlt(`${vehicleName} - All Inspection Images`);
                                 }}
-                                className="text-xs text-primary hover:text-primary-light hover:underline cursor-pointer"
+                                className="text-xs text-blue-500 hover:text-blue-600 hover:underline cursor-pointer"
                               >
                                 +{photoUrls.length - 3} more
                               </button>

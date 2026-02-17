@@ -74,7 +74,7 @@ export default function NotificationItem({
     <div
       onClick={handleClick}
       className={`p-4 border-b border-white/10 hover:bg-white/5 transition-colors cursor-pointer ${
-        !notification.read ? 'bg-primary/5 border-l-2 border-l-primary' : ''
+        !notification.read ? 'bg-blue-500/5 border-l-2 border-l-blue-500' : ''
       }`}
     >
       <div className="flex items-start gap-3">

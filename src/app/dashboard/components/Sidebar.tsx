@@ -96,7 +96,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[100] p-2 bg-black/90 border border-primary/30 rounded-lg text-white hover:bg-primary/10 transition-colors shadow-lg"
+        className="lg:hidden fixed top-4 left-4 z-[100] p-2 bg-black/90 border border-blue-500/30 rounded-lg text-white hover:bg-blue-500/10 transition-colors shadow-lg"
         aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
         aria-expanded={mobileMenuOpen}
         aria-controls="sidebar-navigation"
@@ -175,11 +175,11 @@ export default function Sidebar() {
                         }}
                         className={`flex items-center gap-2 px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${
                           isActive
-                            ? 'bg-primary/15 text-primary border border-primary/30'
+                            ? 'bg-blue-500/15 text-blue-500 border border-blue-500/30'
                             : 'text-white/70 hover:text-white hover:bg-white/5 border border-transparent'
                         }`}
                       >
-                        <item.icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-primary' : 'text-white/50'}`} />
+                        <item.icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-blue-500' : 'text-white/50'}`} />
                         <span className="truncate">{item.name}</span>
                       </Link>
                     );
@@ -194,7 +194,7 @@ export default function Sidebar() {
       <div className="p-2 border-t border-white/10 shrink-0 bg-black">
         <button
           onClick={handleSignOut}
-          className="flex w-full items-center gap-2 px-2 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-black"
+          className="flex w-full items-center gap-2 px-2 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-black"
         >
           <LogOut className="h-4 w-4 shrink-0 text-white/50" />
           Sign Out

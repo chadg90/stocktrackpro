@@ -422,7 +422,7 @@ export default function SubscriptionPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -439,7 +439,7 @@ export default function SubscriptionPage() {
           <button
             type="button"
             onClick={() => loadSubscriptionData(authUser)}
-            className="text-primary hover:underline font-medium whitespace-nowrap"
+            className="text-blue-500 hover:underline font-medium whitespace-nowrap"
           >
             Try again
           </button>
@@ -456,7 +456,7 @@ export default function SubscriptionPage() {
         <div className="flex items-start justify-between mb-8">
           <div className="flex-1">
             <h2 className="text-2xl font-semibold text-white mb-2 flex items-center gap-3">
-              <CreditCard className="w-6 h-6 text-primary" />
+              <CreditCard className="w-6 h-6 text-blue-500" />
               Current Subscription
             </h2>
             <p className="text-white/60">Your current plan and billing information</p>
@@ -494,8 +494,8 @@ export default function SubscriptionPage() {
         </div>
 
         {(subscriptionStatus === 'active' || subscriptionStatus === 'trial') && !company?.stripe_customer_id && (
-          <div className="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
-            <p className="text-primary text-sm">
+          <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <p className="text-blue-500 text-sm">
               You subscribed via the app or another channel. Your subscription is active. Manage your billing using the chosen method when subscribing.
             </p>
           </div>
@@ -507,7 +507,7 @@ export default function SubscriptionPage() {
               <button
                 onClick={handleManageBilling}
                 disabled={portalLoading || !company?.stripe_customer_id}
-                className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
+                className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
                 title={!company?.stripe_customer_id ? (subscriptionStatus === 'active' || subscriptionStatus === 'trial' ? 'Billing is managed via the app' : 'Subscribe first to manage billing') : 'Open Stripe billing portal'}
                 aria-label={portalLoading ? 'Opening billing portal' : (!company?.stripe_customer_id ? 'Billing managed via app' : 'Open Stripe billing portal')}
               >
@@ -550,7 +550,7 @@ export default function SubscriptionPage() {
       {canManage && (
         <div className="dashboard-card p-8">
           <h2 className="text-2xl font-semibold text-white mb-2 flex items-center gap-3">
-            <Tag className="w-6 h-6 text-primary" />
+            <Tag className="w-6 h-6 text-blue-500" />
             Promo Code Checkout
           </h2>
           <p className="text-white/60 mb-6">Enter a promo code to validate and proceed to checkout</p>
@@ -574,7 +574,7 @@ export default function SubscriptionPage() {
                 }}
                 placeholder="Enter promo code"
                 disabled={promoCodeValidating || validatedPromoCode !== null}
-                className={`w-full rounded-lg bg-white/5 border px-4 py-3 pr-10 text-white placeholder:text-white/40 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase font-medium ${
+                className={`w-full rounded-lg bg-white/5 border px-4 py-3 pr-10 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all uppercase font-medium ${
                   validatedPromoCode 
                     ? 'border-green-500/50 bg-green-500/10' 
                     : promoCodeError 
@@ -592,7 +592,7 @@ export default function SubscriptionPage() {
               <button
                 onClick={validatePromoCode}
                 disabled={!promoCode.trim() || promoCodeValidating}
-                className="px-6 py-3 bg-primary hover:bg-primary-light text-black rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 flex items-center gap-2"
+                className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 flex items-center gap-2"
               >
                 {promoCodeValidating ? (
                   <>
@@ -631,7 +631,7 @@ export default function SubscriptionPage() {
                     onClick={() => setSelectedTierForPromo(tier.id)}
                     className={`p-4 rounded-lg border-2 text-left transition-colors ${
                       selectedTierForPromo === tier.id
-                        ? 'border-primary bg-primary/10'
+                        ? 'border-blue-500 bg-blue-500/10'
                         : 'border-white/10 bg-white/5 hover:border-white/20'
                     }`}
                   >
@@ -643,7 +643,7 @@ export default function SubscriptionPage() {
               <button
                 onClick={handlePromoCodeCheckout}
                 disabled={!selectedTierForPromo}
-                className="mt-4 w-full px-6 py-3 bg-primary hover:bg-primary-light text-black rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                className="mt-4 w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4" />
                 Proceed to Checkout
@@ -707,14 +707,14 @@ export default function SubscriptionPage() {
               <div
                 key={tier.id}
                 className={`dashboard-card p-6 flex flex-col transition-all hover:scale-[1.02] ${
-                  isCurrentTier ? 'ring-2 ring-primary shadow-lg shadow-primary/20' : 'hover:border-primary/30'
+                  isCurrentTier ? 'ring-2 ring-blue-500 shadow-lg shadow-blue-500/20' : 'hover:border-blue-500/30'
                 }`}
               >
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-xl font-bold text-white">{tier.name}</h3>
                     {isCurrentTier && (
-                      <span className="text-xs px-3 py-1 bg-primary/20 text-primary rounded-full font-semibold">Current</span>
+                      <span className="text-xs px-3 py-1 bg-blue-500/20 text-blue-500 rounded-full font-semibold">Current</span>
                     )}
                   </div>
                   <p className="text-white/60 text-sm mb-4">{tier.description}</p>
@@ -727,7 +727,7 @@ export default function SubscriptionPage() {
                 <ul className="space-y-3 mb-6 flex-1">
                   {tier.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3 text-sm text-white/90">
-                      <Check className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                      <Check className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -741,11 +741,11 @@ export default function SubscriptionPage() {
                       isCurrentTier
                         ? 'bg-white/10 text-white/60 cursor-not-allowed'
                         : isUpgrade
-                        ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/20'
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                         : isDowngrade
                         ? 'bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30'
                         : subscriptionStatus !== 'active' && subscriptionStatus !== 'trial'
-                        ? 'bg-primary hover:bg-primary-light text-black shadow-lg shadow-primary/20'
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                         : 'bg-white/10 hover:bg-white/20 text-white'
                     } disabled:opacity-50`}
                   >
@@ -777,7 +777,7 @@ export default function SubscriptionPage() {
       </div>
 
       {/* Help Section */}
-      <div className="dashboard-card p-8 bg-gradient-to-br from-white/5 to-transparent border-primary/20">
+      <div className="dashboard-card p-8 bg-gradient-to-br from-white/5 to-transparent border-blue-500/20">
         <h2 className="text-2xl font-semibold text-white mb-3">Need Help?</h2>
         <p className="text-white/60 mb-6">
           If you have questions about your subscription or need assistance, we're here to help.

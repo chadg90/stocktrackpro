@@ -716,7 +716,7 @@ export default function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => { setError(null); if (profile?.company_id) fetchData(profile.company_id); }}
-                  className="text-primary hover:underline font-medium whitespace-nowrap"
+                  className="text-blue-500 hover:underline font-medium whitespace-nowrap"
                 >
                   Try again
                 </button>
@@ -738,7 +738,7 @@ export default function DashboardPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                     required
                   />
                 </div>
@@ -748,13 +748,13 @@ export default function DashboardPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                     required
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-black font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
                   disabled={loading}
                 >
                   {loading ? 'Signing in…' : 'Sign in'}
@@ -762,7 +762,7 @@ export default function DashboardPage() {
               </form>
               <p className="text-white/60 text-center text-sm mt-4">Managers only.</p>
               <p className="text-white/50 text-center text-xs mt-2">
-                New user? <a href="/onboarding" className="text-primary hover:underline">Create an account</a> or download the app to get started.
+                New user? <a href="/onboarding" className="text-blue-500 hover:underline">Create an account</a> or download the app to get started.
               </p>
             </div>
             </div>
@@ -798,9 +798,9 @@ export default function DashboardPage() {
                         <button
                           key={range}
                           onClick={() => setDateRange(range as '7' | '30' | '90' | 'all')}
-                          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+                          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
                             dateRange === range
-                              ? 'bg-primary text-black'
+                              ? 'bg-blue-500 text-white'
                               : 'text-white/70 hover:text-white'
                           }`}
                           aria-label={range === 'all' ? 'All time' : `Last ${range} days`}
@@ -973,7 +973,7 @@ export default function DashboardPage() {
                               <span className="text-white text-sm font-medium">{v.name}</span>
                             </div>
                             <div className="flex items-center gap-3">
-                              <span className="text-primary text-sm">{v.count} insp</span>
+                              <span className="text-blue-500 text-sm">{v.count} insp</span>
                               {v.defects > 0 && (
                                 <span className="text-red-400 text-xs">{v.defects} defects</span>
                               )}
@@ -1102,14 +1102,14 @@ export default function DashboardPage() {
                         {userActivity.map((u, i) => (
                           <div key={u.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-black font-bold text-sm">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center text-black font-bold text-sm">
                                 {i + 1}
                               </div>
                               <span className="text-white text-sm font-medium">{u.name}</span>
                             </div>
                             <div className="flex items-center gap-4 text-xs">
                               <div className="text-center">
-                                <p className="text-primary font-semibold">{u.inspections}</p>
+                                <p className="text-blue-500 font-semibold">{u.inspections}</p>
                                 <p className="text-white/50">inspections</p>
                               </div>
                               <div className="text-center">
@@ -1232,19 +1232,19 @@ export default function DashboardPage() {
                       <tr>
                         <td className="px-4 py-3 text-white">Fleet Vehicles</td>
                         <td className="px-4 py-3 text-white">{vehiclesCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-primary">{activeVehiclesCount ?? '—'}</td>
+                        <td className="px-4 py-3 text-blue-500">{activeVehiclesCount ?? '—'}</td>
                         <td className="px-4 py-3 text-green-400">{fleetUtilization}%</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-3 text-white">Assets</td>
                         <td className="px-4 py-3 text-white">{assetsCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-primary">{activeAssetsCount ?? '—'}</td>
+                        <td className="px-4 py-3 text-blue-500">{activeAssetsCount ?? '—'}</td>
                         <td className="px-4 py-3 text-green-400">{assetUtilization}%</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-3 text-white">Inspections ({dateRange === 'all' ? 'All Time' : `Last ${dateRange} Days`})</td>
                         <td className="px-4 py-3 text-white">{inspections.length}</td>
-                        <td className="px-4 py-3 text-primary">—</td>
+                        <td className="px-4 py-3 text-blue-500">—</td>
                         <td className="px-4 py-3 text-cyan-400">{avgInspectionsPerDay}/day</td>
                       </tr>
                       <tr>
@@ -1256,7 +1256,7 @@ export default function DashboardPage() {
                       <tr>
                         <td className="px-4 py-3 text-white">Team Members</td>
                         <td className="px-4 py-3 text-white">{teamCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-primary">{userActivity.length} active</td>
+                        <td className="px-4 py-3 text-blue-500">{userActivity.length} active</td>
                         <td className="px-4 py-3 text-cyan-400">—</td>
                       </tr>
                     </tbody>

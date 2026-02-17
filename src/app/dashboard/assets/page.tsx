@@ -219,15 +219,15 @@ export default function AssetsPage() {
           placeholder="Search by name, brand, or QR code..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 w-full md:w-96 bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+          className="pl-10 w-full md:w-96 bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-black border border-primary/20 rounded-xl overflow-hidden">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-white/5 border-b border-primary/20 text-white/70 text-sm uppercase">
+            <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">
               <tr>
                 <th className="px-6 py-4 font-medium">Asset Details</th>
                 <th className="px-6 py-4 font-medium">Status</th>
@@ -254,7 +254,7 @@ export default function AssetsPage() {
                                 setViewingImageAlt(tool.name || 'Asset Image');
                               }
                             }}
-                            className={`w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${tool.image_url ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''}`}
+                            className={`w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${tool.image_url ? 'hover:ring-2 hover:ring-blue-500 cursor-pointer' : ''}`}
                           >
                             {tool.image_url ? (
                               <AuthenticatedImage
@@ -274,7 +274,7 @@ export default function AssetsPage() {
                               href={tool.image_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-xs text-primary hover:underline"
+                              className="text-xs text-blue-500 hover:underline"
                             >
                               Open image
                             </a>
@@ -311,7 +311,7 @@ export default function AssetsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => openEditModal(tool)}
-                          className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                          className="p-2 text-white/60 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
                           title="Edit Asset"
                           aria-label="Edit asset"
                         >
@@ -356,7 +356,7 @@ export default function AssetsPage() {
               required
               value={formData.name || ''}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -366,7 +366,7 @@ export default function AssetsPage() {
                 type="text"
                 value={formData.brand || ''}
                 onChange={(e) => setFormData({...formData, brand: e.target.value})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               />
             </div>
             <div>
@@ -375,7 +375,7 @@ export default function AssetsPage() {
                 type="text"
                 value={formData.model || ''}
                 onChange={(e) => setFormData({...formData, model: e.target.value})}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               />
             </div>
           </div>
@@ -384,7 +384,7 @@ export default function AssetsPage() {
             <select
               value={formData.status || 'active'}
               onChange={(e) => setFormData({...formData, status: e.target.value as any})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
             >
               <option value="active">Active</option>
               <option value="maintenance">Maintenance</option>
@@ -399,7 +399,7 @@ export default function AssetsPage() {
               type="text"
               value={formData.location || ''}
               onChange={(e) => setFormData({...formData, location: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
             />
           </div>
           <div>
@@ -408,14 +408,14 @@ export default function AssetsPage() {
               type="text"
               value={formData.qr_code || ''}
               onChange={(e) => setFormData({...formData, qr_code: e.target.value})}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
             />
           </div>
           <div className="pt-4">
             <button
               type="submit"
               disabled={processing}
-              className="w-full bg-primary hover:bg-primary-light text-black font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
             >
               {processing ? 'Saving Changes...' : 'Save Changes'}
             </button>

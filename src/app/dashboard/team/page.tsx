@@ -301,7 +301,7 @@ export default function TeamPage() {
       {error && (
         <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex flex-wrap items-center justify-between gap-2" role="alert">
           <span>{error}</span>
-          <button type="button" onClick={handleRetry} className="text-primary hover:underline font-medium whitespace-nowrap">
+          <button type="button" onClick={handleRetry} className="text-blue-500 hover:underline font-medium whitespace-nowrap">
             Try again
           </button>
         </div>
@@ -336,7 +336,7 @@ export default function TeamPage() {
             placeholder="Search team members..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+            className="pl-10 w-full bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
           />
         </div>
         {isAdmin && (
@@ -344,7 +344,7 @@ export default function TeamPage() {
             <select
               value={selectedCompanyFilter}
               onChange={(e) => setSelectedCompanyFilter(e.target.value)}
-              className="w-full bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
             >
               <option value="all">All Companies</option>
               {companies.map((c) => (
@@ -358,10 +358,10 @@ export default function TeamPage() {
       </div>
 
       {/* Team Table */}
-      <div className="bg-black border border-primary/20 rounded-xl overflow-hidden mb-8">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden mb-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-white/5 border-b border-primary/20 text-white/70 text-sm uppercase">
+            <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">
               <tr>
                 <th className="px-6 py-4 font-medium">Member</th>
                 <th className="px-6 py-4 font-medium">Role</th>
@@ -389,14 +389,14 @@ export default function TeamPage() {
                             {displayNameFor(member)}
                           </p>
                           {member.id === currentUserProfile?.id && (
-                            <span className="text-xs text-primary">(You)</span>
+                            <span className="text-xs text-blue-500">(You)</span>
                           )}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                        ${member.role === 'admin' ? 'bg-primary/20 text-primary border border-primary/30' : 
+                        ${member.role === 'admin' ? 'bg-blue-500/20 text-blue-500 border border-blue-500/30' : 
                           member.role === 'manager' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
                           'bg-white/10 text-white/60 border border-white/20'}`}
                       >
@@ -421,7 +421,7 @@ export default function TeamPage() {
                         {canEditUsers && (
                           <button
                             onClick={() => openEditUser(member)}
-                            className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                            className="p-2 text-white/60 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
                             title={isManager ? "Edit User Info" : "Edit User"}
                             aria-label={isManager ? "Edit user info" : "Edit user"}
                           >
@@ -466,7 +466,7 @@ export default function TeamPage() {
               type="text"
               value={editDisplayName}
               onChange={(e) => setEditDisplayName(e.target.value)}
-              className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               placeholder="Name"
             />
           </div>
@@ -476,7 +476,7 @@ export default function TeamPage() {
               <select
                 value={editRole}
                 onChange={(e) => setEditRole(e.target.value as Profile['role'])}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               >
                 <option value="user">User</option>
                 <option value="manager">Manager</option>
@@ -490,7 +490,7 @@ export default function TeamPage() {
               <select
                 value={editCompanyId}
                 onChange={(e) => setEditCompanyId(e.target.value)}
-                className="w-full bg-black border border-primary/30 rounded-lg px-3 py-2 text-white focus:border-primary outline-none"
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
                 required
               >
                 <option value="" disabled>Select company</option>
@@ -514,7 +514,7 @@ export default function TeamPage() {
             <button
               type="submit"
               disabled={processing}
-              className="px-4 py-2 rounded-lg bg-primary text-black font-semibold hover:bg-primary-light disabled:opacity-60"
+              className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-60"
             >
               {processing ? 'Saving...' : 'Save Changes'}
             </button>

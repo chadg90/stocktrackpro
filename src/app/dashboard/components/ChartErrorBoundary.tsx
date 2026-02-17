@@ -54,7 +54,7 @@ export default class ChartErrorBoundary extends Component<Props, State> {
           </p>
           <button
             onClick={this.handleRetry}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs text-primary border border-primary/30 rounded-lg hover:bg-primary/10 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs text-blue-500 border border-blue-500/30 rounded-lg hover:bg-blue-500/10 transition-colors"
           >
             <RefreshCw className="h-3 w-3" />
             Retry

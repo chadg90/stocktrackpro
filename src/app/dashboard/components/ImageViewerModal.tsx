@@ -97,7 +97,7 @@ export default function ImageViewerModal({
         <AuthenticatedImage
           src={imageUrl}
           alt={altText}
-          className="max-w-full max-h-full object-contain rounded-lg shadow-2xl border border-primary/20"
+          className="max-w-full max-h-full object-contain rounded-lg shadow-2xl border border-blue-500/20"
         />
       </div>
     </div>

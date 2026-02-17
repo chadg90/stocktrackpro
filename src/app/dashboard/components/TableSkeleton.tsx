@@ -21,7 +21,7 @@ export default function TableSkeleton({ rows = 5, cols, singleCell = false }: Ta
       <tr>
         <td colSpan={cols} className="px-6 py-8">
           <div className="flex items-center justify-center gap-2 text-white/50">
-            <div className="h-4 w-4 rounded-full border-2 border-white/20 border-t-primary/50 animate-spin" />
+            <div className="h-4 w-4 rounded-full border-2 border-white/20 border-t-blue-500/50 animate-spin" />
             <span className="text-sm">Loading…</span>
           </div>
         </td>

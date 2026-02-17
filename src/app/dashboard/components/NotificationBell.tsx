@@ -156,13 +156,13 @@ export default function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-black border border-primary/30 rounded-xl shadow-xl z-[100] max-h-[500px] flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-primary/20">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-black border border-blue-500/30 rounded-xl shadow-xl z-[100] max-h-[500px] flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-blue-500/20">
             <h3 className="text-white font-semibold">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-xs text-primary hover:underline"
+                className="text-xs text-blue-500 hover:underline"
               >
                 Mark all as read
               </button>
@@ -171,7 +171,7 @@ export default function NotificationBell() {
           <div className="overflow-y-auto max-h-[400px]">
             {loading ? (
               <div className="p-8 flex items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
               </div>
             ) : notifications.length === 0 ? (
               <div className="p-8 text-center text-white/50 text-sm">

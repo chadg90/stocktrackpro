@@ -582,7 +582,7 @@ export default function AnalyticsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -596,7 +596,7 @@ export default function AnalyticsPage() {
             <button
               type="button"
               onClick={() => { setError(null); fetchAnalytics(profile.company_id!); }}
-              className="text-primary hover:underline font-medium whitespace-nowrap"
+              className="text-blue-500 hover:underline font-medium whitespace-nowrap"
             >
               Try again
             </button>
@@ -612,14 +612,14 @@ export default function AnalyticsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 bg-black border border-primary/30 rounded-lg p-1">
+          <div className="flex items-center gap-2 bg-black border border-blue-500/30 rounded-lg p-1">
             {['7', '30', '90', 'all'].map((range) => (
               <button
                 key={range}
                 onClick={() => setDateRange(range as '7' | '30' | '90' | 'all')}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   dateRange === range
-                    ? 'bg-primary text-black'
+                    ? 'bg-blue-500 text-white'
                     : 'text-white/70 hover:text-white'
                 }`}
               >
@@ -649,8 +649,8 @@ export default function AnalyticsPage() {
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               activeTab === tab.id
-                ? 'bg-primary text-black'
-                : 'bg-black border border-primary/30 text-white/70 hover:text-white hover:border-primary/50'
+                ? 'bg-blue-500 text-white'
+                : 'bg-black border border-blue-500/30 text-white/70 hover:text-white hover:border-blue-500/50'
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -664,7 +664,7 @@ export default function AnalyticsPage() {
         <div className="space-y-6">
           {/* Health Scores */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div className="bg-black border border-primary/25 rounded-xl p-6">
+            <div className="bg-black border border-blue-500/25 rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold">Fleet Health</h3>
                 <div className={`text-2xl font-bold ${fleetHealthScore >= 80 ? 'text-green-400' : fleetHealthScore >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
@@ -679,19 +679,19 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="bg-black border border-primary/25 rounded-xl p-6">
+            <div className="bg-black border border-blue-500/25 rounded-xl p-6">
               <h3 className="text-white font-semibold mb-2">Total Inspections</h3>
-              <p className="text-3xl font-bold text-primary">{inspections.length}</p>
+              <p className="text-3xl font-bold text-blue-500">{inspections.length}</p>
               <p className="text-white/50 text-sm">{dateRange === 'all' ? 'all time' : `last ${dateRange} days`}</p>
             </div>
 
-            <div className="bg-black border border-primary/25 rounded-xl p-6">
+            <div className="bg-black border border-blue-500/25 rounded-xl p-6">
               <h3 className="text-white font-semibold mb-2">Active Defects</h3>
               <p className="text-3xl font-bold text-red-400">{defects.filter(d => d.status !== 'resolved').length}</p>
               <p className="text-white/50 text-sm">{dateRange === 'all' ? 'all time' : `last ${dateRange} days`}</p>
             </div>
 
-            <div className="bg-black border border-primary/25 rounded-xl p-6">
+            <div className="bg-black border border-blue-500/25 rounded-xl p-6">
               <h3 className="text-white font-semibold mb-2">Avg Resolution Time</h3>
               <p className="text-3xl font-bold text-cyan-400">{avgResolutionTime || '—'}</p>
               <p className="text-white/50 text-sm">days to resolve</p>
@@ -699,7 +699,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Daily Activity Chart */}
-          <div className="bg-black border border-primary/25 rounded-xl p-6">
+          <div className="bg-black border border-blue-500/25 rounded-xl p-6">
             <h3 className="text-white font-semibold mb-4">Daily Activity Overview</h3>
             {dailyActivity.length > 0 ? (
               <ResponsiveContainer width="100%" height={350}>
@@ -739,7 +739,7 @@ export default function AnalyticsPage() {
       {activeTab === 'fleet' && (
         <div className="space-y-6">
           {/* Vehicle Performance Rankings */}
-          <div className="bg-black border border-primary/25 rounded-xl p-6">
+          <div className="bg-black border border-blue-500/25 rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-white font-semibold">Vehicle Performance Rankings</h3>
               {vehiclePerformance.length > 0 && (
@@ -779,7 +779,7 @@ export default function AnalyticsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-white font-medium">{v.name}</td>
-                      <td className="px-4 py-3 text-right text-primary">{v.inspections}</td>
+                      <td className="px-4 py-3 text-right text-blue-500">{v.inspections}</td>
                       <td className="px-4 py-3 text-right text-red-400">{v.defects}</td>
                       <td className="px-4 py-3 text-right text-green-400">{v.resolved}</td>
                       <td className="px-4 py-3 text-right">
@@ -801,7 +801,7 @@ export default function AnalyticsPage() {
 
           {/* Defect Analysis */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-black border border-primary/25 rounded-xl p-6">
+            <div className="bg-black border border-blue-500/25 rounded-xl p-6">
               <h3 className="text-white font-semibold mb-4">Defects by Severity</h3>
               {defects.length > 0 ? (
                 <ResponsiveContainer width="100%" height={250}>
@@ -841,7 +841,7 @@ export default function AnalyticsPage() {
               )}
             </div>
 
-            <div className="bg-black border border-primary/25 rounded-xl p-6">
+            <div className="bg-black border border-blue-500/25 rounded-xl p-6">
               <h3 className="text-white font-semibold mb-4">Defect Status</h3>
               {defects.length > 0 ? (
                 <ResponsiveContainer width="100%" height={250}>
@@ -869,7 +869,7 @@ export default function AnalyticsPage() {
       {activeTab === 'assets' && (
         <div className="space-y-6">
           {/* Asset Utilization by Type */}
-          <div className="bg-black border border-primary/25 rounded-xl p-6">
+          <div className="bg-black border border-blue-500/25 rounded-xl p-6">
             <h3 className="text-white font-semibold mb-4">Asset Utilization by Type</h3>
             {assetUtilizationByType.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
@@ -890,7 +890,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Asset Details Table */}
-          <div className="bg-black border border-primary/25 rounded-xl p-6">
+          <div className="bg-black border border-blue-500/25 rounded-xl p-6">
             <h3 className="text-white font-semibold mb-4">Asset Type Breakdown</h3>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -907,7 +907,7 @@ export default function AnalyticsPage() {
                     <tr key={a.name} className="hover:bg-white/5">
                       <td className="px-4 py-3 text-white font-medium">{a.name}</td>
                       <td className="px-4 py-3 text-right text-white">{a.total}</td>
-                      <td className="px-4 py-3 text-right text-primary">{a.active}</td>
+                      <td className="px-4 py-3 text-right text-blue-500">{a.active}</td>
                       <td className="px-4 py-3 text-right">
                         <span className={`font-semibold ${
                           a.rate >= 70 ? 'text-green-400' :
@@ -930,7 +930,7 @@ export default function AnalyticsPage() {
       {activeTab === 'users' && (
         <div className="space-y-6">
           {/* User Performance Table */}
-          <div className="bg-black border border-primary/25 rounded-xl p-6">
+          <div className="bg-black border border-blue-500/25 rounded-xl p-6">
             <h3 className="text-white font-semibold mb-4">User Activity Rankings</h3>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -958,7 +958,7 @@ export default function AnalyticsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-white font-medium">{u.name}</td>
-                      <td className="px-4 py-3 text-right text-primary">{u.inspections}</td>
+                      <td className="px-4 py-3 text-right text-blue-500">{u.inspections}</td>
                       <td className="px-4 py-3 text-right text-purple-400">{u.actions}</td>
                       <td className="px-4 py-3 text-right text-yellow-400">{u.defectsFound}</td>
                       <td className="px-4 py-3 text-right text-white font-semibold">{u.inspections + u.actions}</td>
@@ -970,7 +970,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* User Activity Chart */}
-          <div className="bg-black border border-primary/25 rounded-xl p-6">
+          <div className="bg-black border border-blue-500/25 rounded-xl p-6">
             <h3 className="text-white font-semibold mb-4">User Activity Comparison</h3>
             {userPerformance.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>

@@ -399,7 +399,7 @@ export default function DefectsPage() {
           <button
             type="button"
             onClick={() => { setError(null); fetchData(profile.company_id!); }}
-            className="text-primary hover:underline font-medium whitespace-nowrap"
+            className="text-blue-500 hover:underline font-medium whitespace-nowrap"
           >
             Try again
           </button>
@@ -456,15 +456,15 @@ export default function DefectsPage() {
             placeholder="Search by vehicle registration or description..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full bg-black border border-primary/30 rounded-lg px-4 py-2 text-white focus:border-primary outline-none"
+            className="pl-10 w-full bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
           />
         </div>
-        <div className="flex items-center gap-2 bg-black border border-primary/30 rounded-lg p-1">
+        <div className="flex items-center gap-2 bg-black border border-blue-500/30 rounded-lg p-1">
           <button
             onClick={() => setStatusFilter('pending')}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
               statusFilter === 'pending' 
-                ? 'bg-primary text-black' 
+                ? 'bg-blue-500 text-white' 
                 : 'text-white/70 hover:text-white'
             }`}
           >
@@ -474,7 +474,7 @@ export default function DefectsPage() {
             onClick={() => setStatusFilter('resolved')}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
               statusFilter === 'resolved' 
-                ? 'bg-primary text-black' 
+                ? 'bg-blue-500 text-white' 
                 : 'text-white/70 hover:text-white'
             }`}
           >
@@ -484,7 +484,7 @@ export default function DefectsPage() {
             onClick={() => setStatusFilter('all')}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
               statusFilter === 'all' 
-                ? 'bg-primary text-black' 
+                ? 'bg-blue-500 text-white' 
                 : 'text-white/70 hover:text-white'
             }`}
           >
@@ -494,10 +494,10 @@ export default function DefectsPage() {
       </div>
 
       {/* List */}
-      <div className="bg-black border border-primary/20 rounded-xl overflow-hidden">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-white/5 border-b border-primary/20 text-white/70 text-sm uppercase">
+            <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">
               <tr>
                 <th className="px-6 py-4 font-medium">Severity</th>
                 <th className="px-6 py-4 font-medium">Vehicle</th>
@@ -567,7 +567,7 @@ export default function DefectsPage() {
                                       key={url}
                                       type="button"
                                       onClick={() => openViewer(i)}
-                                      className="w-9 h-9 rounded border border-white/20 overflow-hidden flex-shrink-0 hover:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
+                                      className="w-9 h-9 rounded border border-white/20 overflow-hidden flex-shrink-0 hover:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                     >
                                       <AuthenticatedImage src={url} alt="" className="w-full h-full object-cover" />
                                     </button>
@@ -576,7 +576,7 @@ export default function DefectsPage() {
                                     <button
                                       type="button"
                                       onClick={() => openViewer(showCount)}
-                                      className="text-primary text-xs hover:underline font-medium"
+                                      className="text-blue-500 text-xs hover:underline font-medium"
                                     >
                                       +{rest} more
                                     </button>
@@ -587,7 +587,7 @@ export default function DefectsPage() {
                                     href={urls[0]}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="text-xs text-white/60 hover:text-primary"
+                                    className="text-xs text-white/60 hover:text-blue-500"
                                   >
                                     Open
                                   </a>
