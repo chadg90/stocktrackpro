@@ -404,7 +404,7 @@ export default function FleetPage() {
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
                         ${vehicle.status === 'active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
                           vehicle.status === 'service_due' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
-                          vehicle.status === 'maintenance' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
+                          vehicle.status === 'maintenance' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
                           'bg-white/10 text-white/60 border border-white/20'}`}
                       >
                         {vehicle.status?.replace('_', ' ')}

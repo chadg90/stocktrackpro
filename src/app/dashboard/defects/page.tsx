@@ -520,7 +520,7 @@ export default function DefectsPage() {
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium uppercase
                           ${defect.severity === 'critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
-                            defect.severity === 'high' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
+                            defect.severity === 'high' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
                             defect.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
                             'bg-blue-500/20 text-blue-400 border border-blue-500/30'}`}
                         >

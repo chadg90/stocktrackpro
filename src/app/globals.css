@@ -5,8 +5,8 @@
 :root {
   --foreground: 255, 255, 255;
   --background: 0, 0, 0;
-  --primary: #fea917;
-  --primary-light: #feba46;
+  --primary: #3b82f6;
+  --primary-light: #2563eb;
   --brand-blue: #3b82f6;
   --brand-blue-hover: #2563eb;
   --text-dark: #000000;

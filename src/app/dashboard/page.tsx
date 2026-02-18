@@ -1189,14 +1189,14 @@ export default function DashboardPage() {
                           key={d.name} 
                           className={`p-4 rounded-xl border ${
                             d.name === 'Critical' ? 'border-red-500/30 bg-red-500/10' :
-                            d.name === 'High' ? 'border-orange-500/30 bg-orange-500/10' :
+                            d.name === 'High' ? 'border-blue-500/30 bg-blue-500/10' :
                             d.name === 'Medium' ? 'border-yellow-500/30 bg-yellow-500/10' :
                             'border-blue-500/30 bg-blue-500/10'
                           }`}
                         >
                           <p className={`text-3xl font-bold ${
                             d.name === 'Critical' ? 'text-red-400' :
-                            d.name === 'High' ? 'text-orange-400' :
+                            d.name === 'High' ? 'text-blue-400' :
                             d.name === 'Medium' ? 'text-yellow-400' :
                             'text-blue-400'
                           }`}>

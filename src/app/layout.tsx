@@ -11,7 +11,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#fea917",
+  themeColor: "#3b82f6",
 };
 
 export const metadata: Metadata = {
@@ -108,9 +108,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#fea917" />
+        <meta name="msapplication-TileColor" content="#3b82f6" />
         <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="theme-color" content="#fea917" />
+        <meta name="theme-color" content="#3b82f6" />
         <meta name="application-name" content="Stock Track PRO" />
         <meta name="apple-mobile-web-app-title" content="Stock Track PRO" />
         <meta name="msapplication-tooltip" content="Professional Asset & Equipment Management System" />

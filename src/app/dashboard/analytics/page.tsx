@@ -772,7 +772,7 @@ export default function AnalyticsPage() {
                         <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                           i === 0 ? 'bg-yellow-500 text-black' :
                           i === 1 ? 'bg-gray-300 text-black' :
-                          i === 2 ? 'bg-orange-400 text-black' :
+                          i === 2 ? 'bg-blue-400 text-white' :
                           'bg-white/10 text-white'
                         }`}>
                           {i + 1}
@@ -951,7 +951,7 @@ export default function AnalyticsPage() {
                         <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                           i === 0 ? 'bg-yellow-500 text-black' :
                           i === 1 ? 'bg-gray-300 text-black' :
-                          i === 2 ? 'bg-orange-400 text-black' :
+                          i === 2 ? 'bg-blue-400 text-white' :
                           'bg-white/10 text-white'
                         }`}>
                           {i + 1}
