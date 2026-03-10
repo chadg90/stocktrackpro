@@ -17,6 +17,7 @@ type Company = {
   subscription_tier?: string;
   stripe_subscription_id?: string;
   stripe_customer_id?: string;
+  subscription_type?: string;
   trial_end_date?: any;
 };
 
@@ -430,6 +431,7 @@ export default function SubscriptionPage() {
   const canManage = profile?.role === 'manager' || profile?.role === 'admin';
   const currentTier = company?.subscription_tier;
   const subscriptionStatus = company?.subscription_status;
+  const subscriptionType = company?.subscription_type;
 
   return (
     <div className="space-y-8">
@@ -702,6 +704,13 @@ export default function SubscriptionPage() {
             const isDowngrade = currentTier && 
               tierOrder[currentTier as TierId] > tierOrder[tier.id] &&
               tier.id !== currentTier;
+
+            // If the current subscription is marked as app-managed and not linked to Stripe,
+            // allow starting a website subscription for the same tier.
+            const isAppOnlyCurrentTier =
+              isCurrentTier &&
+              subscriptionType === 'app' &&
+              !company?.stripe_customer_id;
             
             return (
               <div
@@ -736,28 +745,32 @@ export default function SubscriptionPage() {
                 {canManage && (
                   <button
                     onClick={() => handleSubscribe(tier.id)}
-                    disabled={checkoutLoading === tier.id || isCurrentTier}
+                    disabled={checkoutLoading === tier.id || (isCurrentTier && !isAppOnlyCurrentTier)}
                     className={`w-full py-3 px-4 rounded-lg font-semibold transition-all ${
-                      isCurrentTier
+                      isCurrentTier && !isAppOnlyCurrentTier
                         ? 'bg-white/10 text-white/60 cursor-not-allowed'
                         : isUpgrade
                         ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                         : isDowngrade
                         ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/40'
                         : subscriptionStatus !== 'active' && subscriptionStatus !== 'trial'
+                          ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                          : isAppOnlyCurrentTier
                         ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                         : 'bg-white/10 hover:bg-white/20 text-white'
                     } disabled:opacity-50`}
                   >
                     {checkoutLoading === tier.id
                       ? 'Processing...'
-                      : isCurrentTier
+                      : isCurrentTier && !isAppOnlyCurrentTier
                       ? 'Current Plan'
                       : isUpgrade
                       ? 'Upgrade Now'
                       : isDowngrade
                       ? 'Downgrade'
                       : subscriptionStatus !== 'active' && subscriptionStatus !== 'trial'
+                      ? 'Subscribe Now'
+                      : isAppOnlyCurrentTier
                       ? 'Subscribe Now'
                       : 'Change Plan'}
                   </button>
