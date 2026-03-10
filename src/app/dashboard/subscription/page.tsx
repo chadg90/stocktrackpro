@@ -431,7 +431,6 @@ export default function SubscriptionPage() {
   const canManage = profile?.role === 'manager' || profile?.role === 'admin';
   const currentTier = company?.subscription_tier;
   const subscriptionStatus = company?.subscription_status;
-  const subscriptionType = company?.subscription_type;
 
   return (
     <div className="space-y-8">
@@ -705,12 +704,13 @@ export default function SubscriptionPage() {
               tierOrder[currentTier as TierId] > tierOrder[tier.id] &&
               tier.id !== currentTier;
 
-            // If the current subscription is marked as app-managed and not linked to Stripe,
-            // allow starting a website subscription for the same tier.
-            const isAppOnlyCurrentTier =
-              isCurrentTier &&
-              subscriptionType === 'app' &&
+            // If the subscription is active/trial but not linked to Stripe (no customer id),
+            // treat it as app/other and allow starting a website subscription for the same tier.
+            const isAppOnlySubscription =
+              (subscriptionStatus === 'active' || subscriptionStatus === 'trial') &&
               !company?.stripe_customer_id;
+
+            const isAppOnlyCurrentTier = isCurrentTier && isAppOnlySubscription;
             
             return (
               <div
