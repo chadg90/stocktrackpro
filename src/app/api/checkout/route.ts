@@ -305,6 +305,21 @@ export async function POST(request: NextRequest) {
       promoCode: stripePromoCode || null,
     });
 
+    // Prevent creating a second website (Stripe) subscription if one is already active/trial.
+    const hasActiveStripeSubscription =
+      companyData?.subscription_type === 'stripe' &&
+      (companyData.subscription_status === 'active' || companyData.subscription_status === 'trial');
+
+    if (hasActiveStripeSubscription) {
+      return NextResponse.json(
+        {
+          error:
+            'You already have an active website subscription. To change your plan or billing, use the Manage Billing Portal on the Subscription page.',
+        },
+        { status: 400 }
+      );
+    }
+
     const stripe = getStripe();
     let session;
     try {
