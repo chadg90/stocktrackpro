@@ -125,8 +125,8 @@ export default function DashboardPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Date range filter
-  const [dateRange, setDateRange] = useState<'7' | '30' | '90' | 'all'>('30');
+  // Date range filter (supports up to 24 months of history)
+  const [dateRange, setDateRange] = useState<'7' | '30' | '90' | '365' | '730' | 'all'>('30');
 
   // Analytics data
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -794,18 +794,32 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-white/50 text-sm hidden sm:inline">Period</span>
                     <div className="flex items-center gap-0.5 bg-white/5 border border-white/10 rounded-lg p-0.5">
-                      {['7', '30', '90', 'all'].map((range) => (
+                      {['7', '30', '90', '365', '730', 'all'].map((range) => (
                         <button
                           key={range}
-                          onClick={() => setDateRange(range as '7' | '30' | '90' | 'all')}
+                          onClick={() => setDateRange(range as '7' | '30' | '90' | '365' | '730' | 'all')}
                           className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
                             dateRange === range
                               ? 'bg-blue-500 text-white'
                               : 'text-white/70 hover:text-white'
                           }`}
-                          aria-label={range === 'all' ? 'All time' : `Last ${range} days`}
+                          aria-label={
+                            range === 'all'
+                              ? 'All time'
+                              : range === '365'
+                              ? 'Last 12 months'
+                              : range === '730'
+                              ? 'Last 24 months'
+                              : `Last ${range} days`
+                          }
                         >
-                          {range === 'all' ? 'All' : `${range}d`}
+                          {range === 'all'
+                            ? 'All'
+                            : range === '365'
+                            ? '12m'
+                            : range === '730'
+                            ? '24m'
+                            : `${range}d`}
                         </button>
                       ))}
                     </div>
@@ -1242,7 +1256,17 @@ export default function DashboardPage() {
                         <td className="px-4 py-3 text-green-400">{assetUtilization}%</td>
                       </tr>
                       <tr>
-                        <td className="px-4 py-3 text-white">Inspections ({dateRange === 'all' ? 'All Time' : `Last ${dateRange} Days`})</td>
+                        <td className="px-4 py-3 text-white">
+                          Inspections (
+                          {dateRange === 'all'
+                            ? 'All Time'
+                            : dateRange === '365'
+                            ? 'Last 12 Months'
+                            : dateRange === '730'
+                            ? 'Last 24 Months'
+                            : `Last ${dateRange} Days`}
+                          )
+                        </td>
                         <td className="px-4 py-3 text-white">{inspections.length}</td>
                         <td className="px-4 py-3 text-blue-500">—</td>
                         <td className="px-4 py-3 text-cyan-400">{avgInspectionsPerDay}/day</td>
