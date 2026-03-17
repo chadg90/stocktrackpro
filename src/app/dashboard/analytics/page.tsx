@@ -75,12 +75,12 @@ type HistoryItem = {
   timestamp?: Timestamp | string;
 };
 
-const COLORS = ['#00D9FF', '#FF6B6B', '#FFD93D', '#6BCF7F', '#9B59B6', '#E74C3C', '#3498DB', '#2ECC71'];
+const COLORS = ['#3b82f6', '#6366f1', '#0d9488', '#d97706', '#7c3aed', '#0891b2', '#10b981', '#64748b'];
 const SEVERITY_COLORS = {
-  critical: '#EF4444',
-  high: '#F97316',
-  medium: '#EAB308',
-  low: '#3B82F6',
+  critical: '#dc2626',
+  high: '#ea580c',
+  medium: '#ca8a04',
+  low: '#2563eb',
 };
 
 const getDateValue = (value?: Timestamp | string): Date | null => {
@@ -706,12 +706,12 @@ export default function AnalyticsPage() {
                 <AreaChart data={dailyActivity}>
                   <defs>
                     <linearGradient id="colorInsp" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#00D9FF" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#00D9FF" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorDef" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#FF6B6B" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#FF6B6B" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#64748b" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#64748b" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorAct" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#9B59B6" stopOpacity={0.3} />
@@ -721,10 +721,10 @@ export default function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                   <XAxis dataKey="date" stroke="#888" />
                   <YAxis stroke="#888" />
-                  <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
                   <Legend />
-                  <Area type="monotone" dataKey="inspections" stroke="#00D9FF" fill="url(#colorInsp)" name="Inspections" />
-                  <Area type="monotone" dataKey="defects" stroke="#FF6B6B" fill="url(#colorDef)" name="Defects" />
+                  <Area type="monotone" dataKey="inspections" stroke="#3b82f6" fill="url(#colorInsp)" name="Inspections" />
+                  <Area type="monotone" dataKey="defects" stroke="#64748b" fill="url(#colorDef)" name="Defects" />
                   <Area type="monotone" dataKey="actions" stroke="#9B59B6" fill="url(#colorAct)" name="Asset Actions" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -828,7 +828,7 @@ export default function AnalyticsPage() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -853,8 +853,8 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                     <XAxis dataKey="name" stroke="#888" />
                     <YAxis stroke="#888" />
-                    <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
-                    <Bar dataKey="value" fill="#00D9FF" />
+                    <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
+                    <Bar dataKey="value" fill="#3b82f6" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -878,7 +878,7 @@ export default function AnalyticsPage() {
                   <XAxis type="number" stroke="#888" domain={[0, 100]} />
                   <YAxis dataKey="name" type="category" stroke="#888" width={100} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} 
+                    contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} 
                     formatter={(value, name) => [`${value}%`, 'Utilization Rate']}
                   />
                   <Bar dataKey="rate" fill="#9B59B6" name="Utilization %" />
@@ -978,9 +978,9 @@ export default function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                   <XAxis dataKey="name" stroke="#888" />
                   <YAxis stroke="#888" />
-                  <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
                   <Legend />
-                  <Bar dataKey="inspections" fill="#00D9FF" name="Inspections" />
+                  <Bar dataKey="inspections" fill="#3b82f6" name="Inspections" />
                   <Bar dataKey="actions" fill="#9B59B6" name="Asset Actions" />
                 </BarChart>
               </ResponsiveContainer>

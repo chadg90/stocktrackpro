@@ -90,7 +90,7 @@ type HistoryItem = {
   timestamp?: Timestamp | string;
 };
 
-const COLORS = ['#00D9FF', '#FF6B6B', '#FFD93D', '#6BCF7F', '#9B59B6', '#E74C3C', '#3498DB', '#2ECC71'];
+const COLORS = ['#3b82f6', '#6366f1', '#0d9488', '#d97706', '#7c3aed', '#0891b2', '#10b981', '#64748b'];
 
 const formatDate = (value?: string | Timestamp) => {
   if (!value) return '—';
@@ -948,7 +948,7 @@ export default function DashboardPage() {
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
                         </PieChart>
                       </ResponsiveContainer>
                     ) : (
@@ -966,8 +966,8 @@ export default function DashboardPage() {
                           <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                           <XAxis type="number" stroke="#888" />
                           <YAxis dataKey="name" type="category" stroke="#888" width={80} />
-                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
-                          <Bar dataKey="value" fill="#00D9FF" />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
+                          <Bar dataKey="value" fill="#3b82f6" />
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
@@ -1029,7 +1029,7 @@ export default function DashboardPage() {
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
                         </PieChart>
                       </ResponsiveContainer>
                     ) : (
@@ -1046,7 +1046,7 @@ export default function DashboardPage() {
                           <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                           <XAxis type="number" stroke="#888" />
                           <YAxis dataKey="name" type="category" stroke="#888" width={80} />
-                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
                           <Bar dataKey="value" fill="#9B59B6" />
                         </BarChart>
                       </ResponsiveContainer>
@@ -1099,7 +1099,7 @@ export default function DashboardPage() {
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
                           <Legend />
                         </PieChart>
                       </ResponsiveContainer>
@@ -1156,15 +1156,15 @@ export default function DashboardPage() {
                         <AreaChart data={inspectionsOverTime}>
                           <defs>
                             <linearGradient id="colorInsp" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#00D9FF" stopOpacity={0.3} />
-                              <stop offset="95%" stopColor="#00D9FF" stopOpacity={0} />
+                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                             </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                           <XAxis dataKey="date" stroke="#888" />
                           <YAxis stroke="#888" />
-                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
-                          <Area type="monotone" dataKey="count" stroke="#00D9FF" fill="url(#colorInsp)" strokeWidth={2} />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
+                          <Area type="monotone" dataKey="count" stroke="#3b82f6" fill="url(#colorInsp)" strokeWidth={2} />
                         </AreaChart>
                       </ResponsiveContainer>
                     ) : (
@@ -1181,9 +1181,9 @@ export default function DashboardPage() {
                           <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                           <XAxis dataKey="date" stroke="#888" />
                           <YAxis stroke="#888" />
-                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #00D9FF', borderRadius: '8px' }} />
+                          <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
                           <Legend />
-                          <Bar dataKey="reported" fill="#FF6B6B" name="Reported" />
+                          <Bar dataKey="reported" fill="#64748b" name="Reported" />
                           <Bar dataKey="resolved" fill="#6BCF7F" name="Resolved" />
                         </BarChart>
                       </ResponsiveContainer>
