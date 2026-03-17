@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -31,7 +32,12 @@ module.exports = {
           200: '#1a1f2b',
           300: '#161a25',
           400: '#12151d',
-        }
+        },
+        dashboard: {
+          'bg-light': '#F8FAFC',
+          'text-primary': '#0F172A',
+          'text-secondary': '#475569',
+        },
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

@@ -77,7 +77,7 @@ export default function ExportButton({
       <button
         onClick={() => setShowDropdown(!showDropdown)}
         disabled={disabled || exporting || !hasData}
-        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/40 text-blue-500 hover:border-blue-500 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+        className={`btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/40 text-blue-500 hover:border-blue-500 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
         title="Export Data"
         aria-label={exporting ? 'Exporting data' : 'Export data'}
       >
@@ -101,7 +101,7 @@ export default function ExportButton({
             className="fixed inset-0 z-10" 
             onClick={() => setShowDropdown(false)}
           />
-          <div className="absolute right-0 mt-2 w-48 bg-black border border-blue-500/30 rounded-lg shadow-xl z-20 overflow-hidden">
+          <div className="export-dropdown absolute right-0 mt-2 w-48 bg-black border border-blue-500/30 rounded-lg shadow-xl z-20 overflow-hidden">
             <button
               onClick={handleExportExcel}
               className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors"

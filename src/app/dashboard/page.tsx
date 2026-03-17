@@ -776,12 +776,12 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-3 mb-1">
                     <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Dashboard</h1>
                     {subscriptionStatus === 'trial' && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                      <span className="badge-trial inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
                         7-Day Free Trial
                       </span>
                     )}
                     {subscriptionStatus === 'active' && subscriptionTier && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                      <span className="badge-tier inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
                         {subscriptionTier.replace('PRO_', '')}
                       </span>
                     )}
@@ -800,7 +800,7 @@ export default function DashboardPage() {
                           onClick={() => setDateRange(range as '7' | '30' | '90' | '365' | '730' | 'all')}
                           className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
                             dateRange === range
-                              ? 'bg-blue-500 text-white'
+                              ? 'bg-blue-500 text-white keep-light-on-dark'
                               : 'text-white/70 hover:text-white'
                           }`}
                           aria-label={
@@ -838,7 +838,7 @@ export default function DashboardPage() {
                   <PrintButton title="Analytics Report" contentId="analytics-report" />
                   <button
                     onClick={() => profile?.company_id && fetchData(profile.company_id)}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-white/20 text-white hover:bg-white/5 transition-colors disabled:opacity-60"
+                    className="btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-white/20 text-white hover:bg-white/5 transition-colors disabled:opacity-60"
                     disabled={loading}
                     aria-label={loading ? 'Refreshing data' : 'Refresh dashboard data'}
                   >

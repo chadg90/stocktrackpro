@@ -115,7 +115,7 @@ export default function PrintButton({
     <button
       onClick={handlePrint}
       disabled={disabled || printing}
-      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/40 text-blue-500 hover:border-blue-500 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/40 text-blue-500 hover:border-blue-500 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       title="Print Report"
       aria-label={printing ? 'Preparing print' : 'Print report'}
     >

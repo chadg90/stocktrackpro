@@ -13,6 +13,15 @@
   --text-light: #ffffff;
 }
 
+/* Light mode design tokens */
+[data-theme='light'] {
+  --dashboard-bg: #F8FAFC;
+  --dashboard-bg-card: #ffffff;
+  --dashboard-text-primary: #0F172A;
+  --dashboard-text-secondary: #475569;
+  --dashboard-border: #e2e8f0;
+}
+
 body {
   color: rgb(var(--foreground));
   background: rgb(var(--background));
@@ -106,6 +115,99 @@ body {
 
   .theme-light .dashboard-card .text-white\/30 {
     @apply text-zinc-400;
+  }
+
+  /* Light mode: explicit text contrast (Primary #0F172A, Secondary #475569) */
+  /* Preserve white text on colored buttons (e.g. blue primary) */
+  .theme-light .text-white:not(.keep-light-on-dark) {
+    color: #0F172A !important;
+  }
+  .theme-light .text-white\/90 {
+    color: #0F172A !important;
+  }
+  .theme-light .text-white\/80 {
+    color: #1e293b !important;
+  }
+  .theme-light .text-white\/75 {
+    color: #334155 !important;
+  }
+  .theme-light .text-white\/70 {
+    color: #475569 !important;
+  }
+  .theme-light .text-white\/60 {
+    color: #475569 !important;
+  }
+  .theme-light .text-white\/50 {
+    color: #64748b !important;
+  }
+  .theme-light .text-white\/40 {
+    color: #64748b !important;
+  }
+  .theme-light .text-white\/30 {
+    color: #94a3b8 !important;
+  }
+
+  /* Light mode: backgrounds and borders */
+  .theme-light .bg-white\/5 {
+    background-color: #f1f5f9 !important;
+  }
+  .theme-light .bg-white\/10 {
+    background-color: #e2e8f0 !important;
+  }
+  .theme-light .border-white\/10 {
+    border-color: #e2e8f0 !important;
+  }
+  .theme-light .border-white\/15 {
+    border-color: #e2e8f0 !important;
+  }
+  .theme-light .border-white\/20 {
+    border-color: #cbd5e1 !important;
+  }
+  .theme-light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #e2e8f0 !important;
+  }
+  .theme-light .divide-white\/10 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #e2e8f0 !important;
+  }
+
+  /* Export/Print buttons: solid background + border in light mode */
+  .theme-light .btn-dashboard-action {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0F172A !important;
+  }
+  .theme-light .btn-dashboard-action:hover:not(:disabled) {
+    background-color: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+  }
+  .theme-light .btn-dashboard-action[data-active='true'] {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+  }
+
+  /* Export dropdown in light mode */
+  .theme-light .export-dropdown {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  .theme-light .export-dropdown button {
+    color: #0F172A !important;
+  }
+  .theme-light .export-dropdown button:hover {
+    background-color: #f1f5f9 !important;
+  }
+
+  /* Team/status badges: defined border + legible text in light mode */
+  .theme-light .badge-trial {
+    border: 1px solid #93c5fd !important;
+    background-color: #eff6ff !important;
+    color: #1d4ed8 !important;
+  }
+  .theme-light .badge-tier {
+    border: 1px solid #86efac !important;
+    background-color: #f0fdf4 !important;
+    color: #15803d !important;
   }
 }
 

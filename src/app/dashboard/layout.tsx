@@ -225,16 +225,17 @@ export default function DashboardLayout({
   return (
     <ToastProvider>
       <div
+        data-theme={theme}
         className={`min-h-screen ${
           theme === 'light'
-            ? 'bg-slate-50 text-zinc-900 theme-light'
+            ? 'bg-[#F8FAFC] text-[#0F172A] theme-light'
             : 'bg-black text-white theme-dark'
         }`}
       >
         <Sidebar theme={theme} onToggleTheme={toggleTheme} />
         <main
           className={`min-h-screen pt-20 lg:pt-0 lg:pl-64 ${
-            theme === 'light' ? 'bg-white/80' : 'bg-zinc-950/50'
+            theme === 'light' ? 'bg-[#F8FAFC]' : 'bg-zinc-950/50'
           }`}
         >
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
