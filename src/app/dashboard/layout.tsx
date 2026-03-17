@@ -19,6 +19,8 @@ type Company = {
   subscription_tier?: string;
 };
 
+type ThemePreference = 'light' | 'dark';
+
 export default function DashboardLayout({
   children,
 }: {
@@ -27,9 +29,19 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+  const [theme, setTheme] = useState<ThemePreference>('dark');
   const router = useRouter();
   const pathname = usePathname();
   const isDashboardRoot = pathname === '/dashboard' || pathname === '/dashboard/';
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = window.localStorage.getItem('stp_dashboard_theme');
+      if (stored === 'light' || stored === 'dark') {
+        setTheme(stored);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Only run on client side and if firebase is initialized
@@ -128,6 +140,16 @@ export default function DashboardLayout({
     };
   }, []);
 
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const next: ThemePreference = prev === 'dark' ? 'light' : 'dark';
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('stp_dashboard_theme', next);
+      }
+      return next;
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -202,9 +224,19 @@ export default function DashboardLayout({
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-black">
-        <Sidebar />
-        <main className="min-h-screen pt-20 lg:pt-0 lg:pl-64 bg-zinc-950/50">
+      <div
+        className={`min-h-screen ${
+          theme === 'light'
+            ? 'bg-slate-50 text-zinc-900 theme-light'
+            : 'bg-black text-white theme-dark'
+        }`}
+      >
+        <Sidebar theme={theme} onToggleTheme={toggleTheme} />
+        <main
+          className={`min-h-screen pt-20 lg:pt-0 lg:pl-64 ${
+            theme === 'light' ? 'bg-white/80' : 'bg-zinc-950/50'
+          }`}
+        >
           <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
             <header className="flex flex-wrap items-center justify-between gap-4 mb-6 lg:mb-8">
               <div className="min-w-0 flex-1" aria-hidden />

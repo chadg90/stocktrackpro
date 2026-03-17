@@ -54,6 +54,59 @@ body {
   .dashboard-kpi-label {
     @apply text-sm text-white/70;
   }
+
+  /* Light theme overrides for dashboard */
+  .theme-light .dashboard-card {
+    @apply bg-white border-zinc-200;
+  }
+
+  .theme-light .dashboard-section-title {
+    @apply text-zinc-900;
+  }
+
+  .theme-light .dashboard-kpi-value {
+    @apply text-zinc-900;
+  }
+
+  .theme-light .dashboard-kpi-label {
+    @apply text-zinc-600;
+  }
+
+  .theme-light .dashboard-card .text-white {
+    @apply text-zinc-900;
+  }
+
+  .theme-light .dashboard-card .text-white\/90 {
+    @apply text-zinc-900;
+  }
+
+  .theme-light .dashboard-card .text-white\/80 {
+    @apply text-zinc-800;
+  }
+
+  .theme-light .dashboard-card .text-white\/75 {
+    @apply text-zinc-700;
+  }
+
+  .theme-light .dashboard-card .text-white\/70 {
+    @apply text-zinc-600;
+  }
+
+  .theme-light .dashboard-card .text-white\/60 {
+    @apply text-zinc-500;
+  }
+
+  .theme-light .dashboard-card .text-white\/50 {
+    @apply text-zinc-500;
+  }
+
+  .theme-light .dashboard-card .text-white\/40 {
+    @apply text-zinc-400;
+  }
+
+  .theme-light .dashboard-card .text-white\/30 {
+    @apply text-zinc-400;
+  }
 }
 
 @layer utilities {

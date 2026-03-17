@@ -3,7 +3,24 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Truck, Users, LogOut, AlertTriangle, History, MapPin, Key, Building2, Menu, X, BarChart3, CreditCard } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Package,
+  Truck,
+  Users,
+  LogOut,
+  AlertTriangle,
+  History,
+  MapPin,
+  Key,
+  Building2,
+  Menu,
+  X,
+  BarChart3,
+  CreditCard,
+  Sun,
+  Moon,
+} from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -21,6 +38,13 @@ type NavigationItem = {
 type NavigationGroup = {
   label: string;
   items: NavigationItem[];
+};
+
+type ThemePreference = 'light' | 'dark';
+
+type SidebarProps = {
+  theme: ThemePreference;
+  onToggleTheme: () => void;
 };
 
 // Organized navigation groups
@@ -63,7 +87,7 @@ const navigationGroups: NavigationGroup[] = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -126,7 +150,11 @@ export default function Sidebar() {
       }}
       >
         <div className="flex h-20 items-center justify-between px-5 border-b border-white/10 shrink-0">
-          <Link href="/" className="relative w-36 h-9 flex items-center" onClick={() => setMobileMenuOpen(false)}>
+          <Link
+            href="/"
+            className="relative w-36 h-9 flex items-center"
+            onClick={() => setMobileMenuOpen(false)}
+          >
             <Image
               src="/logo.png"
               alt="Stock Track PRO"
@@ -136,8 +164,22 @@ export default function Sidebar() {
               className="object-left"
             />
           </Link>
-          <div className="lg:hidden">
-            <NotificationBell />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-black/60 text-white/80 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/60 focus:ring-offset-2 focus:ring-offset-black"
+              aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+            >
+              {theme === 'light' ? (
+                <Sun className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Moon className="h-4 w-4" aria-hidden="true" />
+              )}
+            </button>
+            <div className="lg:hidden">
+              <NotificationBell />
+            </div>
           </div>
         </div>
 

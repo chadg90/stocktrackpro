@@ -705,7 +705,7 @@ export default function DashboardPage() {
   }, [authUser, profile]);
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen">
       {!authUser && <Navbar />}
       <div className={`${!authUser ? 'container mx-auto px-4 pt-28 pb-16' : ''}`}>
         <div className="max-w-7xl mx-auto">
