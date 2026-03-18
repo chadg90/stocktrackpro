@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getFunctions } from 'firebase/functions';
 
 // Check if we're in a browser environment and have required config
 const isBrowser = typeof window !== 'undefined';
@@ -25,4 +26,5 @@ if (hasConfig && isBrowser) {
 export const firebaseApp = app;
 export const firebaseAuth = app ? getAuth(app) : null;
 export const firebaseDb = app ? getFirestore(app) : null;
+export const firebaseFunctions = app ? getFunctions(app) : null;
 

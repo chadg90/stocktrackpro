@@ -7,6 +7,7 @@ import {
   where,
   getDocs,
   getDoc,
+  addDoc,
   deleteDoc,
   doc,
   updateDoc,
@@ -41,9 +42,23 @@ type Company = {
   name?: string;
 };
 
+type Invite = {
+  id: string;
+  email: string;
+  inviteeName?: string;
+  role: 'manager' | 'user';
+  companyId: string;
+  companyName?: string;
+  status: 'pending' | 'accepted' | 'expired' | 'cancelled';
+  createdAt?: Timestamp | string;
+  expiresAt?: Timestamp | string;
+  emailSent?: boolean;
+};
+
 
 export default function TeamPage() {
   const [team, setTeam] = useState<Profile[]>([]);
+  const [invites, setInvites] = useState<Invite[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,6 +73,11 @@ export default function TeamPage() {
   const [editDisplayName, setEditDisplayName] = useState('');
   const [editRole, setEditRole] = useState<Profile['role']>('user');
   const [editCompanyId, setEditCompanyId] = useState('');
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [inviteRole, setInviteRole] = useState<'manager' | 'user'>('user');
+  const [inviteProcessing, setInviteProcessing] = useState(false);
 
   // Company info for admin actions
   const [companyName, setCompanyName] = useState<string | undefined>(undefined);
@@ -85,6 +105,7 @@ export default function TeamPage() {
           setCurrentUserProfile({...data, id: user.uid});
           if (data.company_id) {
             fetchCompany(data.company_id);
+            fetchInvites(data.company_id);
           }
           if (data.role === 'admin') {
             await fetchCompanies();
@@ -115,6 +136,23 @@ export default function TeamPage() {
       setError(err instanceof Error ? err.message : 'Failed to load team');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchInvites = async (companyId: string) => {
+    if (!firebaseDb || !companyId) return;
+    try {
+      const q = query(collection(firebaseDb!, 'invites'), where('companyId', '==', companyId));
+      const snapshot = await getDocs(q);
+      const inviteData = snapshot.docs.map((inviteDoc) => ({ id: inviteDoc.id, ...inviteDoc.data() } as Invite));
+      inviteData.sort((a, b) => {
+        const aTime = a.createdAt instanceof Timestamp ? a.createdAt.toMillis() : new Date(a.createdAt || 0).getTime();
+        const bTime = b.createdAt instanceof Timestamp ? b.createdAt.toMillis() : new Date(b.createdAt || 0).getTime();
+        return bTime - aTime;
+      });
+      setInvites(inviteData);
+    } catch (error) {
+      console.error('Error fetching invites:', error);
     }
   };
 
@@ -247,6 +285,49 @@ export default function TeamPage() {
     }
   };
 
+  const handleInviteMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firebaseDb || !currentUserProfile?.company_id) return;
+    if (!inviteEmail.trim()) {
+      alert('Please enter an email address.');
+      return;
+    }
+
+    setInviteProcessing(true);
+    try {
+      const email = inviteEmail.trim().toLowerCase();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+
+      await addDoc(collection(firebaseDb, 'invites'), {
+        email,
+        inviteeName: inviteName.trim() || null,
+        role: inviteRole,
+        companyId: currentUserProfile.company_id,
+        companyName: companyName || 'Stock Track PRO',
+        invitedBy: currentUserProfile.id,
+        invitedByName: displayNameFor(currentUserProfile),
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        expiresAt,
+        emailSent: false,
+      });
+
+      setInviteEmail('');
+      setInviteName('');
+      setInviteRole('user');
+      setIsInviteModalOpen(false);
+      fetchInvites(currentUserProfile.company_id);
+      alert(`Invite sent to ${email}`);
+    } catch (error) {
+      console.error('Error creating invite:', error);
+      alert('Failed to create invite. Please try again.');
+    } finally {
+      setInviteProcessing(false);
+    }
+  };
+
   const displayNameFor = (member: Profile) => {
     // From profile: first_name + last_name > display_name > displayName > name > email prefix
     if (member.first_name || member.last_name) {
@@ -312,6 +393,15 @@ export default function TeamPage() {
           <p className="text-white/70 text-sm mt-1">Manage your team members and permissions</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          {(isAdmin || isManager) && (
+            <button
+              onClick={() => setIsInviteModalOpen(true)}
+              className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-colors"
+            >
+              <Mail className="h-4 w-4" />
+              Invite Member
+            </button>
+          )}
           {isAdmin && (
             <button
               onClick={handleDeleteCompany}
@@ -453,6 +543,53 @@ export default function TeamPage() {
         />
       </div>
 
+      {(isAdmin || isManager) && (
+        <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-blue-500/20 bg-white/5">
+            <h2 className="text-white font-semibold">Recent Invites</h2>
+            <p className="text-white/60 text-sm mt-1">Track invite delivery and acceptance status.</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="border-b border-blue-500/20 text-white/70 text-xs uppercase">
+                <tr>
+                  <th className="px-6 py-3 font-medium">Email</th>
+                  <th className="px-6 py-3 font-medium">Role</th>
+                  <th className="px-6 py-3 font-medium">Status</th>
+                  <th className="px-6 py-3 font-medium">Sent</th>
+                  <th className="px-6 py-3 font-medium">Expires</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
+                {invites.length === 0 ? (
+                  <EmptyStateTableRow colSpan={5} message="No invites sent yet." />
+                ) : (
+                  invites.slice(0, 8).map((invite) => (
+                    <tr key={invite.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-3 text-white/80 text-sm">{invite.email}</td>
+                      <td className="px-6 py-3 text-white/70 text-sm capitalize">{invite.role}</td>
+                      <td className="px-6 py-3">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                          invite.status === 'accepted'
+                            ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                            : invite.status === 'pending'
+                              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                              : 'bg-white/10 text-white/60 border border-white/20'
+                        }`}>
+                          {invite.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-white/70 text-sm">{invite.emailSent ? 'Yes' : 'Pending'}</td>
+                      <td className="px-6 py-3 text-white/70 text-sm">{formatDate(invite.expiresAt)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Edit User Modal */}
       <Modal
         isOpen={isEditModalOpen}
@@ -517,6 +654,66 @@ export default function TeamPage() {
               className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-60"
             >
               {processing ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        title="Invite Team Member"
+      >
+        <form onSubmit={handleInviteMember} className="space-y-4">
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Email</label>
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
+              placeholder="driver@company.com"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Name (optional)</label>
+            <input
+              type="text"
+              value={inviteName}
+              onChange={(e) => setInviteName(e.target.value)}
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
+              placeholder="Alex Driver"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Role</label>
+            <select
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value as 'manager' | 'user')}
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
+            >
+              <option value="user">User</option>
+              <option value="manager">Manager</option>
+            </select>
+          </div>
+          <p className="text-xs text-white/50">
+            The invite link is valid for 7 days and can only be accepted once.
+          </p>
+          <div className="pt-2 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setIsInviteModalOpen(false)}
+              className="px-4 py-2 rounded-lg border border-white/20 text-white/80 hover:border-white/40"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={inviteProcessing}
+              className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-60"
+            >
+              {inviteProcessing ? 'Sending...' : 'Send Invite'}
             </button>
           </div>
         </form>
