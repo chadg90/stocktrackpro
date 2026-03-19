@@ -12,6 +12,15 @@ const PRICE_PER_VEHICLE = 8;
 const MIN_VEHICLES = 5;
 const MAX_VEHICLES = 100;
 
+type Tier = { label: string; assets: string; users: string; colour: string };
+
+function getTier(count: number): Tier {
+  if (count <= 15) return { label: 'Starter',    assets: '1,000 assets',   users: 'Up to 15 users',     colour: 'text-sky-400'    };
+  if (count <= 35) return { label: 'Growth',     assets: '5,000 assets',   users: 'Up to 35 users',     colour: 'text-indigo-400' };
+  if (count <= 75) return { label: 'Business',   assets: '20,000 assets',  users: 'Up to 75 users',     colour: 'text-violet-400' };
+  return               { label: 'Enterprise', assets: 'Unlimited assets', users: 'Unlimited users',    colour: 'text-blue-400'   };
+}
+
 export default function Pricing() {
   const [profile, setProfile] = useState<{ company_id?: string; role?: string } | null>(null);
   const [authUser, setAuthUser] = useState<{ getIdToken: () => Promise<string> } | null>(null);
@@ -73,7 +82,11 @@ export default function Pricing() {
     }
   };
 
+  const tier = getTier(vehicleCount);
+
   const features = [
+    tier.assets,
+    tier.users,
     'Unlimited vehicle inspections',
     'Defect reporting & workflow',
     'MOT & Tax expiry reminders',
@@ -114,8 +127,13 @@ export default function Pricing() {
 
             {/* Price display */}
             <div className="text-center mb-8 mt-2">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <span className={`text-sm font-bold px-3 py-1 rounded-full border ${tier.colour} border-current bg-current/10 transition-all duration-300`}>
+                  {tier.label}
+                </span>
+              </div>
               <div className="flex items-end justify-center gap-1 mb-1">
-                <span className="text-5xl sm:text-6xl font-bold text-white">
+                <span className="text-5xl sm:text-6xl font-bold text-white transition-all duration-200">
                   £{monthlyTotal.toFixed(0)}
                 </span>
                 <span className="text-white/50 text-lg mb-2">/month</span>
@@ -154,6 +172,15 @@ export default function Pricing() {
                   <Link href="/contact" className="underline hover:text-blue-300">Contact us</Link> for a custom quote.
                 </p>
               )}
+            </div>
+
+            {/* Tier steps */}
+            <div className="grid grid-cols-4 gap-1 mb-6">
+              {(['Starter','Growth','Business','Enterprise'] as const).map((t) => (
+                <div key={t} className={`rounded-lg py-1.5 px-1 text-center text-xs font-medium transition-all duration-300 ${tier.label === t ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40' : 'bg-white/5 text-white/30 border border-white/10'}`}>
+                  {t}
+                </div>
+              ))}
             </div>
 
             {/* CTA */}

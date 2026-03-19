@@ -8,11 +8,22 @@ const PRICE_PER_VEHICLE = 8;
 const MIN_VEHICLES = 5;
 const MAX_VEHICLES = 100;
 
+type Tier = { label: string; assets: string; users: string };
+function getTier(count: number): Tier {
+  if (count <= 15) return { label: 'Starter',    assets: '1,000 assets',    users: 'Up to 15 users'    };
+  if (count <= 35) return { label: 'Growth',     assets: '5,000 assets',    users: 'Up to 35 users'    };
+  if (count <= 75) return { label: 'Business',   assets: '20,000 assets',   users: 'Up to 75 users'    };
+  return               { label: 'Enterprise', assets: 'Unlimited assets', users: 'Unlimited users'   };
+}
+
 export default function PricingSection() {
   const [vehicleCount, setVehicleCount] = useState(MIN_VEHICLES);
   const monthlyTotal = vehicleCount * PRICE_PER_VEHICLE;
+  const tier = getTier(vehicleCount);
 
   const features = [
+    tier.assets,
+    tier.users,
     'Unlimited vehicle inspections',
     'Defect reporting & workflow',
     'MOT & Tax expiry reminders',
@@ -38,6 +49,9 @@ export default function PricingSection() {
         {/* Card */}
         <div className="rounded-2xl bg-white shadow-xl border border-gray-200 overflow-hidden">
           <div className="bg-blue-600 px-8 py-6 text-center">
+            <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-3">
+              {tier.label}
+            </span>
             <div className="flex items-end justify-center gap-1">
               <span className="text-5xl font-bold text-white">£{monthlyTotal}</span>
               <span className="text-blue-200 text-lg mb-1">/month</span>
