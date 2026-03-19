@@ -20,6 +20,9 @@ import {
   CreditCard,
   Sun,
   Moon,
+  Tag,
+  LifeBuoy,
+  Ticket,
 } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -83,6 +86,19 @@ const navigationGroups: NavigationGroup[] = [
     items: [
       { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCard, managerOnly: true },
       { name: 'Companies', href: '/dashboard/companies', icon: Building2, adminOnly: true },
+    ]
+  },
+  {
+    label: 'Support',
+    items: [
+      { name: 'Support', href: '/dashboard/support', icon: LifeBuoy },
+    ]
+  },
+  {
+    label: 'Admin',
+    items: [
+      { name: 'Promo Codes', href: '/dashboard/admin/promo-codes', icon: Tag, adminOnly: true },
+      { name: 'Support Tickets', href: '/dashboard/admin/tickets', icon: Ticket, adminOnly: true },
     ]
   },
 ];
