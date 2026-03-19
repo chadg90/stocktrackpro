@@ -26,6 +26,7 @@ export default function InviteAcceptPage() {
   const [invite, setInvite] = useState<InvitePreview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -59,6 +60,20 @@ export default function InviteAcceptPage() {
     loadInvite();
   }, [inviteId]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const ua = window.navigator.userAgent || '';
+    setIsMobile(/iPhone|iPad|iPod|Android/i.test(ua));
+  }, []);
+
+  useEffect(() => {
+    if (!accepted || !isMobile) return;
+    const timer = window.setTimeout(() => {
+      window.location.href = '/';
+    }, 2000);
+    return () => window.clearTimeout(timer);
+  }, [accepted, isMobile]);
+
   const handleAcceptInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseFunctions || !inviteId) return;
@@ -85,8 +100,14 @@ export default function InviteAcceptPage() {
       setAccepted(true);
     } catch (err: any) {
       console.error('Invite acceptance failed:', err);
-      if (err?.code === 'already-exists') {
+      const code = String(err?.code || '');
+      const message = String(err?.message || '');
+      if (code.includes('already-exists')) {
         setError('An account already exists for this email. Please sign in on the app.');
+      } else if (code.includes('failed-precondition')) {
+        setError('This invite is no longer valid. Please ask your manager to resend it.');
+      } else if (message.toLowerCase().includes('missing required metadata')) {
+        setError('This invite is missing setup data. Please ask your manager to send a new invite.');
       } else {
         setError('Could not accept this invite. Please ask your manager to resend it.');
       }
@@ -127,11 +148,16 @@ export default function InviteAcceptPage() {
               </p>
             </div>
             <Link
-              href="/dashboard"
+              href="/"
               className="block w-full rounded-lg border border-white/20 text-white/80 hover:text-white hover:border-white/40 py-3 px-4 text-center transition-colors"
             >
-              Back to Website
+              Continue to Website
             </Link>
+            {isMobile && (
+              <p className="text-xs text-white/50 text-center">
+                Redirecting you to the website in 2 seconds. Use the app banner at the top to install/open Stock Track PRO.
+              </p>
+            )}
           </div>
         </div>
       </main>
