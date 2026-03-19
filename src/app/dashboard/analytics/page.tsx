@@ -75,12 +75,12 @@ type HistoryItem = {
   timestamp?: Timestamp | string;
 };
 
-const COLORS = ['#3b82f6', '#6366f1', '#0d9488', '#d97706', '#7c3aed', '#0891b2', '#10b981', '#64748b'];
+const COLORS = ['#2563eb', '#7c3aed', '#0f766e', '#ea580c', '#c026d3', '#0284c7', '#16a34a', '#475569'];
 const SEVERITY_COLORS = {
-  critical: '#dc2626',
-  high: '#ea580c',
-  medium: '#ca8a04',
-  low: '#2563eb',
+  critical: '#ef4444',
+  high: '#f97316',
+  medium: '#f59e0b',
+  low: '#22c55e',
 };
 
 const getDateValue = (value?: Timestamp | string): Date | null => {
@@ -667,13 +667,13 @@ export default function AnalyticsPage() {
             <div className="bg-black border border-blue-500/25 rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold">Fleet Health</h3>
-                <div className={`text-2xl font-bold ${fleetHealthScore >= 80 ? 'text-green-400' : fleetHealthScore >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+                <div className={`text-2xl font-bold ${fleetHealthScore >= 80 ? 'text-green-300' : fleetHealthScore >= 60 ? 'text-amber-300' : 'text-red-300'}`}>
                   {fleetHealthScore}%
                 </div>
               </div>
               <div className="w-full bg-white/10 rounded-full h-2">
                 <div 
-                  className={`h-2 rounded-full transition-all ${fleetHealthScore >= 80 ? 'bg-green-400' : fleetHealthScore >= 60 ? 'bg-yellow-400' : 'bg-red-400'}`}
+                  className={`h-2 rounded-full transition-all ${fleetHealthScore >= 80 ? 'bg-green-300' : fleetHealthScore >= 60 ? 'bg-amber-300' : 'bg-red-300'}`}
                   style={{ width: `${fleetHealthScore}%` }}
                 />
               </div>
@@ -779,14 +779,14 @@ export default function AnalyticsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-white font-medium">{v.name}</td>
-                      <td className="px-4 py-3 text-right text-blue-500">{v.inspections}</td>
-                      <td className="px-4 py-3 text-right text-red-400">{v.defects}</td>
-                      <td className="px-4 py-3 text-right text-green-400">{v.resolved}</td>
+                      <td className="px-4 py-3 text-right text-blue-300">{v.inspections}</td>
+                      <td className="px-4 py-3 text-right text-red-300">{v.defects}</td>
+                      <td className="px-4 py-3 text-right text-green-300">{v.resolved}</td>
                       <td className="px-4 py-3 text-right">
                         <span className={`font-semibold ${
-                          v.score >= 80 ? 'text-green-400' :
-                          v.score >= 60 ? 'text-yellow-400' :
-                          'text-red-400'
+                          v.score >= 80 ? 'text-green-300' :
+                          v.score >= 60 ? 'text-amber-300' :
+                          'text-red-300'
                         }`}>
                           {v.score}%
                         </span>
@@ -907,12 +907,12 @@ export default function AnalyticsPage() {
                     <tr key={a.name} className="hover:bg-white/5">
                       <td className="px-4 py-3 text-white font-medium">{a.name}</td>
                       <td className="px-4 py-3 text-right text-white">{a.total}</td>
-                      <td className="px-4 py-3 text-right text-blue-500">{a.active}</td>
+                      <td className="px-4 py-3 text-right text-blue-300">{a.active}</td>
                       <td className="px-4 py-3 text-right">
                         <span className={`font-semibold ${
-                          a.rate >= 70 ? 'text-green-400' :
-                          a.rate >= 40 ? 'text-yellow-400' :
-                          'text-red-400'
+                          a.rate >= 70 ? 'text-green-300' :
+                          a.rate >= 40 ? 'text-amber-300' :
+                          'text-red-300'
                         }`}>
                           {a.rate}%
                         </span>
@@ -958,9 +958,9 @@ export default function AnalyticsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-white font-medium">{u.name}</td>
-                      <td className="px-4 py-3 text-right text-blue-500">{u.inspections}</td>
+                      <td className="px-4 py-3 text-right text-blue-300">{u.inspections}</td>
                       <td className="px-4 py-3 text-right text-purple-400">{u.actions}</td>
-                      <td className="px-4 py-3 text-right text-yellow-400">{u.defectsFound}</td>
+                      <td className="px-4 py-3 text-right text-amber-300">{u.defectsFound}</td>
                       <td className="px-4 py-3 text-right text-white font-semibold">{u.inspections + u.actions}</td>
                     </tr>
                   ))}

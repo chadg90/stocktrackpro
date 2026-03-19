@@ -90,7 +90,7 @@ type HistoryItem = {
   timestamp?: Timestamp | string;
 };
 
-const COLORS = ['#3b82f6', '#6366f1', '#0d9488', '#d97706', '#7c3aed', '#0891b2', '#10b981', '#64748b'];
+const COLORS = ['#2563eb', '#7c3aed', '#0f766e', '#ea580c', '#c026d3', '#0284c7', '#16a34a', '#475569'];
 
 const formatDate = (value?: string | Timestamp) => {
   if (!value) return '—';
@@ -781,7 +781,7 @@ export default function DashboardPage() {
                       </span>
                     )}
                     {subscriptionStatus === 'active' && subscriptionTier && (
-                      <span className="badge-tier inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                      <span className="badge-tier inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-300 border border-green-400/40">
                         {subscriptionTier.replace('PRO_', '')}
                       </span>
                     )}
@@ -869,7 +869,7 @@ export default function DashboardPage() {
                     <div className="w-10 h-10 rounded-lg bg-blue-500/15 flex items-center justify-center">
                       <Truck className="h-5 w-5 text-blue-400" />
                     </div>
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${fleetUtilization >= 70 ? 'text-green-400' : 'text-amber-400'}`}>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${fleetUtilization >= 70 ? 'text-green-300' : 'text-amber-300'}`}>
                       {fleetUtilization >= 70 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                       {fleetUtilization}%
                     </span>
@@ -884,7 +884,7 @@ export default function DashboardPage() {
                     <div className="w-10 h-10 rounded-lg bg-purple-500/15 flex items-center justify-center">
                       <Package className="h-5 w-5 text-purple-400" />
                     </div>
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${assetUtilization >= 70 ? 'text-green-400' : 'text-amber-400'}`}>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${assetUtilization >= 70 ? 'text-green-300' : 'text-amber-300'}`}>
                       {assetUtilization >= 70 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                       {assetUtilization}%
                     </span>
@@ -910,7 +910,7 @@ export default function DashboardPage() {
                     <div className="w-10 h-10 rounded-lg bg-cyan-500/15 flex items-center justify-center">
                       <Target className="h-5 w-5 text-cyan-400" />
                     </div>
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${defectResolutionRate >= 70 ? 'text-green-400' : 'text-red-400'}`}>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${defectResolutionRate >= 70 ? 'text-green-300' : 'text-red-300'}`}>
                       {defectResolutionRate}%
                     </span>
                   </div>
@@ -987,9 +987,9 @@ export default function DashboardPage() {
                               <span className="text-white text-sm font-medium">{v.name}</span>
                             </div>
                             <div className="flex items-center gap-3">
-                              <span className="text-blue-500 text-sm">{v.count} insp</span>
+                              <span className="text-blue-300 text-sm">{v.count} insp</span>
                               {v.defects > 0 && (
-                                <span className="text-red-400 text-xs">{v.defects} defects</span>
+                                <span className="text-red-300 text-xs">{v.defects} defects</span>
                               )}
                             </div>
                           </div>
@@ -1183,8 +1183,8 @@ export default function DashboardPage() {
                           <YAxis stroke="#888" />
                           <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
                           <Legend />
-                          <Bar dataKey="reported" fill="#64748b" name="Reported" />
-                          <Bar dataKey="resolved" fill="#6BCF7F" name="Resolved" />
+                          <Bar dataKey="reported" fill="#f97316" name="Reported" />
+                          <Bar dataKey="resolved" fill="#22c55e" name="Resolved" />
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
@@ -1209,10 +1209,10 @@ export default function DashboardPage() {
                           }`}
                         >
                           <p className={`text-3xl font-bold ${
-                            d.name === 'Critical' ? 'text-red-400' :
-                            d.name === 'High' ? 'text-orange-400' :
-                            d.name === 'Medium' ? 'text-yellow-400' :
-                            'text-blue-400'
+                            d.name === 'Critical' ? 'text-red-300' :
+                            d.name === 'High' ? 'text-orange-300' :
+                            d.name === 'Medium' ? 'text-amber-300' :
+                            'text-green-300'
                           }`}>
                             {d.value}
                           </p>
@@ -1246,14 +1246,14 @@ export default function DashboardPage() {
                       <tr>
                         <td className="px-4 py-3 text-white">Fleet Vehicles</td>
                         <td className="px-4 py-3 text-white">{vehiclesCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-blue-500">{activeVehiclesCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-green-400">{fleetUtilization}%</td>
+                        <td className="px-4 py-3 text-blue-300">{activeVehiclesCount ?? '—'}</td>
+                        <td className="px-4 py-3 text-green-300">{fleetUtilization}%</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-3 text-white">Assets</td>
                         <td className="px-4 py-3 text-white">{assetsCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-blue-500">{activeAssetsCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-green-400">{assetUtilization}%</td>
+                        <td className="px-4 py-3 text-blue-300">{activeAssetsCount ?? '—'}</td>
+                        <td className="px-4 py-3 text-green-300">{assetUtilization}%</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-3 text-white">
@@ -1268,19 +1268,19 @@ export default function DashboardPage() {
                           )
                         </td>
                         <td className="px-4 py-3 text-white">{inspections.length}</td>
-                        <td className="px-4 py-3 text-blue-500">—</td>
+                        <td className="px-4 py-3 text-blue-300">—</td>
                         <td className="px-4 py-3 text-cyan-400">{avgInspectionsPerDay}/day</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-3 text-white">Defects</td>
                         <td className="px-4 py-3 text-white">{defectsCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-green-400">{resolvedDefectsCount ?? '—'} resolved</td>
-                        <td className="px-4 py-3 text-green-400">{defectResolutionRate}% resolved</td>
+                        <td className="px-4 py-3 text-green-300">{resolvedDefectsCount ?? '—'} resolved</td>
+                        <td className="px-4 py-3 text-green-300">{defectResolutionRate}% resolved</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-3 text-white">Team Members</td>
                         <td className="px-4 py-3 text-white">{teamCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-blue-500">{userActivity.length} active</td>
+                        <td className="px-4 py-3 text-blue-300">{userActivity.length} active</td>
                         <td className="px-4 py-3 text-cyan-400">—</td>
                       </tr>
                     </tbody>
