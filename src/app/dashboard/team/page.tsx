@@ -804,7 +804,7 @@ export default function TeamPage() {
                 onChange={(e) => setBulkRole(e.target.value as 'manager' | 'user')}
                 className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
               >
-                <option value="user">User (Driver / Fitter)</option>
+                <option value="user">User</option>
                 <option value="manager">Manager</option>
               </select>
             </div>

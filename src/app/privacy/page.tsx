@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
+import Link from 'next/link';
 
 export default function PrivacyPolicy() {
   const currentDate = new Date().toLocaleDateString('en-GB', {
@@ -11,7 +12,7 @@ export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-black">
       <Navbar />
-      
+
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-white mb-8">
@@ -23,7 +24,7 @@ export default function PrivacyPolicy() {
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">1. Introduction</h2>
               <p className="text-white/80">
-                StockTrackPro ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share your information when you use our mobile application.
+                StockTrackPro ("we", "our", "us") is committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, how we use it, and your rights when using our website, dashboard, and companion mobile app.
               </p>
             </div>
 
@@ -34,15 +35,15 @@ export default function PrivacyPolicy() {
               <ul className="space-y-3 text-white/80 mb-6">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Account information (email, name, company details)</span>
+                  <span>Account information (name, business email, password, company details)</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>User profile information</span>
+                  <span>Team invitations and role assignments (manager/user)</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Company and asset management data</span>
+                  <span>Company, asset, vehicle, inspection, and defect reporting data</span>
                 </li>
               </ul>
 
@@ -50,19 +51,19 @@ export default function PrivacyPolicy() {
               <ul className="space-y-3 text-white/80 mb-6">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Device information</span>
+                  <span>Device and app metadata (model, OS, app version)</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Usage data</span>
+                  <span>Usage and event data required to operate features</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Log data</span>
+                  <span>Security, audit, and service logs</span>
                 </li>
               </ul>
 
-              <h3 className="text-xl font-semibold text-white mb-3">2.3 Camera Access</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">2.3 Camera, Photos, and Notifications</h3>
               <p className="text-white/80 mb-4">We request access to your device's camera for:</p>
               <ul className="space-y-3 text-white/80">
                 <li className="flex items-start space-x-2">
@@ -81,13 +82,17 @@ export default function PrivacyPolicy() {
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Vehicle inspection photos are stored securely in our cloud system</span>
                 </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>Push notification tokens to deliver operational alerts (for example, defect notifications)</span>
+                </li>
               </ul>
             </div>
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">3. How We Use Your Information</h2>
 
-              <h3 className="text-xl font-semibold text-white mb-3">3.1 Firebase Services</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">3.1 Core Platform Services</h3>
               <p className="text-white/80 mb-4">We use Firebase for:</p>
               <ul className="space-y-3 text-white/80 mb-6">
                 <li className="flex items-start space-x-2">
@@ -104,24 +109,20 @@ export default function PrivacyPolicy() {
                 </li>
               </ul>
 
-              <h3 className="text-xl font-semibold text-white mb-3">3.2 RevenueCat</h3>
-              <p className="text-white/80 mb-4">We use RevenueCat to manage subscriptions:</p>
+              <h3 className="text-xl font-semibold text-white mb-3">3.2 Billing, Email, and Notifications</h3>
+              <p className="text-white/80 mb-4">We use third-party providers to operate billing and communications:</p>
               <ul className="space-y-3 text-white/80">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Processing subscription purchases</span>
+                  <span>Stripe for subscription checkout, billing portal, payment processing, and webhook events</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Managing subscription status</span>
+                  <span>SMTP/email provider for invite and service emails</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Handling subscription renewals and cancellations</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Transaction data is processed securely through Apple's App Store</span>
+                  <span>Notification services for push alerts and scheduled compliance reminders</span>
                 </li>
               </ul>
             </div>
@@ -172,17 +173,23 @@ export default function PrivacyPolicy() {
               <ul className="space-y-3 text-white/80">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Subscriptions are managed through your Apple App Store account</span>
+                  <span>Subscriptions are sold and managed via our website checkout powered by Stripe</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Billing and payment information is handled by Apple</span>
+                  <span>Billing and payment information is handled by Stripe and your selected payment method provider</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>You can view and manage subscriptions in your App Store settings</span>
+                  <span>You can view and manage subscription details in the billing portal from your dashboard</span>
                 </li>
               </ul>
+              <p className="text-white/80 mt-4">
+                For billing-specific contractual terms, see our{' '}
+                <Link href="/subscription-terms" className="text-primary hover:underline">
+                  Subscription Terms
+                </Link>.
+              </p>
             </div>
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
@@ -195,11 +202,11 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>RevenueCat</span>
+                  <span>Stripe Payments Europe Ltd / Stripe, Inc.</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Apple App Store</span>
+                  <span>Email delivery provider (for transactional messages)</span>
                 </li>
               </ul>
               <p className="text-white/80">Each service has its own privacy policy that applies to your data.</p>
@@ -252,7 +259,7 @@ export default function PrivacyPolicy() {
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">5.</span>
-                    <span>Your account and all associated data will be permanently deleted</span>
+                    <span>Your account profile and access credentials are permanently deleted</span>
                   </li>
                 </ol>
               </div>
@@ -266,33 +273,21 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>All company data and settings</span>
+                  <span>Your user profile and user-level settings</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Asset and inventory records</span>
+                  <span>Data you created where deletion rights apply under your company role and applicable law</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Vehicle fleet data and inspection records</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>All uploaded photos and documents</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Team member information</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Location and access code data</span>
+                  <span>Records retained where required for legal, tax, security, fraud prevention, or dispute handling</span>
                 </li>
               </ul>
 
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
                 <p className="text-yellow-200/90 text-sm">
-                  <strong className="text-yellow-100">Important:</strong> Account deletion is permanent and cannot be undone. Please ensure you have exported any data you wish to keep before deleting your account. Note that subscription cancellations must be managed separately through your Apple App Store account settings.
+                  <strong className="text-yellow-100">Important:</strong> Account deletion is permanent and cannot be undone. Please ensure you export any data you wish to keep before deleting your account. Subscription cancellations are managed in your Stripe billing portal.
                 </p>
               </div>
             </div>
@@ -329,7 +324,7 @@ export default function PrivacyPolicy() {
             <div className="bg-black border border-primary/20 rounded-2xl p-8">
               <h2 className="text-2xl font-semibold text-white mb-4">13. App Store Requirements</h2>
               <p className="text-white/80">
-                This app is distributed through the Apple App Store and follows all Apple's privacy and data collection guidelines.
+                Our companion app follows applicable app store privacy and data transparency requirements.
               </p>
             </div>
           </div>

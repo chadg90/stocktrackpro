@@ -4,6 +4,12 @@ import React from 'react';
 import Navbar from '../components/Navbar';
 
 export default function Terms() {
+  const currentDate = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
   return (
     <div className="min-h-screen bg-zinc-900">
       <Navbar />
@@ -12,7 +18,7 @@ export default function Terms() {
         <div className="max-w-4xl mx-auto pt-20">
           <div className="prose prose-invert max-w-none">
             <h1 className="text-3xl font-bold text-white mb-8">Terms and Conditions</h1>
-            <p className="text-zinc-400 mb-4">Last Updated: February 4, 2024</p>
+            <p className="text-zinc-400 mb-4">Last Updated: {currentDate}</p>
 
             <p className="text-zinc-300 mb-8">
               Welcome to Stock Track PRO ("we," "our," "us"). These Terms and Conditions govern your use of our website, 
@@ -53,7 +59,7 @@ export default function Terms() {
             <p className="text-zinc-300 mb-4">
               Our services are provided on a subscription basis. Prices are clearly displayed on our pricing page 
               and may be subject to VAT. All prices are in British Pounds (GBP). Subscriptions are billed monthly 
-              based on the number of users.
+              based on subscribed vehicles. The standard plan is priced per vehicle with a minimum vehicle count.
             </p>
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">5. Data Privacy and Security</h2>
@@ -107,6 +113,9 @@ export default function Terms() {
             <p className="text-zinc-400 mt-12 mb-8">
               By using Stock Track PRO, you acknowledge that you have read, understood, and agree to these 
               Terms and Conditions.
+            </p>
+            <p className="text-zinc-400 mb-8">
+              Detailed billing and renewal rules are set out in our Subscription Terms.
             </p>
           </div>
         </div>

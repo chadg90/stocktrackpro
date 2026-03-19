@@ -36,6 +36,7 @@ const Footer = () => {
           </p>
           <div className="flex flex-wrap gap-4 text-sm text-white/90">
             <Link href="/terms" className="hover:text-blue-500">Terms & Conditions</Link>
+            <Link href="/subscription-terms" className="hover:text-blue-500">Subscription Terms</Link>
             <Link href="/privacy" className="hover:text-blue-500">Privacy Policy</Link>
             <Link href="/cookies" className="hover:text-blue-500">Cookie Policy</Link>
           </div>

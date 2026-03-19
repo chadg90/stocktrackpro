@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         const companyId = subscription.metadata?.company_id;
-        const tier = subscription.metadata?.tier;
+        const vehicleCountRaw = subscription.metadata?.vehicle_count;
         if (!companyId) break;
 
         const status = subscription.status;
@@ -167,12 +167,13 @@ export async function POST(request: NextRequest) {
           : null;
         
         const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
+        const subscribedVehicles = vehicleCountRaw ? parseInt(vehicleCountRaw, 10) : null;
 
         await db.collection('companies').doc(companyId).set(
           {
             subscription_status: firebaseStatus,
             subscription_type: 'stripe',
-            ...(tier && { subscription_tier: tier }),
+            ...(subscribedVehicles && { subscribed_vehicles: subscribedVehicles }),
             ...(expiryDate && { subscription_expiry_date: expiryDate }),
             ...(trialEndDate && { trial_end_date: trialEndDate }),
             stripe_subscription_id: subscription.id,
@@ -181,7 +182,7 @@ export async function POST(request: NextRequest) {
           },
           { merge: true }
         );
-        console.log('Updated company', companyId, 'subscription (customer.subscription.updated)', { stripeStatus: status, firebaseStatus, tier });
+        console.log('Updated company', companyId, 'subscription (customer.subscription.updated)', { stripeStatus: status, firebaseStatus, subscribedVehicles });
         break;
       }
 

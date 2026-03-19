@@ -265,6 +265,17 @@ export default function SubscriptionPage() {
         <p className="text-white/75">Per-vehicle billing via Stripe. Adjust your fleet size and manage billing here.</p>
       </div>
 
+      {company?.legacy && (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-5 py-4">
+          <p className="text-amber-100 font-medium">
+            Legacy pricing: your company remains on its initial agreed price long term.
+          </p>
+          <p className="text-amber-200/90 text-sm mt-1">
+            This account is excluded from new per-vehicle pricing unless you request a plan change.
+          </p>
+        </div>
+      )}
+
       <div className="dashboard-card p-8">
         <div className="flex items-start justify-between mb-8">
           <div className="flex-1">

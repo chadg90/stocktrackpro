@@ -31,19 +31,23 @@ export default function HowTo() {
                 <ol className="space-y-2 text-white/80">
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">1</span>
-                    <span>Download Stock Track PRO from the App Store</span>
+                    <span>Manager signs up on the StockTrackPro website and selects a vehicle count plan</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">2</span>
-                    <span>Create an account or sign in</span>
+                    <span>Manager accesses the web dashboard and completes initial company setup</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">3</span>
-                    <span>Join a company using an access code OR create a new company</span>
+                    <span>Manager invites team members by email from the Team page (role: Manager or User)</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">4</span>
-                    <span>Complete your profile setup</span>
+                    <span>Team members open invite link, set password, then sign in to the app</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">5</span>
+                    <span>Use login or forgot password only in the app (onboarding and in-app signup removed)</span>
                   </li>
                 </ol>
               </div>
@@ -53,15 +57,15 @@ export default function HowTo() {
                 <ol className="space-y-2 text-white/80">
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">1</span>
-                    <span>Go to Manager Dashboard</span>
+                    <span>Open the dashboard Team page and send individual or bulk invites</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">2</span>
-                    <span>Generate access codes for team members</span>
+                    <span>Assign role as Manager or User for each invite</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">3</span>
-                    <span>Set up locations for your assets</span>
+                    <span>Set up locations and operating structure for your assets and fleet</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">4</span>
@@ -289,23 +293,23 @@ export default function HowTo() {
                 <ol className="space-y-2 text-white/80">
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">1</span>
-                    <span>Go to Manager Dashboard</span>
+                    <span>Go to Team in the website dashboard</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">2</span>
-                    <span>Tap "Generate Access Code"</span>
+                    <span>Send invite by email (single or bulk)</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">3</span>
-                    <span>Share code with new team member</span>
+                    <span>Choose role as Manager or User</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">4</span>
-                    <span>Team member uses code during signup</span>
+                    <span>Team member accepts invite via link and sets their password</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">5</span>
-                    <span>They're automatically added to your company</span>
+                    <span>They are automatically added to your company and can sign in to the app</span>
                   </li>
                 </ol>
               </div>
