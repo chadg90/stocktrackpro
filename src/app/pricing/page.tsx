@@ -114,6 +114,9 @@ export default function Pricing() {
           <p className="text-lg sm:text-xl text-white/75 leading-relaxed">
             Pay per vehicle. No tiers, no hidden fees. Scale up or down — changes take effect from your next billing cycle.
           </p>
+          <p className="text-sm text-white/45 mt-3">
+            Already subscribed? Managers can manage billing from the dashboard subscription page.
+          </p>
         </div>
 
         <div className="max-w-2xl mx-auto">

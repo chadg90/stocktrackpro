@@ -4,8 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { CreditCard, Check, ExternalLink, AlertCircle, Calendar, Sparkles, Tag, X } from 'lucide-react';
+import { CreditCard, Check, ExternalLink, AlertCircle, Calendar, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+
+const PRICE_PER_VEHICLE = 8;
+const MIN_VEHICLES = 5;
+const MAX_VEHICLES = 100;
 
 type Profile = {
   company_id?: string;
@@ -14,102 +18,24 @@ type Profile = {
 
 type Company = {
   subscription_status?: string;
-  subscription_tier?: string;
   stripe_subscription_id?: string;
   stripe_customer_id?: string;
   subscription_type?: string;
   trial_end_date?: any;
+  subscribed_vehicles?: number;
+  legacy?: boolean;
 };
 
-type TierId = 'PRO_STARTER' | 'PRO_TEAM' | 'PRO_BUSINESS' | 'PRO_ENTERPRISE';
+type Tier = { label: string; assets: string; users: string; colour: string };
 
-const VALID_TIERS: TierId[] = ['PRO_STARTER', 'PRO_TEAM', 'PRO_BUSINESS', 'PRO_ENTERPRISE'];
+function getTier(count: number): Tier {
+  if (count <= 15) return { label: 'Starter', assets: '1,000 assets', users: 'Up to 15 users', colour: 'text-sky-400' };
+  if (count <= 35) return { label: 'Growth', assets: '5,000 assets', users: 'Up to 35 users', colour: 'text-indigo-400' };
+  if (count <= 75) return { label: 'Business', assets: '20,000 assets', users: 'Up to 75 users', colour: 'text-violet-400' };
+  return { label: 'Enterprise', assets: 'Unlimited assets', users: 'Unlimited users', colour: 'text-blue-400' };
+}
 
-type Tier = {
-  id: TierId;
-  name: string;
-  description: string;
-  price: number;
-  features: string[];
-};
-
-const tiers: Tier[] = [
-  {
-    id: 'PRO_STARTER',
-    name: "Starter",
-    description: "Perfect for individual users",
-    price: 19.99,
-    features: [
-      "Up to 1 user",
-      "Track up to 50 assets",
-      "Up to 5 vehicles",
-      "QR code scanning",
-      "Vehicle inspections",
-      "Fleet and asset management",
-      "7-day free trial for new users",
-    ]
-  },
-  {
-    id: 'PRO_TEAM',
-    name: "Team",
-    description: "Ideal for small teams",
-    price: 34.99,
-    features: [
-      "Up to 10 users",
-      "Track up to 500 assets",
-      "Up to 15 vehicles",
-      "Vehicle inspections and defect workflow",
-      "Full company dashboard",
-      "Priority email support",
-      "7-day free trial for new users",
-    ]
-  },
-  {
-    id: 'PRO_BUSINESS',
-    name: "Business",
-    description: "For growing businesses",
-    price: 49.99,
-    features: [
-      "Up to 40 users",
-      "Up to 1,500 assets",
-      "Up to 40 vehicles",
-      "All features included",
-      "Admin and manager roles",
-      "Full audit trail",
-      "7-day free trial for new users",
-    ]
-  },
-  {
-    id: 'PRO_ENTERPRISE',
-    name: "Enterprise",
-    description: "For large enterprises",
-    price: 119.99,
-    features: [
-      "Up to 75 users",
-      "Up to 1,500 assets",
-      "Up to 150 vehicles",
-      "Custom onboarding",
-      "Dedicated support",
-      "All features included",
-      "7-day free trial for new users",
-    ]
-  }
-];
-
-const formatPrice = (price: number) => {
-  return `£${price.toFixed(2)}`;
-};
-
-const formatTierName = (tier?: string) => {
-  if (!tier) return 'None';
-  const tierMap: Record<string, string> = {
-    'PRO_STARTER': 'Starter',
-    'PRO_TEAM': 'Team',
-    'PRO_BUSINESS': 'Business',
-    'PRO_ENTERPRISE': 'Enterprise',
-  };
-  return tierMap[tier] || tier;
-};
+const formatCurrency = (value: number) => `£${value.toFixed(2)}`;
 
 export default function SubscriptionPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -117,16 +43,11 @@ export default function SubscriptionPage() {
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
-  const [checkoutLoading, setCheckoutLoading] = useState<TierId | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [promoCode, setPromoCode] = useState('');
-  const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
-  const [promoCodeValidating, setPromoCodeValidating] = useState(false);
-  const [validatedPromoCode, setValidatedPromoCode] = useState<string | null>(null);
-  const [promoCodeTier, setPromoCodeTier] = useState<TierId | null>(null);
-  const [selectedTierForPromo, setSelectedTierForPromo] = useState<TierId | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [vehicleCount, setVehicleCount] = useState<number>(MIN_VEHICLES);
 
   const loadSubscriptionData = async (user: User) => {
     if (!firebaseDb) return;
@@ -141,7 +62,13 @@ export default function SubscriptionPage() {
         if (profileData.company_id) {
           const companySnap = await getDoc(doc(firebaseDb, 'companies', profileData.company_id));
           if (companySnap.exists()) {
-            setCompany(companySnap.data() as Company);
+            const companyData = companySnap.data() as Company;
+            setCompany(companyData);
+            if (companyData.subscribed_vehicles && companyData.subscribed_vehicles >= MIN_VEHICLES) {
+              setVehicleCount(Math.min(companyData.subscribed_vehicles, MAX_VEHICLES));
+            } else {
+              setVehicleCount(MIN_VEHICLES);
+            }
           }
         }
       }
@@ -168,13 +95,55 @@ export default function SubscriptionPage() {
         setLoading(false);
         return;
       }
-
       setAuthUser(user);
       loadSubscriptionData(user);
     });
 
     return () => unsub();
   }, []);
+
+  const handleSubscribe = async () => {
+    if (!profile?.company_id || !authUser) return;
+    setCheckoutError(null);
+    setCheckoutLoading(true);
+    try {
+      const token = await authUser.getIdToken();
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          vehicle_count: vehicleCount,
+          company_id: profile.company_id,
+        }),
+        signal: AbortSignal.timeout(25000),
+      });
+
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error(`Server error (${res.status}). ${res.status === 504 ? 'Request timed out. Please try again.' : 'Please check server logs.'}`);
+      }
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || `Checkout failed (${res.status})`);
+      }
+      if (data.url) window.location.href = data.url;
+      else throw new Error('No checkout URL');
+    } catch (e) {
+      let message = 'Something went wrong';
+      if (e instanceof Error) {
+        message = e.name === 'AbortError' || e.message.includes('timeout')
+          ? 'Request timed out. The server may be slow. Please try again.'
+          : e.message;
+      }
+      setCheckoutError(message);
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
 
   const handleManageBilling = async () => {
     if (!authUser) return;
@@ -206,16 +175,8 @@ export default function SubscriptionPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to sync subscription');
-      }
-      // Reload page data
-      if (profile?.company_id && firebaseDb) {
-        const companySnap = await getDoc(doc(firebaseDb, 'companies', profile.company_id));
-        if (companySnap.exists()) {
-          setCompany(companySnap.data() as Company);
-        }
-      }
+      if (!res.ok) throw new Error(data.error || 'Failed to sync subscription');
+      await loadSubscriptionData(authUser);
       if (data.synced === false && data.message) {
         alert(data.message);
       } else {
@@ -226,156 +187,6 @@ export default function SubscriptionPage() {
       alert(err instanceof Error ? err.message : 'Could not sync subscription.');
     } finally {
       setSyncing(false);
-    }
-  };
-
-  const validatePromoCode = async () => {
-    if (!promoCode.trim() || !firebaseDb) {
-      setPromoCodeError('Please enter a promo code');
-      return;
-    }
-
-    if (!profile?.company_id || !authUser) {
-      setPromoCodeError('Please log in to use a promo code');
-      return;
-    }
-
-    setPromoCodeValidating(true);
-    setPromoCodeError(null);
-    
-    try {
-      const trimmedCode = promoCode.trim().toUpperCase();
-      const promoCodeRef = doc(firebaseDb, 'promoCodes', trimmedCode);
-      const promoSnap = await getDoc(promoCodeRef);
-      
-      if (!promoSnap.exists()) {
-        setPromoCodeError('Invalid promo code');
-        setValidatedPromoCode(null);
-        setPromoCodeValidating(false);
-        return;
-      }
-      
-      const promoData = promoSnap.data();
-      
-      // Check if code is expired
-      if (promoData?.expiresAt) {
-        const expiresAt = promoData.expiresAt.toDate ? promoData.expiresAt.toDate() : new Date(promoData.expiresAt);
-        if (expiresAt < new Date()) {
-          setPromoCodeError('This promo code has expired');
-          setValidatedPromoCode(null);
-          setPromoCodeValidating(false);
-          return;
-        }
-      }
-      
-      // Check if code has reached max uses
-      if (promoData?.maxUses && promoData?.usedCount >= promoData.maxUses) {
-        setPromoCodeError('This promo code has reached its usage limit');
-        setValidatedPromoCode(null);
-        setPromoCodeValidating(false);
-        return;
-      }
-      
-      // Check if code is already used (single-use codes)
-      if (promoData?.used === true && !promoData?.maxUses) {
-        setPromoCodeError('This promo code has already been used');
-        setValidatedPromoCode(null);
-        setPromoCodeValidating(false);
-        return;
-      }
-      
-      // Check if promo code has a tier restriction
-      const promoCodeRestrictedTier = promoData?.tier as TierId | null | undefined;
-      
-      // Valid promo code
-      setValidatedPromoCode(trimmedCode);
-      setPromoCodeTier(promoCodeRestrictedTier || null);
-      setPromoCodeError(null);
-      
-      // If promo code has a tier restriction, use that tier immediately
-      if (promoCodeRestrictedTier && VALID_TIERS.includes(promoCodeRestrictedTier)) {
-        // Start checkout immediately with restricted tier
-        await handleSubscribe(promoCodeRestrictedTier);
-      } else {
-        // No tier restriction - user needs to select tier
-        // Use company's selected tier if available, otherwise default to Starter
-        const defaultTier = (currentTier as TierId) || 'PRO_STARTER';
-        setSelectedTierForPromo(defaultTier);
-        // Don't auto-checkout - let user select tier first
-      }
-      
-    } catch (error) {
-      console.error('Error validating promo code:', error);
-      setPromoCodeError('Failed to validate promo code. Please try again.');
-      setValidatedPromoCode(null);
-    } finally {
-      setPromoCodeValidating(false);
-    }
-  };
-
-  const clearPromoCode = () => {
-    setPromoCode('');
-    setValidatedPromoCode(null);
-    setPromoCodeTier(null);
-    setSelectedTierForPromo(null);
-    setPromoCodeError(null);
-  };
-
-  const handlePromoCodeCheckout = async () => {
-    if (!validatedPromoCode) return;
-    
-    // Determine which tier to use
-    const tierToUse = promoCodeTier || selectedTierForPromo || (currentTier as TierId) || 'PRO_STARTER';
-    
-    // Start checkout
-    await handleSubscribe(tierToUse);
-  };
-
-  const handleSubscribe = async (tier: TierId) => {
-    if (!profile?.company_id || !authUser) return;
-    setCheckoutError(null);
-    setPromoCodeError(null);
-    setCheckoutLoading(tier);
-    try {
-      const token = await authUser.getIdToken();
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ 
-          tier, 
-          company_id: profile.company_id,
-          promo_code: validatedPromoCode || promoCode.trim() || undefined,
-        }),
-        signal: AbortSignal.timeout(25000),
-      });
-      
-      const contentType = res.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await res.text();
-        throw new Error(`Server error (${res.status}). ${res.status === 504 ? 'Request timed out. Please try again.' : 'Please check server logs.'}`);
-      }
-      
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || `Checkout failed (${res.status})`);
-      }
-      if (data.url) window.location.href = data.url;
-      else throw new Error('No checkout URL');
-    } catch (e) {
-      let message = 'Something went wrong';
-      if (e instanceof Error) {
-        if (e.name === 'AbortError' || e.message.includes('timeout')) {
-          message = 'Request timed out. The server may be slow. Please try again.';
-        } else {
-          message = e.message;
-        }
-      }
-      setCheckoutError(message);
-    } finally {
-      setCheckoutLoading(null);
     }
   };
 
@@ -410,10 +221,10 @@ export default function SubscriptionPage() {
     if (!trialEndDate) return null;
     try {
       const date = trialEndDate.toDate ? trialEndDate.toDate() : new Date(trialEndDate);
-      return date.toLocaleDateString('en-GB', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      return date.toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
       });
     } catch {
       return null;
@@ -429,8 +240,10 @@ export default function SubscriptionPage() {
   }
 
   const canManage = profile?.role === 'manager' || profile?.role === 'admin';
-  const currentTier = company?.subscription_tier;
   const subscriptionStatus = company?.subscription_status;
+  const tier = getTier(vehicleCount);
+  const currentVehicles = company?.subscribed_vehicles || 0;
+  const monthlyTotal = vehicleCount * PRICE_PER_VEHICLE;
 
   return (
     <div className="space-y-8">
@@ -446,13 +259,12 @@ export default function SubscriptionPage() {
           </button>
         </div>
       )}
-      {/* Page Header */}
+
       <div className="border-b border-white/10 pb-6">
         <h1 className="text-3xl font-bold text-white mb-2">Subscription Management</h1>
-        <p className="text-white/75">View your subscription status and manage your plan</p>
+        <p className="text-white/75">Per-vehicle billing via Stripe. Adjust your fleet size and manage billing here.</p>
       </div>
 
-      {/* Current Subscription Status */}
       <div className="dashboard-card p-8">
         <div className="flex items-start justify-between mb-8">
           <div className="flex-1">
@@ -460,47 +272,36 @@ export default function SubscriptionPage() {
               <CreditCard className="w-6 h-6 text-blue-500" />
               Current Subscription
             </h2>
-            <p className="text-white/75">Your current plan and billing information</p>
+            <p className="text-white/75">Status and billing controls</p>
           </div>
           {getStatusBadge(subscriptionStatus)}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-            <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Plan</p>
-            <p className="text-white font-semibold text-lg">{formatTierName(currentTier)}</p>
+            <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Current Vehicles</p>
+            <p className="text-white font-semibold text-lg">{currentVehicles || 'Not set'}</p>
           </div>
           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-            <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Status</p>
-            <p className="text-white font-semibold text-lg capitalize">{subscriptionStatus || 'Inactive'}</p>
+            <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Estimated Monthly</p>
+            <p className="text-white font-semibold text-lg">{currentVehicles ? formatCurrency(currentVehicles * PRICE_PER_VEHICLE) : '—'}</p>
           </div>
-          {subscriptionStatus === 'trial' && company?.trial_end_date && (
+          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+            <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Feature Tier</p>
+            <p className={`font-semibold text-lg ${tier.colour}`}>{tier.label}</p>
+          </div>
+          {subscriptionStatus === 'trial' && company?.trial_end_date ? (
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Trial Ends</p>
               <p className="text-white font-semibold text-lg">{formatTrialEndDate(company.trial_end_date) || 'N/A'}</p>
             </div>
-          )}
-          {company?.stripe_customer_id && (
+          ) : (
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Billing</p>
-              <p className="text-white font-semibold text-lg">Stripe (website)</p>
-            </div>
-          )}
-          {((subscriptionStatus === 'active' || subscriptionStatus === 'trial') && !company?.stripe_customer_id) && (
-            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-              <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Billing</p>
-              <p className="text-white font-semibold text-lg">App / other</p>
+              <p className="text-white font-semibold text-lg">{company?.stripe_customer_id ? 'Stripe (website)' : 'Not linked yet'}</p>
             </div>
           )}
         </div>
-
-        {(subscriptionStatus === 'active' || subscriptionStatus === 'trial') && !company?.stripe_customer_id && (
-          <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-            <p className="text-blue-500 text-sm">
-              You subscribed via the app or another channel. Your subscription is active. Manage your billing using the chosen method when subscribing.
-            </p>
-          </div>
-        )}
 
         <div className="flex flex-wrap gap-4">
           {canManage && (
@@ -509,17 +310,14 @@ export default function SubscriptionPage() {
                 onClick={handleManageBilling}
                 disabled={portalLoading || !company?.stripe_customer_id}
                 className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
-                title={!company?.stripe_customer_id ? (subscriptionStatus === 'active' || subscriptionStatus === 'trial' ? 'Billing is managed via the app' : 'Subscribe first to manage billing') : 'Open Stripe billing portal'}
-                aria-label={portalLoading ? 'Opening billing portal' : (!company?.stripe_customer_id ? 'Billing managed via app' : 'Open Stripe billing portal')}
               >
-                <ExternalLink className="w-4 h-4" aria-hidden />
+                <ExternalLink className="w-4 h-4" />
                 {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
               </button>
               <button
                 onClick={handleSyncSubscription}
                 disabled={syncing}
                 className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-colors disabled:opacity-60"
-                aria-label={syncing ? 'Syncing subscription' : 'Sync subscription with Stripe'}
               >
                 {syncing ? (
                   <>
@@ -536,264 +334,66 @@ export default function SubscriptionPage() {
             </>
           )}
         </div>
-
-        {subscriptionStatus !== 'active' && subscriptionStatus !== 'trial' && (
-          <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-            <p className="text-yellow-400 text-sm flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              Your subscription is inactive. Subscribe to continue using the dashboard.
-            </p>
-          </div>
-        )}
       </div>
 
-      {/* Promo Code Section */}
       {canManage && (
         <div className="dashboard-card p-8">
-          <h2 className="text-2xl font-semibold text-white mb-2 flex items-center gap-3">
-            <Tag className="w-6 h-6 text-blue-500" />
-            Promo Code Checkout
-          </h2>
-          <p className="text-white/75 mb-6">Enter a promo code to validate and proceed to checkout</p>
-          
-          <div className="flex gap-3">
-            <div className="flex-1 relative">
-              <input
-                type="text"
-                value={promoCode}
-                onChange={(e) => {
-                  setPromoCode(e.target.value.toUpperCase());
-                  setPromoCodeError(null);
-                  setValidatedPromoCode(null);
-                  setPromoCodeTier(null);
-                  setSelectedTierForPromo(null);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && promoCode.trim() && !promoCodeValidating) {
-                    validatePromoCode();
-                  }
-                }}
-                placeholder="Enter promo code"
-                disabled={promoCodeValidating || validatedPromoCode !== null}
-                className={`w-full rounded-lg bg-white/5 border px-4 py-3 pr-10 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all uppercase font-medium ${
-                  validatedPromoCode 
-                    ? 'border-green-500/50 bg-green-500/10' 
-                    : promoCodeError 
-                    ? 'border-red-500/50 bg-red-500/10' 
-                    : 'border-white/20'
-                } disabled:opacity-50`}
-              />
-              {validatedPromoCode && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <Check className="w-5 h-5 text-green-400" />
-                </div>
-              )}
+          <h2 className="text-2xl font-semibold text-white mb-2">Update Vehicle Count</h2>
+          <p className="text-white/75 mb-6">
+            £{PRICE_PER_VEHICLE} per vehicle per month (minimum {MIN_VEHICLES}). Changes apply from your next billing cycle.
+          </p>
+
+          {checkoutError && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              {checkoutError}
             </div>
-            {!validatedPromoCode ? (
-              <button
-                onClick={validatePromoCode}
-                disabled={!promoCode.trim() || promoCodeValidating}
-                className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 flex items-center gap-2"
-              >
-                {promoCodeValidating ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-black"></div>
-                    Validating...
-                  </>
-                ) : (
-                  <>
-                    <Check className="w-4 h-4" />
-                    Validate
-                  </>
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={clearPromoCode}
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-semibold flex items-center gap-2"
-              >
-                <X className="w-4 h-4" />
-                Clear
-              </button>
-            )}
+          )}
+
+          <div className="max-w-2xl">
+            <div className="flex items-center justify-between text-sm text-white/60 mb-3">
+              <span>Vehicles</span>
+              <span className="text-white font-semibold">{vehicleCount}</span>
+            </div>
+            <input
+              type="range"
+              min={MIN_VEHICLES}
+              max={MAX_VEHICLES}
+              step={1}
+              value={vehicleCount}
+              onChange={(e) => setVehicleCount(Number(e.target.value))}
+              className="w-full h-2 rounded-full appearance-none cursor-pointer bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:border-0"
+              style={{
+                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((vehicleCount - MIN_VEHICLES) / (MAX_VEHICLES - MIN_VEHICLES)) * 100}%, rgba(255,255,255,0.1) ${((vehicleCount - MIN_VEHICLES) / (MAX_VEHICLES - MIN_VEHICLES)) * 100}%, rgba(255,255,255,0.1) 100%)`,
+              }}
+              aria-label="Number of vehicles"
+            />
+            <div className="flex justify-between text-xs text-white/30 mt-2">
+              <span>{MIN_VEHICLES} min</span>
+              <span>{MAX_VEHICLES}+</span>
+            </div>
+            <div className="mt-4 flex items-center justify-between text-sm">
+              <span className="text-white/60">Estimated monthly total</span>
+              <span className="text-white font-semibold">{formatCurrency(monthlyTotal)}</span>
+            </div>
+            <div className="mt-2 text-sm text-white/70">
+              <span className={tier.colour}>{tier.label}</span> includes {tier.assets}, {tier.users}
+            </div>
+            <button
+              onClick={handleSubscribe}
+              disabled={checkoutLoading}
+              className="mt-6 w-full py-3 px-4 rounded-lg font-semibold transition-all bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 disabled:opacity-50"
+            >
+              {checkoutLoading ? 'Processing...' : `Continue to Checkout — ${formatCurrency(monthlyTotal)}/month`}
+            </button>
           </div>
-          
-          {/* Tier Selection (shown if promo code doesn't restrict tier) */}
-          {validatedPromoCode && !promoCodeTier && (
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-white/80 mb-3">
-                Select Plan for Trial
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {tiers.map((tier) => (
-                  <button
-                    key={tier.id}
-                    type="button"
-                    onClick={() => setSelectedTierForPromo(tier.id)}
-                    className={`p-4 rounded-lg border-2 text-left transition-colors ${
-                      selectedTierForPromo === tier.id
-                        ? 'border-blue-500 bg-blue-500/10'
-                        : 'border-white/10 bg-white/5 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="font-semibold text-white text-sm mb-1">{tier.name}</div>
-                    <div className="text-white/60 text-xs">{formatPrice(tier.price)}/mo</div>
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={handlePromoCodeCheckout}
-                disabled={!selectedTierForPromo}
-                className="mt-4 w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
-              >
-                <Check className="w-4 h-4" />
-                Proceed to Checkout
-              </button>
-            </div>
-          )}
-          
-          {validatedPromoCode && promoCodeTier && (
-            <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-              <p className="text-green-400 text-sm flex items-center gap-2">
-                <Check className="w-4 h-4 shrink-0" />
-                Promo code <span className="font-semibold">{validatedPromoCode}</span> is valid for <span className="font-semibold">{formatTierName(promoCodeTier)}</span> plan. Redirecting to checkout...
-              </p>
-            </div>
-          )}
-          
-          {promoCodeError && (
-            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <p className="text-red-400 text-sm flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                {promoCodeError}
-              </p>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Available Plans */}
-      <div>
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-white mb-2">Available Plans</h2>
-          <p className="text-white/75">Choose the plan that best fits your needs</p>
-        </div>
-        {checkoutError && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 shrink-0" />
-            {checkoutError}
-          </div>
-        )}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-          {tiers.map((tier) => {
-            const isCurrentTier = currentTier === tier.id;
-            
-            // Determine tier order for upgrade/downgrade detection
-            const tierOrder: Record<TierId, number> = {
-              'PRO_STARTER': 1,
-              'PRO_TEAM': 2,
-              'PRO_BUSINESS': 3,
-              'PRO_ENTERPRISE': 4,
-            };
-            
-            const isUpgrade = currentTier && 
-              tierOrder[currentTier as TierId] < tierOrder[tier.id] &&
-              tier.id !== currentTier;
-            
-            const isDowngrade = currentTier && 
-              tierOrder[currentTier as TierId] > tierOrder[tier.id] &&
-              tier.id !== currentTier;
-
-            // If the subscription is active/trial but not linked to Stripe (no customer id),
-            // treat it as app/other and allow starting a website subscription for the same tier.
-            const isAppOnlySubscription =
-              (subscriptionStatus === 'active' || subscriptionStatus === 'trial') &&
-              !company?.stripe_customer_id;
-
-            const isAppOnlyCurrentTier = isCurrentTier && isAppOnlySubscription;
-            
-            return (
-              <div
-                key={tier.id}
-                className={`dashboard-card p-6 flex flex-col transition-all hover:scale-[1.02] ${
-                  isCurrentTier ? 'ring-2 ring-blue-500 shadow-lg shadow-blue-500/20' : 'hover:border-blue-500/30'
-                }`}
-              >
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-bold text-white">{tier.name}</h3>
-                    {isCurrentTier && (
-                      <span className="text-xs px-3 py-1 bg-blue-500/20 text-blue-500 rounded-full font-semibold">Current</span>
-                    )}
-                  </div>
-                  <p className="text-white/75 text-sm mb-4">{tier.description}</p>
-                  <div className="mb-6 pb-6 border-b border-white/10">
-                    <span className="text-3xl font-bold text-white">{formatPrice(tier.price)}</span>
-                    <span className="text-white/75 text-sm ml-2">/month</span>
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-6 flex-1">
-                  {tier.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-sm text-white/90">
-                      <Check className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {canManage && (
-                  <button
-                    onClick={() => handleSubscribe(tier.id)}
-                    disabled={checkoutLoading === tier.id || (isCurrentTier && !isAppOnlyCurrentTier)}
-                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all ${
-                      isCurrentTier && !isAppOnlyCurrentTier
-                        ? 'bg-white/10 text-white/60 cursor-not-allowed'
-                        : isUpgrade
-                        ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                        : isDowngrade
-                        ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/40'
-                        : subscriptionStatus !== 'active' && subscriptionStatus !== 'trial'
-                          ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                          : isAppOnlyCurrentTier
-                        ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                        : 'bg-white/10 hover:bg-white/20 text-white'
-                    } disabled:opacity-50`}
-                  >
-                    {checkoutLoading === tier.id
-                      ? 'Processing...'
-                      : isCurrentTier && !isAppOnlyCurrentTier
-                      ? 'Current Plan'
-                      : isUpgrade
-                      ? 'Upgrade Now'
-                      : isDowngrade
-                      ? 'Downgrade'
-                      : subscriptionStatus !== 'active' && subscriptionStatus !== 'trial'
-                      ? 'Subscribe Now'
-                      : isAppOnlyCurrentTier
-                      ? 'Subscribe Now'
-                      : 'Change Plan'}
-                  </button>
-                )}
-
-                {!canManage && (
-                  <div className="text-center py-3 px-4 bg-white/5 rounded-lg border border-white/10">
-                    <p className="text-white/40 text-xs">
-                      Only managers and admins can manage subscriptions
-                    </p>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Help Section */}
       <div className="dashboard-card p-8 bg-gradient-to-br from-white/5 to-transparent border-blue-500/20">
         <h2 className="text-2xl font-semibold text-white mb-3">Need Help?</h2>
         <p className="text-white/80 mb-6">
-          If you have questions about your subscription or need assistance, we're here to help.
+          If you have questions about billing or need help changing your vehicle count, contact support.
         </p>
         <div className="flex flex-wrap gap-4">
           <Link
@@ -807,7 +407,7 @@ export default function SubscriptionPage() {
             href="/pricing"
             className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
           >
-            View Pricing Details
+            View Public Pricing
             <ExternalLink className="w-4 h-4" />
           </Link>
         </div>
