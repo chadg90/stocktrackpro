@@ -1,108 +1,95 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Check } from 'lucide-react';
+import Link from 'next/link';
+
+const PRICE_PER_VEHICLE = 8;
+const MIN_VEHICLES = 5;
+const MAX_VEHICLES = 100;
 
 export default function PricingSection() {
-  const tiers = [
-    {
-      name: "Professional Starter",
-      description: "Perfect for individual users",
-      price: 19.99,
-      features: [
-        "Track up to 50 assets",
-        "Up to 5 vehicles",
-        "1 user account",
-        "QR code scanning",
-        "Vehicle inspections",
-        "Basic reporting",
-        "Mobile app access",
-        "7-day free trial for new users",
-      ]
-    },
-    {
-      name: "Professional Team",
-      description: "Ideal for small teams",
-      price: 34.99,
-      features: [
-        "Track up to 500 assets",
-        "Up to 15 vehicles",
-        "Up to 10 team members",
-        "QR code scanning",
-        "Vehicle inspections",
-        "Basic reporting",
-        "Mobile app access",
-        "7-day free trial for new users",
-      ]
-    },
-    {
-      name: "Professional Business",
-      description: "For growing businesses",
-      price: 49.99,
-      features: [
-        "Unlimited asset tracking",
-        "Up to 40 vehicles",
-        "Up to 40 team members",
-        "QR code scanning",
-        "Vehicle inspections",
-        "Basic reporting",
-        "Mobile app access",
-        "7-day free trial for new users",
-      ]
-    }
+  const [vehicleCount, setVehicleCount] = useState(MIN_VEHICLES);
+  const monthlyTotal = vehicleCount * PRICE_PER_VEHICLE;
+
+  const features = [
+    'Unlimited vehicle inspections',
+    'Defect reporting & workflow',
+    'MOT & Tax expiry reminders',
+    'Full company dashboard',
+    'Team management & invites',
+    'QR code scanning',
+    'Asset & tool tracking',
+    'iOS & Android mobile app',
+    'Priority email support',
   ];
 
   return (
-    <section id="pricing" className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
+    <section id="pricing" className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-            Simple, transparent pricing
-          </h2>
-          <p className="mt-4 text-lg text-gray-600">
-            Subscriptions are managed in the app. New users receive a 7-day free trial.
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Simple, transparent pricing</h2>
+          <p className="mt-3 text-lg text-gray-600">
+            £{PRICE_PER_VEHICLE} per vehicle per month. All features included. No tiers.
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">
-          {tiers.map((tier) => (
-            <div
-              key={tier.name}
-              className="rounded-lg bg-white shadow-lg divide-y divide-gray-200 flex flex-col"
-            >
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 text-center">{tier.name}</h3>
-                <p className="mt-2 text-sm text-gray-500 text-center">{tier.description}</p>
-                <p className="mt-4">
-                  <span className="text-3xl font-bold text-gray-900">
-                    £{tier.price}
-                  </span>
-                  <span className="text-base font-medium text-gray-500">/month</span>
-                </p>
-                <a href="/contact" className="mt-6 w-full bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 transition-colors text-sm text-center block">
-                  Contact
-                </a>
+        {/* Card */}
+        <div className="rounded-2xl bg-white shadow-xl border border-gray-200 overflow-hidden">
+          <div className="bg-blue-600 px-8 py-6 text-center">
+            <div className="flex items-end justify-center gap-1">
+              <span className="text-5xl font-bold text-white">£{monthlyTotal}</span>
+              <span className="text-blue-200 text-lg mb-1">/month</span>
+            </div>
+            <p className="text-blue-200 text-sm mt-1">
+              £{PRICE_PER_VEHICLE} &times; {vehicleCount} vehicle{vehicleCount !== 1 ? 's' : ''}
+            </p>
+          </div>
+
+          <div className="px-8 py-6">
+            {/* Slider */}
+            <div className="mb-6">
+              <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Number of vehicles</span>
+                <span className="font-semibold text-gray-900">{vehicleCount}</span>
               </div>
-              <div className="p-6 flex-1">
-                <ul className="space-y-3">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start">
-                      <Check className="h-4 w-4 text-green-500 shrink-0 mt-0.5 mr-2" />
-                      <span className="text-sm text-gray-600 leading-relaxed">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+              <input
+                type="range"
+                min={MIN_VEHICLES}
+                max={MAX_VEHICLES}
+                step={1}
+                value={vehicleCount}
+                onChange={(e) => setVehicleCount(Number(e.target.value))}
+                className="w-full h-2 rounded-full appearance-none cursor-pointer accent-blue-600"
+                aria-label="Number of vehicles"
+              />
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <span>{MIN_VEHICLES} min</span>
+                <span>{MAX_VEHICLES}+</span>
               </div>
             </div>
-          ))}
+
+            <Link
+              href="/pricing"
+              className="block w-full bg-blue-600 text-white text-center rounded-xl py-3 px-6 font-semibold hover:bg-blue-700 transition-colors mb-6"
+            >
+              Get Started — £{monthlyTotal}/month
+            </Link>
+
+            <ul className="space-y-2">
+              {features.map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-600">{f}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-
-        {/* Pricing Notice */}
-        <p className="mt-8 text-center text-sm text-gray-500">
-          All prices include VAT at 20%
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Minimum {MIN_VEHICLES} vehicles &bull; 7-day free trial &bull; All prices include VAT &bull; Cancel anytime
         </p>
       </div>
     </section>

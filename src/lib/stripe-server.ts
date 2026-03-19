@@ -14,23 +14,18 @@ export function getStripe(): Stripe {
   return stripeInstance;
 }
 
-export type SubscriptionTier = 'PRO_STARTER' | 'PRO_TEAM' | 'PRO_BUSINESS' | 'PRO_ENTERPRISE';
+export type SubscriptionTier = 'PRO_PER_VEHICLE';
 
-const TIER_TO_PRICE_KEY: Record<SubscriptionTier, string> = {
-  PRO_STARTER: 'STRIPE_PRICE_STARTER',
-  PRO_TEAM: 'STRIPE_PRICE_TEAM',
-  PRO_BUSINESS: 'STRIPE_PRICE_BUSINESS',
-  PRO_ENTERPRISE: 'STRIPE_PRICE_ENTERPRISE',
-};
-
-export function getStripePriceId(tier: SubscriptionTier): string {
-  const key = TIER_TO_PRICE_KEY[tier];
-  const priceId = process.env[key];
+export function getStripePriceId(_tier: SubscriptionTier): string {
+  const priceId = process.env.STRIPE_PRICE_PER_VEHICLE;
   if (!priceId) {
-    throw new Error(`Missing env: ${key} for tier ${tier}`);
+    throw new Error('Missing env: STRIPE_PRICE_PER_VEHICLE');
   }
   return priceId;
 }
+
+export const MIN_VEHICLES = 5;
+export const PRICE_PER_VEHICLE = 8; // GBP
 
 /** Create a Stripe Customer Portal session for managing subscription. Requires company to have stripe_customer_id. */
 export async function createBillingPortalSession(

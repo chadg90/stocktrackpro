@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStripe, getStripePriceId, type SubscriptionTier } from '@/lib/stripe-server';
+import { getStripe, getStripePriceId, MIN_VEHICLES } from '@/lib/stripe-server';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 // Increase timeout for Vercel (max 60s on Pro, 10s on Hobby)
 export const maxDuration = 60;
 
-const VALID_TIERS: SubscriptionTier[] = ['PRO_STARTER', 'PRO_TEAM', 'PRO_BUSINESS', 'PRO_ENTERPRISE'];
+const TIER = 'PRO_PER_VEHICLE' as const;
 
 const CHECKOUT_WINDOW_MS = 60 * 1000; // 1 minute
 const CHECKOUT_MAX_REQUESTS = 10;
@@ -91,31 +91,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    let { tier, company_id: companyId, promo_code } = body as { tier?: string; company_id?: string; promo_code?: string };
+    const { vehicle_count, company_id: companyId } = body as { vehicle_count?: number; company_id?: string };
 
-    // If promo code is provided, check if it has a tier restriction and use that tier
-    if (promo_code && promo_code.trim()) {
-      try {
-        const db = getAdminDb();
-        const trimmedPromoCode = promo_code.trim().toUpperCase();
-        const promoCodeSnap = await db.collection('promoCodes').doc(trimmedPromoCode).get();
-        if (promoCodeSnap.exists) {
-          const promoData = promoCodeSnap.data();
-          // If promo code has a tier restriction, use that tier instead of the requested tier
-          if (promoData?.tier && VALID_TIERS.includes(promoData.tier as SubscriptionTier)) {
-            console.log('[Checkout] Promo code tier restriction:', promoData.tier, 'overriding requested tier:', tier);
-            tier = promoData.tier;
-          }
-        }
-      } catch (promoTierError) {
-        console.error('[Checkout] Error checking promo code tier:', promoTierError);
-        // Continue with original tier if check fails
-      }
-    }
-
-    if (!tier || !VALID_TIERS.includes(tier as SubscriptionTier)) {
+    const vehicleCount = Number(vehicle_count);
+    if (!vehicleCount || vehicleCount < MIN_VEHICLES || vehicleCount > 500 || !Number.isInteger(vehicleCount)) {
       return NextResponse.json(
-        { error: 'Invalid or missing tier' },
+        { error: `vehicle_count must be a whole number between ${MIN_VEHICLES} and 500` },
         { status: 400 }
       );
     }
@@ -178,7 +159,7 @@ export async function POST(request: NextRequest) {
 
     let priceId: string;
     try {
-      priceId = getStripePriceId(tier as SubscriptionTier);
+      priceId = getStripePriceId(TIER);
     } catch (priceError) {
       console.error('Price ID error:', priceError);
       return NextResponse.json(
@@ -187,122 +168,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate price ID format (Stripe price IDs start with price_)
     if (!priceId.startsWith('price_')) {
-      console.error('Invalid price ID format:', priceId);
       return NextResponse.json(
         { error: 'Invalid price ID format. Price IDs must start with "price_".' },
         { status: 500 }
       );
     }
 
-    // Log configuration for debugging
+    const trimmedCompanyId = companyId.trim();
     const secretKey = process.env.STRIPE_SECRET_KEY || '';
     const isLiveMode = secretKey.startsWith('sk_live_');
     console.log('[Checkout] Configuration:', {
       mode: isLiveMode ? 'LIVE' : 'TEST',
-      tier,
+      vehicleCount,
       priceId,
       baseUrl,
       successUrl,
       cancelUrl,
-      companyId: companyId.trim(),
+      companyId: trimmedCompanyId,
     });
 
-    // Validate metadata values (Stripe requires strings, max 500 chars each)
-    const trimmedCompanyId = companyId.trim();
-    if (trimmedCompanyId.length > 500) {
-      return NextResponse.json(
-        { error: 'Company ID too long for Stripe metadata' },
-        { status: 400 }
-      );
-    }
-    if (tier.length > 500) {
-      return NextResponse.json(
-        { error: 'Tier value too long for Stripe metadata' },
-        { status: 400 }
-      );
-    }
-
-    // Check if company is new (hasn't had a Stripe subscription before)
-    // Apply 7-day free trial for new companies
     const companySnap = await db.collection('companies').doc(trimmedCompanyId).get();
     const companyData = companySnap.exists ? companySnap.data() : null;
     const hasPreviousStripeSubscription = companyData?.stripe_subscription_id != null;
-    const isNewCompany = !hasPreviousStripeSubscription && 
+    const isNewCompany = !hasPreviousStripeSubscription &&
       (companyData?.subscription_status === 'trial' || companyData?.subscription_status == null);
-    
-    // Validate promo code if provided
-    let stripePromoCode: string | undefined = undefined;
-    if (promo_code && promo_code.trim()) {
-      const trimmedPromoCode = promo_code.trim().toUpperCase();
-      try {
-        const promoCodeSnap = await db.collection('promoCodes').doc(trimmedPromoCode).get();
-        if (!promoCodeSnap.exists) {
-          return NextResponse.json(
-            { error: 'Invalid promo code' },
-            { status: 400 }
-          );
-        }
-        const promoData = promoCodeSnap.data();
-        
-        // Note: Tier validation already happened earlier - if promo code has a tier restriction,
-        // the tier was already set to match the promo code's tier. This check is just for logging.
-        if (promoData?.tier && promoData.tier !== tier) {
-          console.warn('[Checkout] Promo code tier mismatch - this should not happen:', {
-            promoCodeTier: promoData.tier,
-            requestedTier: tier
-          });
-        }
-        
-        // Check if code is expired
-        if (promoData?.expiresAt) {
-          const expiresAt = promoData.expiresAt.toDate ? promoData.expiresAt.toDate() : new Date(promoData.expiresAt);
-          if (expiresAt < new Date()) {
-            return NextResponse.json(
-              { error: 'This promo code has expired' },
-              { status: 400 }
-            );
-          }
-        }
-        
-        // Check if code has reached max uses
-        if (promoData?.maxUses && promoData?.usedCount >= promoData.maxUses) {
-          return NextResponse.json(
-            { error: 'This promo code has reached its usage limit' },
-            { status: 400 }
-          );
-        }
-        
-        // Check if code is already used (single-use codes)
-        if (promoData?.used === true && !promoData?.maxUses) {
-          return NextResponse.json(
-            { error: 'This promo code has already been used' },
-            { status: 400 }
-          );
-        }
-        
-        // Use the promo code ID as the Stripe coupon/promo code
-        // Note: Stripe promo codes are created in Stripe dashboard and referenced by ID
-        // For now, we'll store the promo code in metadata and handle discount in webhook
-        stripePromoCode = trimmedPromoCode;
-        console.log('[Checkout] Valid promo code:', trimmedPromoCode);
-      } catch (promoError: any) {
-        console.error('[Checkout] Error validating promo code:', promoError);
-        return NextResponse.json(
-          { error: 'Failed to validate promo code. Please try again.' },
-          { status: 500 }
-        );
-      }
-    }
-    
+
     console.log('[Checkout] Company subscription status:', {
       companyId: trimmedCompanyId,
       subscription_status: companyData?.subscription_status,
-      stripe_subscription_id: companyData?.stripe_subscription_id,
       isNewCompany,
-      willApplyTrial: isNewCompany,
-      promoCode: stripePromoCode || null,
     });
 
     // Prevent creating a second website (Stripe) subscription if one is already active/trial.
@@ -323,38 +218,24 @@ export async function POST(request: NextRequest) {
     const stripe = getStripe();
     let session;
     try {
-      const sessionParams: any = {
+      session = await stripe.checkout.sessions.create({
         mode: 'subscription',
         payment_method_types: ['card'],
-        line_items: [{ price: priceId, quantity: 1 }],
+        line_items: [{ price: priceId, quantity: vehicleCount }],
         success_url: successUrl,
         cancel_url: cancelUrl,
         metadata: {
           company_id: trimmedCompanyId,
-          tier: tier,
-          ...(stripePromoCode && { promo_code: stripePromoCode }),
+          vehicle_count: String(vehicleCount),
         },
         subscription_data: {
           metadata: {
             company_id: trimmedCompanyId,
-            tier: tier,
-            ...(stripePromoCode && { promo_code: stripePromoCode }),
+            vehicle_count: String(vehicleCount),
           },
-          // Apply 7-day free trial for new companies
           ...(isNewCompany && { trial_period_days: 7 }),
         },
-      };
-      
-      // If promo code is provided, add it to allow_promotion_codes
-      // Note: Stripe Checkout supports promotion codes via allow_promotion_codes: true
-      // or by specifying discounts. For custom promo codes stored in Firestore,
-      // we'll handle the discount in the webhook after subscription creation.
-      if (stripePromoCode) {
-        // Store promo code in metadata - webhook will apply discount
-        sessionParams.allow_promotion_codes = false; // We handle custom codes via webhook
-      }
-      
-      session = await stripe.checkout.sessions.create(sessionParams);
+      });
     } catch (stripeError: any) {
       console.error('Stripe API error:', {
         message: stripeError?.message,
