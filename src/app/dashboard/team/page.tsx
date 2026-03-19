@@ -79,6 +79,13 @@ export default function TeamPage() {
   const [inviteRole, setInviteRole] = useState<'manager' | 'user'>('user');
   const [inviteProcessing, setInviteProcessing] = useState(false);
 
+  // Bulk invite
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [bulkEmails, setBulkEmails] = useState('');
+  const [bulkRole, setBulkRole] = useState<'manager' | 'user'>('user');
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [bulkResult, setBulkResult] = useState<{ sent: string[]; failed: string[] } | null>(null);
+
   // Company info for admin actions
   const [companyName, setCompanyName] = useState<string | undefined>(undefined);
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -285,6 +292,67 @@ export default function TeamPage() {
     }
   };
 
+  const handleDeleteInvite = async (inviteId: string, email: string) => {
+    if (!firebaseDb || !canEditUsers) return;
+    if (!confirm(`Delete invite for ${email}? This cannot be undone.`)) return;
+    try {
+      await deleteDoc(doc(firebaseDb!, 'invites', inviteId));
+      if (currentUserProfile?.company_id) fetchInvites(currentUserProfile.company_id);
+    } catch (error) {
+      console.error('Error deleting invite:', error);
+      alert('Failed to delete invite.');
+    }
+  };
+
+  const parsedBulkEmails = bulkEmails
+    .split(/[\n,]+/)
+    .map((e) => e.trim().toLowerCase())
+    .filter((e) => e.includes('@'));
+
+  const handleBulkInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firebaseDb || !currentUserProfile?.company_id) return;
+    if (parsedBulkEmails.length === 0) {
+      alert('No valid email addresses found.');
+      return;
+    }
+    setBulkProcessing(true);
+    setBulkResult(null);
+    const sent: string[] = [];
+    const failed: string[] = [];
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await Promise.all(
+      parsedBulkEmails.map(async (email) => {
+        try {
+          await addDoc(collection(firebaseDb!, 'invites'), {
+            email,
+            inviteeName: null,
+            role: bulkRole,
+            companyId: currentUserProfile.company_id,
+            companyName: companyName || 'Stock Track PRO',
+            invitedBy: currentUserProfile.id,
+            invitedByName: displayNameFor(currentUserProfile),
+            status: 'pending',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            expiresAt,
+            emailSent: false,
+          });
+          sent.push(email);
+        } catch {
+          failed.push(email);
+        }
+      })
+    );
+
+    setBulkResult({ sent, failed });
+    setBulkProcessing(false);
+    setBulkEmails('');
+    if (currentUserProfile?.company_id) fetchInvites(currentUserProfile.company_id);
+  };
+
   const handleInviteMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseDb || !currentUserProfile?.company_id) return;
@@ -394,13 +462,22 @@ export default function TeamPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {(isAdmin || isManager) && (
-            <button
-              onClick={() => setIsInviteModalOpen(true)}
-              className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-colors"
-            >
-              <Mail className="h-4 w-4" />
-              Invite Member
-            </button>
+            <>
+              <button
+                onClick={() => setIsInviteModalOpen(true)}
+                className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+                Invite Member
+              </button>
+              <button
+                onClick={() => { setIsBulkModalOpen(true); setBulkResult(null); }}
+                className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+                Bulk Invite
+              </button>
+            </>
           )}
           {isAdmin && (
             <button
@@ -558,11 +635,12 @@ export default function TeamPage() {
                   <th className="px-6 py-3 font-medium">Status</th>
                   <th className="px-6 py-3 font-medium">Sent</th>
                   <th className="px-6 py-3 font-medium">Expires</th>
+                  <th className="px-6 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
                 {invites.length === 0 ? (
-                  <EmptyStateTableRow colSpan={5} message="No invites sent yet." />
+                  <EmptyStateTableRow colSpan={6} message="No invites sent yet." />
                 ) : (
                   invites.slice(0, 8).map((invite) => (
                     <tr key={invite.id} className="hover:bg-white/5 transition-colors">
@@ -581,6 +659,16 @@ export default function TeamPage() {
                       </td>
                       <td className="px-6 py-3 text-white/70 text-sm">{invite.emailSent ? 'Yes' : 'Pending'}</td>
                       <td className="px-6 py-3 text-white/70 text-sm">{formatDate(invite.expiresAt)}</td>
+                      <td className="px-6 py-3 text-right">
+                        <button
+                          onClick={() => handleDeleteInvite(invite.id, invite.email)}
+                          className="p-2 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                          title="Delete invite"
+                          aria-label={`Delete invite for ${invite.email}`}
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden />
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -657,6 +745,88 @@ export default function TeamPage() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={isBulkModalOpen}
+        onClose={() => { setIsBulkModalOpen(false); setBulkResult(null); setBulkEmails(''); }}
+        title="Bulk Invite Team Members"
+      >
+        {bulkResult ? (
+          <div className="space-y-4">
+            {bulkResult.sent.length > 0 && (
+              <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-4">
+                <p className="text-green-400 font-semibold text-sm mb-2">{bulkResult.sent.length} invite{bulkResult.sent.length !== 1 ? 's' : ''} sent</p>
+                <ul className="text-green-300/80 text-xs space-y-1 max-h-40 overflow-y-auto">
+                  {bulkResult.sent.map((e) => <li key={e}>{e}</li>)}
+                </ul>
+              </div>
+            )}
+            {bulkResult.failed.length > 0 && (
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-4">
+                <p className="text-red-400 font-semibold text-sm mb-2">{bulkResult.failed.length} failed</p>
+                <ul className="text-red-300/80 text-xs space-y-1">
+                  {bulkResult.failed.map((e) => <li key={e}>{e}</li>)}
+                </ul>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => { setIsBulkModalOpen(false); setBulkResult(null); setBulkEmails(''); }}
+                className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleBulkInvite} className="space-y-4">
+            <div>
+              <label className="block text-sm text-white/70 mb-1">
+                Email Addresses
+                <span className="text-white/40 font-normal ml-1">— one per line, or comma-separated</span>
+              </label>
+              <textarea
+                value={bulkEmails}
+                onChange={(e) => setBulkEmails(e.target.value)}
+                className="w-full h-40 bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none text-sm resize-none"
+                placeholder={"john@company.com\njane@company.com\nalex@company.com"}
+              />
+              {parsedBulkEmails.length > 0 && (
+                <p className="text-xs text-blue-400 mt-1">{parsedBulkEmails.length} valid email{parsedBulkEmails.length !== 1 ? 's' : ''} detected</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm text-white/70 mb-1">Role for all</label>
+              <select
+                value={bulkRole}
+                onChange={(e) => setBulkRole(e.target.value as 'manager' | 'user')}
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
+              >
+                <option value="user">User (Driver / Fitter)</option>
+                <option value="manager">Manager</option>
+              </select>
+            </div>
+            <p className="text-xs text-white/50">Each person will receive a branded invite email with a link to set their password and download the app.</p>
+            <div className="pt-2 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => { setIsBulkModalOpen(false); setBulkEmails(''); }}
+                className="px-4 py-2 rounded-lg border border-white/20 text-white/80 hover:border-white/40"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={bulkProcessing || parsedBulkEmails.length === 0}
+                className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-60"
+              >
+                {bulkProcessing ? 'Sending...' : `Send ${parsedBulkEmails.length > 0 ? parsedBulkEmails.length : ''} Invite${parsedBulkEmails.length !== 1 ? 's' : ''}`}
+              </button>
+            </div>
+          </form>
+        )}
       </Modal>
 
       <Modal

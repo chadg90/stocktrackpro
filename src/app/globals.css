@@ -208,6 +208,53 @@ body {
     background-color: #f0fdf4 !important;
     color: #15803d !important;
   }
+
+  /* Light mode: tables, cards, inputs - replace black with light surfaces */
+  .theme-light main .bg-black {
+    background-color: #ffffff !important;
+  }
+  .theme-light main .border-blue-500\/20,
+  .theme-light main .border-blue-500\/25,
+  .theme-light main .border-blue-500\/30 {
+    border-color: #e2e8f0 !important;
+  }
+
+  /* Light mode: table row hover - light gray instead of dark */
+  .theme-light main tbody tr:hover {
+    background-color: #f1f5f9 !important;
+  }
+
+  /* Light mode: hover states - light gray instead of white/5, white/10, white/20 */
+  .theme-light main .hover\:bg-white\/5:hover {
+    background-color: #f1f5f9 !important;
+  }
+  .theme-light main .hover\:bg-white\/10:hover {
+    background-color: #e2e8f0 !important;
+  }
+  .theme-light main .hover\:bg-white\/20:hover {
+    background-color: #cbd5e1 !important;
+  }
+  .theme-light main .hover\:text-white:hover {
+    color: #0F172A !important;
+  }
+
+  /* Light mode: inputs, selects, textareas */
+  .theme-light main input,
+  .theme-light main select,
+  .theme-light main textarea {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #0F172A !important;
+  }
+  .theme-light main input::placeholder,
+  .theme-light main textarea::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  /* Light mode: modal header, unread notification highlight */
+  .theme-light main .bg-blue-500\/5 {
+    background-color: #eff6ff !important;
+  }
 }
 
 @layer utilities {
