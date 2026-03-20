@@ -7,6 +7,7 @@ import {
   where,
   getDocs,
   orderBy,
+  limit,
   Timestamp,
   doc,
   getDoc,
@@ -30,6 +31,7 @@ type Profile = {
   name?: string;
   email?: string;
   created_at?: Timestamp | string;
+  last_login?: Timestamp | string;
 };
 
 type Vehicle = {
@@ -37,15 +39,25 @@ type Vehicle = {
   registration?: string;
   make?: string;
   model?: string;
-  status?: string;
+  year?: number;
+  vin?: string;
   mileage?: number;
+  notes?: string;
+  status?: string;
 };
 
 type Asset = {
   id: string;
   name?: string;
+  brand?: string;
+  model?: string;
+  serial_number?: string;
   type?: string;
+  category?: string;
   status?: string;
+  location?: string;
+  condition?: string;
+  notes?: string;
 };
 
 type Inspection = {
@@ -55,11 +67,15 @@ type Inspection = {
   has_defect?: boolean;
   inspected_by?: string;
   mileage?: number;
+  notes?: string;
 };
 
 type Defect = {
   id: string;
   vehicle_id?: string;
+  reported_by?: string;
+  resolved_by?: string;
+  resolution_notes?: string;
   severity?: 'low' | 'medium' | 'high' | 'critical';
   status: 'pending' | 'resolved' | 'investigating';
   reported_at?: Timestamp | string;
@@ -70,9 +86,12 @@ type Defect = {
 type HistoryItem = {
   id: string;
   tool_id?: string;
+  vehicle_id?: string;
   action?: string;
   user_id?: string;
   timestamp?: Timestamp | string;
+  notes?: string;
+  location?: string;
 };
 
 const COLORS = ['#2563eb', '#7c3aed', '#0f766e', '#ea580c', '#c026d3', '#0284c7', '#16a34a', '#475569'];
@@ -100,6 +119,16 @@ const formatDate = (value?: string | Timestamp) => {
     return '—';
   }
 };
+
+function getUserDisplayName(u: Profile | undefined, fallback = ''): string {
+  if (!u) return fallback || 'Unknown';
+  if (u.first_name || u.last_name) return `${u.first_name || ''} ${u.last_name || ''}`.trim();
+  if (u.display_name) return u.display_name.trim();
+  if (u.displayName) return u.displayName;
+  if (u.name) return u.name;
+  if (u.email) return u.email.split('@')[0] || fallback || 'Unknown';
+  return fallback || 'Unknown';
+}
 
 export default function AnalyticsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -196,34 +225,8 @@ export default function AnalyticsPage() {
       
       try {
         const inspectionsSnap = await getDocs(inspectionsQuery);
-        let inspectionsData = inspectionsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
-        
-        // Limit to 8 most recent inspections per user (matching app behavior)
-        const inspectionsByUser: Record<string, Inspection[]> = {};
-        inspectionsData.forEach(insp => {
-          const userId = insp.inspected_by || 'unknown';
-          if (!inspectionsByUser[userId]) {
-            inspectionsByUser[userId] = [];
-          }
-          inspectionsByUser[userId].push(insp);
-        });
-        
-        // Sort each user's inspections by date (most recent first) and take top 8
-        const filteredInspections: Inspection[] = [];
-        Object.values(inspectionsByUser).forEach(userInspections => {
-          userInspections.sort((a, b) => {
-            const aDate = getDateValue(a.inspected_at);
-            const bDate = getDateValue(b.inspected_at);
-            if (!aDate && !bDate) return 0;
-            if (!aDate) return 1;
-            if (!bDate) return -1;
-            return bDate.getTime() - aDate.getTime();
-          });
-          filteredInspections.push(...userInspections.slice(0, 8));
-        });
-        
-        console.log('[Analytics] Fetched inspections:', inspectionsData.length, 'Filtered to 8 per user:', filteredInspections.length);
-        setInspections(filteredInspections);
+        const inspectionsData = inspectionsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
+        setInspections(inspectionsData);
       } catch (inspError: any) {
         console.error('[Analytics] Error fetching inspections (may need Firestore index):', inspError);
         // If index error, try fallback query without orderBy
@@ -235,34 +238,8 @@ export default function AnalyticsPage() {
               where('company_id', '==', companyId)
             );
             const fallbackSnap = await getDocs(fallbackQuery);
-            let inspectionsData = fallbackSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
-            
-            // Limit to 8 most recent inspections per user (matching app behavior)
-            const inspectionsByUser: Record<string, Inspection[]> = {};
-            inspectionsData.forEach(insp => {
-              const userId = insp.inspected_by || 'unknown';
-              if (!inspectionsByUser[userId]) {
-                inspectionsByUser[userId] = [];
-              }
-              inspectionsByUser[userId].push(insp);
-            });
-            
-            // Sort each user's inspections by date (most recent first) and take top 8
-            const filteredInspections: Inspection[] = [];
-            Object.values(inspectionsByUser).forEach(userInspections => {
-              userInspections.sort((a, b) => {
-                const aDate = getDateValue(a.inspected_at);
-                const bDate = getDateValue(b.inspected_at);
-                if (!aDate && !bDate) return 0;
-                if (!aDate) return 1;
-                if (!bDate) return -1;
-                return bDate.getTime() - aDate.getTime();
-              });
-              filteredInspections.push(...userInspections.slice(0, 8));
-            });
-            
-            console.log('[Analytics] Fetched inspections (fallback, no orderBy):', inspectionsData.length, 'Filtered to 8 per user:', filteredInspections.length);
-            setInspections(filteredInspections);
+            const inspectionsData = fallbackSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
+            setInspections(inspectionsData);
           } catch (fallbackError) {
             console.error('[Analytics] Fallback query also failed:', fallbackError);
             setInspections([]);
@@ -292,11 +269,12 @@ export default function AnalyticsPage() {
       const defectsSnap = await getDocs(defectsQuery);
       setDefects(defectsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Defect)));
 
-      // Fetch history
+      // Fetch history (capped for browser performance; matches dashboard export depth)
       let historyQuery = query(
         collection(firebaseDb, 'tool_history'),
         where('company_id', '==', companyId),
-        orderBy('timestamp', 'desc')
+        orderBy('timestamp', 'desc'),
+        limit(2500)
       );
       
       if (startDate) {
@@ -304,7 +282,8 @@ export default function AnalyticsPage() {
           collection(firebaseDb, 'tool_history'),
           where('company_id', '==', companyId),
           where('timestamp', '>=', Timestamp.fromDate(startDate)),
-          orderBy('timestamp', 'desc')
+          orderBy('timestamp', 'desc'),
+          limit(2500)
         );
       }
       
@@ -542,42 +521,144 @@ export default function AnalyticsPage() {
     }));
   }, [assets]);
 
-  // Export data
-  const exportSheets = useMemo(() => [
-    {
-      name: 'Daily Activity',
-      data: dailyActivity,
-      fieldMappings: { date: 'Date', inspections: 'Inspections', defects: 'Defects Reported', actions: 'Asset Actions' },
-    },
-    {
-      name: 'Vehicle Performance',
-      data: vehiclePerformance.map(v => ({
-        Vehicle: v.name,
-        Inspections: v.inspections,
-        Defects: v.defects,
-        Resolved: v.resolved,
-        'Health Score': v.score,
-      })),
-    },
-    {
-      name: 'User Performance',
-      data: userPerformance.map(u => ({
-        User: u.name,
-        Inspections: u.inspections,
-        'Asset Actions': u.actions,
-        'Defects Found': u.defectsFound,
-      })),
-    },
-    {
-      name: 'Asset Utilization',
-      data: assetUtilizationByType.map(a => ({
-        Type: a.name,
-        Total: a.total,
-        Active: a.active,
-        'Utilization Rate': `${a.rate}%`,
-      })),
-    },
-  ], [dailyActivity, vehiclePerformance, userPerformance, assetUtilizationByType]);
+  // Export data — summary tabs plus full registers for audits / weekly PDF
+  const exportSheets = useMemo(() => {
+    const vehicleRegister = vehicles.map((v) => ({
+      'Vehicle ID': v.id,
+      Registration: v.registration || '',
+      Make: v.make || '',
+      Model: v.model || '',
+      Year: v.year ?? '',
+      VIN: v.vin || '',
+      Mileage: v.mileage ?? '',
+      Status: v.status || '',
+      Notes: v.notes || '',
+    }));
+
+    const assetRegister = assets.map((a) => ({
+      'Asset ID': a.id,
+      Name: a.name || '',
+      Brand: a.brand || '',
+      Model: a.model || '',
+      'Serial Number': a.serial_number || '',
+      Type: a.type || '',
+      Category: a.category || '',
+      Status: a.status || '',
+      Location: a.location || '',
+      Condition: a.condition || '',
+      Notes: a.notes || '',
+    }));
+
+    const inspectionLog = inspections.map((i) => {
+      const v = vehicles.find((x) => x.id === i.vehicle_id);
+      const inspector = users.find((u) => u.id === i.inspected_by);
+      return {
+        'Inspection ID': i.id,
+        'Vehicle ID': i.vehicle_id || '',
+        Registration: v?.registration || '',
+        'Inspected At': formatDate(i.inspected_at),
+        Mileage: i.mileage ?? '',
+        'Has Defect': i.has_defect ? 'Yes' : 'No',
+        'Inspector ID': i.inspected_by || '',
+        Inspector: getUserDisplayName(inspector, i.inspected_by || ''),
+        Notes: i.notes || '',
+      };
+    });
+
+    const defectLog = defects.map((d) => {
+      const v = vehicles.find((x) => x.id === d.vehicle_id);
+      const reporter = users.find((u) => u.id === d.reported_by);
+      return {
+        'Defect ID': d.id,
+        'Vehicle ID': d.vehicle_id || '',
+        Registration: v?.registration || '',
+        Description: d.description || '',
+        Severity: d.severity || '',
+        Status: d.status || '',
+        'Reported At': formatDate(d.reported_at),
+        'Reported By': getUserDisplayName(reporter, d.reported_by || ''),
+        'Resolved At': formatDate(d.resolved_at),
+        'Resolved By': d.resolved_by || '',
+        'Resolution Notes': d.resolution_notes || '',
+      };
+    });
+
+    const historyLog = historyItems.map((h) => {
+      const asset = assets.find((x) => x.id === h.tool_id);
+      const actor = users.find((u) => u.id === h.user_id);
+      return {
+        'Record ID': h.id,
+        Timestamp: formatDate(h.timestamp),
+        Action: h.action || '',
+        'Asset ID': h.tool_id || '',
+        'Asset Name': asset?.name || '',
+        Location: h.location || '',
+        Notes: h.notes || '',
+        User: getUserDisplayName(actor, h.user_id || ''),
+      };
+    });
+
+    const teamExport = users.map((u) => ({
+      'User ID': u.id || '',
+      Name: getUserDisplayName(u, ''),
+      Email: u.email || '',
+      Role: u.role || '',
+      'Last Login': formatDate(u.last_login),
+    }));
+
+    return [
+      {
+        name: 'Daily Activity',
+        data: dailyActivity,
+        fieldMappings: { date: 'Date', inspections: 'Inspections', defects: 'Defects Reported', actions: 'Asset Actions' },
+      },
+      {
+        name: 'Vehicle Performance',
+        data: vehiclePerformance.map((v) => ({
+          Vehicle: v.name,
+          Inspections: v.inspections,
+          Defects: v.defects,
+          Resolved: v.resolved,
+          'Health Score': v.score,
+        })),
+      },
+      {
+        name: 'User Performance',
+        data: userPerformance.map((u) => ({
+          User: u.name,
+          Inspections: u.inspections,
+          'Asset Actions': u.actions,
+          'Defects Found': u.defectsFound,
+        })),
+      },
+      {
+        name: 'Asset Utilization',
+        data: assetUtilizationByType.map((a) => ({
+          Type: a.name,
+          Total: a.total,
+          Active: a.active,
+          'Utilization Rate': `${a.rate}%`,
+        })),
+      },
+      { name: 'Vehicles Register', data: vehicleRegister },
+      { name: 'Assets Register', data: assetRegister },
+      { name: 'Team', data: teamExport },
+      { name: 'Inspections Log', data: inspectionLog },
+      { name: 'Defects Log', data: defectLog },
+      { name: 'Asset History', data: historyLog },
+    ];
+  }, [
+    dailyActivity,
+    vehiclePerformance,
+    userPerformance,
+    assetUtilizationByType,
+    vehicles,
+    assets,
+    users,
+    inspections,
+    defects,
+    historyItems,
+  ]);
 
   if (loading) {
     return (
@@ -590,13 +671,16 @@ export default function AnalyticsPage() {
   return (
     <div id="detailed-analytics" className="print-content">
       {error && (
-        <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex flex-wrap items-center justify-between gap-2 no-print" role="alert">
+        <div
+          className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 flex flex-wrap items-center justify-between gap-2 no-print dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-100"
+          role="alert"
+        >
           <span>{error}</span>
           {profile?.company_id && (
             <button
               type="button"
               onClick={() => { setError(null); fetchAnalytics(profile.company_id!); }}
-              className="text-blue-500 hover:underline font-medium whitespace-nowrap"
+              className="text-blue-600 hover:underline font-medium whitespace-nowrap dark:text-blue-400"
             >
               Try again
             </button>
@@ -612,15 +696,15 @@ export default function AnalyticsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 bg-black border border-blue-500/30 rounded-lg p-1">
+          <div className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white p-1 dark:border-blue-500/30 dark:bg-black">
             {['7', '30', '90', 'all'].map((range) => (
               <button
                 key={range}
                 onClick={() => setDateRange(range as '7' | '30' | '90' | 'all')}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   dateRange === range
-                    ? 'bg-blue-500 text-white'
-                    : 'text-white/70 hover:text-white'
+                    ? 'bg-blue-500 text-white keep-light-on-dark'
+                    : 'text-zinc-700 hover:text-zinc-900 dark:text-white/70 dark:hover:text-white'
                 }`}
               >
                 {range === 'all' ? 'All' : `${range}d`}
@@ -629,7 +713,8 @@ export default function AnalyticsPage() {
           </div>
           <ExportButton
             data={dailyActivity}
-            filename={`detailed-analytics-${format(new Date(), 'yyyy-MM-dd')}`}
+            filename={`stp-analytics-export-${format(new Date(), 'yyyy-MM-dd')}`}
+            reportTitle={`Stock Track PRO — Analytics export (${format(new Date(), 'PPP')}) · Range: ${dateRange === 'all' ? 'All time' : `Last ${dateRange} days`}`}
             multiSheetData={exportSheets}
           />
           <PrintButton title="Detailed Analytics Report" contentId="detailed-analytics" />
@@ -649,8 +734,8 @@ export default function AnalyticsPage() {
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               activeTab === tab.id
-                ? 'bg-blue-500 text-white'
-                : 'bg-black border border-blue-500/30 text-white/70 hover:text-white hover:border-blue-500/50'
+                ? 'bg-blue-500 text-white keep-light-on-dark'
+                : 'border border-zinc-200 bg-zinc-50 text-zinc-800 hover:border-zinc-300 hover:bg-zinc-100 dark:border-blue-500/30 dark:bg-black dark:text-white/70 dark:hover:border-blue-500/50 dark:hover:text-white'
             }`}
           >
             <tab.icon className="h-4 w-4" />

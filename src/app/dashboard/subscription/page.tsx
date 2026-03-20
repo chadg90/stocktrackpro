@@ -29,10 +29,13 @@ type Company = {
 type Tier = { label: string; assets: string; users: string; colour: string };
 
 function getTier(count: number): Tier {
-  if (count <= 15) return { label: 'Starter', assets: '1,000 assets', users: 'Up to 15 users', colour: 'text-sky-400' };
-  if (count <= 35) return { label: 'Growth', assets: '5,000 assets', users: 'Up to 35 users', colour: 'text-indigo-400' };
-  if (count <= 75) return { label: 'Business', assets: '20,000 assets', users: 'Up to 75 users', colour: 'text-violet-400' };
-  return { label: 'Enterprise', assets: 'Unlimited assets', users: 'Unlimited users', colour: 'text-blue-400' };
+  if (count <= 15)
+    return { label: 'Starter', assets: '1,000 assets', users: 'Up to 15 users', colour: 'text-sky-800 dark:text-sky-400' };
+  if (count <= 35)
+    return { label: 'Growth', assets: '5,000 assets', users: 'Up to 35 users', colour: 'text-indigo-800 dark:text-indigo-400' };
+  if (count <= 75)
+    return { label: 'Business', assets: '20,000 assets', users: 'Up to 75 users', colour: 'text-violet-800 dark:text-violet-400' };
+  return { label: 'Enterprise', assets: 'Unlimited assets', users: 'Unlimited users', colour: 'text-blue-800 dark:text-blue-400' };
 }
 
 const formatCurrency = (value: number) => `£${value.toFixed(2)}`;
@@ -194,14 +197,14 @@ export default function SubscriptionPage() {
     switch (status) {
       case 'active':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-300 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30">
             <Check className="w-4 h-4" />
             Active
           </span>
         );
       case 'trial':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-950 border border-amber-400 dark:bg-yellow-500/20 dark:text-yellow-300 dark:border-yellow-500/40">
             <Calendar className="w-4 h-4" />
             7-Day Free Trial
           </span>
@@ -209,7 +212,7 @@ export default function SubscriptionPage() {
       case 'inactive':
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-red-500/20 text-red-400 border border-red-500/30">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 border border-red-300 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30">
             <AlertCircle className="w-4 h-4" />
             Inactive
           </span>
@@ -242,35 +245,41 @@ export default function SubscriptionPage() {
   const canManage = profile?.role === 'manager' || profile?.role === 'admin';
   const subscriptionStatus = company?.subscription_status;
   const tier = getTier(vehicleCount);
+  const effectiveTier = company?.legacy
+    ? { label: 'Legacy Plan', assets: 'As agreed', users: 'As agreed', colour: 'text-amber-700 dark:text-amber-300' }
+    : tier;
   const currentVehicles = company?.subscribed_vehicles || 0;
   const monthlyTotal = vehicleCount * PRICE_PER_VEHICLE;
 
   return (
     <div className="space-y-8">
       {loadError && authUser && (
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex flex-wrap items-center justify-between gap-2" role="alert">
+        <div
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 flex flex-wrap items-center justify-between gap-2 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-100"
+          role="alert"
+        >
           <span>{loadError}</span>
           <button
             type="button"
             onClick={() => loadSubscriptionData(authUser)}
-            className="text-blue-500 hover:underline font-medium whitespace-nowrap"
+            className="text-blue-600 hover:underline font-medium whitespace-nowrap dark:text-blue-400"
           >
             Try again
           </button>
         </div>
       )}
 
-      <div className="border-b border-white/10 pb-6">
-        <h1 className="text-3xl font-bold text-white mb-2">Subscription Management</h1>
-        <p className="text-white/75">Per-vehicle billing via Stripe. Adjust your fleet size and manage billing here.</p>
+      <div className="border-b border-zinc-200 dark:border-white/10 pb-6">
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Subscription Management</h1>
+        <p className="text-zinc-600 dark:text-white/75">Per-vehicle billing via Stripe. Adjust your fleet size and manage billing here.</p>
       </div>
 
       {company?.legacy && (
-        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-5 py-4">
-          <p className="text-amber-100 font-medium">
+        <div className="rounded-xl border border-amber-300 bg-amber-50 px-5 py-4 dark:border-amber-500/40 dark:bg-amber-500/10">
+          <p className="text-amber-900 dark:text-amber-100 font-semibold">
             Legacy pricing: your company remains on its initial agreed price long term.
           </p>
-          <p className="text-amber-200/90 text-sm mt-1">
+          <p className="text-amber-800 dark:text-amber-200/90 text-sm mt-1">
             This account is excluded from new per-vehicle pricing unless you request a plan change.
           </p>
         </div>
@@ -291,15 +300,19 @@ export default function SubscriptionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Current Vehicles</p>
-            <p className="text-white font-semibold text-lg">{currentVehicles || 'Not set'}</p>
+            <p className="text-white font-semibold text-lg">
+              {company?.legacy ? 'Legacy plan' : (currentVehicles || 'Not set')}
+            </p>
           </div>
           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Estimated Monthly</p>
-            <p className="text-white font-semibold text-lg">{currentVehicles ? formatCurrency(currentVehicles * PRICE_PER_VEHICLE) : '—'}</p>
+            <p className="text-white font-semibold text-lg">
+              {company?.legacy ? 'Legacy pricing' : (currentVehicles ? formatCurrency(currentVehicles * PRICE_PER_VEHICLE) : '—')}
+            </p>
           </div>
           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Feature Tier</p>
-            <p className={`font-semibold text-lg ${tier.colour}`}>{tier.label}</p>
+            <p className={`font-semibold text-lg ${effectiveTier.colour}`}>{effectiveTier.label}</p>
           </div>
           {subscriptionStatus === 'trial' && company?.trial_end_date ? (
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
@@ -355,7 +368,7 @@ export default function SubscriptionPage() {
           </p>
 
           {checkoutError && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 flex items-center gap-2">
+            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-2 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-200">
               <AlertCircle className="w-5 h-5 shrink-0" />
               {checkoutError}
             </div>
@@ -388,7 +401,7 @@ export default function SubscriptionPage() {
               <span className="text-white font-semibold">{formatCurrency(monthlyTotal)}</span>
             </div>
             <div className="mt-2 text-sm text-white/70">
-              <span className={tier.colour}>{tier.label}</span> includes {tier.assets}, {tier.users}
+              <span className={effectiveTier.colour}>{effectiveTier.label}</span> includes {effectiveTier.assets}, {effectiveTier.users}
             </div>
             <button
               onClick={handleSubscribe}

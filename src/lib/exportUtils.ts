@@ -1,8 +1,10 @@
 /**
- * Export utilities for converting data to CSV and Excel formats
+ * Export utilities for converting data to CSV, Excel, and PDF formats
  */
 
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 /**
  * Converts an array of objects to CSV format
@@ -204,4 +206,82 @@ export function exportToCSV(
   const formattedData = formatDataForExport(data, fieldMappings);
   const csvContent = convertToCSV(formattedData, headers);
   downloadCSV(csvContent, filename);
+}
+
+export type ExportSheetInput = {
+  name: string;
+  data: any[];
+  fieldMappings?: Record<string, string>;
+};
+
+/**
+ * Multi-sheet PDF (landscape A4). Suitable for weekly / archive downloads.
+ * Long text cells are truncated for PDF layout stability.
+ */
+export function exportMultipleSheetsToPDF(
+  sheets: ExportSheetInput[],
+  filename: string,
+  reportTitle?: string
+): void {
+  const nonEmpty = sheets.filter((s) => s.data && s.data.length > 0);
+  if (nonEmpty.length === 0) {
+    alert('No data to export');
+    return;
+  }
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const margin = 12;
+  let isFirstPage = true;
+
+  const truncate = (val: unknown, max = 100): string => {
+    if (val === null || val === undefined) return '';
+    const s = String(val).replace(/\r?\n/g, ' ');
+    return s.length > max ? `${s.slice(0, max - 3)}...` : s;
+  };
+
+  nonEmpty.forEach((sheet, idx) => {
+    if (!isFirstPage) {
+      doc.addPage();
+    }
+    isFirstPage = false;
+
+    let y = margin;
+
+    if (idx === 0 && reportTitle) {
+      doc.setFontSize(15);
+      doc.setTextColor(15, 23, 42);
+      doc.text(reportTitle, margin, y);
+      y += 8;
+      doc.setFontSize(9);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Generated ${new Date().toLocaleString()}`, margin, y);
+      y += 10;
+    }
+
+    doc.setFontSize(11);
+    doc.setTextColor(15, 23, 42);
+    const sectionTitle = sheet.name.substring(0, 90);
+    doc.text(sectionTitle, margin, y);
+    y += 7;
+
+    const formatted = formatDataForExport(sheet.data, sheet.fieldMappings);
+    const keys = Object.keys(formatted[0] || {});
+    if (keys.length === 0) return;
+
+    const body = formatted.map((row) =>
+      keys.map((k) => truncate(row[k], 120))
+    );
+
+    autoTable(doc, {
+      startY: y,
+      head: [keys],
+      body,
+      styles: { fontSize: 7, cellPadding: 1.5, overflow: 'linebreak', cellWidth: 'wrap' },
+      headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      margin: { left: margin, right: margin },
+    });
+  });
+
+  doc.save(`${filename}.pdf`);
 }

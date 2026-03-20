@@ -255,6 +255,56 @@ body {
   .theme-light main .bg-blue-500\/5 {
     background-color: #eff6ff !important;
   }
+
+  /* Light mode: KPI / chart accents (readable on white cards) */
+  .theme-light main .text-green-300 {
+    color: #15803d !important;
+  }
+  .theme-light main .text-amber-300 {
+    color: #b45309 !important;
+  }
+  .theme-light main .text-red-300 {
+    color: #b91c1c !important;
+  }
+  .theme-light main .text-red-400 {
+    color: #dc2626 !important;
+  }
+  .theme-light main .text-cyan-400 {
+    color: #0e7490 !important;
+  }
+  .theme-light main .text-blue-400 {
+    color: #1d4ed8 !important;
+  }
+  .theme-light main .text-blue-500 {
+    color: #1d4ed8 !important;
+  }
+  .theme-light main .text-purple-400 {
+    color: #6d28d9 !important;
+  }
+  .theme-light main .text-emerald-400 {
+    color: #047857 !important;
+  }
+
+  /* Light mode: inline status / tier colors (not overridden by text-white rules) */
+  .theme-light main .text-sky-400 {
+    color: #0369a1 !important;
+  }
+  .theme-light main .text-indigo-400 {
+    color: #4338ca !important;
+  }
+  .theme-light main .text-violet-400 {
+    color: #6d28d9 !important;
+  }
+
+  /* Alerts: strong contrast on light background */
+  .theme-light main [role='alert'] {
+    background-color: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #991b1b !important;
+  }
+  .theme-light main [role='alert'] button {
+    color: #1d4ed8 !important;
+  }
 }
 
 @layer utilities {

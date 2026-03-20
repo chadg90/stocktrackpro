@@ -52,17 +52,29 @@ type Vehicle = {
   registration?: string;
   make?: string;
   model?: string;
+  year?: number;
+  vin?: string;
+  mileage?: number;
+  notes?: string;
   status?: string;
   created_at?: Timestamp | string;
+  updated_at?: Timestamp | string;
 };
 
 type Asset = {
   id: string;
   name?: string;
+  brand?: string;
+  model?: string;
+  serial_number?: string;
   type?: string;
+  category?: string;
   status?: string;
   location?: string;
+  condition?: string;
+  notes?: string;
   created_at?: Timestamp | string;
+  updated_at?: Timestamp | string;
 };
 
 type Inspection = {
@@ -71,12 +83,18 @@ type Inspection = {
   inspected_at?: Timestamp | string;
   has_defect?: boolean;
   inspected_by?: string;
+  mileage?: number;
+  notes?: string;
 };
 
 type Defect = {
   id: string;
   vehicle_id?: string;
   reported_at?: Timestamp | string;
+  resolved_at?: Timestamp | string;
+  reported_by?: string;
+  resolved_by?: string;
+  resolution_notes?: string;
   severity?: 'low' | 'medium' | 'high' | 'critical';
   description?: string;
   status?: 'pending' | 'resolved' | 'investigating';
@@ -85,9 +103,12 @@ type Defect = {
 type HistoryItem = {
   id: string;
   tool_id?: string;
+  vehicle_id?: string;
   action?: string;
   user_id?: string;
   timestamp?: Timestamp | string;
+  notes?: string;
+  location?: string;
 };
 
 const COLORS = ['#2563eb', '#7c3aed', '#0f766e', '#ea580c', '#c026d3', '#0284c7', '#16a34a', '#475569'];
@@ -289,34 +310,9 @@ export default function DashboardPage() {
           );
         }
         const inspSnap = await getDocs(inspQuery);
-        let inspectionsData = inspSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
-        
-        // Limit to 8 most recent inspections per user (matching app behavior)
-        const inspectionsByUser: Record<string, Inspection[]> = {};
-        inspectionsData.forEach(insp => {
-          const userId = insp.inspected_by || 'unknown';
-          if (!inspectionsByUser[userId]) {
-            inspectionsByUser[userId] = [];
-          }
-          inspectionsByUser[userId].push(insp);
-        });
-        
-        // Sort each user's inspections by date (most recent first) and take top 8
-        const filteredInspections: Inspection[] = [];
-        Object.values(inspectionsByUser).forEach(userInspections => {
-          userInspections.sort((a, b) => {
-            const aDate = a.inspected_at && typeof a.inspected_at === 'object' && 'toDate' in a.inspected_at
-              ? a.inspected_at.toDate()
-              : (a.inspected_at ? new Date(a.inspected_at as string) : new Date(0));
-            const bDate = b.inspected_at && typeof b.inspected_at === 'object' && 'toDate' in b.inspected_at
-              ? b.inspected_at.toDate()
-              : (b.inspected_at ? new Date(b.inspected_at as string) : new Date(0));
-            return bDate.getTime() - aDate.getTime();
-          });
-          filteredInspections.push(...userInspections.slice(0, 8));
-        });
-        
-        setInspections(filteredInspections);
+        const inspectionsData = inspSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
+        // Full set for analytics + exports (website managers need complete history in range)
+        setInspections(inspectionsData);
 
         // Fetch defects with date filter
         let defQuery = query(
@@ -340,7 +336,7 @@ export default function DashboardPage() {
           collection(firebaseDb!, 'tool_history'),
           where('company_id', '==', companyId),
           orderBy('timestamp', 'desc'),
-          limit(500)
+          limit(2500)
         );
         if (startDate) {
           histQuery = query(
@@ -348,7 +344,7 @@ export default function DashboardPage() {
             where('company_id', '==', companyId),
             where('timestamp', '>=', Timestamp.fromDate(startDate)),
             orderBy('timestamp', 'desc'),
-            limit(500)
+            limit(2500)
           );
         }
         const histSnap = await getDocs(histQuery);
@@ -656,49 +652,98 @@ export default function DashboardPage() {
     return (inspections.length / days).toFixed(1);
   }, [inspections, dateRange]);
 
-  // Export data preparation
-  const exportData = useMemo(() => ({
-    vehicles: vehicles.map(v => ({
-      Registration: v.registration || '',
-      Make: v.make || '',
-      Model: v.model || '',
-      Status: v.status || '',
-      'Created At': formatDate(v.created_at),
-    })),
-    assets: assets.map(a => ({
-      Name: a.name || '',
-      Type: a.type || '',
-      Status: a.status || '',
-      Location: a.location || '',
-      'Created At': formatDate(a.created_at),
-    })),
-    users: users.map(u => ({
-      Name: getUserDisplayName(u, ''),
-      Email: u.email || '',
-      Role: u.role || '',
-      'Last Login': formatDate(u.last_login),
-    })),
-    inspections: inspections.map(i => {
-      const v = vehicles.find(v => v.id === i.vehicle_id);
-      const u = users.find(u => u.id === i.inspected_by);
+  // Export data preparation (full columns for compliance / weekly archives)
+  const exportData = useMemo(() => {
+    const historyRows = historyItems.map((h) => {
+      const asset = assets.find((a) => a.id === h.tool_id);
+      const actor = users.find((u) => u.id === h.user_id);
       return {
-        Vehicle: v ? v.registration : i.vehicle_id || '',
-        'Inspected At': formatDate(i.inspected_at),
-        'Has Defect': i.has_defect ? 'Yes' : 'No',
-        Inspector: getUserDisplayName(u, i.inspected_by || ''),
+        'Record ID': h.id,
+        Timestamp: formatDate(h.timestamp),
+        Action: h.action || '',
+        'Asset ID': h.tool_id || '',
+        'Asset Name': asset?.name || '',
+        'Asset Type': asset?.type || '',
+        Location: h.location || '',
+        Notes: h.notes || '',
+        'User ID': h.user_id || '',
+        User: getUserDisplayName(actor, h.user_id || ''),
       };
-    }),
-    defects: defects.map(d => {
-      const v = vehicles.find(v => v.id === d.vehicle_id);
-      return {
-        Vehicle: v ? v.registration : d.vehicle_id || '',
-        Description: d.description || '',
-        Severity: d.severity || '',
-        Status: d.status || '',
-        'Reported At': formatDate(d.reported_at),
-      };
-    }),
-  }), [vehicles, assets, users, inspections, defects]);
+    });
+
+    return {
+      vehicles: vehicles.map((v) => ({
+        'Vehicle ID': v.id,
+        Registration: v.registration || '',
+        Make: v.make || '',
+        Model: v.model || '',
+        Year: v.year ?? '',
+        VIN: v.vin || '',
+        Mileage: v.mileage ?? '',
+        Status: v.status || '',
+        Notes: v.notes || '',
+        'Created At': formatDate(v.created_at),
+        'Updated At': formatDate(v.updated_at),
+      })),
+      assets: assets.map((a) => ({
+        'Asset ID': a.id,
+        Name: a.name || '',
+        Brand: a.brand || '',
+        Model: a.model || '',
+        'Serial Number': a.serial_number || '',
+        Type: a.type || '',
+        Category: a.category || '',
+        Status: a.status || '',
+        Location: a.location || '',
+        Condition: a.condition || '',
+        Notes: a.notes || '',
+        'Created At': formatDate(a.created_at),
+        'Updated At': formatDate(a.updated_at),
+      })),
+      users: users.map((u) => ({
+        'User ID': u.id,
+        Name: getUserDisplayName(u, ''),
+        Email: u.email || '',
+        Role: u.role || '',
+        'Created At': formatDate(u.created_at),
+        'Last Login': formatDate(u.last_login),
+      })),
+      inspections: inspections.map((i) => {
+        const v = vehicles.find((x) => x.id === i.vehicle_id);
+        const inspector = users.find((u) => u.id === i.inspected_by);
+        return {
+          'Inspection ID': i.id,
+          'Vehicle ID': i.vehicle_id || '',
+          Registration: v?.registration || '',
+          'Inspected At': formatDate(i.inspected_at),
+          Mileage: i.mileage ?? '',
+          'Has Defect': i.has_defect ? 'Yes' : 'No',
+          'Inspector ID': i.inspected_by || '',
+          Inspector: getUserDisplayName(inspector, i.inspected_by || ''),
+          Notes: i.notes || '',
+        };
+      }),
+      defects: defects.map((d) => {
+        const v = vehicles.find((x) => x.id === d.vehicle_id);
+        const reporter = users.find((u) => u.id === d.reported_by);
+        return {
+          'Defect ID': d.id,
+          'Vehicle ID': d.vehicle_id || '',
+          Registration: v?.registration || '',
+          Description: d.description || '',
+          Severity: d.severity || '',
+          Status: d.status || '',
+          'Reported At': formatDate(d.reported_at),
+          'Reported By ID': d.reported_by || '',
+          'Reported By': getUserDisplayName(reporter, d.reported_by || ''),
+          'Resolved At': formatDate(d.resolved_at),
+          'Resolved By': d.resolved_by || '',
+          'Resolution Notes': d.resolution_notes || '',
+        };
+      }),
+      history: historyRows,
+    };
+  }, [vehicles, assets, users, inspections, defects, historyItems]);
 
   const isAuthedManager = useMemo(() => {
     return !!authUser && profile && (profile.role === 'manager' || profile.role === 'admin') && profile.company_id;
@@ -710,13 +755,16 @@ export default function DashboardPage() {
       <div className={`${!authUser ? 'container mx-auto px-4 pt-28 pb-16' : ''}`}>
         <div className="max-w-7xl mx-auto">
           {error && (
-            <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex flex-wrap items-center justify-between gap-2" role="alert">
+            <div
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 flex flex-wrap items-center justify-between gap-2 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-100"
+              role="alert"
+            >
               <span>{error}</span>
               {profile?.company_id && (
                 <button
                   type="button"
                   onClick={() => { setError(null); if (profile?.company_id) fetchData(profile.company_id); }}
-                  className="text-blue-500 hover:underline font-medium whitespace-nowrap"
+                  className="text-blue-600 hover:underline font-medium whitespace-nowrap dark:text-blue-400"
                 >
                   Try again
                 </button>
@@ -826,13 +874,15 @@ export default function DashboardPage() {
                   </div>
                   <ExportButton
                     data={exportData.vehicles}
-                    filename={`analytics-report-${format(new Date(), 'yyyy-MM-dd')}`}
+                    filename={`stp-dashboard-export-${format(new Date(), 'yyyy-MM-dd')}`}
+                    reportTitle={`Stock Track PRO — Dashboard export (${format(new Date(), 'PPP')})`}
                     multiSheetData={[
                       { name: 'Vehicles', data: exportData.vehicles },
                       { name: 'Assets', data: exportData.assets },
                       { name: 'Users', data: exportData.users },
                       { name: 'Inspections', data: exportData.inspections },
                       { name: 'Defects', data: exportData.defects },
+                      { name: 'Asset History', data: exportData.history },
                     ]}
                   />
                   <PrintButton title="Analytics Report" contentId="analytics-report" />

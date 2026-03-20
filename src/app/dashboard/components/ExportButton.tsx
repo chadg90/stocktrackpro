@@ -2,7 +2,12 @@
 
 import React, { useState } from 'react';
 import { Download, Loader2, FileSpreadsheet, FileText, ChevronDown } from 'lucide-react';
-import { exportToCSV, exportToExcel, exportMultipleSheetsToExcel } from '@/lib/exportUtils';
+import {
+  exportToCSV,
+  exportToExcel,
+  exportMultipleSheetsToExcel,
+  exportMultipleSheetsToPDF,
+} from '@/lib/exportUtils';
 
 interface ExportButtonProps {
   data: any[];
@@ -18,6 +23,8 @@ interface ExportButtonProps {
     data: any[];
     fieldMappings?: Record<string, string>;
   }>;
+  /** Shown on PDF cover page (e.g. weekly report title) */
+  reportTitle?: string;
 }
 
 export default function ExportButton({
@@ -29,6 +36,7 @@ export default function ExportButton({
   disabled = false,
   sheetName = 'Data',
   multiSheetData,
+  reportTitle,
 }: ExportButtonProps) {
   const [exporting, setExporting] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -70,6 +78,32 @@ export default function ExportButton({
     }
   };
 
+  const handleExportPDF = async () => {
+    setExporting(true);
+    setShowDropdown(false);
+    try {
+      const title =
+        reportTitle ||
+        `Stock Track PRO — ${filename.replace(/-/g, ' ')}`;
+      if (multiSheetData && multiSheetData.length > 0) {
+        exportMultipleSheetsToPDF(multiSheetData, filename, title);
+      } else if (data && data.length > 0) {
+        exportMultipleSheetsToPDF(
+          [{ name: sheetName, data, fieldMappings }],
+          filename,
+          title
+        );
+      } else {
+        alert('No data to export');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Failed to export PDF. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const hasData = (data && data.length > 0) || (multiSheetData && multiSheetData.some(s => s.data.length > 0));
 
   return (
@@ -78,7 +112,7 @@ export default function ExportButton({
         onClick={() => setShowDropdown(!showDropdown)}
         disabled={disabled || exporting || !hasData}
         className={`btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/40 text-blue-500 hover:border-blue-500 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-        title="Export Data"
+        title="Export data (Excel, CSV, or PDF — use PDF for a weekly archive report)"
         aria-label={exporting ? 'Exporting data' : 'Export data'}
       >
         {exporting ? (
@@ -101,20 +135,27 @@ export default function ExportButton({
             className="fixed inset-0 z-10" 
             onClick={() => setShowDropdown(false)}
           />
-          <div className="export-dropdown absolute right-0 mt-2 w-48 bg-black border border-blue-500/30 rounded-lg shadow-xl z-20 overflow-hidden">
+          <div className="export-dropdown absolute right-0 mt-2 w-56 bg-black border border-blue-500/30 rounded-lg shadow-xl z-20 overflow-hidden">
             <button
               onClick={handleExportExcel}
-              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors text-left"
             >
-              <FileSpreadsheet className="h-4 w-4 text-green-400" />
-              Export to Excel (.xlsx)
+              <FileSpreadsheet className="h-4 w-4 text-green-400 shrink-0" />
+              Excel (.xlsx)
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors border-t border-white/10 text-left"
+            >
+              <FileText className="h-4 w-4 text-rose-400 shrink-0" />
+              PDF report (weekly archive)
             </button>
             <button
               onClick={handleExportCSV}
-              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors border-t border-white/10"
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors border-t border-white/10 text-left"
             >
-              <FileText className="h-4 w-4 text-blue-400" />
-              Export to CSV
+              <FileText className="h-4 w-4 text-blue-400 shrink-0" />
+              CSV
             </button>
           </div>
         </>

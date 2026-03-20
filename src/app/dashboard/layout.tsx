@@ -234,11 +234,11 @@ export default function DashboardLayout({
       >
         <Sidebar theme={theme} onToggleTheme={toggleTheme} />
         <main
-          className={`min-h-screen pt-20 lg:pt-0 lg:pl-64 ${
+          className={`min-h-screen overflow-x-hidden pt-20 lg:pt-0 lg:pl-64 ${
             theme === 'light' ? 'bg-[#F8FAFC]' : 'bg-zinc-950/50'
           }`}
         >
-          <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+          <div className="p-4 sm:p-6 lg:p-8 pb-16 sm:pb-24 max-w-[1600px] mx-auto min-h-0">
             <header className="flex flex-wrap items-center justify-between gap-4 mb-6 lg:mb-8">
               <div className="min-w-0 flex-1" aria-hidden />
               <div className="flex items-center gap-3">
