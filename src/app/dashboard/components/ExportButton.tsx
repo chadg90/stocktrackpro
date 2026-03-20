@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, Loader2, FileSpreadsheet, FileText, ChevronDown } from 'lucide-react';
+import { Download, Loader2, FileSpreadsheet, FileText, ChevronDown, ClipboardList } from 'lucide-react';
 import {
   exportToCSV,
   exportToExcel,
@@ -25,6 +25,8 @@ interface ExportButtonProps {
   }>;
   /** Shown on PDF cover page (e.g. weekly report title) */
   reportTitle?: string;
+  /** Optional structured fleet health PDF (dashboard) */
+  fleetHealthPdf?: { onExport: () => void };
 }
 
 export default function ExportButton({
@@ -37,6 +39,7 @@ export default function ExportButton({
   sheetName = 'Data',
   multiSheetData,
   reportTitle,
+  fleetHealthPdf,
 }: ExportButtonProps) {
   const [exporting, setExporting] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -105,12 +108,13 @@ export default function ExportButton({
   };
 
   const hasData = (data && data.length > 0) || (multiSheetData && multiSheetData.some(s => s.data.length > 0));
+  const canOpenMenu = hasData || !!fleetHealthPdf?.onExport;
 
   return (
     <div className="relative">
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        disabled={disabled || exporting || !hasData}
+        disabled={disabled || exporting || !canOpenMenu}
         className={`btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/40 text-blue-500 hover:border-blue-500 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
         title="Export data (Excel, CSV, or PDF — use PDF for a weekly archive report)"
         aria-label={exporting ? 'Exporting data' : 'Export data'}
@@ -135,28 +139,47 @@ export default function ExportButton({
             className="fixed inset-0 z-10" 
             onClick={() => setShowDropdown(false)}
           />
-          <div className="export-dropdown absolute right-0 mt-2 w-56 bg-black border border-blue-500/30 rounded-lg shadow-xl z-20 overflow-hidden">
-            <button
-              onClick={handleExportExcel}
-              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors text-left"
-            >
-              <FileSpreadsheet className="h-4 w-4 text-green-400 shrink-0" />
-              Excel (.xlsx)
-            </button>
-            <button
-              onClick={handleExportPDF}
-              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors border-t border-white/10 text-left"
-            >
-              <FileText className="h-4 w-4 text-rose-400 shrink-0" />
-              PDF report (weekly archive)
-            </button>
-            <button
-              onClick={handleExportCSV}
-              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors border-t border-white/10 text-left"
-            >
-              <FileText className="h-4 w-4 text-blue-400 shrink-0" />
-              CSV
-            </button>
+          <div className="export-dropdown absolute right-0 mt-2 w-60 bg-black border border-blue-500/30 rounded-lg shadow-xl z-20 overflow-hidden">
+            {fleetHealthPdf?.onExport && (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDropdown(false);
+                  fleetHealthPdf.onExport();
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors text-left"
+              >
+                <ClipboardList className="h-4 w-4 text-sky-400 shrink-0" />
+                Fleet health PDF
+              </button>
+            )}
+            {hasData && (
+              <button
+                onClick={handleExportExcel}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors text-left ${fleetHealthPdf?.onExport ? 'border-t border-white/10' : ''}`}
+              >
+                <FileSpreadsheet className="h-4 w-4 text-green-400 shrink-0" />
+                Excel (.xlsx)
+              </button>
+            )}
+            {hasData && (
+              <button
+                onClick={handleExportPDF}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors border-t border-white/10 text-left"
+              >
+                <FileText className="h-4 w-4 text-rose-400 shrink-0" />
+                PDF report (archive)
+              </button>
+            )}
+            {hasData && (
+              <button
+                onClick={handleExportCSV}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors border-t border-white/10 text-left"
+              >
+                <FileText className="h-4 w-4 text-blue-400 shrink-0" />
+                CSV
+              </button>
+            )}
           </div>
         </>
       )}

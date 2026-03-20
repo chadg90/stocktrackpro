@@ -28,6 +28,7 @@ import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDay
 import ExportButton from './components/ExportButton';
 import PrintButton from './components/PrintButton';
 import ChartErrorBoundary from './components/ChartErrorBoundary';
+import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
 
 // Check if Firebase is properly initialized
 const isFirebaseAvailable = firebaseAuth && firebaseDb;
@@ -36,6 +37,7 @@ import { RefreshCw, Users, Truck, Package, TrendingUp, TrendingDown, Activity, C
 type Profile = {
   id: string;
   company_id?: string;
+  company_name?: string;
   role?: string;
   first_name?: string;
   last_name?: string;
@@ -57,6 +59,8 @@ type Vehicle = {
   mileage?: number;
   notes?: string;
   status?: string;
+  mot_expiry_date?: Timestamp | string;
+  tax_expiry_date?: Timestamp | string;
   created_at?: Timestamp | string;
   updated_at?: Timestamp | string;
 };
@@ -90,9 +94,9 @@ type Inspection = {
 type Defect = {
   id: string;
   vehicle_id?: string;
+  reported_by?: string;
   reported_at?: Timestamp | string;
   resolved_at?: Timestamp | string;
-  reported_by?: string;
   resolved_by?: string;
   resolution_notes?: string;
   severity?: 'low' | 'medium' | 'high' | 'critical';
@@ -745,6 +749,30 @@ export default function DashboardPage() {
     };
   }, [vehicles, assets, users, inspections, defects, historyItems]);
 
+  const handleFleetHealthPdf = useCallback(() => {
+    if (vehicles.length === 0 && defects.length === 0) {
+      alert('No fleet data loaded yet. Refresh the dashboard or add vehicles/defects first.');
+      return;
+    }
+    const nameFor = (userId: string | undefined) => {
+      if (!userId) return '—';
+      const u = users.find((x) => x.id === userId);
+      if (!u) return userId;
+      if (u.first_name || u.last_name) return `${u.first_name || ''} ${u.last_name || ''}`.trim();
+      if (u.display_name) return u.display_name.trim();
+      if (u.displayName) return u.displayName;
+      if (u.name) return u.name;
+      if (u.email) return u.email.split('@')[0];
+      return userId;
+    };
+    exportFleetHealthReportPDF({
+      companyName: profile?.company_name,
+      vehicles,
+      defects,
+      getUserDisplayName: nameFor,
+    });
+  }, [vehicles, defects, users, profile]);
+
   const isAuthedManager = useMemo(() => {
     return !!authUser && profile && (profile.role === 'manager' || profile.role === 'admin') && profile.company_id;
   }, [authUser, profile]);
@@ -876,6 +904,7 @@ export default function DashboardPage() {
                     data={exportData.vehicles}
                     filename={`stp-dashboard-export-${format(new Date(), 'yyyy-MM-dd')}`}
                     reportTitle={`Stock Track PRO — Dashboard export (${format(new Date(), 'PPP')})`}
+                    fleetHealthPdf={{ onExport: handleFleetHealthPdf }}
                     multiSheetData={[
                       { name: 'Vehicles', data: exportData.vehicles },
                       { name: 'Assets', data: exportData.assets },
@@ -982,27 +1011,37 @@ export default function DashboardPage() {
                   <div className="dashboard-card p-6">
                     <h3 className="text-white font-semibold mb-4">Vehicle Status Distribution</h3>
                     {vehicleStatusBreakdown.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={250}>
-                        <PieChart>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart margin={{ top: 0, right: 8, bottom: 8, left: 8 }}>
                           <Pie
                             data={vehicleStatusBreakdown}
                             cx="50%"
-                            cy="50%"
-                            innerRadius={50}
-                            outerRadius={80}
+                            cy="42%"
+                            innerRadius={48}
+                            outerRadius={72}
                             paddingAngle={2}
                             dataKey="value"
-                            label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                            label={false}
                           >
                             {vehicleStatusBreakdown.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
                           <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
+                          <Legend
+                            verticalAlign="bottom"
+                            wrapperStyle={{ paddingTop: 12 }}
+                            formatter={(value: string, entry: { payload?: { value?: number } }) => {
+                              const v = entry?.payload?.value ?? 0;
+                              const total = vehicleStatusBreakdown.reduce((s, x) => s + x.value, 0);
+                              const pct = total ? ((v / total) * 100).toFixed(0) : '0';
+                              return `${value}: ${v} (${pct}%)`;
+                            }}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     ) : (
-                      <div className="h-[250px] flex items-center justify-center text-white/50">No vehicle data</div>
+                      <div className="h-[300px] flex items-center justify-center text-white/50">No vehicle data</div>
                     )}
                   </div>
                   </ChartErrorBoundary>
@@ -1063,27 +1102,37 @@ export default function DashboardPage() {
                   <div className="dashboard-card p-6">
                     <h3 className="text-white font-semibold mb-4">Asset Status Distribution</h3>
                     {assetStatusBreakdown.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={250}>
-                        <PieChart>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart margin={{ top: 0, right: 8, bottom: 8, left: 8 }}>
                           <Pie
                             data={assetStatusBreakdown}
                             cx="50%"
-                            cy="50%"
-                            innerRadius={50}
-                            outerRadius={80}
+                            cy="42%"
+                            innerRadius={48}
+                            outerRadius={72}
                             paddingAngle={2}
                             dataKey="value"
-                            label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                            label={false}
                           >
                             {assetStatusBreakdown.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
                           <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
+                          <Legend
+                            verticalAlign="bottom"
+                            wrapperStyle={{ paddingTop: 12 }}
+                            formatter={(value: string, entry: { payload?: { value?: number } }) => {
+                              const v = entry?.payload?.value ?? 0;
+                              const total = assetStatusBreakdown.reduce((s, x) => s + x.value, 0);
+                              const pct = total ? ((v / total) * 100).toFixed(0) : '0';
+                              return `${value}: ${v} (${pct}%)`;
+                            }}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     ) : (
-                      <div className="h-[250px] flex items-center justify-center text-white/50">No asset data</div>
+                      <div className="h-[300px] flex items-center justify-center text-white/50">No asset data</div>
                     )}
                   </div>
 
@@ -1140,17 +1189,26 @@ export default function DashboardPage() {
                           <Pie
                             data={usersByRole}
                             cx="50%"
-                            cy="50%"
-                            outerRadius={80}
+                            cy="45%"
+                            outerRadius={72}
                             dataKey="value"
-                            label={({ name, value }) => `${name}: ${value}`}
+                            label={false}
                           >
                             {usersByRole.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
                           <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
-                          <Legend />
+                          <Legend
+                            verticalAlign="bottom"
+                            wrapperStyle={{ paddingTop: 12 }}
+                            formatter={(value: string, entry: { payload?: { value?: number } }) => {
+                              const v = entry?.payload?.value ?? 0;
+                              const total = usersByRole.reduce((s, x) => s + x.value, 0);
+                              const pct = total ? ((v / total) * 100).toFixed(0) : '0';
+                              return `${value}: ${v} (${pct}%)`;
+                            }}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     ) : (
