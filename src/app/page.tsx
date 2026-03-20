@@ -2,6 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Navbar from './components/Navbar';
+import { CompaniesShowcaseStrip, type ShowcaseLogo } from '@/components/CompaniesShowcaseStrip';
 import { Wrench, QrCode, Map, Smartphone, Users, ClipboardList, ArrowRight, Check, Zap, Droplets, Truck } from 'lucide-react';
 import Link from 'next/link';
 
@@ -23,6 +24,15 @@ export const metadata: Metadata = {
     description: 'Track tools, equipment, and vehicles in one app. Inspections, defects, QR check-ins, and team management.',
   },
 };
+
+/** Logos in “Companies which use us” — set `featured: true` for a larger mark in the row. */
+const SHOWCASE_LOGOS: ShowcaseLogo[] = [
+  {
+    src: '/clients/newstreet-groundwork.png',
+    alt: 'Newstreet Groundwork Services',
+    featured: true,
+  },
+];
 
 export default function Home() {
   return (
@@ -97,49 +107,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Companies which use us */}
-      <section className="py-16 sm:py-24">
-        <div className="container mx-auto px-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 text-center">
-            Companies which use us
-          </h2>
-          <p className="text-white/50 text-sm text-center max-w-md mx-auto mb-12">
-            Shown with their permission. Happy to be listed here? Get in touch.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-12 sm:gap-16 rounded-2xl border border-white/10 bg-white/[0.02] py-10 sm:py-12 px-6 sm:px-10">
-            <div className="flex flex-col items-center gap-4 text-center max-w-[220px]">
-              <div className="relative h-[132px] w-[132px] sm:h-[152px] sm:w-[152px] rounded-full overflow-hidden bg-neutral-950 ring-2 ring-white/10 shadow-lg shadow-black/40">
-                <Image
-                  src="/clients/newstreet-groundwork.png"
-                  alt="Newstreet Groundwork Services logo"
-                  fill
-                  className="object-cover object-center scale-[1.06]"
-                  sizes="(max-width: 640px) 132px, 152px"
-                />
-              </div>
-              <div>
-                <p className="text-white font-semibold text-sm sm:text-base leading-snug">Newstreet</p>
-                <p className="text-white/55 text-xs sm:text-sm uppercase tracking-wide mt-0.5">
-                  Groundwork Services
-                </p>
-              </div>
-            </div>
-            <p className="text-white/35 text-sm text-center max-w-xs border-l border-white/10 pl-10 sm:pl-16 border-dashed self-center hidden sm:block">
-              Your company could be here too —{' '}
-              <Link href="/contact" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
-                get in touch
-              </Link>{' '}
-              to be featured.
-            </p>
-          </div>
-          <p className="text-white/35 text-sm text-center mt-8 sm:hidden">
-            Your company could be here too —{' '}
-            <Link href="/contact" className="text-blue-400 hover:text-blue-300 underline underline-offset-2">
-              get in touch
-            </Link>
-          </p>
-        </div>
-      </section>
+      <CompaniesShowcaseStrip logos={SHOWCASE_LOGOS} />
 
       {/* Features grid — cards with hover */}
       <section className="py-20 sm:py-28 border-t border-white/10">
