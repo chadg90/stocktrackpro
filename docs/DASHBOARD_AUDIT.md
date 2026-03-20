@@ -1,7 +1,7 @@
 # Dashboard & Data Connectivity Audit
 
 **Date:** 2025  
-**Scope:** Dashboard (overview, fleet, assets, team, defects, history, locations, access-codes, companies, analytics), Firestore rules, data flow.
+**Scope:** Dashboard (overview, fleet, assets, team, defects, history, locations, fleet-report, companies, analytics), Firestore rules, data flow.
 
 ---
 

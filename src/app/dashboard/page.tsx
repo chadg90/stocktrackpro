@@ -32,7 +32,8 @@ import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
 
 // Check if Firebase is properly initialized
 const isFirebaseAvailable = firebaseAuth && firebaseDb;
-import { RefreshCw, Users, Truck, Package, TrendingUp, TrendingDown, Activity, CheckCircle, Clock, BarChart3, Calendar, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import Link from 'next/link';
+import { RefreshCw, Users, Truck, Package, TrendingUp, TrendingDown, Activity, CheckCircle, Clock, BarChart3, Calendar, Target, ArrowUpRight, ArrowDownRight, ClipboardList } from 'lucide-react';
 
 type Profile = {
   id: string;
@@ -900,6 +901,13 @@ export default function DashboardPage() {
                       ))}
                     </div>
                   </div>
+                  <Link
+                    href="/dashboard/fleet-report"
+                    className="btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-white/20 text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  >
+                    <ClipboardList className="h-4 w-4 shrink-0" aria-hidden />
+                    Fleet report
+                  </Link>
                   <ExportButton
                     data={exportData.vehicles}
                     filename={`stp-dashboard-export-${format(new Date(), 'yyyy-MM-dd')}`}

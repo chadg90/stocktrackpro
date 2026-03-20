@@ -8,7 +8,6 @@ import {
   AlertTriangle, 
   History, 
   MapPin, 
-  Key, 
   FileText,
   Search,
   Plus,
@@ -27,7 +26,6 @@ export type EmptyStateType =
   | 'defects' 
   | 'history' 
   | 'locations' 
-  | 'access-codes'
   | 'notifications'
   | 'search'
   | 'analytics'
@@ -86,12 +84,6 @@ const emptyStateConfig: Record<EmptyStateType, {
     title: 'No locations added',
     description: 'Add locations to organize where your assets and vehicles are stored.',
     actionLabel: 'Add Location',
-  },
-  'access-codes': {
-    icon: Key,
-    title: 'No access codes',
-    description: 'Generate access codes to invite new team members to your organization.',
-    actionLabel: 'Generate Code',
   },
   notifications: {
     icon: FileText,

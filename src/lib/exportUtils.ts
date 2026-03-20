@@ -120,6 +120,11 @@ export function exportMultipleSheetsToExcel(
       XLSX.utils.book_append_sheet(wb, ws, sheet.name.substring(0, 31)); // Excel limit: 31 chars
     }
   });
+
+  if (wb.SheetNames.length === 0) {
+    const ws = XLSX.utils.json_to_sheet([{ Message: 'No data rows to export for the selected filters.' }]);
+    XLSX.utils.book_append_sheet(wb, ws, 'Info');
+  }
   
   XLSX.writeFile(wb, `${filename}.xlsx`);
 }

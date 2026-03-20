@@ -33,13 +33,13 @@ The sidebar menu is organised into five main sections:
 - **Locations** (`/dashboard/locations`) - Site and location management
 
 ### 3. Reports & Analytics
+- **Fleet report** (`/dashboard/fleet-report`) - Mileage anomalies, defects, weekly inspections, compliance, and full Excel export (Manager/Admin only)
 - **Analytics** (`/dashboard/analytics`) - Detailed reports and charts
 - **Activity History** (`/dashboard/history`) - Complete audit trail
 - **Defects** (`/dashboard/defects`) - Vehicle defect management (Manager/Admin only)
 
 ### 4. Team & Access
-- **Team** (`/dashboard/team`) - User management
-- **Access Codes** (`/dashboard/access-codes`) - Generate access codes for new team members
+- **Team** (`/dashboard/team`) - User management and invites (access codes are no longer used)
 
 ### 5. Settings
 - **Subscription** (`/dashboard/subscription`) - Manage subscription and billing (Manager/Admin only)

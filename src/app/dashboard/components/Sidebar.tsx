@@ -12,11 +12,11 @@ import {
   AlertTriangle,
   History,
   MapPin,
-  Key,
   Building2,
   Menu,
   X,
   BarChart3,
+  ClipboardList,
   CreditCard,
   Sun,
   Moon,
@@ -69,6 +69,7 @@ const navigationGroups: NavigationGroup[] = [
   {
     label: 'Reports & Analytics',
     items: [
+      { name: 'Fleet report', href: '/dashboard/fleet-report', icon: ClipboardList, managerOnly: true },
       { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
       { name: 'Activity History', href: '/dashboard/history', icon: History },
       { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },
@@ -78,7 +79,6 @@ const navigationGroups: NavigationGroup[] = [
     label: 'Team & Access',
     items: [
       { name: 'Team', href: '/dashboard/team', icon: Users },
-      { name: 'Access Codes', href: '/dashboard/access-codes', icon: Key },
     ]
   },
   {
@@ -221,9 +221,10 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
                 </p>
                 <div className="space-y-0.5">
                   {visibleItems.map((item) => {
-                    const isActive = pathname === item.href || 
-                      (item.href === '/dashboard' && pathname === '/dashboard') ||
-                      (item.href !== '/dashboard' && pathname?.startsWith(item.href));
+                    const isActive =
+                      item.href === '/dashboard' || item.href === '/dashboard/'
+                        ? pathname === '/dashboard' || pathname === '/dashboard/'
+                        : pathname === item.href || (!!pathname && pathname.startsWith(`${item.href}/`));
                     return (
                       <Link
                         key={item.name}
