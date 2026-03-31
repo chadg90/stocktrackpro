@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 const SHOWCASE_LOGOS: ShowcaseLogo[] = [
   {
     src: '/clients/newstreet-groundwork.png',
-    alt: 'Newstreet Groundwork Services',
+    alt: 'Newstreet Groundwork Services logo',
     featured: true,
   },
 ];

@@ -6,6 +6,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Timestamp } from 'firebase/firestore';
+import { applyEvidenceRecordFooters } from '@/lib/exportUtils';
 
 const ACCENT: [number, number, number] = [66, 133, 244]; // #4285F4
 const BLACK: [number, number, number] = [0, 0, 0];
@@ -161,17 +162,19 @@ export function exportFleetHealthReportPDF(input: {
     }
   }
 
+  const referenceId = `STP-FHR-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}-${String(new Date().getHours()).padStart(2, '0')}${String(new Date().getMinutes()).padStart(2, '0')}${String(new Date().getSeconds()).padStart(2, '0')}`;
+
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 14;
   let y = margin;
 
-  const title = 'Weekly Fleet Status Report';
+  const title = 'Fleet maintenance & defect evidence report';
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
+  doc.setFontSize(17);
   doc.setTextColor(...BLACK);
   doc.text(title, margin, y);
-  y += 8;
+  y += 7;
 
   doc.setFontSize(10);
   doc.setTextColor(...ACCENT);
@@ -180,14 +183,28 @@ export function exportFleetHealthReportPDF(input: {
   y += 5;
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...BODY_GRAY);
-  const sub = [
+  const subLines = [
     companyName ? `Organisation: ${companyName}` : null,
+    `Reference: ${referenceId}`,
     `Generated: ${new Date().toLocaleString('en-GB')}`,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-  doc.text(sub, margin, y);
-  y += 10;
+  ].filter(Boolean) as string[];
+  subLines.forEach((line) => {
+    doc.text(line, margin, y);
+    y += 4.5;
+  });
+  y += 4;
+
+  doc.setDrawColor(200, 200, 200);
+  doc.line(margin, y, pageW - margin, y);
+  y += 5;
+
+  doc.setFontSize(8);
+  const coverDisclaimer = doc.splitTextToSize(
+    'This report is produced from records held in Stock Track PRO. It is intended as management and supporting evidence for operator compliance (e.g. maintenance systems, defect monitoring, and DVSA / traffic commissioner enquiries). It does not replace statutory records, a valid MOT certificate, or a DVSA vehicle inspection outcome.',
+    pageW - margin * 2
+  );
+  doc.text(coverDisclaimer, margin, y);
+  y += coverDisclaimer.length * 3.6 + 8;
 
   const section = (label: string) => {
     doc.setFont('helvetica', 'bold');
@@ -222,7 +239,7 @@ export function exportFleetHealthReportPDF(input: {
       styles: { fontSize: 8, textColor: BODY_GRAY },
       headStyles: { fillColor: ACCENT, textColor: 255, fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [248, 250, 252] },
-      margin: { left: margin, right: margin },
+      margin: { left: margin, right: margin, bottom: 20 },
     });
     y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
   }
@@ -260,7 +277,7 @@ export function exportFleetHealthReportPDF(input: {
       styles: { fontSize: 8 },
       headStyles: { fillColor: BLACK, textColor: 255, fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [252, 252, 252] },
-      margin: { left: margin, right: margin },
+      margin: { left: margin, right: margin, bottom: 20 },
     });
     y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
   }
@@ -292,7 +309,7 @@ export function exportFleetHealthReportPDF(input: {
       styles: { fontSize: 8 },
       headStyles: { fillColor: ACCENT, textColor: 255, fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [248, 250, 252] },
-      margin: { left: margin, right: margin },
+      margin: { left: margin, right: margin, bottom: 20 },
     });
     y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
   }
@@ -312,7 +329,7 @@ export function exportFleetHealthReportPDF(input: {
         : [['—', 'No vehicles with mileage > 0', '—']],
     styles: { fontSize: 9 },
     headStyles: { fillColor: BLACK, textColor: 255, fontStyle: 'bold' },
-    margin: { left: margin, right: margin },
+    margin: { left: margin, right: margin, bottom: 20 },
   });
   y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
 
@@ -337,5 +354,6 @@ export function exportFleetHealthReportPDF(input: {
     y += lines.length * 4.2 + 2;
   });
 
-  doc.save(`fleet-health-report-${new Date().toISOString().slice(0, 10)}.pdf`);
+  applyEvidenceRecordFooters(doc, referenceId, margin);
+  doc.save(`stp-fleet-evidence-report-${new Date().toISOString().slice(0, 10)}.pdf`);
 }

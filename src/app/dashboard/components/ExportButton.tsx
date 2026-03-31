@@ -7,6 +7,7 @@ import {
   exportToExcel,
   exportMultipleSheetsToExcel,
   exportMultipleSheetsToPDF,
+  type PdfArchiveMeta,
 } from '@/lib/exportUtils';
 
 interface ExportButtonProps {
@@ -27,6 +28,8 @@ interface ExportButtonProps {
   reportTitle?: string;
   /** Optional structured fleet health PDF (dashboard) */
   fleetHealthPdf?: { onExport: () => void };
+  /** Shown on multi-sheet PDF cover and footers */
+  pdfMeta?: PdfArchiveMeta;
 }
 
 const EXPORT_COOLDOWN_MS = 5000;
@@ -43,6 +46,7 @@ export default function ExportButton({
   multiSheetData,
   reportTitle,
   fleetHealthPdf,
+  pdfMeta,
 }: ExportButtonProps) {
   const [exporting, setExporting] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -121,12 +125,13 @@ export default function ExportButton({
           ...s,
           data: clampRows(s.data),
         }));
-        exportMultipleSheetsToPDF(clampedSheets, filename, title);
+        exportMultipleSheetsToPDF(clampedSheets, filename, title, pdfMeta);
       } else if (data && data.length > 0) {
         exportMultipleSheetsToPDF(
           [{ name: sheetName, data: clampRows(data), fieldMappings }],
           filename,
-          title
+          title,
+          pdfMeta
         );
       } else {
         alert('No data to export');
@@ -148,7 +153,7 @@ export default function ExportButton({
         onClick={() => setShowDropdown(!showDropdown)}
         disabled={disabled || exporting || !canOpenMenu}
         className={`btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/40 text-blue-500 hover:border-blue-500 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-        title="Export data (Excel, CSV, or PDF — use PDF for a weekly archive report)"
+        title="Export: compliance summary PDF, full data archive PDF, spreadsheet, or CSV. Print from the downloaded PDF if needed."
         aria-label={exporting ? 'Exporting data' : 'Export data'}
       >
         {exporting ? (
@@ -180,10 +185,13 @@ export default function ExportButton({
                   setShowDropdown(false);
                   fleetHealthPdf.onExport();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors text-left"
+                className="w-full flex items-start gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors text-left"
               >
-                <ClipboardList className="h-4 w-4 text-sky-400 shrink-0" />
-                Fleet health PDF
+                <ClipboardList className="h-4 w-4 text-sky-400 shrink-0 mt-0.5" />
+                <span className="flex flex-col items-start gap-0.5">
+                  <span>Fleet compliance summary (PDF)</span>
+                  <span className="text-[11px] font-normal text-white/50">Structured defects, MOT/tax alerts, actions</span>
+                </span>
               </button>
             )}
             {hasData && (
@@ -198,10 +206,13 @@ export default function ExportButton({
             {hasData && (
               <button
                 onClick={handleExportPDF}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors border-t border-white/10 text-left"
+                className="w-full flex items-start gap-3 px-4 py-3 text-sm text-white hover:bg-blue-500/10 transition-colors border-t border-white/10 text-left"
               >
-                <FileText className="h-4 w-4 text-rose-400 shrink-0" />
-                PDF report (archive)
+                <FileText className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+                <span className="flex flex-col items-start gap-0.5">
+                  <span>Full data archive (PDF)</span>
+                  <span className="text-[11px] font-normal text-white/50">All exported tables — print from file</span>
+                </span>
               </button>
             )}
             {hasData && (

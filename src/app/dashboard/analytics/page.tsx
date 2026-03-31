@@ -19,11 +19,11 @@ import { Calendar, TrendingUp, AlertTriangle, CheckCircle, Package, Truck, Users
 import { format, subDays, startOfDay, differenceInDays, eachDayOfInterval, parseISO } from 'date-fns';
 import { activityHistoryStartFromDashboardRange, TOOL_HISTORY_ANALYTICS_CAP } from '@/lib/dvsaRetention';
 import ExportButton from '../components/ExportButton';
-import PrintButton from '../components/PrintButton';
 
 type Profile = {
   id?: string;
   company_id?: string;
+  company_name?: string;
   role?: string;
   first_name?: string;
   last_name?: string;
@@ -636,7 +636,7 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div id="detailed-analytics" className="print-content">
+    <div>
       {error && (
         <div
           className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 flex flex-wrap items-center justify-between gap-2 no-print dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-100"
@@ -681,10 +681,10 @@ export default function AnalyticsPage() {
           <ExportButton
             data={dailyActivity}
             filename={`stp-analytics-export-${format(new Date(), 'yyyy-MM-dd')}`}
-            reportTitle={`Stock Track PRO — Analytics export (${format(new Date(), 'PPP')}) · Range: ${dateRange === 'all' ? 'All time' : `Last ${dateRange} days`}`}
+            reportTitle={`Stock Track PRO — Analytics data export (${format(new Date(), 'PPP')}) · Range: ${dateRange === 'all' ? 'All time' : `Last ${dateRange} days`}`}
+            pdfMeta={{ organization: profile?.company_name }}
             multiSheetData={exportSheets}
           />
-          <PrintButton title="Detailed Analytics Report" contentId="detailed-analytics" />
         </div>
       </div>
 

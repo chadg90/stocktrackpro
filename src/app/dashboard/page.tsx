@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import {
   onAuthStateChanged,
@@ -27,14 +27,13 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, X
 import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDays } from 'date-fns';
 import { activityHistoryStartFromDashboardRange, TOOL_HISTORY_ANALYTICS_CAP } from '@/lib/dvsaRetention';
 import ExportButton from './components/ExportButton';
-import PrintButton from './components/PrintButton';
 import ChartErrorBoundary from './components/ChartErrorBoundary';
 import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
+import { RefreshCw, Users, Truck, Package, TrendingUp, TrendingDown, Activity, CheckCircle, Clock, BarChart3, Calendar, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 // Check if Firebase is properly initialized
 const isFirebaseAvailable = firebaseAuth && firebaseDb;
-import Link from 'next/link';
-import { RefreshCw, Users, Truck, Package, TrendingUp, TrendingDown, Activity, CheckCircle, Clock, BarChart3, Calendar, Target, ArrowUpRight, ArrowDownRight, ClipboardList } from 'lucide-react';
+const DASHBOARD_REFRESH_COOLDOWN_MS = 8000;
 
 type Profile = {
   id: string;
@@ -176,6 +175,8 @@ export default function DashboardPage() {
   // Company subscription info
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
+
+  const lastManualRefreshAtRef = useRef(0);
 
   useEffect(() => {
     if (!isFirebaseAvailable) {
@@ -335,6 +336,20 @@ export default function DashboardPage() {
     },
     [dateRange]
   );
+
+  const handleManualRefresh = useCallback(() => {
+    if (!profile?.company_id || loading) return;
+    const now = Date.now();
+    if (now - lastManualRefreshAtRef.current < DASHBOARD_REFRESH_COOLDOWN_MS) {
+      const wait = Math.ceil(
+        (DASHBOARD_REFRESH_COOLDOWN_MS - (now - lastManualRefreshAtRef.current)) / 1000
+      );
+      alert(`Please wait ${wait}s before refreshing again.`);
+      return;
+    }
+    lastManualRefreshAtRef.current = now;
+    fetchData(profile.company_id);
+  }, [profile?.company_id, loading, fetchData]);
 
   useEffect(() => {
     if (!authUser) return;
@@ -818,7 +833,7 @@ export default function DashboardPage() {
           )}
 
           {isAuthedManager && (
-            <div id="analytics-report" className="print-content space-y-6 lg:space-y-8">
+            <div className="space-y-6 lg:space-y-8">
               {/* Header with controls */}
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 mb-6 no-print">
                 <div>
@@ -873,18 +888,12 @@ export default function DashboardPage() {
                       ))}
                     </div>
                   </div>
-                  <Link
-                    href="/dashboard/fleet-report"
-                    className="btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-white/20 text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                  >
-                    <ClipboardList className="h-4 w-4 shrink-0" aria-hidden />
-                    Fleet report
-                  </Link>
                   <ExportButton
                     data={exportData.vehicles}
                     filename={`stp-dashboard-export-${format(new Date(), 'yyyy-MM-dd')}`}
-                    reportTitle={`Stock Track PRO — Dashboard export (${format(new Date(), 'PPP')})`}
+                    reportTitle={`Stock Track PRO — Dashboard data export (${format(new Date(), 'PPP')})`}
                     fleetHealthPdf={{ onExport: handleFleetHealthPdf }}
+                    pdfMeta={{ organization: profile?.company_name }}
                     multiSheetData={[
                       { name: 'Vehicles', data: exportData.vehicles },
                       { name: 'Assets', data: exportData.assets },
@@ -894,23 +903,18 @@ export default function DashboardPage() {
                       { name: 'Asset History', data: exportData.history },
                     ]}
                   />
-                  <PrintButton title="Analytics Report" contentId="analytics-report" />
                   <button
-                    onClick={() => profile?.company_id && fetchData(profile.company_id)}
+                    type="button"
+                    onClick={handleManualRefresh}
                     className="btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-white/20 text-white hover:bg-white/5 transition-colors disabled:opacity-60"
                     disabled={loading}
+                    title="Manual refresh (limited to once every 8 seconds)"
                     aria-label={loading ? 'Refreshing data' : 'Refresh dashboard data'}
                   >
                     <RefreshCw className={`h-4 w-4 shrink-0 ${loading ? 'animate-spin' : ''}`} aria-hidden />
                     Refresh
                   </button>
                 </div>
-              </div>
-
-              {/* Print Header (hidden on screen) */}
-              <div className="print-header hidden print:block mb-8">
-                <h1 className="text-2xl font-bold">Analytics Report</h1>
-                <p className="text-sm text-gray-600">Generated on {format(new Date(), 'PPP')}</p>
               </div>
 
               {/* Loading overlay for data */}

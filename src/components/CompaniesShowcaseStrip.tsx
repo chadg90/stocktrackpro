@@ -55,14 +55,15 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
               key={logo.src}
               className={
                 logo.featured
-                  ? 'mx-auto rounded-2xl bg-white border border-neutral-200 shadow-sm shadow-neutral-900/5 px-6 py-5 sm:px-8 sm:py-6 w-full max-w-md'
+                  ? 'mx-auto w-full max-w-2xl rounded-2xl bg-white px-8 py-7 sm:px-12 sm:py-9 md:px-14 md:py-10 ring-1 ring-neutral-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
                   : 'mx-auto'
               }
             >
+              {/* Wide horizontal marks (e.g. wordmark + icon row): width-led box, generous padding */}
               <div
-                className={`relative flex shrink-0 items-center justify-center mx-auto ${
+                className={`relative mx-auto flex shrink-0 items-center justify-center ${
                   logo.featured
-                    ? 'h-24 w-full max-w-[280px] sm:h-32 sm:max-w-[320px] md:h-36 md:max-w-[360px]'
+                    ? 'aspect-[5/2] w-full max-h-[140px] sm:max-h-[160px] md:max-h-[180px] min-h-[96px]'
                     : 'h-10 w-32 sm:h-12 sm:w-36 md:h-14 md:w-40'
                 }`}
               >
@@ -73,7 +74,7 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
                   className="object-contain object-center"
                   sizes={
                     logo.featured
-                      ? '(max-width: 768px) 280px, 360px'
+                      ? '(max-width: 768px) 90vw, 672px'
                       : '(max-width: 768px) 128px, 160px'
                   }
                 />

@@ -219,6 +219,45 @@ export type ExportSheetInput = {
   fieldMappings?: Record<string, string>;
 };
 
+export type PdfArchiveMeta = {
+  organization?: string;
+};
+
+function evidenceReferenceId(prefix: string): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${prefix}-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+}
+
+/**
+ * Formal footer on every page — call immediately before `doc.save()`.
+ * Keeps a consistent audit trail for printed / archived PDFs.
+ */
+export function applyEvidenceRecordFooters(
+  doc: InstanceType<typeof jsPDF>,
+  referenceId: string,
+  marginMm = 12
+): void {
+  const pageCount = doc.getNumberOfPages();
+  const pageH = doc.internal.pageSize.getHeight();
+  const pageW = doc.internal.pageSize.getWidth();
+  const gen = new Date().toLocaleString('en-GB');
+  const line2 =
+    'Stock Track PRO — management evidence for operator records; not a statutory roadworthiness certificate, MOT pass, or DVSA inspection outcome.';
+
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(200, 200, 200);
+    doc.line(marginMm, pageH - 13, pageW - marginMm, pageH - 13);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Reference: ${referenceId}  ·  Page ${i} of ${pageCount}  ·  Generated: ${gen}`, marginMm, pageH - 9);
+    const wrapped = doc.splitTextToSize(line2, pageW - marginMm * 2);
+    doc.text(wrapped, marginMm, pageH - 5);
+  }
+}
+
 /**
  * Multi-sheet PDF (landscape A4). Suitable for weekly / archive downloads.
  * Long text cells are truncated for PDF layout stability.
@@ -226,7 +265,8 @@ export type ExportSheetInput = {
 export function exportMultipleSheetsToPDF(
   sheets: ExportSheetInput[],
   filename: string,
-  reportTitle?: string
+  reportTitle?: string,
+  meta?: PdfArchiveMeta
 ): void {
   const nonEmpty = sheets.filter((s) => s.data && s.data.length > 0);
   if (nonEmpty.length === 0) {
@@ -234,6 +274,7 @@ export function exportMultipleSheetsToPDF(
     return;
   }
 
+  const referenceId = evidenceReferenceId('STP-DAT');
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const margin = 12;
   let isFirstPage = true;
@@ -253,16 +294,40 @@ export function exportMultipleSheetsToPDF(
     let y = margin;
 
     if (idx === 0 && reportTitle) {
-      doc.setFontSize(15);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
       doc.setTextColor(15, 23, 42);
-      doc.text(reportTitle, margin, y);
-      y += 8;
+      const titleLines = doc.splitTextToSize(reportTitle, doc.internal.pageSize.getWidth() - margin * 2);
+      doc.text(titleLines, margin, y);
+      y += titleLines.length * 5.5 + 2;
+
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(71, 85, 105);
-      doc.text(`Generated ${new Date().toLocaleString()}`, margin, y);
-      y += 10;
+      if (meta?.organization) {
+        doc.text(`Organisation: ${meta.organization}`, margin, y);
+        y += 5;
+      }
+      doc.text(`Reference: ${referenceId}`, margin, y);
+      y += 5;
+      doc.text(`Generated: ${new Date().toLocaleString('en-GB')}`, margin, y);
+      y += 6;
+
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, y, doc.internal.pageSize.getWidth() - margin, y);
+      y += 5;
+
+      doc.setFontSize(8);
+      doc.setTextColor(60, 60, 60);
+      const coverNote = doc.splitTextToSize(
+        'Formal data extract from Stock Track PRO for retention, audit, and supporting evidence (e.g. operator licence / DVSA enquiries). Contents reflect system records at generation time.',
+        doc.internal.pageSize.getWidth() - margin * 2
+      );
+      doc.text(coverNote, margin, y);
+      y += coverNote.length * 3.6 + 6;
     }
 
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(15, 23, 42);
     const sectionTitle = sheet.name.substring(0, 90);
@@ -284,9 +349,10 @@ export function exportMultipleSheetsToPDF(
       styles: { fontSize: 7, cellPadding: 1.5, overflow: 'linebreak', cellWidth: 'wrap' },
       headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [248, 250, 252] },
-      margin: { left: margin, right: margin },
+      margin: { left: margin, right: margin, bottom: 18 },
     });
   });
 
+  applyEvidenceRecordFooters(doc, referenceId, margin);
   doc.save(`${filename}.pdf`);
 }
