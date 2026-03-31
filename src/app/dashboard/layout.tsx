@@ -8,6 +8,7 @@ import Sidebar from './components/Sidebar';
 import NotificationBell from './components/NotificationBell';
 import { useRouter, usePathname } from 'next/navigation';
 import { ToastProvider } from '@/components/Toast';
+import DashboardQueryProvider from './providers/DashboardQueryProvider';
 
 type Profile = {
   company_id?: string;
@@ -215,15 +216,16 @@ export default function DashboardLayout({
     // On /dashboard page, show login form without sidebar
     return (
       <ToastProvider>
-        <div className="min-h-screen bg-black">
-          {children}
-        </div>
+        <DashboardQueryProvider>
+          <div className="min-h-screen bg-black">{children}</div>
+        </DashboardQueryProvider>
       </ToastProvider>
     );
   }
 
   return (
     <ToastProvider>
+      <DashboardQueryProvider>
       <div
         data-theme={theme}
         className={`min-h-screen ${
@@ -239,18 +241,19 @@ export default function DashboardLayout({
           }`}
         >
           <div className="p-4 sm:p-6 lg:p-8 pb-16 sm:pb-24 max-w-[1600px] mx-auto min-h-0">
-            <header className="flex flex-wrap items-center justify-between gap-4 mb-6 lg:mb-8">
-              <div className="min-w-0 flex-1" aria-hidden />
-              <div className="flex items-center gap-3">
-                <div className="hidden lg:block">
-                  <NotificationBell />
-                </div>
+            <header
+              className="dashboard-topbar flex flex-wrap items-center justify-end gap-3"
+              aria-label="Dashboard toolbar"
+            >
+              <div className="hidden lg:block">
+                <NotificationBell />
               </div>
             </header>
             {children}
           </div>
         </main>
       </div>
+      </DashboardQueryProvider>
     </ToastProvider>
   );
 }

@@ -21,6 +21,7 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Search, AlertTriangle, CheckCircle, Clock, Filter, Truck, Trash2 } from 'lucide-react';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
+import LazyWhenVisible from '../components/LazyWhenVisible';
 import { EmptyStateTableRow } from '../components/EmptyState';
 import TableSkeleton from '../components/TableSkeleton';
 import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
@@ -563,14 +564,26 @@ export default function DefectsPage() {
                               <>
                                 <div className="flex items-center gap-1">
                                   {thumbUrls.map((url, i) => (
-                                    <button
+                                    <LazyWhenVisible
                                       key={url}
-                                      type="button"
-                                      onClick={() => openViewer(i)}
-                                      className="w-9 h-9 rounded border border-white/20 overflow-hidden flex-shrink-0 hover:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                      className="inline-block"
+                                      placeholder={
+                                        <div className="w-9 h-9 rounded border border-white/20 bg-white/10 animate-pulse" />
+                                      }
                                     >
-                                      <AuthenticatedImage src={url} alt="" className="w-full h-full object-cover" />
-                                    </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => openViewer(i)}
+                                        className="w-9 h-9 rounded border border-white/20 overflow-hidden flex-shrink-0 hover:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                      >
+                                        <AuthenticatedImage
+                                          src={url}
+                                          alt=""
+                                          className="w-full h-full object-cover"
+                                          preferThumbnail
+                                        />
+                                      </button>
+                                    </LazyWhenVisible>
                                   ))}
                                   {rest > 0 && (
                                     <button

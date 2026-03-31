@@ -82,32 +82,32 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trusted by */}
-      <section className="py-14 sm:py-18 border-y border-white/10 bg-white/[0.02]">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-white/40 text-xs font-semibold uppercase tracking-[0.25em] mb-6">
-            Trusted by
+      {/* Sectors we serve */}
+      <section className="py-12 sm:py-16 border-y border-white/10 bg-white/[0.02]">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <p className="text-center text-white/45 text-[11px] font-semibold uppercase tracking-[0.22em] mb-5">
+            Built for
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 mb-6">
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-10 mb-5">
             {[
               { icon: Zap, label: 'Electrical' },
               { icon: Droplets, label: 'Plumbing' },
               { icon: Truck, label: 'Logistics' },
               { icon: Wrench, label: 'Trades' },
             ].map(({ icon: Icon, label }) => (
-              <div key={label} className="flex flex-col items-center gap-2 text-white/50">
-                <Icon className="w-8 h-8 sm:w-10 sm:h-10" strokeWidth={1.5} aria-hidden />
-                <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
+              <div key={label} className="flex flex-col items-center gap-2 text-white/55">
+                <Icon className="w-7 h-7 sm:w-9 sm:h-9" strokeWidth={1.5} aria-hidden />
+                <span className="text-[11px] sm:text-xs font-medium uppercase tracking-wider">{label}</span>
               </div>
             ))}
           </div>
-          <p className="text-center text-white/70 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            Teams across the UK who want to stop losing tools and keep vehicles compliant.
+          <p className="text-center text-white/65 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+            UK teams who want fewer lost tools and clearer vehicle compliance.
           </p>
         </div>
       </section>
 
-      <CompaniesShowcaseStrip logos={SHOWCASE_LOGOS} />
+      <CompaniesShowcaseStrip logos={SHOWCASE_LOGOS} className="border-t-0" />
 
       {/* Features grid — cards with hover */}
       <section className="py-20 sm:py-28 border-t border-white/10">

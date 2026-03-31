@@ -17,6 +17,7 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadialBarChart, RadialBar } from 'recharts';
 import { Calendar, TrendingUp, AlertTriangle, CheckCircle, Package, Truck, Users, Clock, Target, ArrowUpRight, ArrowDownRight, FileText, Filter } from 'lucide-react';
 import { format, subDays, startOfDay, differenceInDays, eachDayOfInterval, parseISO } from 'date-fns';
+import { activityHistoryStartFromDashboardRange, TOOL_HISTORY_ANALYTICS_CAP } from '@/lib/dvsaRetention';
 import ExportButton from '../components/ExportButton';
 import PrintButton from '../components/PrintButton';
 
@@ -184,12 +185,7 @@ export default function AnalyticsPage() {
     setLoading(true);
     setError(null);
     try {
-      const now = new Date();
-      let startDate: Date | null = null;
-      
-      if (dateRange !== 'all') {
-        startDate = startOfDay(subDays(now, parseInt(dateRange)));
-      }
+      const rangeStart = activityHistoryStartFromDashboardRange(dateRange);
 
       // Fetch vehicles
       const vehiclesQ = query(collection(firebaseDb, 'vehicles'), where('company_id', '==', companyId));
@@ -206,23 +202,13 @@ export default function AnalyticsPage() {
       const usersSnap = await getDocs(usersQ);
       setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)));
 
-      // Fetch inspections with date filter
-      let inspectionsQuery;
-      if (startDate) {
-        inspectionsQuery = query(
-          collection(firebaseDb, 'vehicle_inspections'),
-          where('company_id', '==', companyId),
-          where('inspected_at', '>=', Timestamp.fromDate(startDate)),
-          orderBy('inspected_at', 'desc')
-        );
-      } else {
-        inspectionsQuery = query(
-          collection(firebaseDb, 'vehicle_inspections'),
-          where('company_id', '==', companyId),
-          orderBy('inspected_at', 'desc')
-        );
-      }
-      
+      const inspectionsQuery = query(
+        collection(firebaseDb, 'vehicle_inspections'),
+        where('company_id', '==', companyId),
+        where('inspected_at', '>=', Timestamp.fromDate(rangeStart)),
+        orderBy('inspected_at', 'desc')
+      );
+
       try {
         const inspectionsSnap = await getDocs(inspectionsQuery);
         const inspectionsData = inspectionsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
@@ -250,43 +236,24 @@ export default function AnalyticsPage() {
         }
       }
 
-      // Fetch defects
-      let defectsQuery = query(
+      const defectsQuery = query(
         collection(firebaseDb, 'vehicle_defects'),
         where('company_id', '==', companyId),
+        where('reported_at', '>=', Timestamp.fromDate(rangeStart)),
         orderBy('reported_at', 'desc')
       );
-      
-      if (startDate) {
-        defectsQuery = query(
-          collection(firebaseDb, 'vehicle_defects'),
-          where('company_id', '==', companyId),
-          where('reported_at', '>=', Timestamp.fromDate(startDate)),
-          orderBy('reported_at', 'desc')
-        );
-      }
-      
+
       const defectsSnap = await getDocs(defectsQuery);
       setDefects(defectsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Defect)));
 
-      // Fetch history (capped for browser performance; matches dashboard export depth)
-      let historyQuery = query(
+      const historyQuery = query(
         collection(firebaseDb, 'tool_history'),
         where('company_id', '==', companyId),
+        where('timestamp', '>=', Timestamp.fromDate(rangeStart)),
         orderBy('timestamp', 'desc'),
-        limit(2500)
+        limit(TOOL_HISTORY_ANALYTICS_CAP)
       );
-      
-      if (startDate) {
-        historyQuery = query(
-          collection(firebaseDb, 'tool_history'),
-          where('company_id', '==', companyId),
-          where('timestamp', '>=', Timestamp.fromDate(startDate)),
-          orderBy('timestamp', 'desc'),
-          limit(2500)
-        );
-      }
-      
+
       const historySnap = await getDocs(historyQuery);
       setHistoryItems(historySnap.docs.map(d => ({ id: d.id, ...d.data() } as HistoryItem)));
 

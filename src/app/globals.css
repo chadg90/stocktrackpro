@@ -64,6 +64,14 @@ body {
     @apply text-sm text-white/70;
   }
 
+  /* Main content top bar (notifications) — separator adapts to light/dark dashboard theme */
+  .dashboard-topbar {
+    @apply border-b border-white/10 pb-4 mb-5 lg:mb-6;
+  }
+  [data-theme='light'] .dashboard-topbar {
+    border-color: var(--dashboard-border);
+  }
+
   /* Light theme overrides for dashboard */
   .theme-light .dashboard-card {
     @apply bg-white border-zinc-200;

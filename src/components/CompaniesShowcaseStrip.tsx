@@ -9,10 +9,16 @@ export type ShowcaseLogo = {
   featured?: boolean;
 };
 
+type Props = {
+  logos: ShowcaseLogo[];
+  /** Optional class on outer section (e.g. spacing from hero). */
+  className?: string;
+};
+
 /**
- * Light band + logo row. Featured logos get a white card and a larger mark.
+ * Light band + logo row for the marketing home page. Featured logos get a card and larger mark.
  */
-export function CompaniesShowcaseStrip({ logos }: { logos: ShowcaseLogo[] }) {
+export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
   const rowJustify =
     logos.length <= 1
       ? 'justify-center'
@@ -21,28 +27,42 @@ export function CompaniesShowcaseStrip({ logos }: { logos: ShowcaseLogo[] }) {
         : 'justify-center lg:justify-between';
 
   return (
-    <section className="bg-neutral-50 border-y border-neutral-200 py-6 sm:py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <p className="text-center text-neutral-500 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] sm:tracking-[0.32em] mb-4 sm:mb-5 px-2">
-          Companies which use us
-        </p>
+    <section
+      className={`bg-neutral-50 border-y border-neutral-200/90 py-10 sm:py-12 ${className}`.trim()}
+      aria-labelledby="showcase-heading"
+    >
+      <div className="container mx-auto px-4 max-w-5xl">
+        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+          <p className="text-neutral-500 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-3">
+            Our customers
+          </p>
+          <h2
+            id="showcase-heading"
+            className="text-neutral-900 text-xl sm:text-2xl font-semibold tracking-tight mb-2"
+          >
+            Teams that rely on Stock Track PRO
+          </h2>
+          <p className="text-neutral-600 text-sm sm:text-[15px] leading-relaxed">
+            From groundwork to trades — UK businesses keeping assets and vehicles organised.
+          </p>
+        </div>
 
         <div
-          className={`flex flex-wrap items-center gap-x-8 gap-y-6 sm:gap-x-10 md:flex-nowrap ${rowJustify}`}
+          className={`flex flex-wrap items-center justify-items-center gap-x-10 gap-y-8 sm:gap-x-12 md:flex-nowrap ${rowJustify}`}
         >
           {logos.map((logo) => (
             <div
               key={logo.src}
               className={
                 logo.featured
-                  ? 'rounded-2xl bg-white border border-neutral-200/90 shadow-sm p-4 sm:p-5 md:p-6'
-                  : ''
+                  ? 'mx-auto rounded-2xl bg-white border border-neutral-200 shadow-sm shadow-neutral-900/5 px-6 py-5 sm:px-8 sm:py-6 w-full max-w-md'
+                  : 'mx-auto'
               }
             >
               <div
-                className={`relative flex shrink-0 items-center justify-center ${
+                className={`relative flex shrink-0 items-center justify-center mx-auto ${
                   logo.featured
-                    ? 'h-28 w-52 sm:h-36 sm:w-64 md:h-44 md:w-80'
+                    ? 'h-24 w-full max-w-[280px] sm:h-32 sm:max-w-[320px] md:h-36 md:max-w-[360px]'
                     : 'h-10 w-32 sm:h-12 sm:w-36 md:h-14 md:w-40'
                 }`}
               >
@@ -62,12 +82,16 @@ export function CompaniesShowcaseStrip({ logos }: { logos: ShowcaseLogo[] }) {
           ))}
         </div>
 
-        <div className="text-center mt-5 sm:mt-6">
+        <p className="text-center text-neutral-500 text-xs sm:text-sm mt-8 max-w-md mx-auto leading-relaxed">
+          Your logo could be here — we work with growing fleets and contractors across the UK.
+        </p>
+
+        <div className="text-center mt-6">
           <Link
             href="/contact"
-            className="inline-flex items-center justify-center text-sm font-semibold text-blue-600 hover:text-blue-700 underline underline-offset-4 decoration-neutral-300 hover:decoration-blue-500/50 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-neutral-900 text-white text-sm font-semibold px-5 py-2.5 hover:bg-neutral-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-neutral-50"
           >
-            Get in touch
+            Become a customer
           </Link>
         </div>
       </div>

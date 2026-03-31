@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import {
   collection,
@@ -12,8 +12,8 @@ import {
   orderBy,
   Timestamp,
 } from 'firebase/firestore';
-import { subDays, startOfDay } from 'date-fns';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
+import { fifteenMonthsAgoStart } from '@/lib/dvsaRetention';
 import type {
   FleetDefect,
   FleetInspection,
@@ -54,9 +54,10 @@ type FleetReportContextValue = {
 
 const FleetReportContext = createContext<FleetReportContextValue | null>(null);
 
-const LOOKBACK_DAYS = 365;
+const FULL_EXPORT_COOLDOWN_MS = 45_000;
 
 export function FleetReportProvider({ children }: { children: React.ReactNode }) {
+  const lastFullExportAt = useRef(0);
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,7 +93,7 @@ export function FleetReportProvider({ children }: { children: React.ReactNode })
     }
     setError(null);
     try {
-      const startDate = startOfDay(subDays(new Date(), LOOKBACK_DAYS));
+      const startDate = fifteenMonthsAgoStart();
 
       const vehiclesQ = query(
         collection(firebaseDb, 'vehicles'),
@@ -204,6 +205,13 @@ export function FleetReportProvider({ children }: { children: React.ReactNode })
   );
 
   const exportFullExcel = useCallback(() => {
+    const now = Date.now();
+    if (now - lastFullExportAt.current < FULL_EXPORT_COOLDOWN_MS) {
+      const wait = Math.ceil((FULL_EXPORT_COOLDOWN_MS - (now - lastFullExportAt.current)) / 1000);
+      alert(`Please wait ${wait}s before exporting the full fleet report again.`);
+      return;
+    }
+    lastFullExportAt.current = Date.now();
     const sheets = buildFleetReportExcelSheets(vehicles, users, inspections, defects);
     exportMultipleSheetsToExcel(
       sheets.map((s) => ({ name: s.name, data: s.data as any[] })),

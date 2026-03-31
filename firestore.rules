@@ -51,6 +51,57 @@ service cloud.firestore {
           get(/databases/$(database)/documents/companies/$(userCompanyId())).data.subscription_status == 'trial'
         );
     }
+
+    // Custom claims (synced by Cloud Functions). Prefer token when present; legacy uses profile + company reads.
+    function tokenCompanyMatches(resourceCompanyId) {
+      return request.auth != null &&
+        request.auth.token.companyId != null &&
+        request.auth.token.companyId == resourceCompanyId;
+    }
+
+    function tokenSubscriptionActive() {
+      return request.auth.token.subscriptionStatus == 'active' ||
+        request.auth.token.subscriptionStatus == 'trial';
+    }
+
+    function tokenTenantOk(resourceCompanyId) {
+      return isSignedIn() &&
+        tokenCompanyMatches(resourceCompanyId) &&
+        tokenSubscriptionActive();
+    }
+
+    // Legacy: profile document + company subscription (extra rule reads). Kept for hybrid rollout.
+    function legacyTenantOk(resourceCompanyId) {
+      return isSignedIn() &&
+        userCompanyId() == resourceCompanyId &&
+        isCompanyActive();
+    }
+
+    // Prefer claims; fall back to legacy so stale tokens do not lock users out after backfill + refresh.
+    function hybridTenantOk(resourceCompanyId) {
+      return tokenTenantOk(resourceCompanyId) || legacyTenantOk(resourceCompanyId);
+    }
+
+    function vehicleInspectionTenantOk(resourceCompanyId) {
+      return hybridTenantOk(resourceCompanyId);
+    }
+
+    // Single get(companies/{id}) for vehicle create quota. Requires vehicle_slot_count / vehicle_slot_limit
+    // (maintained by Cloud Functions + optional backfill). If either field missing, allow (backward compatible).
+    function companyVehicleCreateAllowed(companyId) {
+      return exists(/databases/$(database)/documents/companies/$(companyId)) &&
+        (
+          get(/databases/$(database)/documents/companies/$(companyId)).data.legacy == true ||
+          !get(/databases/$(database)/documents/companies/$(companyId)).data.keys()
+            .hasAll(['vehicle_slot_count', 'vehicle_slot_limit']) ||
+          (
+            get(/databases/$(database)/documents/companies/$(companyId)).data.vehicle_slot_count is int &&
+            get(/databases/$(database)/documents/companies/$(companyId)).data.vehicle_slot_limit is int &&
+            get(/databases/$(database)/documents/companies/$(companyId)).data.vehicle_slot_count <
+              get(/databases/$(database)/documents/companies/$(companyId)).data.vehicle_slot_limit
+          )
+        );
+    }
     
     // ============================================
     // PROFILES
@@ -72,21 +123,29 @@ service cloud.firestore {
         isAdmin()
       );
       
-      // Users can update their own non-sensitive fields
-      // Admins can update any profile
-      // Managers can update profiles in their company
+      // Users: non-sensitive fields only. company_id only on first bind (join company). role/company_id not self-editable after bind.
+      // Admins / managers: unchanged broader updates.
       allow update: if isSignedIn() && (
         isAdmin() ||
         (
           request.auth.uid == userId &&
-          // Allow changing company_id ONLY if user doesn't have one yet
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['expoPushToken', 'pushTokenUpdatedAt', 'display_name', 'photo_url', 'phone', 'updated_at'])
+        ) ||
+        (
+          request.auth.uid == userId &&
           (
-            request.resource.data.company_id == resource.data.company_id ||
             resource.data.company_id == null ||
             !('company_id' in resource.data)
           ) &&
           request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['expoPushToken', 'pushTokenUpdatedAt', 'display_name', 'photo_url', 'phone', 'updated_at', 'company_id', 'role'])
+            .hasOnly(['company_id', 'updated_at', 'display_name', 'role']) &&
+          request.resource.data.role == 'user' &&
+          (
+            !('role' in resource.data) ||
+            resource.data.role == null ||
+            resource.data.role == 'user'
+          )
         ) ||
         (
           isManager() && userCompanyId() == resource.data.company_id &&
@@ -158,35 +217,33 @@ service cloud.firestore {
     // TOOLS
     // ============================================
     match /tools/{toolId} {
-      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
-      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
+      allow read: if isSignedIn() && hybridTenantOk(resource.data.company_id);
+      allow create: if isSignedIn() && hybridTenantOk(request.resource.data.company_id);
       allow update: if isSignedIn() &&
-        userCompanyId() == request.resource.data.company_id &&
-        request.resource.data.company_id == resource.data.company_id &&
-        isCompanyActive();
-      allow delete: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
+        hybridTenantOk(resource.data.company_id) &&
+        request.resource.data.company_id == resource.data.company_id;
+      allow delete: if isSignedIn() && hybridTenantOk(resource.data.company_id);
     }
 
     // ============================================
     // LOCATIONS
     // ============================================
     match /locations/{locationId} {
-      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
+      allow read: if isSignedIn() && hybridTenantOk(resource.data.company_id);
       allow create: if isSignedIn() && (
-        (isManager() && userCompanyId() == request.resource.data.company_id && isCompanyActive()) ||
+        (isManager() && hybridTenantOk(request.resource.data.company_id)) ||
         isAdmin()
       );
       allow update: if isSignedIn() && (
         (
           isManager() &&
-          userCompanyId() == resource.data.company_id &&
-          request.resource.data.company_id == resource.data.company_id &&
-          isCompanyActive()
+          hybridTenantOk(resource.data.company_id) &&
+          request.resource.data.company_id == resource.data.company_id
         ) ||
         isAdmin()
       );
       allow delete: if isSignedIn() && (
-        (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
+        (isManager() && hybridTenantOk(resource.data.company_id)) ||
         isAdmin()
       );
     }
@@ -195,8 +252,8 @@ service cloud.firestore {
     // TOOL HISTORY
     // ============================================
     match /tool_history/{historyId} {
-      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
-      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
+      allow read: if isSignedIn() && hybridTenantOk(resource.data.company_id);
+      allow create: if isSignedIn() && hybridTenantOk(request.resource.data.company_id);
       // History is immutable - only admins can modify/delete
       allow update, delete: if isAdmin();
     }
@@ -205,37 +262,36 @@ service cloud.firestore {
     // VEHICLES
     // ============================================
     match /vehicles/{vehicleId} {
-      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
-      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
+      allow read: if isSignedIn() && vehicleInspectionTenantOk(resource.data.company_id);
+      allow create: if isSignedIn() &&
+        vehicleInspectionTenantOk(request.resource.data.company_id) &&
+        companyVehicleCreateAllowed(request.resource.data.company_id);
       allow update: if isSignedIn() &&
-        userCompanyId() == resource.data.company_id &&
         request.resource.data.company_id == resource.data.company_id &&
-        isCompanyActive();
-      allow delete: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
+        vehicleInspectionTenantOk(resource.data.company_id);
+      allow delete: if isSignedIn() && vehicleInspectionTenantOk(resource.data.company_id);
     }
 
     // ============================================
     // VEHICLE INSPECTIONS
     // ============================================
     match /vehicle_inspections/{inspectionId} {
-      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
-      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
+      allow read: if isSignedIn() && vehicleInspectionTenantOk(resource.data.company_id);
+      allow create: if isSignedIn() && vehicleInspectionTenantOk(request.resource.data.company_id);
       // Users can update their own inspections, managers can update any in their company
       allow update: if isSignedIn() && (
         (
           resource.data.inspected_by == request.auth.uid &&
-          userCompanyId() == resource.data.company_id &&
-          isCompanyActive()
+          vehicleInspectionTenantOk(resource.data.company_id)
         ) ||
         (
           isManager() &&
-          userCompanyId() == resource.data.company_id &&
-          isCompanyActive()
+          vehicleInspectionTenantOk(resource.data.company_id)
         ) ||
         isAdmin()
       ) && request.resource.data.company_id == resource.data.company_id;
       allow delete: if isSignedIn() && (
-        (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
+        (isManager() && vehicleInspectionTenantOk(resource.data.company_id)) ||
         isAdmin()
       );
     }
@@ -244,19 +300,18 @@ service cloud.firestore {
     // VEHICLE DEFECTS
     // ============================================
     match /vehicle_defects/{defectId} {
-      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
-      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
+      allow read: if isSignedIn() && hybridTenantOk(resource.data.company_id);
+      allow create: if isSignedIn() && hybridTenantOk(request.resource.data.company_id);
       allow update: if isSignedIn() && (
         (
           isManager() &&
-          userCompanyId() == resource.data.company_id &&
-          request.resource.data.company_id == resource.data.company_id &&
-          isCompanyActive()
+          hybridTenantOk(resource.data.company_id) &&
+          request.resource.data.company_id == resource.data.company_id
         ) ||
         isAdmin()
       );
       allow delete: if isSignedIn() && (
-        (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
+        (isManager() && hybridTenantOk(resource.data.company_id)) ||
         isAdmin()
       );
     }
@@ -265,19 +320,18 @@ service cloud.firestore {
     // VEHICLE DAMAGE REPORTS
     // ============================================
     match /vehicle_damage_reports/{reportId} {
-      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
-      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
+      allow read: if isSignedIn() && hybridTenantOk(resource.data.company_id);
+      allow create: if isSignedIn() && hybridTenantOk(request.resource.data.company_id);
       allow update: if isSignedIn() && (
         (
           isManager() &&
-          userCompanyId() == resource.data.company_id &&
-          request.resource.data.company_id == resource.data.company_id &&
-          isCompanyActive()
+          hybridTenantOk(resource.data.company_id) &&
+          request.resource.data.company_id == resource.data.company_id
         ) ||
         isAdmin()
       );
       allow delete: if isSignedIn() && (
-        (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
+        (isManager() && hybridTenantOk(resource.data.company_id)) ||
         isAdmin()
       );
     }

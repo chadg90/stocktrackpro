@@ -28,17 +28,24 @@ export default function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const notificationsUnsubRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
 
-    const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
+    const unsubAuth = onAuthStateChanged(firebaseAuth, async (user) => {
+      if (notificationsUnsubRef.current) {
+        notificationsUnsubRef.current();
+        notificationsUnsubRef.current = null;
+      }
       if (user && firebaseDb) {
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
         const snap = await getDoc(profileRef);
         if (snap.exists()) {
           const data = snap.data();
           if (data.company_id) {
-            setupNotificationsListener(data.company_id, user.uid);
+            const off = setupNotificationsListener(data.company_id, user.uid);
+            if (off) notificationsUnsubRef.current = off;
           } else {
             setLoading(false);
           }
@@ -50,7 +57,13 @@ export default function NotificationBell() {
       }
     });
 
-    return () => unsub();
+    return () => {
+      unsubAuth();
+      if (notificationsUnsubRef.current) {
+        notificationsUnsubRef.current();
+        notificationsUnsubRef.current = null;
+      }
+    };
   }, []);
 
   const setupNotificationsListener = (companyId: string, userId: string) => {

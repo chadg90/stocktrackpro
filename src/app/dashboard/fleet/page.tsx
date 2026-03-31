@@ -22,6 +22,7 @@ import Modal from '../components/Modal';
 import ExportButton from '../components/ExportButton';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
+import LazyWhenVisible from '../components/LazyWhenVisible';
 import { EmptyStateTableRow } from '../components/EmptyState';
 import TableSkeleton from '../components/TableSkeleton';
 import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
@@ -368,11 +369,17 @@ export default function FleetPage() {
                             className={`w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden ${vehicle.image_url ? 'hover:ring-2 hover:ring-blue-500 cursor-pointer' : ''}`}
                           >
                             {vehicle.image_url ? (
-                              <AuthenticatedImage
-                                src={vehicle.image_url}
-                                alt={vehicle.make || 'Vehicle Image'}
-                                className="w-full h-full object-cover"
-                              />
+                              <LazyWhenVisible
+                                className="w-full h-full"
+                                placeholder={<div className="w-full h-full bg-white/10 animate-pulse rounded-lg" />}
+                              >
+                                <AuthenticatedImage
+                                  src={vehicle.image_url}
+                                  alt={vehicle.make || 'Vehicle Image'}
+                                  className="w-full h-full object-cover"
+                                  preferThumbnail
+                                />
+                              </LazyWhenVisible>
                             ) : (
                               <Truck className="h-5 w-5 text-white/40" />
                             )}

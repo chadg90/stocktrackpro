@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Download, Loader2, FileSpreadsheet, FileText, ChevronDown, ClipboardList } from 'lucide-react';
 import {
   exportToCSV,
@@ -29,6 +29,9 @@ interface ExportButtonProps {
   fleetHealthPdf?: { onExport: () => void };
 }
 
+const EXPORT_COOLDOWN_MS = 5000;
+const MAX_EXPORT_ROWS = 5000;
+
 export default function ExportButton({
   data,
   filename,
@@ -43,17 +46,36 @@ export default function ExportButton({
 }: ExportButtonProps) {
   const [exporting, setExporting] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const lastExportAtRef = useRef(0);
+
+  const guardSpam = (): boolean => {
+    const now = Date.now();
+    if (now - lastExportAtRef.current < EXPORT_COOLDOWN_MS) {
+      const wait = Math.ceil((EXPORT_COOLDOWN_MS - (now - lastExportAtRef.current)) / 1000);
+      alert(`Please wait ${wait}s before exporting again.`);
+      return false;
+    }
+    lastExportAtRef.current = now;
+    return true;
+  };
+
+  const clampRows = (rows: any[]): any[] => {
+    if (rows.length <= MAX_EXPORT_ROWS) return rows;
+    alert(`Export limited to ${MAX_EXPORT_ROWS} rows (${rows.length} in this view).`);
+    return rows.slice(0, MAX_EXPORT_ROWS);
+  };
 
   const handleExportCSV = async () => {
     if (!data || data.length === 0) {
       alert('No data to export');
       return;
     }
+    if (!guardSpam()) return;
 
     setExporting(true);
     setShowDropdown(false);
     try {
-      exportToCSV(data, filename, headers, fieldMappings);
+      exportToCSV(clampRows(data), filename, headers, fieldMappings);
     } catch (error) {
       console.error('Export error:', error);
       alert('Failed to export data. Please try again.');
@@ -63,13 +85,18 @@ export default function ExportButton({
   };
 
   const handleExportExcel = async () => {
+    if (!guardSpam()) return;
     setExporting(true);
     setShowDropdown(false);
     try {
       if (multiSheetData && multiSheetData.length > 0) {
-        exportMultipleSheetsToExcel(multiSheetData, filename);
+        const clampedSheets = multiSheetData.map((s) => ({
+          ...s,
+          data: clampRows(s.data),
+        }));
+        exportMultipleSheetsToExcel(clampedSheets, filename);
       } else if (data && data.length > 0) {
-        exportToExcel(data, filename, sheetName, fieldMappings);
+        exportToExcel(clampRows(data), filename, sheetName, fieldMappings);
       } else {
         alert('No data to export');
       }
@@ -82,6 +109,7 @@ export default function ExportButton({
   };
 
   const handleExportPDF = async () => {
+    if (!guardSpam()) return;
     setExporting(true);
     setShowDropdown(false);
     try {
@@ -89,10 +117,14 @@ export default function ExportButton({
         reportTitle ||
         `Stock Track PRO — ${filename.replace(/-/g, ' ')}`;
       if (multiSheetData && multiSheetData.length > 0) {
-        exportMultipleSheetsToPDF(multiSheetData, filename, title);
+        const clampedSheets = multiSheetData.map((s) => ({
+          ...s,
+          data: clampRows(s.data),
+        }));
+        exportMultipleSheetsToPDF(clampedSheets, filename, title);
       } else if (data && data.length > 0) {
         exportMultipleSheetsToPDF(
-          [{ name: sheetName, data, fieldMappings }],
+          [{ name: sheetName, data: clampRows(data), fieldMappings }],
           filename,
           title
         );
@@ -144,6 +176,7 @@ export default function ExportButton({
               <button
                 type="button"
                 onClick={() => {
+                  if (!guardSpam()) return;
                   setShowDropdown(false);
                   fleetHealthPdf.onExport();
                 }}

@@ -25,6 +25,7 @@ import {
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDays } from 'date-fns';
+import { activityHistoryStartFromDashboardRange, TOOL_HISTORY_ANALYTICS_CAP } from '@/lib/dvsaRetention';
 import ExportButton from './components/ExportButton';
 import PrintButton from './components/PrintButton';
 import ChartErrorBoundary from './components/ChartErrorBoundary';
@@ -237,12 +238,7 @@ export default function DashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        const now = new Date();
-        let startDate: Date | null = null;
-        
-        if (dateRange !== 'all') {
-          startDate = startOfDay(subDays(now, parseInt(dateRange)));
-        }
+        const rangeStart = activityHistoryStartFromDashboardRange(dateRange);
 
         // Base queries for counts
         const toolsQ = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId));
@@ -300,58 +296,34 @@ export default function DashboardPage() {
         const usersSnap = await getDocs(teamQ);
         setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)));
 
-        // Fetch inspections with date filter
-        let inspQuery = query(
+        // Fetch inspections (always bounded by DVSA-style window + selected range)
+        const inspQuery = query(
           collection(firebaseDb!, 'vehicle_inspections'),
           where('company_id', '==', companyId),
+          where('inspected_at', '>=', Timestamp.fromDate(rangeStart)),
           orderBy('inspected_at', 'desc')
         );
-        if (startDate) {
-          inspQuery = query(
-            collection(firebaseDb!, 'vehicle_inspections'),
-            where('company_id', '==', companyId),
-            where('inspected_at', '>=', Timestamp.fromDate(startDate)),
-            orderBy('inspected_at', 'desc')
-          );
-        }
         const inspSnap = await getDocs(inspQuery);
         const inspectionsData = inspSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
         // Full set for analytics + exports (website managers need complete history in range)
         setInspections(inspectionsData);
 
-        // Fetch defects with date filter
-        let defQuery = query(
+        const defQuery = query(
           collection(firebaseDb!, 'vehicle_defects'),
           where('company_id', '==', companyId),
+          where('reported_at', '>=', Timestamp.fromDate(rangeStart)),
           orderBy('reported_at', 'desc')
         );
-        if (startDate) {
-          defQuery = query(
-            collection(firebaseDb!, 'vehicle_defects'),
-            where('company_id', '==', companyId),
-            where('reported_at', '>=', Timestamp.fromDate(startDate)),
-            orderBy('reported_at', 'desc')
-          );
-        }
         const defSnap = await getDocs(defQuery);
         setDefects(defSnap.docs.map(d => ({ id: d.id, ...d.data() } as Defect)));
 
-        // Fetch history with date filter
-        let histQuery = query(
+        const histQuery = query(
           collection(firebaseDb!, 'tool_history'),
           where('company_id', '==', companyId),
+          where('timestamp', '>=', Timestamp.fromDate(rangeStart)),
           orderBy('timestamp', 'desc'),
-          limit(2500)
+          limit(TOOL_HISTORY_ANALYTICS_CAP)
         );
-        if (startDate) {
-          histQuery = query(
-            collection(firebaseDb!, 'tool_history'),
-            where('company_id', '==', companyId),
-            where('timestamp', '>=', Timestamp.fromDate(startDate)),
-            orderBy('timestamp', 'desc'),
-            limit(2500)
-          );
-        }
         const histSnap = await getDocs(histQuery);
         setHistoryItems(histSnap.docs.map(d => ({ id: d.id, ...d.data() } as HistoryItem)));
 
@@ -846,9 +818,9 @@ export default function DashboardPage() {
           )}
 
           {isAuthedManager && (
-            <div id="analytics-report" className="print-content space-y-8">
+            <div id="analytics-report" className="print-content space-y-6 lg:space-y-8">
               {/* Header with controls */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 no-print">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 mb-6 no-print">
                 <div>
                   <div className="flex items-center gap-3 mb-1">
                     <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Dashboard</h1>
