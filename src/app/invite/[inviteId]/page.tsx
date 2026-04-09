@@ -47,7 +47,13 @@ export default function InviteAcceptPage() {
         const preview = result.data as InvitePreview;
         setInvite(preview);
         if (!preview.valid) {
-          setError('This invite is no longer valid. Please ask your manager for a new invite.');
+          if (preview.status === 'accepted') {
+            setError(
+              'This invite was already used to set up an account. Open the Stock Track PRO app and sign in with the same email from your invite. If you are unsure of the password, use Forgot password on the login screen. A new invite cannot replace an existing account.'
+            );
+          } else {
+            setError('This invite is no longer valid. Please ask your manager for a new invite.');
+          }
         }
       } catch (err) {
         console.error('Error loading invite preview:', err);
@@ -105,7 +111,9 @@ export default function InviteAcceptPage() {
       if (code.includes('already-exists')) {
         setError('An account already exists for this email. Please sign in on the app.');
       } else if (code.includes('failed-precondition')) {
-        setError('This invite is no longer valid. Please ask your manager to resend it.');
+        setError(
+          'This invite is no longer valid (expired, cancelled, or already used). If you already submitted this form once, sign in on the app with that password or use Forgot password. Otherwise ask your manager for a new invite.'
+        );
       } else if (message.toLowerCase().includes('missing required metadata')) {
         setError('This invite is missing setup data. Please ask your manager to send a new invite.');
       } else {
