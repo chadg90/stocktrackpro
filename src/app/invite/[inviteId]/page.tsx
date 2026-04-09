@@ -26,6 +26,7 @@ export default function InviteAcceptPage() {
   const [invite, setInvite] = useState<InvitePreview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
+  const [signedUpEmail, setSignedUpEmail] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   const [firstName, setFirstName] = useState('');
@@ -72,14 +73,6 @@ export default function InviteAcceptPage() {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(ua));
   }, []);
 
-  useEffect(() => {
-    if (!accepted || !isMobile) return;
-    const timer = window.setTimeout(() => {
-      window.location.href = '/';
-    }, 2000);
-    return () => window.clearTimeout(timer);
-  }, [accepted, isMobile]);
-
   const handleAcceptInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseFunctions || !inviteId) return;
@@ -97,12 +90,14 @@ export default function InviteAcceptPage() {
     setError(null);
     try {
       const acceptInvite = httpsCallable(firebaseFunctions, 'acceptInvite');
-      await acceptInvite({
+      const result = await acceptInvite({
         inviteId,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         password,
       });
+      const payload = result.data as { success?: boolean; email?: string };
+      setSignedUpEmail((payload?.email || '').trim() || null);
       setAccepted(true);
     } catch (err: any) {
       console.error('Invite acceptance failed:', err);
@@ -135,11 +130,44 @@ export default function InviteAcceptPage() {
   if (accepted) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <div className="w-full max-w-lg rounded-2xl border border-blue-500/30 bg-zinc-950 p-6 sm:p-8">
-          <h1 className="text-2xl font-semibold mb-2">You are all set</h1>
-          <p className="text-white/70 mb-6">
-            Your Stock Track PRO account is ready. Download the app and sign in with your email and password.
-          </p>
+        <div className="w-full max-w-lg rounded-2xl border border-emerald-500/35 bg-zinc-950 p-6 sm:p-8 shadow-lg shadow-emerald-500/5">
+          <div className="flex flex-col items-center text-center mb-6">
+            <div
+              className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/40"
+              aria-hidden
+            >
+              <svg className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2">You have successfully signed up</h1>
+            <p className="text-white/70 text-sm sm:text-base max-w-md">
+              Your Stock Track PRO account is ready. Open the app on your phone and sign in with the email and password you
+              just created.
+            </p>
+          </div>
+
+          {signedUpEmail && (
+            <div className="mb-6 rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-left">
+              <p className="text-xs text-white/50 uppercase tracking-wide mb-1">Sign in with this email</p>
+              <p className="text-white font-medium break-all">{signedUpEmail}</p>
+            </div>
+          )}
+
+          <ol className="text-sm text-white/75 space-y-3 mb-6 list-decimal list-inside text-left">
+            <li>
+              <span className="text-white/90">Get the app</span> — use the App Store link below, or your manager’s link if you
+              are on Android (testing).
+            </li>
+            <li>
+              <span className="text-white/90">Open Stock Track PRO</span> and choose sign in (not create account).
+            </li>
+            <li>
+              <span className="text-white/90">Enter your email and password</span> from this page. Use Forgot password in the
+              app if you need to reset it later.
+            </li>
+          </ol>
+
           <div className="space-y-3">
             <a
               href={APP_STORE_URL}
@@ -147,23 +175,25 @@ export default function InviteAcceptPage() {
               rel="noopener noreferrer"
               className="block w-full rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 text-center transition-colors"
             >
-              Download on App Store
+              Open App Store — Stock Track PRO
             </a>
-            <div className="rounded-lg border border-white/15 bg-white/5 p-4">
+            <div className="rounded-lg border border-white/15 bg-white/5 p-4 text-left">
               <p className="text-sm text-white/80 font-medium">Android (internal testing)</p>
               <p className="text-sm text-white/60 mt-1">
-                Your manager will send your Android install link directly while testing is in progress.
+                Your manager will send your install or Play testing link. Then sign in with the same email and password as
+                above.
               </p>
             </div>
             <Link
               href="/"
               className="block w-full rounded-lg border border-white/20 text-white/80 hover:text-white hover:border-white/40 py-3 px-4 text-center transition-colors"
             >
-              Continue to Website
+              Continue to website
             </Link>
             {isMobile && (
-              <p className="text-xs text-white/50 text-center">
-                Redirecting you to the website in 2 seconds. Use the app banner at the top to install/open Stock Track PRO.
+              <p className="text-xs text-white/45 text-center">
+                Tip: after installing, return here if you need your sign-in email again, or use Continue to website when you are
+                done.
               </p>
             )}
           </div>
