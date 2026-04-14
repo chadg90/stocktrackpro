@@ -11,9 +11,6 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h3 className="text-blue-500 font-semibold text-lg">Stock Track PRO</h3>
-            <p className="text-white text-sm mt-2">
-              Developed and operated by Chad Garner, trading as Garner Software.
-            </p>
             <p className="text-white text-sm mt-1">
               Email: <Link href="mailto:support@stocktrackpro.co.uk" className="hover:text-blue-500">support@stocktrackpro.co.uk</Link>
             </p>
@@ -32,7 +29,7 @@ const Footer = () => {
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-6 border-t border-blue-500/20">
           <p className="text-white text-sm">
-            © {new Date().getFullYear()} Stock Track PRO — Developed and operated by Chad Garner, trading as Garner Software.
+            © {new Date().getFullYear()} Stock Track PRO
           </p>
           <div className="flex flex-wrap gap-4 text-sm text-white/90">
             <Link href="/terms" className="hover:text-blue-500">Terms & Conditions</Link>

@@ -5,7 +5,7 @@ export default function FAQ() {
   const faqs = [
     {
       question: "How do I get an account?",
-      answer: "New companies can set up on this website: click Get started, create your account, then choose Setup new company. Existing teams: get an access code from your manager and join in the app (App Store or Google Play), or create an account here and enter the code. Managers sign in on the web dashboard at Log in.",
+      answer: "New companies can get started from this website by selecting Get Started. You can then set up your company and invite your team. Existing team members should use their invite link and then sign in to the app (App Store or Google Play). Managers sign in to the web dashboard via Log in.",
     },
     {
       question: "Do I need QR codes to use the app?",
@@ -25,11 +25,11 @@ export default function FAQ() {
     },
     {
       question: "How do I subscribe—app or web?",
-      answer: "Managers can subscribe on the web (Pricing page, pay by card) or in the app (App Store / Google Play). Web subscriptions can be managed or cancelled from the dashboard. In-app subscriptions are managed in your device’s store. New users get a 7-day free trial.",
+      answer: "Managers can subscribe on the web (Pricing page, card payment) or in the app (App Store / Google Play). Web subscriptions can be managed or cancelled from the dashboard. In-app subscriptions are managed in your device’s store settings. New users receive a 7-day free trial.",
     },
     {
       question: "Can I cancel anytime?",
-      answer: "Yes. There is no long-term contract. If you subscribed on the web, use “Manage subscription” in the dashboard to update or cancel. If you subscribed in the app, cancel via your App Store or Google Play subscription settings.",
+      answer: "Yes. There is no long-term contract. If you subscribed on the web, use Manage Billing in the dashboard to update or cancel. If you subscribed in the app, cancel through your App Store or Google Play subscription settings.",
     },
     {
       question: "Is my data secure?",
@@ -37,7 +37,7 @@ export default function FAQ() {
     },
     {
       question: "We have a very large fleet or many users. Is there an Enterprise plan?",
-      answer: "Yes. The Enterprise plan includes up to 75 users, 1,500 assets, and 150 vehicles, plus dedicated support and custom onboarding. For larger deployments, contact us for a tailored quote.",
+      answer: "Yes. We support larger fleets and teams, including tailored onboarding for bigger deployments. Contact us for a tailored quote.",
     },
   ];
 

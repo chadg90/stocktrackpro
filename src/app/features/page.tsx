@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from '../components/Navbar';
 import Link from 'next/link';
 import { Car, ClipboardList, QrCode, Users, Wrench, RefreshCw, Shield, ArrowRight } from 'lucide-react';
+const WHATSAPP_ENQUIRY_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
 
 export default function Features() {
   const featureBlocks = [
@@ -40,10 +41,10 @@ export default function Features() {
   const dashboardHighlights = [
     "At-a-glance metrics for total assets, vehicles, and team members (company scoped).",
     "Manual refresh from the header to pull the latest data.",
-    "Quick navigation to team management, add asset, locations, history, vehicle inspections, and access code creation.",
-    "Generate a single-use, 7-day access code tied to the manager's company for onboarding.",
+    "Quick navigation to team management, assets, locations, history, inspections, defects, and reports.",
+    "Invite team members by email and manage access by role.",
     "Defect notification modal shows vehicle, inspector, date, type, severity, and description with options to view the full report or dismiss.",
-    "Dashboard is used to view details and export information; subscriptions are managed in the mobile app.",
+    "Dashboard is used to review data, exports, and billing controls for web subscriptions.",
   ];
 
   return (
@@ -100,7 +101,7 @@ export default function Features() {
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-white mb-3">Manager Dashboard</h2>
                 <p className="text-white/70 mb-6 leading-relaxed">
-                  Managers with an active subscription can view company data across tools, vehicles, users, and reports. Actions focus on reviewing data, exporting, and onboarding; subscriptions remain managed in the mobile app.
+                  Managers with an active subscription can view company data across tools, vehicles, users, and reports. Actions focus on reviewing data, exporting, and onboarding, with web subscription billing managed in the dashboard.
                 </p>
                 <ul className="space-y-3 text-white/80">
                   {dashboardHighlights.map((item, idx) => (
@@ -123,16 +124,18 @@ export default function Features() {
         <div className="container relative mx-auto px-4 text-center">
           <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">Ready to get started?</h3>
           <p className="text-white/70 max-w-lg mx-auto mb-8">
-            New users receive a 7-day free trial. Subscriptions are managed in the app.
+            New users receive a 7-day free trial. Contact us on WhatsApp for a quick setup conversation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/contact"
+            <a
+              href={WHATSAPP_ENQUIRY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue"
             >
               Contact
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
+            </a>
             <Link
               href="/pricing"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-blue-500/50 hover:bg-white/5 transition-all duration-200 font-medium"

@@ -10,10 +10,10 @@ export default function HowTo() {
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-white mb-6">
-            How to Use <span className="text-blue-500">Stock Track PRO</span>
+            How to use <span className="text-blue-500">Stock Track PRO</span>
           </h1>
           <p className="text-xl text-white/80 mb-12">
-            Complete step-by-step guide to get the most out of your asset, equipment, and fleet management system.
+            A practical step-by-step guide to help your team manage assets and fleet operations effectively.
           </p>
 
           {/* Getting Started Section */}
@@ -31,23 +31,23 @@ export default function HowTo() {
                 <ol className="space-y-2 text-white/80">
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">1</span>
-                    <span>Manager signs up on the StockTrackPro website and selects a vehicle count plan</span>
+                    <span>A manager signs up on the Stock Track PRO website and selects the appropriate plan</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">2</span>
-                    <span>Manager accesses the web dashboard and completes initial company setup</span>
+                    <span>The manager signs in to the web dashboard and completes initial company setup</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">3</span>
-                    <span>Manager invites team members by email from the Team page (role: Manager or User)</span>
+                    <span>The manager invites team members by email from the Team page (role: Manager or User)</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">4</span>
-                    <span>Team members open invite link, set password, then sign in to the app</span>
+                    <span>Team members open the invite link, set a password, then sign in to the app</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">5</span>
-                    <span>Use login or forgot password only in the app (onboarding and in-app signup removed)</span>
+                    <span>Team members use Log in / Forgot password in the app after accepting their invite</span>
                   </li>
                 </ol>
               </div>
@@ -69,7 +69,7 @@ export default function HowTo() {
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">4</span>
-                    <span>Add initial assets, equipment and fleet</span>
+                    <span>Add your initial assets, equipment, and fleet vehicles</span>
                   </li>
                 </ol>
               </div>
@@ -87,19 +87,19 @@ export default function HowTo() {
             
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-white mb-3">Adding Assets (Managers)</h3>
+                <h3 className="text-lg font-semibold text-white mb-3">Adding assets (Managers)</h3>
                 <ol className="space-y-2 text-white/80">
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">1</span>
-                    <span>Navigate to Assets tab</span>
+                    <span>Open the Assets tab</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">2</span>
-                    <span>Tap "Add Asset"</span>
+                    <span>Select Add Asset</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">3</span>
-                    <span>Fill in details: Asset name and description, QR code (scan or enter manually), Location assignment, Condition status</span>
+                    <span>Complete the details: asset name and description, QR code (scan or enter manually), location assignment, and condition status</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">4</span>
@@ -109,15 +109,15 @@ export default function HowTo() {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-white mb-3">Checking Out Assets (All Users)</h3>
+                <h3 className="text-lg font-semibold text-white mb-3">Checking out assets (All users)</h3>
                 <ol className="space-y-2 text-white/80">
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">1</span>
-                    <span>Go to Scan tab</span>
+                    <span>Open the Scan tab</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">2</span>
-                    <span>Tap "Check Out" button</span>
+                    <span>Select Check Out</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">3</span>
@@ -125,25 +125,25 @@ export default function HowTo() {
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">4</span>
-                    <span>Confirm the checkout</span>
+                    <span>Confirm check-out</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">5</span>
-                    <span>Asset is now assigned to you</span>
+                    <span>The asset is now assigned to you</span>
                   </li>
                 </ol>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-white mb-3">Checking In Assets (All Users)</h3>
+                <h3 className="text-lg font-semibold text-white mb-3">Checking in assets (All users)</h3>
                 <ol className="space-y-2 text-white/80">
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">1</span>
-                    <span>Go to Scan tab</span>
+                    <span>Open the Scan tab</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">2</span>
-                    <span>Tap "Check In" button</span>
+                    <span>Select Check In</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">3</span>
@@ -151,11 +151,11 @@ export default function HowTo() {
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">4</span>
-                    <span>Confirm the check-in</span>
+                    <span>Confirm check-in</span>
                   </li>
                   <li className="flex items-start">
                     <span className="w-6 h-6 bg-blue-500/20 rounded-full flex items-center justify-center text-sm font-semibold text-blue-500 mr-3 mt-0.5">5</span>
-                    <span>Asset is returned to available status</span>
+                    <span>The asset returns to available status</span>
                   </li>
                 </ol>
               </div>

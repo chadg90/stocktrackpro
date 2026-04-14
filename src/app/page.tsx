@@ -219,7 +219,7 @@ export default function Home() {
             New users get a 7-day free trial. Subscriptions are managed through the app; managers use the dashboard to review company data.
           </p>
           <p className="text-white/50 text-sm mb-10">
-            New company? <Link href="/onboarding" className="text-blue-500 hover:underline">Create your account and set up in minutes</Link>.
+            New company? <a href={WHATSAPP_ENQUIRY_URL} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Message us on WhatsApp</a> and we will help you get set up quickly.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
