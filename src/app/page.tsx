@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import { CompaniesShowcaseStrip, type ShowcaseLogo } from '@/components/CompaniesShowcaseStrip';
 import { Wrench, QrCode, Map, Smartphone, Users, ClipboardList, ArrowRight, Check, Zap, Droplets, Truck } from 'lucide-react';
 import Link from 'next/link';
+const WHATSAPP_ENQUIRY_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
 
 export const metadata: Metadata = {
   title: 'Fleet & Asset Management for Trades and Contractors',
@@ -54,13 +55,15 @@ export default function Home() {
             Track equipment, run inspections, report defects and manage your fleet in real time. Built for trades and contractors.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              href="/contact"
+            <a
+              href={WHATSAPP_ENQUIRY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black btn-brand-blue"
             >
               Get in touch
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
+            </a>
             <Link
               href="/pricing"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
@@ -219,14 +222,18 @@ export default function Home() {
             New company? <Link href="/onboarding" className="text-blue-500 hover:underline">Create your account and set up in minutes</Link>.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/onboarding"
+            <a
+              href={WHATSAPP_ENQUIRY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black"
             >
               Get started
-            </Link>
+            </a>
             <Link
-              href="/contact"
+              href={WHATSAPP_ENQUIRY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
             >
               Contact

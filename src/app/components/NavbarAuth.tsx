@@ -13,6 +13,7 @@ const baseNavigation = [
   { name: 'FAQ', href: '/faq' },
   { name: 'Contact', href: '/contact' },
 ];
+const WHATSAPP_ENQUIRY_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
 
 export type NavbarAuthResult = {
   navigation: typeof baseNavigation;
@@ -174,13 +175,15 @@ export function NavbarNavContent({ onLinkClick }: { onLinkClick: () => void }) {
         {!authChecked || !isLoggedIn ? (
           <>
             {authChecked && (
-              <Link
-                href="/onboarding"
+              <a
+                href={WHATSAPP_ENQUIRY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-white font-semibold text-sm hover:scale-[1.02] transition-all duration-200 btn-brand-blue"
                 onClick={onLinkClick}
               >
                 Get started
-              </Link>
+              </a>
             )}
             <Link
               href="/dashboard"
@@ -244,9 +247,9 @@ export function NavbarMobileNavContent({ onLinkClick }: { onLinkClick: () => voi
         ) : (
           <>
             {authChecked && (
-              <Link href="/onboarding" className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-white font-semibold btn-brand-blue" onClick={onLinkClick}>
+              <a href={WHATSAPP_ENQUIRY_URL} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-white font-semibold btn-brand-blue" onClick={onLinkClick}>
                 Get started
-              </Link>
+              </a>
             )}
             <Link href="/dashboard" className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl border border-white/20 text-white/90 hover:text-white hover:bg-white/5" onClick={onLinkClick}>
               <LogIn className="h-4 w-4" aria-hidden />
