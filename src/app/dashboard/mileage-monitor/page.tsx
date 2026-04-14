@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, AlertTriangle, Gauge } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Gauge, ShieldCheck } from 'lucide-react';
 import { FleetReportProvider, useFleetReport } from '../fleet-report/FleetReportContext';
 import { buildMileageMonitoringRows } from '@/lib/fleetReportLogic';
 
@@ -10,19 +10,21 @@ function levelBadge() {
   return 'bg-zinc-100 text-zinc-800 border-zinc-300 dark:bg-slate-900/70 dark:text-slate-100 dark:border-slate-600/60';
 }
 
-function levelDot(level: string) {
-  if (level === 'critical') return 'bg-red-300';
-  if (level === 'high') return 'bg-amber-300';
-  if (level === 'watch') return 'bg-yellow-300';
-  if (level === 'stale' || level === 'insufficient') return 'bg-slate-300';
-  return 'bg-emerald-300';
+type StatusTone = 'critical' | 'high' | 'watch' | 'missing' | 'normal';
+
+function normalizeStatus(level: string): StatusTone {
+  if (level === 'critical') return 'critical';
+  if (level === 'high') return 'high';
+  if (level === 'watch') return 'watch';
+  if (level === 'stale' || level === 'insufficient') return 'missing';
+  return 'normal';
 }
 
-function levelLabel(level: string) {
-  if (level === 'critical') return 'Critical';
-  if (level === 'high') return 'High';
-  if (level === 'watch') return 'Watch';
-  if (level === 'stale' || level === 'insufficient') return 'Missing data';
+function levelLabel(status: StatusTone) {
+  if (status === 'critical') return 'Critical';
+  if (status === 'high') return 'High';
+  if (status === 'watch') return 'Watch';
+  if (status === 'missing') return 'Missing data';
   return 'Normal';
 }
 
@@ -54,17 +56,25 @@ function rowTint(level: string) {
   return '';
 }
 
-function statusPanelBorder(level: string) {
-  if (level === 'critical') return 'border-l-red-300';
-  if (level === 'high') return 'border-l-amber-300';
-  if (level === 'watch') return 'border-l-yellow-300';
-  if (level === 'stale' || level === 'insufficient') return 'border-l-slate-300';
+function statusPanelBorder(status: StatusTone) {
+  if (status === 'critical') return 'border-l-red-300';
+  if (status === 'high') return 'border-l-amber-300';
+  if (status === 'watch') return 'border-l-yellow-300';
+  if (status === 'missing') return 'border-l-slate-300';
   return 'border-l-emerald-300';
+}
+
+function statusCardAccent(status: StatusTone) {
+  if (status === 'critical') return 'bg-red-700 dark:bg-red-300';
+  if (status === 'high') return 'bg-amber-700 dark:bg-amber-300';
+  if (status === 'watch') return 'bg-yellow-700 dark:bg-yellow-300';
+  if (status === 'missing') return 'bg-slate-600 dark:bg-slate-300';
+  return 'bg-emerald-700 dark:bg-emerald-300';
 }
 
 function MileageMonitorContent() {
   const { loading, error, inspections, vehicles } = useFleetReport();
-  const [filter, setFilter] = useState<'all' | 'review' | 'missing'>('all');
+  const [filter, setFilter] = useState<'all' | 'attention' | 'missing' | 'normal'>('all');
   const rows = useMemo(
     () => buildMileageMonitoringRows(inspections, vehicles),
     [inspections, vehicles]
@@ -77,17 +87,21 @@ function MileageMonitorContent() {
   const insufficientCount = rows.filter((r) => r.anomalyLevel === 'insufficient').length;
   const missingDataCount = staleCount + insufficientCount;
   const needsReviewCount = criticalCount + highCount + watchCount;
+  const normalCount = rows.filter((r) => normalizeStatus(r.anomalyLevel) === 'normal').length;
   const avgRiskScore = rows.length
     ? Math.round(rows.reduce((sum, row) => sum + row.riskScore, 0) / rows.length)
     : 0;
   const filteredRows = useMemo(() => {
-    if (filter === 'review') {
+    if (filter === 'attention') {
       return rows.filter(
         (r) => r.anomalyLevel === 'critical' || r.anomalyLevel === 'high' || r.anomalyLevel === 'watch'
       );
     }
     if (filter === 'missing') {
       return rows.filter((r) => r.anomalyLevel === 'stale' || r.anomalyLevel === 'insufficient');
+    }
+    if (filter === 'normal') {
+      return rows.filter((r) => normalizeStatus(r.anomalyLevel) === 'normal');
     }
     return rows;
   }, [rows, filter]);
@@ -104,31 +118,33 @@ function MileageMonitorContent() {
 
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
         <div>
-          <h1 className="text-[28px] font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+          <h1 className="text-[30px] font-bold text-zinc-900 dark:text-white flex items-center gap-2">
             <Gauge className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             Mileage Monitor
           </h1>
           <p className="text-zinc-600 dark:text-white/65 mt-1.5 max-w-3xl text-sm">
-            Clear weekly mileage monitoring with simple statuses: Normal, Watch, High, Critical, and Missing data.
+            Corporate fleet view of mileage risk, data quality, and required actions. Each vehicle card explains
+            status, reason, and next action.
+          </p>
+        </div>
+        <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-blue-500/25 dark:bg-black">
+          <p className="text-xs uppercase tracking-wide text-zinc-500 dark:text-white/55">Status model</p>
+          <p className="text-sm text-zinc-800 dark:text-white/85 mt-0.5">
+            Normal / Watch / High / Critical / Missing data
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
         <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Critical</p>
-          <p className="text-xl font-semibold text-red-700 dark:text-red-200 mt-1">{criticalCount}</p>
-          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Strong anomaly.</p>
+          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Fleet monitored</p>
+          <p className="text-xl font-semibold text-zinc-900 dark:text-white mt-1">{rows.length}</p>
+          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Vehicles in this period.</p>
         </div>
         <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">High</p>
-          <p className="text-xl font-semibold text-amber-700 dark:text-amber-200 mt-1">{highCount}</p>
-          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Needs review.</p>
-        </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black hidden lg:block">
-          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Watch</p>
-          <p className="text-xl font-semibold text-yellow-700 dark:text-yellow-200 mt-1">{watchCount}</p>
-          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Above trend.</p>
+          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Needs attention</p>
+          <p className="text-xl font-semibold text-red-700 dark:text-red-200 mt-1">{needsReviewCount}</p>
+          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Watch, High, and Critical.</p>
         </div>
         <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
           <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Missing data</p>
@@ -136,9 +152,14 @@ function MileageMonitorContent() {
           <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">No check or too little data.</p>
         </div>
         <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Review now</p>
-          <p className="text-xl font-semibold text-blue-700 dark:text-blue-200 mt-1">{needsReviewCount}</p>
-          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Avg risk {avgRiskScore}/100.</p>
+          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Healthy vehicles</p>
+          <p className="text-xl font-semibold text-emerald-700 dark:text-emerald-200 mt-1">{normalCount}</p>
+          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Currently normal trend.</p>
+        </div>
+        <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
+          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Average risk score</p>
+          <p className="text-xl font-semibold text-blue-700 dark:text-blue-200 mt-1">{avgRiskScore}</p>
+          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Out of 100.</p>
         </div>
       </div>
 
@@ -153,7 +174,10 @@ function MileageMonitorContent() {
       </div>
 
       <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-        <p className="text-zinc-900 dark:text-white font-medium mb-2">Status guide</p>
+        <div className="flex items-center gap-2 mb-2">
+          <ShieldCheck className="h-4 w-4 text-blue-600 dark:text-blue-300" />
+          <p className="text-zinc-900 dark:text-white font-medium">How to read this page</p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-zinc-700 dark:text-white/80">
           <p><span className="text-emerald-700 dark:text-emerald-200 font-medium">Normal:</span> current usage is within expected range.</p>
           <p><span className="text-yellow-700 dark:text-yellow-200 font-medium">Watch:</span> slightly above trend, monitor next week.</p>
@@ -166,8 +190,9 @@ function MileageMonitorContent() {
       <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl border border-zinc-200 bg-zinc-50 p-1.5 dark:border-slate-500/35 dark:bg-slate-700/20">
         {[
           { id: 'all', label: `All (${rows.length})` },
-          { id: 'review', label: `Needs review (${needsReviewCount})` },
+          { id: 'attention', label: `Needs attention (${needsReviewCount})` },
           { id: 'missing', label: `Missing data (${missingDataCount})` },
+          { id: 'normal', label: `Normal (${normalCount})` },
         ].map((item) => (
           <button
             key={item.id}
@@ -196,10 +221,11 @@ function MileageMonitorContent() {
             const deltaVsLast = row.currentWeekMiles - row.lastWeekMiles;
             const deltaVsBaseline =
               row.baselineWeeklyMiles > 0 ? row.currentWeekMiles - row.baselineWeeklyMiles : null;
+            const status = normalizeStatus(row.anomalyLevel);
             return (
               <article
                 key={row.vehicleId}
-                className={`rounded-xl border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black border-l-2 ${statusPanelBorder(row.anomalyLevel)} ${rowTint(row.anomalyLevel)} p-3`}
+                className={`rounded-xl border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black border-l-2 ${statusPanelBorder(status)} ${rowTint(row.anomalyLevel)} p-3`}
               >
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                   <div>
@@ -213,8 +239,8 @@ function MileageMonitorContent() {
                       {row.riskScore}
                     </span>
                     <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs border ${levelBadge()}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${levelDot(row.anomalyLevel)}`} />
-                      {levelLabel(row.anomalyLevel)}
+                      <span className={`h-1.5 w-1.5 rounded-full ${statusCardAccent(status)}`} />
+                      {levelLabel(status)}
                     </span>
                   </div>
                 </div>
