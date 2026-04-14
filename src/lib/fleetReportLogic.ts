@@ -1,4 +1,12 @@
-import { format, startOfWeek, endOfWeek, differenceInCalendarDays, subWeeks } from 'date-fns';
+import {
+  addDays,
+  differenceInCalendarDays,
+  endOfWeek,
+  format,
+  startOfDay,
+  startOfWeek,
+  subWeeks,
+} from 'date-fns';
 import type { Timestamp } from 'firebase/firestore';
 
 export type FleetVehicle = {
@@ -111,6 +119,17 @@ export type MileageMonitorRow = {
 const MAX_DAILY_MILES = 450;
 const ROLLBACK_THRESHOLD = -40;
 
+function toMileageNumber(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const parsed = Number(trimmed.replace(/,/g, ''));
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return null;
+}
+
 export function buildMileageInspectionRows(
   inspections: FleetInspection[],
   vehicles: FleetVehicle[],
@@ -143,7 +162,7 @@ export function buildMileageInspectionRows(
       const v = vehicleMap[vid];
       const reg = v?.registration || vid;
       const at = toJsDate(i.inspected_at);
-      const m = typeof i.mileage === 'number' && !Number.isNaN(i.mileage) ? i.mileage : null;
+      const m = toMileageNumber(i.mileage);
       const inspector = getUserLabel(userMap[i.inspected_by || ''], i.inspected_by || '');
 
       let flag = '';
@@ -242,7 +261,7 @@ export function buildMileageMonitoringRows(
     for (const insp of list) {
       const at = toJsDate(insp.inspected_at);
       if (!at) continue;
-      const m = typeof insp.mileage === 'number' && !Number.isNaN(insp.mileage) ? insp.mileage : null;
+      const m = toMileageNumber(insp.mileage);
       if (m == null) continue;
       const key = weekKey(at);
       weeklyReadings[key] = (weeklyReadings[key] || 0) + 1;
@@ -252,18 +271,32 @@ export function buildMileageMonitoringRows(
     let prevDate: Date | null = null;
     for (const insp of list) {
       const at = toJsDate(insp.inspected_at);
-      const m = typeof insp.mileage === 'number' && !Number.isNaN(insp.mileage) ? insp.mileage : null;
+      const m = toMileageNumber(insp.mileage);
       if (!at || m == null) continue;
       if (prevM != null && prevDate) {
         const delta = m - prevM;
         const days = Math.max(1, differenceInCalendarDays(at, prevDate));
-        const key = weekKey(at);
         if (delta < ROLLBACK_THRESHOLD) {
           rollbackCount += 1;
         } else if (delta > 2500 || delta / days > 700) {
           unrealisticJumpCount += 1;
         } else if (delta >= 0) {
-          weeklyMiles[key] = (weeklyMiles[key] || 0) + delta;
+          const rawDays = differenceInCalendarDays(at, prevDate);
+          if (rawDays <= 0) {
+            const key = weekKey(at);
+            weeklyMiles[key] = (weeklyMiles[key] || 0) + delta;
+          } else {
+            // Distribute miles over elapsed days to avoid overcounting a single week
+            // when inspections are sporadic.
+            const milesPerDay = delta / rawDays;
+            let cursor = startOfDay(addDays(prevDate, 1));
+            const endDay = startOfDay(at);
+            while (cursor <= endDay) {
+              const key = weekKey(cursor);
+              weeklyMiles[key] = (weeklyMiles[key] || 0) + milesPerDay;
+              cursor = addDays(cursor, 1);
+            }
+          }
         }
       }
       prevM = m;
