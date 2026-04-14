@@ -68,7 +68,7 @@ function MileageMonitorContent() {
   }, [rows, filter]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+    <div className="max-w-7xl mx-auto px-3 py-4 space-y-3">
       <Link
         href="/dashboard"
         className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
@@ -160,7 +160,7 @@ function MileageMonitorContent() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
+      <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] p-1.5">
         {[
           { id: 'all', label: `All (${rows.length})` },
           { id: 'risk', label: `Needs review (${criticalCount + highCount + watchCount})` },
@@ -173,8 +173,8 @@ function MileageMonitorContent() {
             onClick={() => setFilter(item.id as typeof filter)}
             className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
               filter === item.id
-                ? 'bg-blue-500/20 border-blue-500/40 text-blue-200'
-                : 'bg-white/5 border-white/10 text-white/65 hover:text-white hover:bg-white/10'
+                ? 'bg-blue-500/25 border-blue-400/60 text-blue-100 shadow-[0_0_0_1px_rgba(96,165,250,0.2)]'
+                : 'bg-slate-700/35 border-slate-400/40 text-white/90 hover:text-white hover:bg-slate-600/40'
             }`}
           >
             {item.label}
@@ -187,21 +187,16 @@ function MileageMonitorContent() {
         <p className="text-white/50 text-sm">Loading mileage monitoring data…</p>
       ) : (
         <div className="dashboard-card overflow-x-auto">
-          <table className="w-full text-sm text-left min-w-[1440px]">
+          <table className="w-full text-sm text-left min-w-[1080px]">
             <thead>
               <tr className="border-b border-white/10 text-white/50">
                 <th className="px-3 py-1.5 font-medium">Registration</th>
                 <th className="px-3 py-1.5 font-medium">Risk score</th>
                 <th className="px-3 py-1.5 font-medium">Latest odometer</th>
                 <th className="px-3 py-1.5 font-medium">Last check</th>
-                <th className="px-3 py-1.5 font-medium">Days since check</th>
                 <th className="px-3 py-1.5 font-medium">Checks</th>
-                <th className="px-3 py-1.5 font-medium">Current week</th>
                 <th className="px-3 py-1.5 font-medium">Scored week</th>
-                <th className="px-3 py-1.5 font-medium">Last week</th>
-                <th className="px-3 py-1.5 font-medium">8-week avg</th>
-                <th className="px-3 py-1.5 font-medium">Baseline</th>
-                <th className="px-3 py-1.5 font-medium">Data weeks</th>
+                <th className="px-3 py-1.5 font-medium">Trend summary</th>
                 <th className="px-3 py-1.5 font-medium">Status</th>
                 <th className="px-3 py-1.5 font-medium">Confidence</th>
                 <th className="px-3 py-1.5 font-medium">Reason</th>
@@ -220,24 +215,27 @@ function MileageMonitorContent() {
                   <td className="px-3 py-1.5 text-white/85 tabular-nums">
                     {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
                   </td>
-                  <td className="px-3 py-1.5 text-white/70 whitespace-nowrap">{row.latestInspectionAt}</td>
-                  <td className="px-3 py-1.5 text-white/70 tabular-nums">
-                    {row.daysSinceLastInspection != null ? `${row.daysSinceLastInspection}d` : '—'}
+                  <td className="px-3 py-1.5 text-white/70">
+                    <span className="whitespace-nowrap">{row.latestInspectionAt}</span>
+                    <span className="block text-[10px] text-white/45 mt-0.5 tabular-nums">
+                      {row.daysSinceLastInspection != null ? `${row.daysSinceLastInspection}d ago` : '—'}
+                    </span>
                   </td>
                   <td className="px-3 py-1.5 text-white/70">
                     {row.validMileageCount}/{row.inspectionCount}
                   </td>
-                  <td className="px-3 py-1.5 text-white tabular-nums">{row.currentWeekMiles.toLocaleString()} mi</td>
                   <td className="px-3 py-1.5 text-white/80 tabular-nums">
                     {row.scoredWeekMiles.toLocaleString()} mi
                     <span className="block text-[10px] text-white/45 mt-0.5">{row.scoredWeekLabel}</span>
                   </td>
-                  <td className="px-3 py-1.5 text-white/80 tabular-nums">{row.lastWeekMiles.toLocaleString()} mi</td>
-                  <td className="px-3 py-1.5 text-white/80 tabular-nums">{row.avgWeeklyMiles.toLocaleString()} mi</td>
-                  <td className="px-3 py-1.5 text-white/80 tabular-nums">
-                    {row.baselineWeeklyMiles > 0 ? `${row.baselineWeeklyMiles.toLocaleString()} mi` : '—'}
+                  <td className="px-3 py-1.5 text-white/75 tabular-nums">
+                    <span className="block">This: {row.currentWeekMiles.toLocaleString()} mi</span>
+                    <span className="block text-white/60">Last: {row.lastWeekMiles.toLocaleString()} mi</span>
+                    <span className="block text-white/60">Avg: {row.avgWeeklyMiles.toLocaleString()} mi</span>
+                    <span className="block text-white/50">
+                      Base: {row.baselineWeeklyMiles > 0 ? `${row.baselineWeeklyMiles.toLocaleString()} mi` : '—'} · {row.dataWeeks}/8 weeks
+                    </span>
                   </td>
-                  <td className="px-3 py-1.5 text-white/70">{row.dataWeeks}/8</td>
                   <td className="px-3 py-1.5">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs border capitalize ${levelBadge(row.anomalyLevel)}`}>
                       {levelLabel(row.anomalyLevel)}
@@ -250,7 +248,7 @@ function MileageMonitorContent() {
               ))}
               {filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={17} className="px-3 py-6 text-white/50">
+                  <td colSpan={12} className="px-3 py-6 text-white/50">
                     No vehicles match this filter.
                   </td>
                 </tr>
