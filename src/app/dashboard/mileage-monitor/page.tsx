@@ -116,7 +116,7 @@ function MileageMonitorContent() {
         Back to dashboard
       </Link>
 
-      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+      <div className="flex flex-col gap-2">
         <div>
           <h1 className="text-[30px] font-bold text-zinc-900 dark:text-white flex items-center gap-2">
             <Gauge className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -126,11 +126,8 @@ function MileageMonitorContent() {
             Quick anomaly view for fleet mileage with clear status, risk, and trend context.
           </p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-blue-500/25 dark:bg-black">
-          <p className="text-xs uppercase tracking-wide text-zinc-500 dark:text-white/55">Status model</p>
-          <p className="text-sm text-zinc-800 dark:text-white/85 mt-0.5">
-            Normal / Watch / High / Critical / Missing data
-          </p>
+        <div className="inline-flex w-fit items-center rounded-full border border-zinc-300 bg-zinc-100 px-3 py-1 text-[11px] text-zinc-700 dark:border-slate-500/50 dark:bg-slate-800/60 dark:text-slate-200">
+          Status: Normal, Watch, High, Critical, Missing data
         </div>
       </div>
 
@@ -200,20 +197,20 @@ function MileageMonitorContent() {
             return (
               <article
                 key={row.vehicleId}
-                className={`rounded-xl border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black border-l-2 ${statusPanelBorder(status)} ${rowTint(row.anomalyLevel)} p-3`}
+                className={`rounded-xl border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black border-l-2 ${statusPanelBorder(status)} ${rowTint(row.anomalyLevel)} p-4`}
               >
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                   <div>
-                    <p className="text-zinc-900 dark:text-white font-semibold tracking-wide">{row.registration}</p>
-                    <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-0.5 tabular-nums">
+                    <p className="text-zinc-900 dark:text-white text-[30px] font-bold tracking-wide leading-tight">{row.registration}</p>
+                    <p className="text-xs text-zinc-700 dark:text-white/70 mt-1 tabular-nums font-medium">
                       Odometer: {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex min-w-[48px] justify-center px-2 py-0.5 rounded-md border border-zinc-300 text-zinc-800 text-xs tabular-nums dark:border-white/15 dark:text-white/90">
+                    <span className="inline-flex min-w-[48px] justify-center px-2.5 py-1 rounded-md border border-zinc-300 text-zinc-900 text-sm font-semibold tabular-nums dark:border-white/15 dark:text-white/95">
                       {row.riskScore}
                     </span>
-                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs border ${levelBadge()}`}>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-semibold border ${levelBadge()}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${statusCardAccent(status)}`} />
                       {levelLabel(status)}
                     </span>
@@ -222,45 +219,45 @@ function MileageMonitorContent() {
 
                 <div className="mt-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.5">
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
-                    <p className="text-[10px] uppercase tracking-wide text-zinc-500 dark:text-white/45">Scored week</p>
-                    <p className="text-sm text-zinc-900 dark:text-white/90 tabular-nums mt-0.5">
+                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Scored week</p>
+                    <p className="text-base font-semibold text-zinc-900 dark:text-white/95 tabular-nums mt-0.5">
                       {row.scoredWeekMiles.toLocaleString()} mi
                     </p>
-                    <p className="text-[10px] text-zinc-500 dark:text-white/45 mt-0.5">{row.scoredWeekLabel}</p>
+                    <p className="text-xs text-zinc-700 dark:text-white/70 mt-0.5">{row.scoredWeekLabel}</p>
                   </div>
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
-                    <p className="text-[10px] uppercase tracking-wide text-zinc-500 dark:text-white/45">Movement</p>
-                    <p className={`text-xs mt-0.5 ${deltaVsBaseline == null ? 'text-zinc-600 dark:text-slate-300' : movementTone(deltaVsBaseline)}`}>
+                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Movement</p>
+                    <p className={`text-sm font-medium mt-0.5 ${deltaVsBaseline == null ? 'text-zinc-700 dark:text-slate-200' : movementTone(deltaVsBaseline)}`}>
                       Baseline: {deltaVsBaseline == null ? 'No baseline yet' : signedMileage(deltaVsBaseline)}
                     </p>
-                    <p className={`text-xs mt-0.5 ${movementTone(deltaVsLast)}`}>
+                    <p className={`text-sm font-medium mt-0.5 ${movementTone(deltaVsLast)}`}>
                       Week-on-week: {signedMileage(deltaVsLast)}
                     </p>
                   </div>
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
-                    <p className="text-[10px] uppercase tracking-wide text-zinc-500 dark:text-white/45">Inspection quality</p>
-                    <p className="text-xs text-zinc-700 dark:text-white/75 mt-0.5 tabular-nums">
+                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Inspection quality</p>
+                    <p className="text-sm font-medium text-zinc-800 dark:text-white/85 mt-0.5 tabular-nums">
                       Checks: {row.validMileageCount}/{row.inspectionCount}
                     </p>
-                    <p className="text-xs text-zinc-600 dark:text-white/60 mt-0.5 tabular-nums">
+                    <p className="text-sm font-medium text-zinc-700 dark:text-white/75 mt-0.5 tabular-nums">
                       Data: {row.dataWeeks}/8 weeks
                     </p>
                   </div>
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
-                    <p className="text-[10px] uppercase tracking-wide text-zinc-500 dark:text-white/45">Last check</p>
-                    <p className="text-xs text-zinc-700 dark:text-white/75 mt-0.5">{row.latestInspectionAt}</p>
-                    <p className={`text-xs mt-0.5 capitalize ${confidenceBadge(row.confidence)}`}>
+                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Last check</p>
+                    <p className="text-sm font-medium text-zinc-800 dark:text-white/85 mt-0.5">{row.latestInspectionAt}</p>
+                    <p className={`text-sm font-medium mt-0.5 capitalize ${confidenceBadge(row.confidence)}`}>
                       {row.confidence} confidence
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-2.5 grid grid-cols-1 xl:grid-cols-2 gap-2">
-                  <p className="text-[11px] text-zinc-800 dark:text-white/80 leading-relaxed">
-                    <span className="text-zinc-500 dark:text-white/50">Reason:</span> {row.anomalyReason}
+                  <p className="text-sm text-zinc-900 dark:text-white/90 leading-relaxed font-medium">
+                    <span className="text-zinc-700 dark:text-white/70 font-semibold">Reason:</span> {row.anomalyReason}
                   </p>
-                  <p className="text-[11px] text-zinc-800 dark:text-white/80 leading-relaxed">
-                    <span className="text-zinc-500 dark:text-white/50">Action:</span> {row.recommendedAction}
+                  <p className="text-sm text-zinc-900 dark:text-white/90 leading-relaxed font-medium">
+                    <span className="text-zinc-700 dark:text-white/70 font-semibold">Action:</span> {row.recommendedAction}
                   </p>
                 </div>
               </article>
