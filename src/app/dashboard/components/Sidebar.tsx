@@ -13,6 +13,7 @@ import {
   History,
   MapPin,
   Building2,
+  Gauge,
   Menu,
   X,
   BarChart3,
@@ -69,6 +70,7 @@ const navigationGroups: NavigationGroup[] = [
     label: 'Reports & Analytics',
     items: [
       { name: 'Fleet report', href: '/dashboard/fleet-report', icon: ClipboardList, managerOnly: true },
+      { name: 'Mileage monitor', href: '/dashboard/mileage-monitor', icon: Gauge, managerOnly: true },
       { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
       { name: 'Activity History', href: '/dashboard/history', icon: History },
       { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },

@@ -1,4 +1,4 @@
-import { format, startOfWeek, endOfWeek, differenceInCalendarDays } from 'date-fns';
+import { format, startOfWeek, endOfWeek, differenceInCalendarDays, subWeeks } from 'date-fns';
 import type { Timestamp } from 'firebase/firestore';
 
 export type FleetVehicle = {
@@ -94,6 +94,20 @@ export type MileageRow = {
   Inspector: string;
 };
 
+export type MileageMonitorRow = {
+  vehicleId: string;
+  registration: string;
+  currentWeekMiles: number;
+  lastWeekMiles: number;
+  avgWeeklyMiles: number;
+  baselineWeeklyMiles: number;
+  dataWeeks: number;
+  currentWeekReadings: number;
+  anomalyLevel: 'normal' | 'watch' | 'high' | 'critical' | 'insufficient';
+  anomalyReason: string;
+  confidence: 'low' | 'medium' | 'high';
+};
+
 const MAX_DAILY_MILES = 450;
 const ROLLBACK_THRESHOLD = -40;
 
@@ -180,6 +194,160 @@ export function buildMileageInspectionRows(
   }
 
   return rows.sort((a, b) => (a['Inspected At'] < b['Inspected At'] ? 1 : -1));
+}
+
+function weekKey(date: Date): string {
+  return format(startOfWeek(date, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+}
+
+function median(values: number[]): number {
+  if (values.length === 0) return 0;
+  const sorted = values.slice().sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 0) return (sorted[mid - 1] + sorted[mid]) / 2;
+  return sorted[mid];
+}
+
+export function buildMileageMonitoringRows(
+  inspections: FleetInspection[],
+  vehicles: FleetVehicle[],
+  now: Date = new Date()
+): MileageMonitorRow[] {
+  const byVehicle: Record<string, FleetInspection[]> = {};
+  for (const i of inspections) {
+    const vid = i.vehicle_id;
+    if (!vid) continue;
+    if (!byVehicle[vid]) byVehicle[vid] = [];
+    byVehicle[vid].push(i);
+  }
+
+  const recentWeekKeys = Array.from({ length: 8 }, (_, i) =>
+    weekKey(subWeeks(now, i))
+  );
+  const currentWeekKey = recentWeekKeys[0];
+  const lastWeekKey = recentWeekKeys[1];
+
+  const rows: MileageMonitorRow[] = vehicles.map((vehicle) => {
+    const list = (byVehicle[vehicle.id] || []).slice().sort((a, b) => {
+      const da = toJsDate(a.inspected_at)?.getTime() ?? 0;
+      const db = toJsDate(b.inspected_at)?.getTime() ?? 0;
+      return da - db;
+    });
+
+    const weeklyMiles: Record<string, number> = {};
+    const weeklyReadings: Record<string, number> = {};
+    let rollbackCount = 0;
+    let unrealisticJumpCount = 0;
+
+    for (const insp of list) {
+      const at = toJsDate(insp.inspected_at);
+      if (!at) continue;
+      const m = typeof insp.mileage === 'number' && !Number.isNaN(insp.mileage) ? insp.mileage : null;
+      if (m == null) continue;
+      const key = weekKey(at);
+      weeklyReadings[key] = (weeklyReadings[key] || 0) + 1;
+    }
+
+    let prevM: number | null = null;
+    let prevDate: Date | null = null;
+    for (const insp of list) {
+      const at = toJsDate(insp.inspected_at);
+      const m = typeof insp.mileage === 'number' && !Number.isNaN(insp.mileage) ? insp.mileage : null;
+      if (!at || m == null) continue;
+      if (prevM != null && prevDate) {
+        const delta = m - prevM;
+        const days = Math.max(1, differenceInCalendarDays(at, prevDate));
+        const key = weekKey(at);
+        if (delta < ROLLBACK_THRESHOLD) {
+          rollbackCount += 1;
+        } else if (delta > 2500 || delta / days > 700) {
+          unrealisticJumpCount += 1;
+        } else if (delta >= 0) {
+          weeklyMiles[key] = (weeklyMiles[key] || 0) + delta;
+        }
+      }
+      prevM = m;
+      prevDate = at;
+    }
+
+    const currentWeekMiles = Math.round(weeklyMiles[currentWeekKey] || 0);
+    const lastWeekMiles = Math.round(weeklyMiles[lastWeekKey] || 0);
+    const currentWeekReadings = weeklyReadings[currentWeekKey] || 0;
+    const priorWeekMiles = recentWeekKeys
+      .slice(1, 7)
+      .map((key) => weeklyMiles[key] || 0)
+      .filter((m) => m > 0);
+    const allRecentWeekMiles = recentWeekKeys
+      .map((key) => weeklyMiles[key] || 0)
+      .filter((m) => m > 0);
+    const baselineWeeklyMiles = Math.round(median(priorWeekMiles));
+    const avgWeeklyMiles = allRecentWeekMiles.length
+      ? Math.round(allRecentWeekMiles.reduce((sum, m) => sum + m, 0) / allRecentWeekMiles.length)
+      : 0;
+    const dataWeeks = recentWeekKeys.filter((key) => (weeklyMiles[key] || 0) > 0).length;
+
+    let anomalyLevel: MileageMonitorRow['anomalyLevel'] = 'normal';
+    let anomalyReason = 'Within normal range for recent usage pattern.';
+
+    if (rollbackCount > 0) {
+      anomalyLevel = 'critical';
+      anomalyReason = 'Odometer rollback pattern detected in recent inspection history.';
+    } else if (unrealisticJumpCount > 0) {
+      anomalyLevel = 'high';
+      anomalyReason = 'Very large mileage jump detected; review readings or vehicle usage.';
+    } else if (currentWeekReadings === 0) {
+      anomalyLevel = 'insufficient';
+      anomalyReason = 'No mileage reading logged this week.';
+    } else if (baselineWeeklyMiles > 0) {
+      const ratio = currentWeekMiles / baselineWeeklyMiles;
+      const uplift = currentWeekMiles - baselineWeeklyMiles;
+      if (ratio >= 2.2 && uplift >= 150) {
+        anomalyLevel = 'critical';
+        anomalyReason = 'Current week mileage is well above baseline.';
+      } else if (ratio >= 1.7 && uplift >= 100) {
+        anomalyLevel = 'high';
+        anomalyReason = 'Current week mileage is significantly above baseline.';
+      } else if (ratio >= 1.35 && uplift >= 60) {
+        anomalyLevel = 'watch';
+        anomalyReason = 'Current week mileage is above expected trend.';
+      }
+    } else if (currentWeekMiles >= 250) {
+      anomalyLevel = 'watch';
+      anomalyReason = 'No baseline yet; week mileage is high for a new pattern.';
+    }
+
+    let confidence: MileageMonitorRow['confidence'] = 'low';
+    if (dataWeeks >= 6 && currentWeekReadings >= 2) confidence = 'high';
+    else if (dataWeeks >= 3 && currentWeekReadings >= 1) confidence = 'medium';
+
+    return {
+      vehicleId: vehicle.id,
+      registration: vehicle.registration || vehicle.id,
+      currentWeekMiles,
+      lastWeekMiles,
+      avgWeeklyMiles,
+      baselineWeeklyMiles,
+      dataWeeks,
+      currentWeekReadings,
+      anomalyLevel,
+      anomalyReason,
+      confidence,
+    };
+  });
+
+  const severityRank: Record<MileageMonitorRow['anomalyLevel'], number> = {
+    critical: 0,
+    high: 1,
+    watch: 2,
+    insufficient: 3,
+    normal: 4,
+  };
+
+  return rows.sort((a, b) => {
+    const sev = severityRank[a.anomalyLevel] - severityRank[b.anomalyLevel];
+    if (sev !== 0) return sev;
+    return b.currentWeekMiles - a.currentWeekMiles;
+  });
 }
 
 export function filterInspectionsInWeek(
