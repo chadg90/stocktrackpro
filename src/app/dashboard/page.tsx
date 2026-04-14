@@ -196,6 +196,7 @@ export default function DashboardPage() {
   const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
 
   const lastManualRefreshAtRef = useRef(0);
+  const staticDataCompanyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isFirebaseAvailable) {
@@ -243,7 +244,7 @@ export default function DashboardPage() {
   };
 
   const fetchData = useCallback(
-    async (companyId: string) => {
+    async (companyId: string, options?: { forceStaticReload?: boolean }) => {
       if (!isFirebaseAvailable) {
         setError('Firebase is not configured properly');
         return;
@@ -264,35 +265,26 @@ export default function DashboardPage() {
         const toolsQ = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId));
         const vehiclesQ = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId));
         const teamQ = query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId));
-        const inspectionsQ = query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', companyId));
         const activeToolsQ = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId), where('status', '==', 'active'));
         const activeVehiclesQ = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId), where('status', '==', 'active'));
-        const defectsQ = query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId));
-        const resolvedDefectsQ = query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId), where('status', '==', 'resolved'));
 
         // Get counts
         const [
-          toolsCountVal, vehiclesCountVal, teamCountVal, inspectionsCountVal,
-          activeToolsCountVal, activeVehiclesCountVal, defectsCountVal, resolvedDefectsCountVal
+          toolsCountVal, vehiclesCountVal, teamCountVal,
+          activeToolsCountVal, activeVehiclesCountVal
         ] = await Promise.all([
           safeCount(toolsQ),
           safeCount(vehiclesQ),
           safeCount(teamQ),
-          safeCount(inspectionsQ),
           safeCount(activeToolsQ),
           safeCount(activeVehiclesQ),
-          safeCount(defectsQ),
-          safeCount(resolvedDefectsQ),
         ]);
 
         setAssetsCount(toolsCountVal);
         setVehiclesCount(vehiclesCountVal);
         setTeamCount(teamCountVal);
-        setInspectionsCount(inspectionsCountVal);
         setActiveAssetsCount(activeToolsCountVal);
         setActiveVehiclesCount(activeVehiclesCountVal);
-        setDefectsCount(defectsCountVal);
-        setResolvedDefectsCount(resolvedDefectsCountVal);
 
         // Fetch company subscription status
         try {
@@ -306,15 +298,20 @@ export default function DashboardPage() {
           console.error('Error fetching company subscription:', err);
         }
 
-        // Fetch full data for analytics
-        const vehiclesSnap = await getDocs(vehiclesQ);
-        setVehicles(vehiclesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Vehicle)));
-
-        const assetsSnap = await getDocs(toolsQ);
-        setAssets(assetsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Asset)));
-
-        const usersSnap = await getDocs(teamQ);
-        setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)));
+        const shouldReloadStatic =
+          options?.forceStaticReload || staticDataCompanyRef.current !== companyId;
+        if (shouldReloadStatic) {
+          // Static datasets do not depend on date range, so avoid re-reading them on every range change.
+          const [vehiclesSnap, assetsSnap, usersSnap] = await Promise.all([
+            getDocs(vehiclesQ),
+            getDocs(toolsQ),
+            getDocs(teamQ),
+          ]);
+          setVehicles(vehiclesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Vehicle)));
+          setAssets(assetsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Asset)));
+          setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)));
+          staticDataCompanyRef.current = companyId;
+        }
 
         // Fetch inspections (always bounded by DVSA-style window + selected range)
         const inspQuery = query(
@@ -327,6 +324,7 @@ export default function DashboardPage() {
         const inspectionsData = inspSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
         // Full set for analytics + exports (website managers need complete history in range)
         setInspections(inspectionsData);
+        setInspectionsCount(inspectionsData.length);
 
         const defQuery = query(
           collection(firebaseDb!, 'vehicle_defects'),
@@ -335,7 +333,10 @@ export default function DashboardPage() {
           orderBy('reported_at', 'desc')
         );
         const defSnap = await getDocs(defQuery);
-        setDefects(defSnap.docs.map(d => ({ id: d.id, ...d.data() } as Defect)));
+        const defectsData = defSnap.docs.map(d => ({ id: d.id, ...d.data() } as Defect));
+        setDefects(defectsData);
+        setDefectsCount(defectsData.length);
+        setResolvedDefectsCount(defectsData.filter((d) => d.status === 'resolved').length);
 
         const histQuery = query(
           collection(firebaseDb!, 'tool_history'),
@@ -367,7 +368,7 @@ export default function DashboardPage() {
       return;
     }
     lastManualRefreshAtRef.current = now;
-    fetchData(profile.company_id);
+    fetchData(profile.company_id, { forceStaticReload: true });
   }, [profile?.company_id, loading, fetchData]);
 
   useEffect(() => {
@@ -648,11 +649,15 @@ export default function DashboardPage() {
     return Math.round(((resolvedDefectsCount || 0) / defectsCount) * 100);
   }, [defectsCount, resolvedDefectsCount]);
 
+  const rangeSpanDays = useMemo(() => {
+    const rangeStart = activityHistoryStartFromDashboardRange(dateRange);
+    return Math.max(1, differenceInDays(new Date(), rangeStart) + 1);
+  }, [dateRange]);
+
   const avgInspectionsPerDay = useMemo(() => {
     if (inspections.length === 0) return 0;
-    const days = dateRange === 'all' ? 30 : parseInt(dateRange);
-    return (inspections.length / days).toFixed(1);
-  }, [inspections, dateRange]);
+    return (inspections.length / rangeSpanDays).toFixed(1);
+  }, [inspections, rangeSpanDays]);
 
   // Export data preparation (full columns for compliance / weekly archives)
   const exportData = useMemo(() => {
@@ -988,7 +993,7 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   <p className="dashboard-kpi-value">{inspectionsCount ?? '—'}</p>
-                  <p className="dashboard-kpi-label">Total inspections</p>
+                  <p className="dashboard-kpi-label">Inspections in range</p>
                   <p className="text-white/40 text-xs mt-1">~{avgInspectionsPerDay}/day avg</p>
                 </div>
               </div>
@@ -1037,7 +1042,7 @@ export default function DashboardPage() {
                         <td className="px-4 py-3 text-white">
                           Inspections (
                           {dateRange === 'all'
-                            ? 'All Time'
+                            ? 'Last 15 Months'
                             : dateRange === '365'
                             ? 'Last 12 Months'
                             : dateRange === '730'

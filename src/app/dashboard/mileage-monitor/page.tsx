@@ -68,7 +68,7 @@ function MileageMonitorContent() {
   }, [rows, filter]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
       <Link
         href="/dashboard"
         className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors"
@@ -77,69 +77,69 @@ function MileageMonitorContent() {
         Back to dashboard
       </Link>
 
-      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-            <Gauge className="h-7 w-7 text-blue-400" />
+          <h1 className="text-[28px] font-bold text-white flex items-center gap-2">
+            <Gauge className="h-6 w-6 text-blue-400" />
             Mileage Monitor
           </h1>
-          <p className="text-white/65 mt-2 max-w-3xl text-sm">
+          <p className="text-white/65 mt-1.5 max-w-3xl text-sm">
             Weekly monitoring built for sporadic check-ins. Alerts compare current-week mileage against each
             vehicle&apos;s recent baseline, with confidence scoring based on available data.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="dashboard-card p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="dashboard-card p-3">
           <p className="text-white/60 text-xs uppercase tracking-wider">Critical</p>
           <p className="text-2xl font-semibold text-red-300 mt-1">{criticalCount}</p>
           <p className="text-xs text-white/55 mt-1">Very strong anomaly vs normal pattern.</p>
         </div>
-        <div className="dashboard-card p-4">
+        <div className="dashboard-card p-3">
           <p className="text-white/60 text-xs uppercase tracking-wider">High</p>
           <p className="text-2xl font-semibold text-amber-300 mt-1">{highCount}</p>
           <p className="text-xs text-white/55 mt-1">Significant deviation requiring review.</p>
         </div>
-        <div className="dashboard-card p-4">
+        <div className="dashboard-card p-3">
           <p className="text-white/60 text-xs uppercase tracking-wider">Watch</p>
           <p className="text-2xl font-semibold text-yellow-300 mt-1">{watchCount}</p>
           <p className="text-xs text-white/55 mt-1">Above trend, monitor next check-in.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="dashboard-card p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="dashboard-card p-3">
           <p className="text-white/60 text-xs uppercase tracking-wider">Stale check-ins</p>
           <p className="text-2xl font-semibold text-sky-300 mt-1">{staleCount}</p>
           <p className="text-xs text-white/55 mt-1">Sufficient history, but no current-week check logged yet.</p>
         </div>
-        <div className="dashboard-card p-4">
+        <div className="dashboard-card p-3">
           <p className="text-white/60 text-xs uppercase tracking-wider">Insufficient data</p>
           <p className="text-2xl font-semibold text-white/80 mt-1">{insufficientCount}</p>
           <p className="text-xs text-white/55 mt-1">Usually means zero or one valid mileage reading.</p>
         </div>
-        <div className="dashboard-card p-4">
+        <div className="dashboard-card p-3">
           <p className="text-white/60 text-xs uppercase tracking-wider">Vehicles monitored</p>
           <p className="text-2xl font-semibold text-blue-300 mt-1">{rows.length}</p>
           <p className="text-xs text-white/55 mt-1">All fleet vehicles are listed, even with limited data.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="dashboard-card p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="dashboard-card p-3">
           <p className="text-white/60 text-xs uppercase tracking-wider">Needs review now</p>
           <p className="text-2xl font-semibold text-white mt-1">{needsReviewCount}</p>
           <p className="text-xs text-white/55 mt-1">Critical, High, and Watch items combined.</p>
         </div>
-        <div className="dashboard-card p-4">
+        <div className="dashboard-card p-3">
           <p className="text-white/60 text-xs uppercase tracking-wider">Average risk score</p>
           <p className="text-2xl font-semibold text-white mt-1">{avgRiskScore}/100</p>
           <p className="text-xs text-white/55 mt-1">Higher means a riskier fleet profile this week.</p>
         </div>
       </div>
 
-      <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 text-sm text-white/75">
+      <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-3 text-sm text-white/75">
         <div className="flex items-start gap-2">
           <AlertTriangle className="h-4 w-4 mt-0.5 text-blue-300" />
           <p>
@@ -149,7 +149,7 @@ function MileageMonitorContent() {
         </div>
       </div>
 
-      <div className="dashboard-card p-4">
+      <div className="dashboard-card p-3">
         <p className="text-white font-medium mb-2">Status guide</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-white/75">
           <p><span className="text-red-300 font-medium">Critical risk:</span> very large deviation or rollback pattern detected.</p>
@@ -160,7 +160,7 @@ function MileageMonitorContent() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {[
           { id: 'all', label: `All (${rows.length})` },
           { id: 'risk', label: `Needs review (${criticalCount + highCount + watchCount})` },
@@ -171,7 +171,7 @@ function MileageMonitorContent() {
             key={item.id}
             type="button"
             onClick={() => setFilter(item.id as typeof filter)}
-            className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
+            className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
               filter === item.id
                 ? 'bg-blue-500/20 border-blue-500/40 text-blue-200'
                 : 'bg-white/5 border-white/10 text-white/65 hover:text-white hover:bg-white/10'
@@ -190,62 +190,62 @@ function MileageMonitorContent() {
           <table className="w-full text-sm text-left min-w-[1440px]">
             <thead>
               <tr className="border-b border-white/10 text-white/50">
-                <th className="px-3 py-2 font-medium">Registration</th>
-                <th className="px-3 py-2 font-medium">Risk score</th>
-                <th className="px-3 py-2 font-medium">Latest odometer</th>
-                <th className="px-3 py-2 font-medium">Last check</th>
-                <th className="px-3 py-2 font-medium">Days since check</th>
-                <th className="px-3 py-2 font-medium">Checks</th>
-                <th className="px-3 py-2 font-medium">Current week</th>
-                <th className="px-3 py-2 font-medium">Scored week</th>
-                <th className="px-3 py-2 font-medium">Last week</th>
-                <th className="px-3 py-2 font-medium">8-week avg</th>
-                <th className="px-3 py-2 font-medium">Baseline</th>
-                <th className="px-3 py-2 font-medium">Data weeks</th>
-                <th className="px-3 py-2 font-medium">Status</th>
-                <th className="px-3 py-2 font-medium">Confidence</th>
-                <th className="px-3 py-2 font-medium">Reason</th>
-                <th className="px-3 py-2 font-medium">Recommended action</th>
+                <th className="px-3 py-1.5 font-medium">Registration</th>
+                <th className="px-3 py-1.5 font-medium">Risk score</th>
+                <th className="px-3 py-1.5 font-medium">Latest odometer</th>
+                <th className="px-3 py-1.5 font-medium">Last check</th>
+                <th className="px-3 py-1.5 font-medium">Days since check</th>
+                <th className="px-3 py-1.5 font-medium">Checks</th>
+                <th className="px-3 py-1.5 font-medium">Current week</th>
+                <th className="px-3 py-1.5 font-medium">Scored week</th>
+                <th className="px-3 py-1.5 font-medium">Last week</th>
+                <th className="px-3 py-1.5 font-medium">8-week avg</th>
+                <th className="px-3 py-1.5 font-medium">Baseline</th>
+                <th className="px-3 py-1.5 font-medium">Data weeks</th>
+                <th className="px-3 py-1.5 font-medium">Status</th>
+                <th className="px-3 py-1.5 font-medium">Confidence</th>
+                <th className="px-3 py-1.5 font-medium">Reason</th>
+                <th className="px-3 py-1.5 font-medium">Recommended action</th>
               </tr>
             </thead>
             <tbody>
               {filteredRows.map((row) => (
                 <tr key={row.vehicleId} className={`border-b border-white/5 ${rowTint(row.anomalyLevel)}`}>
-                  <td className="px-3 py-2 text-white font-medium">{row.registration}</td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-1.5 text-white font-medium">{row.registration}</td>
+                  <td className="px-3 py-1.5">
                     <span className="inline-flex min-w-[48px] justify-center px-2 py-0.5 rounded-md border border-white/15 text-white/90 tabular-nums">
                       {row.riskScore}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-white/85 tabular-nums">
+                  <td className="px-3 py-1.5 text-white/85 tabular-nums">
                     {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
                   </td>
-                  <td className="px-3 py-2 text-white/70 whitespace-nowrap">{row.latestInspectionAt}</td>
-                  <td className="px-3 py-2 text-white/70 tabular-nums">
+                  <td className="px-3 py-1.5 text-white/70 whitespace-nowrap">{row.latestInspectionAt}</td>
+                  <td className="px-3 py-1.5 text-white/70 tabular-nums">
                     {row.daysSinceLastInspection != null ? `${row.daysSinceLastInspection}d` : '—'}
                   </td>
-                  <td className="px-3 py-2 text-white/70">
+                  <td className="px-3 py-1.5 text-white/70">
                     {row.validMileageCount}/{row.inspectionCount}
                   </td>
-                  <td className="px-3 py-2 text-white tabular-nums">{row.currentWeekMiles.toLocaleString()} mi</td>
-                  <td className="px-3 py-2 text-white/80 tabular-nums">
+                  <td className="px-3 py-1.5 text-white tabular-nums">{row.currentWeekMiles.toLocaleString()} mi</td>
+                  <td className="px-3 py-1.5 text-white/80 tabular-nums">
                     {row.scoredWeekMiles.toLocaleString()} mi
                     <span className="block text-[10px] text-white/45 mt-0.5">{row.scoredWeekLabel}</span>
                   </td>
-                  <td className="px-3 py-2 text-white/80 tabular-nums">{row.lastWeekMiles.toLocaleString()} mi</td>
-                  <td className="px-3 py-2 text-white/80 tabular-nums">{row.avgWeeklyMiles.toLocaleString()} mi</td>
-                  <td className="px-3 py-2 text-white/80 tabular-nums">
+                  <td className="px-3 py-1.5 text-white/80 tabular-nums">{row.lastWeekMiles.toLocaleString()} mi</td>
+                  <td className="px-3 py-1.5 text-white/80 tabular-nums">{row.avgWeeklyMiles.toLocaleString()} mi</td>
+                  <td className="px-3 py-1.5 text-white/80 tabular-nums">
                     {row.baselineWeeklyMiles > 0 ? `${row.baselineWeeklyMiles.toLocaleString()} mi` : '—'}
                   </td>
-                  <td className="px-3 py-2 text-white/70">{row.dataWeeks}/8</td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-1.5 text-white/70">{row.dataWeeks}/8</td>
+                  <td className="px-3 py-1.5">
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs border capitalize ${levelBadge(row.anomalyLevel)}`}>
                       {levelLabel(row.anomalyLevel)}
                     </span>
                   </td>
-                  <td className={`px-3 py-2 capitalize ${confidenceBadge(row.confidence)}`}>{row.confidence}</td>
-                  <td className="px-3 py-2 text-white/65">{row.anomalyReason}</td>
-                  <td className="px-3 py-2 text-white/70">{row.recommendedAction}</td>
+                  <td className={`px-3 py-1.5 capitalize ${confidenceBadge(row.confidence)}`}>{row.confidence}</td>
+                  <td className="px-3 py-1.5 text-white/65">{row.anomalyReason}</td>
+                  <td className="px-3 py-1.5 text-white/70">{row.recommendedAction}</td>
                 </tr>
               ))}
               {filteredRows.length === 0 ? (

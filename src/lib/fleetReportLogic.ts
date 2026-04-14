@@ -324,21 +324,23 @@ export function buildMileageMonitoringRows(
     const validMileageCount = list.reduce((count, insp) => {
       return toMileageNumber(insp.mileage) != null ? count + 1 : count;
     }, 0);
+    const isUsableWeek = (key: string) =>
+      (weeklyReadings[key] || 0) >= 2 || (weeklyMiles[key] || 0) > 0;
     const priorWeekMiles = recentWeekKeys
       .slice(1, 7)
-      .map((key) => weeklyMiles[key] || 0)
-      .filter((m) => m > 0);
+      .filter((key) => isUsableWeek(key))
+      .map((key) => Math.round(weeklyMiles[key] || 0));
     const allRecentWeekMiles = recentWeekKeys
-      .map((key) => weeklyMiles[key] || 0)
-      .filter((m) => m > 0);
+      .filter((key) => isUsableWeek(key))
+      .map((key) => Math.round(weeklyMiles[key] || 0));
     const baselineWeeklyMiles = Math.round(median(priorWeekMiles));
     const avgWeeklyMiles = allRecentWeekMiles.length
       ? Math.round(allRecentWeekMiles.reduce((sum, m) => sum + m, 0) / allRecentWeekMiles.length)
       : 0;
-    const dataWeeks = recentWeekKeys.filter((key) => (weeklyMiles[key] || 0) > 0).length;
-    const latestWeekWithMiles =
-      recentWeekKeys.find((key) => (weeklyMiles[key] || 0) > 0) || null;
-    const scoredWeekKey = currentWeekReadings > 0 ? currentWeekKey : latestWeekWithMiles;
+    const dataWeeks = recentWeekKeys.filter((key) => isUsableWeek(key)).length;
+    const latestWeekWithData =
+      recentWeekKeys.find((key) => isUsableWeek(key)) || null;
+    const scoredWeekKey = currentWeekReadings > 0 ? currentWeekKey : latestWeekWithData;
     const scoredWeekMiles = scoredWeekKey ? Math.round(weeklyMiles[scoredWeekKey] || 0) : 0;
     const scoredWeekLabel =
       scoredWeekKey === currentWeekKey

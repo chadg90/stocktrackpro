@@ -643,6 +643,11 @@ export default function DefectsPage() {
                               <CheckCircle className="h-4 w-4" />
                               Resolved
                             </span>
+                          ) : defect.status === 'investigating' ? (
+                            <span className="inline-flex items-center gap-1.5 text-blue-300 text-sm">
+                              <Clock className="h-4 w-4" />
+                              Investigating
+                            </span>
                           ) : (
                             <span className="inline-flex items-center gap-1.5 text-yellow-400 text-sm">
                               <AlertTriangle className="h-4 w-4" />

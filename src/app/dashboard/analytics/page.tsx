@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import {
   collection,
   query,
@@ -144,6 +144,7 @@ export default function AnalyticsPage() {
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [defects, setDefects] = useState<Defect[]>([]);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const staticDataCompanyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) return;
@@ -155,9 +156,7 @@ export default function AnalyticsPage() {
         if (snap.exists()) {
           const data = snap.data() as Profile;
           setProfile({ ...data, id: user.uid });
-          if (data.company_id) {
-            fetchAnalytics(data.company_id);
-          } else {
+          if (!data.company_id) {
             setLoading(false);
           }
         } else {
@@ -175,9 +174,9 @@ export default function AnalyticsPage() {
     if (profile?.company_id) {
       fetchAnalytics(profile.company_id);
     }
-  }, [dateRange, profile?.company_id]);
+  }, [profile?.company_id, dateRange]);
 
-  const fetchAnalytics = async (companyId: string) => {
+  const fetchAnalytics = async (companyId: string, options?: { forceStaticReload?: boolean }) => {
     if (!firebaseDb || !companyId) {
       setLoading(false);
       return;
@@ -187,20 +186,23 @@ export default function AnalyticsPage() {
     try {
       const rangeStart = activityHistoryStartFromDashboardRange(dateRange);
 
-      // Fetch vehicles
       const vehiclesQ = query(collection(firebaseDb, 'vehicles'), where('company_id', '==', companyId));
-      const vehiclesSnap = await getDocs(vehiclesQ);
-      setVehicles(vehiclesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Vehicle)));
-
-      // Fetch assets
       const assetsQ = query(collection(firebaseDb, 'tools'), where('company_id', '==', companyId));
-      const assetsSnap = await getDocs(assetsQ);
-      setAssets(assetsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Asset)));
-
-      // Fetch users
       const usersQ = query(collection(firebaseDb, 'profiles'), where('company_id', '==', companyId));
-      const usersSnap = await getDocs(usersQ);
-      setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)));
+      const shouldReloadStatic =
+        options?.forceStaticReload || staticDataCompanyRef.current !== companyId;
+      if (shouldReloadStatic) {
+        // These collections are not range-bound; avoid re-reading on range toggle.
+        const [vehiclesSnap, assetsSnap, usersSnap] = await Promise.all([
+          getDocs(vehiclesQ),
+          getDocs(assetsQ),
+          getDocs(usersQ),
+        ]);
+        setVehicles(vehiclesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Vehicle)));
+        setAssets(assetsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Asset)));
+        setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)));
+        staticDataCompanyRef.current = companyId;
+      }
 
       const inspectionsQuery = query(
         collection(firebaseDb, 'vehicle_inspections'),
@@ -221,10 +223,17 @@ export default function AnalyticsPage() {
           try {
             const fallbackQuery = query(
               collection(firebaseDb, 'vehicle_inspections'),
-              where('company_id', '==', companyId)
+              where('company_id', '==', companyId),
+              where('inspected_at', '>=', Timestamp.fromDate(rangeStart))
             );
             const fallbackSnap = await getDocs(fallbackQuery);
-            const inspectionsData = fallbackSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
+            const inspectionsData = fallbackSnap.docs
+              .map(d => ({ id: d.id, ...d.data() } as Inspection))
+              .sort((a, b) => {
+                const aDate = getDateValue(a.inspected_at)?.getTime() || 0;
+                const bDate = getDateValue(b.inspected_at)?.getTime() || 0;
+                return bDate - aDate;
+              });
             setInspections(inspectionsData);
           } catch (fallbackError) {
             console.error('[Analytics] Fallback query also failed:', fallbackError);
@@ -275,9 +284,16 @@ export default function AnalyticsPage() {
   // ANALYTICS COMPUTATIONS
   // ============================================
 
+  const rangeSpanDays = useMemo(() => {
+    const rangeStart = activityHistoryStartFromDashboardRange(dateRange);
+    return Math.max(1, differenceInDays(new Date(), rangeStart) + 1);
+  }, [dateRange]);
+
+  const rangeLabel = dateRange === 'all' ? 'last 15 months' : `last ${dateRange} days`;
+
   // Daily activity breakdown
   const dailyActivity = useMemo(() => {
-    const days = dateRange === 'all' ? 30 : parseInt(dateRange);
+    const days = rangeSpanDays;
     const dateMap: Record<string, { inspections: number; defects: number; actions: number }> = {};
     
     // Initialize all dates
@@ -313,7 +329,7 @@ export default function AnalyticsPage() {
     });
 
     return Object.entries(dateMap).map(([date, data]) => ({ date, ...data }));
-  }, [inspections, defects, historyItems, dateRange]);
+  }, [inspections, defects, historyItems, rangeSpanDays]);
 
   // Fleet health score
   const fleetHealthScore = useMemo(() => {
@@ -646,7 +662,7 @@ export default function AnalyticsPage() {
           {profile?.company_id && (
             <button
               type="button"
-              onClick={() => { setError(null); fetchAnalytics(profile.company_id!); }}
+              onClick={() => { setError(null); fetchAnalytics(profile.company_id!, { forceStaticReload: true }); }}
               className="text-blue-600 hover:underline font-medium whitespace-nowrap dark:text-blue-400"
             >
               Try again
@@ -659,7 +675,7 @@ export default function AnalyticsPage() {
         <div>
           <h1 className="text-3xl font-bold text-white">Detailed Reports</h1>
           <p className="text-white/70 text-sm mt-1">
-            {dateRange === 'all' ? 'All-time metrics and exportable reports' : `Last ${dateRange} days — change period above to see different ranges`}
+            {`Showing ${rangeLabel} — change period above to see different ranges`}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -681,7 +697,7 @@ export default function AnalyticsPage() {
           <ExportButton
             data={dailyActivity}
             filename={`stp-analytics-export-${format(new Date(), 'yyyy-MM-dd')}`}
-            reportTitle={`Stock Track PRO — Analytics data export (${format(new Date(), 'PPP')}) · Range: ${dateRange === 'all' ? 'All time' : `Last ${dateRange} days`}`}
+            reportTitle={`Stock Track PRO — Analytics data export (${format(new Date(), 'PPP')}) · Range: ${dateRange === 'all' ? 'Last 15 months' : `Last ${dateRange} days`}`}
             pdfMeta={{ organization: profile?.company_name }}
             multiSheetData={exportSheets}
           />
@@ -734,13 +750,13 @@ export default function AnalyticsPage() {
             <div className="bg-black border border-blue-500/25 rounded-xl p-6">
               <h3 className="text-white font-semibold mb-2">Total Inspections</h3>
               <p className="text-3xl font-bold text-blue-500">{inspections.length}</p>
-              <p className="text-white/50 text-sm">{dateRange === 'all' ? 'all time' : `last ${dateRange} days`}</p>
+              <p className="text-white/50 text-sm">{rangeLabel}</p>
             </div>
 
             <div className="bg-black border border-blue-500/25 rounded-xl p-6">
               <h3 className="text-white font-semibold mb-2">Active Defects</h3>
               <p className="text-3xl font-bold text-red-400">{defects.filter(d => d.status !== 'resolved').length}</p>
-              <p className="text-white/50 text-sm">{dateRange === 'all' ? 'all time' : `last ${dateRange} days`}</p>
+              <p className="text-white/50 text-sm">{rangeLabel}</p>
             </div>
 
             <div className="bg-black border border-blue-500/25 rounded-xl p-6">
