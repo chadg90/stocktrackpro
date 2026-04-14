@@ -105,6 +105,10 @@ export type MileageRow = {
 export type MileageMonitorRow = {
   vehicleId: string;
   registration: string;
+  inspectionCount: number;
+  validMileageCount: number;
+  latestMileage: number | null;
+  latestInspectionAt: string;
   currentWeekMiles: number;
   lastWeekMiles: number;
   avgWeeklyMiles: number;
@@ -252,6 +256,9 @@ export function buildMileageMonitoringRows(
       const db = toJsDate(b.inspected_at)?.getTime() ?? 0;
       return da - db;
     });
+    const latest = list[list.length - 1];
+    const latestMileage = latest ? toMileageNumber(latest.mileage) : null;
+    const latestInspectionAt = latest ? formatFleetDate(latest.inspected_at) : '—';
 
     const weeklyMiles: Record<string, number> = {};
     const weeklyReadings: Record<string, number> = {};
@@ -306,6 +313,9 @@ export function buildMileageMonitoringRows(
     const currentWeekMiles = Math.round(weeklyMiles[currentWeekKey] || 0);
     const lastWeekMiles = Math.round(weeklyMiles[lastWeekKey] || 0);
     const currentWeekReadings = weeklyReadings[currentWeekKey] || 0;
+    const validMileageCount = list.reduce((count, insp) => {
+      return toMileageNumber(insp.mileage) != null ? count + 1 : count;
+    }, 0);
     const priorWeekMiles = recentWeekKeys
       .slice(1, 7)
       .map((key) => weeklyMiles[key] || 0)
@@ -328,6 +338,12 @@ export function buildMileageMonitoringRows(
     } else if (unrealisticJumpCount > 0) {
       anomalyLevel = 'high';
       anomalyReason = 'Very large mileage jump detected; review readings or vehicle usage.';
+    } else if (validMileageCount === 0) {
+      anomalyLevel = 'insufficient';
+      anomalyReason = 'No valid mileage readings logged yet.';
+    } else if (validMileageCount === 1) {
+      anomalyLevel = 'insufficient';
+      anomalyReason = 'Only one mileage reading logged; at least two checks are needed to calculate movement.';
     } else if (currentWeekReadings === 0) {
       anomalyLevel = 'insufficient';
       anomalyReason = 'No mileage reading logged this week.';
@@ -356,6 +372,10 @@ export function buildMileageMonitoringRows(
     return {
       vehicleId: vehicle.id,
       registration: vehicle.registration || vehicle.id,
+      inspectionCount: list.length,
+      validMileageCount,
+      latestMileage,
+      latestInspectionAt,
       currentWeekMiles,
       lastWeekMiles,
       avgWeeklyMiles,
