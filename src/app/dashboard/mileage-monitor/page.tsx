@@ -14,17 +14,15 @@ function levelDot(level: string) {
   if (level === 'critical') return 'bg-red-300';
   if (level === 'high') return 'bg-amber-300';
   if (level === 'watch') return 'bg-yellow-300';
-  if (level === 'stale') return 'bg-sky-300';
-  if (level === 'insufficient') return 'bg-slate-300';
+  if (level === 'stale' || level === 'insufficient') return 'bg-slate-300';
   return 'bg-emerald-300';
 }
 
 function levelLabel(level: string) {
-  if (level === 'critical') return 'Critical risk';
-  if (level === 'high') return 'High risk';
+  if (level === 'critical') return 'Critical';
+  if (level === 'high') return 'High';
   if (level === 'watch') return 'Watch';
-  if (level === 'stale') return 'Stale check-ins';
-  if (level === 'insufficient') return 'Insufficient data';
+  if (level === 'stale' || level === 'insufficient') return 'Missing data';
   return 'Normal';
 }
 
@@ -60,14 +58,13 @@ function statusPanelBorder(level: string) {
   if (level === 'critical') return 'border-l-red-300';
   if (level === 'high') return 'border-l-amber-300';
   if (level === 'watch') return 'border-l-yellow-300';
-  if (level === 'stale') return 'border-l-sky-300';
-  if (level === 'insufficient') return 'border-l-slate-300';
+  if (level === 'stale' || level === 'insufficient') return 'border-l-slate-300';
   return 'border-l-emerald-300';
 }
 
 function MileageMonitorContent() {
   const { loading, error, inspections, vehicles } = useFleetReport();
-  const [filter, setFilter] = useState<'all' | 'risk' | 'stale' | 'insufficient'>('all');
+  const [filter, setFilter] = useState<'all' | 'review' | 'missing'>('all');
   const rows = useMemo(
     () => buildMileageMonitoringRows(inspections, vehicles),
     [inspections, vehicles]
@@ -78,18 +75,20 @@ function MileageMonitorContent() {
   const watchCount = rows.filter((r) => r.anomalyLevel === 'watch').length;
   const staleCount = rows.filter((r) => r.anomalyLevel === 'stale').length;
   const insufficientCount = rows.filter((r) => r.anomalyLevel === 'insufficient').length;
+  const missingDataCount = staleCount + insufficientCount;
   const needsReviewCount = criticalCount + highCount + watchCount;
   const avgRiskScore = rows.length
     ? Math.round(rows.reduce((sum, row) => sum + row.riskScore, 0) / rows.length)
     : 0;
   const filteredRows = useMemo(() => {
-    if (filter === 'risk') {
+    if (filter === 'review') {
       return rows.filter(
         (r) => r.anomalyLevel === 'critical' || r.anomalyLevel === 'high' || r.anomalyLevel === 'watch'
       );
     }
-    if (filter === 'stale') return rows.filter((r) => r.anomalyLevel === 'stale');
-    if (filter === 'insufficient') return rows.filter((r) => r.anomalyLevel === 'insufficient');
+    if (filter === 'missing') {
+      return rows.filter((r) => r.anomalyLevel === 'stale' || r.anomalyLevel === 'insufficient');
+    }
     return rows;
   }, [rows, filter]);
 
@@ -110,13 +109,12 @@ function MileageMonitorContent() {
             Mileage Monitor
           </h1>
           <p className="text-white/65 mt-1.5 max-w-3xl text-sm">
-            Weekly monitoring built for sporadic check-ins. Alerts compare current-week mileage against each
-            vehicle&apos;s recent baseline, with confidence scoring based on available data.
+            Clear weekly mileage monitoring with simple statuses: Normal, Watch, High, Critical, and Missing data.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-2.5">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
         <div className="dashboard-card p-3">
           <p className="text-white/60 text-xs uppercase tracking-wider">Critical</p>
           <p className="text-xl font-semibold text-red-200 mt-1">{criticalCount}</p>
@@ -133,14 +131,9 @@ function MileageMonitorContent() {
           <p className="text-[11px] text-white/55 mt-1">Above trend.</p>
         </div>
         <div className="dashboard-card p-3">
-          <p className="text-white/60 text-xs uppercase tracking-wider">Stale check-ins</p>
-          <p className="text-xl font-semibold text-sky-200 mt-1">{staleCount}</p>
-          <p className="text-[11px] text-white/55 mt-1">No current week check.</p>
-        </div>
-        <div className="dashboard-card p-3">
-          <p className="text-white/60 text-xs uppercase tracking-wider">Insufficient data</p>
-          <p className="text-xl font-semibold text-slate-200 mt-1">{insufficientCount}</p>
-          <p className="text-[11px] text-white/55 mt-1">Need more checks.</p>
+          <p className="text-white/60 text-xs uppercase tracking-wider">Missing data</p>
+          <p className="text-xl font-semibold text-slate-200 mt-1">{missingDataCount}</p>
+          <p className="text-[11px] text-white/55 mt-1">No check or too little data.</p>
         </div>
         <div className="dashboard-card p-3">
           <p className="text-white/60 text-xs uppercase tracking-wider">Review now</p>
@@ -162,20 +155,19 @@ function MileageMonitorContent() {
       <div className="dashboard-card p-3">
         <p className="text-white font-medium mb-2">Status guide</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-white/80">
-          <p><span className="text-red-200 font-medium">Critical:</span> very large deviation or rollback detected.</p>
-          <p><span className="text-amber-200 font-medium">High:</span> significant increase against baseline.</p>
-          <p><span className="text-yellow-200 font-medium">Watch:</span> above expected trend; monitor next check.</p>
-          <p><span className="text-sky-200 font-medium">Stale:</span> no current-week check-in yet.</p>
-          <p><span className="text-slate-200 font-medium">Insufficient:</span> fewer than two valid mileage readings.</p>
+          <p><span className="text-emerald-200 font-medium">Normal:</span> current usage is within expected range.</p>
+          <p><span className="text-yellow-200 font-medium">Watch:</span> slightly above trend, monitor next week.</p>
+          <p><span className="text-amber-200 font-medium">High:</span> strong deviation from normal pattern.</p>
+          <p><span className="text-red-200 font-medium">Critical:</span> severe deviation or rollback pattern.</p>
+          <p><span className="text-slate-200 font-medium">Missing data:</span> stale check-ins or too few readings.</p>
         </div>
       </div>
 
       <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-500/35 bg-slate-700/20 p-1.5">
         {[
           { id: 'all', label: `All (${rows.length})` },
-          { id: 'risk', label: `Needs review (${criticalCount + highCount + watchCount})` },
-          { id: 'stale', label: `Stale (${staleCount})` },
-          { id: 'insufficient', label: `Insufficient (${insufficientCount})` },
+          { id: 'review', label: `Needs review (${needsReviewCount})` },
+          { id: 'missing', label: `Missing data (${missingDataCount})` },
         ].map((item) => (
           <button
             key={item.id}
