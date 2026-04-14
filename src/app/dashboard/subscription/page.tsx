@@ -10,6 +10,7 @@ import Link from 'next/link';
 const PRICE_PER_VEHICLE = 8;
 const MIN_VEHICLES = 5;
 const MAX_VEHICLES = 100;
+const WHATSAPP_SUPPORT_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%20support%2C%20I%20need%20help%20with%20billing%3A';
 
 type Profile = {
   company_id?: string;
@@ -420,13 +421,15 @@ export default function SubscriptionPage() {
           If you have questions about billing or need help changing your vehicle count, contact support.
         </p>
         <div className="flex flex-wrap gap-4">
-          <Link
-            href="/contact"
+          <a
+            href={WHATSAPP_SUPPORT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
           >
-            Contact Support
+            WhatsApp Support
             <ExternalLink className="w-4 h-4" />
-          </Link>
+          </a>
           <Link
             href="/pricing"
             className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium flex items-center gap-2"

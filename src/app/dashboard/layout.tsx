@@ -21,6 +21,7 @@ type Company = {
 };
 
 type ThemePreference = 'light' | 'dark';
+const WHATSAPP_SUPPORT_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%20support%2C%20I%20need%20help%20with%3A';
 
 export default function DashboardLayout({
   children,
@@ -189,10 +190,12 @@ export default function DashboardLayout({
                     Subscribe Now
                   </a>
                   <a
-                    href="/contact"
+                    href={WHATSAPP_SUPPORT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="block w-full text-white/60 hover:text-white text-sm transition-colors"
                   >
-                    Contact Support
+                    WhatsApp Support
                   </a>
                 </div>
               </div>

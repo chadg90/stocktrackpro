@@ -34,6 +34,8 @@ type Defect = {
   reported_at?: Timestamp | string;
   severity?: 'low' | 'medium' | 'high' | 'critical';
   description?: string;
+  defect_description?: string;
+  reporter_contact_phone?: string;
   status: 'pending' | 'resolved' | 'investigating';
   company_id: string;
   photo_url?: string;
@@ -357,9 +359,13 @@ export default function DefectsPage() {
   };
 
   const filteredDefects = defects.filter(d => {
-    const matchesSearch = 
-      d.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (d.vehicle_id && vehicles[d.vehicle_id]?.registration.toLowerCase().includes(searchTerm.toLowerCase()));
+    const desc = (d.description || d.defect_description || '').toLowerCase();
+    const phone = (d.reporter_contact_phone || '').toLowerCase();
+    const q = searchTerm.toLowerCase();
+    const matchesSearch =
+      desc.includes(q) ||
+      phone.includes(q) ||
+      (d.vehicle_id && vehicles[d.vehicle_id]?.registration.toLowerCase().includes(q));
     
     const matchesStatus = statusFilter === 'all' 
       ? true 
@@ -421,7 +427,8 @@ export default function DefectsPage() {
               vehicle_registration: vehicle?.registration || defect.vehicle_id || 'Unknown',
               vehicle_make: vehicle?.make || '',
               vehicle_model: vehicle?.model || '',
-              description: defect.description || '',
+              description: defect.description || defect.defect_description || '',
+              reporter_contact_phone: defect.reporter_contact_phone || '',
               status: defect.status,
               reported_at: defect.reported_at,
               reported_by: defect.reported_by,
@@ -437,6 +444,7 @@ export default function DefectsPage() {
             vehicle_make: 'Vehicle Make',
             vehicle_model: 'Vehicle Model',
             description: 'Description',
+            reporter_contact_phone: 'Reporter contact phone',
             status: 'Status',
             reported_at: 'Reported At',
             reported_by: 'Reported By',
@@ -503,6 +511,7 @@ export default function DefectsPage() {
                 <th className="px-6 py-4 font-medium">Severity</th>
                 <th className="px-6 py-4 font-medium">Vehicle</th>
                 <th className="px-6 py-4 font-medium">Issue Description</th>
+                <th className="px-6 py-4 font-medium">Contact</th>
                 <th className="px-6 py-4 font-medium">Reported</th>
                 <th className="px-6 py-4 font-medium">Status</th>
                 <th className="px-6 py-4 font-medium text-right">Actions</th>
@@ -510,12 +519,13 @@ export default function DefectsPage() {
             </thead>
             <tbody className="divide-y divide-white/10">
               {loading ? (
-                <TableSkeleton cols={6} />
+                <TableSkeleton cols={7} />
               ) : filteredDefects.length === 0 ? (
-                <EmptyStateTableRow colSpan={6} message="No defects found matching your criteria." />
+                <EmptyStateTableRow colSpan={7} message="No defects found matching your criteria." />
               ) : (
                 paginatedDefects.map((defect) => {
                   const vehicle = defect.vehicle_id ? vehicles[defect.vehicle_id] : null;
+                  const issueText = defect.description || defect.defect_description || '';
                   return (
                     <tr key={defect.id} className="hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4">
@@ -542,8 +552,8 @@ export default function DefectsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-white/90 text-sm line-clamp-2 max-w-xs" title={defect.description}>
-                          {defect.description}
+                        <p className="text-white/90 text-sm line-clamp-2 max-w-xs" title={issueText}>
+                          {issueText || '—'}
                         </p>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                           {(() => {
@@ -558,7 +568,7 @@ export default function DefectsPage() {
                               setViewingImages(urls);
                               setViewingIndex(index);
                               setViewingImage(urls[index] || urls[0]);
-                              setViewingImageAlt(defect.description || 'Defect Photo');
+                              setViewingImageAlt(issueText || 'Defect Photo');
                             };
                             return (
                               <>
@@ -609,6 +619,9 @@ export default function DefectsPage() {
                             );
                           })()}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 text-white/80 text-sm whitespace-nowrap max-w-[140px] truncate" title={defect.reporter_contact_phone || ''}>
+                        {defect.reporter_contact_phone || '—'}
                       </td>
                       <td className="px-6 py-4 text-white/70 text-sm">
                         <div className="flex flex-col gap-1">

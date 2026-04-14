@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
-import { Mail, Send, Loader2 } from 'lucide-react';
+import { Mail, Send, Loader2, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
 const HONEYPOT_FIELD = 'website_url';
+const WHATSAPP_SUPPORT_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%20need%20help%20with%3A';
 
 export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -42,14 +43,18 @@ export default function Contact() {
     {
       title: "Sales Inquiries",
       description: "For pricing and general enquiries",
-      email: "sales@stocktrackpro.co.uk",
+      value: "sales@stocktrackpro.co.uk",
+      href: "mailto:sales@stocktrackpro.co.uk",
       actionText: "Email Sales Team",
+      type: "email",
     },
     {
       title: "Support",
-      description: "For technical support and help",
-      email: "support@stocktrackpro.co.uk",
-      actionText: "Email Support",
+      description: "Fast technical support via WhatsApp Business",
+      value: "+44 7438 146343",
+      href: WHATSAPP_SUPPORT_URL,
+      actionText: "Message on WhatsApp",
+      type: "whatsapp",
     },
   ];
 
@@ -191,11 +196,14 @@ export default function Contact() {
                     <p className="text-white/60 text-sm">{method.description}</p>
                   </div>
                 </div>
-                <p className="text-white/90 mb-6 break-all">{method.email}</p>
+                <p className="text-white/90 mb-6 break-all">{method.value}</p>
                 <Link
-                  href={`mailto:${method.email}`}
+                  href={method.href}
+                  target={method.type === 'whatsapp' ? '_blank' : undefined}
+                  rel={method.type === 'whatsapp' ? 'noopener noreferrer' : undefined}
                   className="inline-flex items-center justify-center w-full px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 btn-brand-blue"
                 >
+                  {method.type === 'whatsapp' ? <MessageCircle className="w-5 h-5 mr-2" /> : null}
                   {method.actionText}
                 </Link>
               </div>
@@ -216,7 +224,7 @@ export default function Contact() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
-                <span>For urgent matters, please mention &quot;Urgent&quot; in your email subject.</span>
+                <span>For urgent matters, contact us via WhatsApp Business for quicker response.</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />

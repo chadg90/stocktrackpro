@@ -38,6 +38,7 @@ export type FleetDefect = {
   reported_at?: Timestamp | string;
   resolved_at?: Timestamp | string;
   description?: string;
+  reporter_contact_phone?: string;
   severity?: string;
   status?: string;
 };
@@ -289,6 +290,7 @@ export function buildFleetReportExcelSheets(
     'Defect ID': d.id,
     Registration: vehicleMap[d.vehicle_id || '']?.registration || d.vehicle_id || '—',
     Description: d.description || '—',
+    'Reporter contact phone': d.reporter_contact_phone || '—',
     Severity: d.severity || '—',
     Status: d.status || '—',
     'Reported At': formatFleetDate(d.reported_at),
@@ -339,6 +341,7 @@ export function buildFleetReportExcelSheets(
         'Defect ID': d.id,
         Registration: vehicleMap[d.vehicle_id || '']?.registration || d.vehicle_id || '—',
         Description: d.description || '—',
+        'Reporter contact phone': d.reporter_contact_phone || '—',
         Severity: d.severity || '—',
         Status: d.status || '—',
         'Reported At': formatFleetDate(d.reported_at),
