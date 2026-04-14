@@ -6,13 +6,17 @@ import { ArrowLeft, AlertTriangle, Gauge } from 'lucide-react';
 import { FleetReportProvider, useFleetReport } from '../fleet-report/FleetReportContext';
 import { buildMileageMonitoringRows } from '@/lib/fleetReportLogic';
 
-function levelBadge(level: string) {
-  if (level === 'critical') return 'bg-red-500/15 text-red-200 border-red-400/40';
-  if (level === 'high') return 'bg-amber-500/15 text-amber-200 border-amber-400/40';
-  if (level === 'watch') return 'bg-yellow-500/15 text-yellow-200 border-yellow-400/40';
-  if (level === 'stale') return 'bg-sky-500/15 text-sky-200 border-sky-400/40';
-  if (level === 'insufficient') return 'bg-slate-600/30 text-slate-200 border-slate-400/40';
-  return 'bg-emerald-500/15 text-emerald-200 border-emerald-400/40';
+function levelBadge() {
+  return 'bg-slate-900/70 text-slate-100 border-slate-600/60';
+}
+
+function levelDot(level: string) {
+  if (level === 'critical') return 'bg-red-300';
+  if (level === 'high') return 'bg-amber-300';
+  if (level === 'watch') return 'bg-yellow-300';
+  if (level === 'stale') return 'bg-sky-300';
+  if (level === 'insufficient') return 'bg-slate-300';
+  return 'bg-emerald-300';
 }
 
 function levelLabel(level: string) {
@@ -30,6 +34,19 @@ function confidenceBadge(confidence: string) {
   return 'text-slate-300';
 }
 
+function signedMileage(delta: number) {
+  const abs = Math.abs(delta).toLocaleString();
+  if (delta > 0) return `+${abs} mi`;
+  if (delta < 0) return `-${abs} mi`;
+  return '0 mi';
+}
+
+function movementTone(delta: number) {
+  if (delta > 0) return 'text-blue-200';
+  if (delta < 0) return 'text-slate-200';
+  return 'text-slate-300';
+}
+
 function rowTint(level: string) {
   if (level === 'critical') return 'bg-red-500/[0.03]';
   if (level === 'high') return 'bg-amber-500/[0.03]';
@@ -37,6 +54,15 @@ function rowTint(level: string) {
   if (level === 'stale') return 'bg-sky-500/[0.02]';
   if (level === 'insufficient') return 'bg-slate-500/[0.03]';
   return '';
+}
+
+function statusPanelBorder(level: string) {
+  if (level === 'critical') return 'border-l-red-300';
+  if (level === 'high') return 'border-l-amber-300';
+  if (level === 'watch') return 'border-l-yellow-300';
+  if (level === 'stale') return 'border-l-sky-300';
+  if (level === 'insufficient') return 'border-l-slate-300';
+  return 'border-l-emerald-300';
 }
 
 function MileageMonitorContent() {
@@ -170,76 +196,83 @@ function MileageMonitorContent() {
       {loading && filteredRows.length === 0 ? (
         <p className="text-white/50 text-sm">Loading mileage monitoring data…</p>
       ) : (
-        <div className="dashboard-card">
-          <table className="w-full text-sm text-left table-fixed">
-            <thead>
-              <tr className="border-b border-white/10 text-white/50">
-                <th className="w-[14%] px-2.5 py-2 font-medium">Vehicle</th>
-                <th className="w-[9%] px-2.5 py-2 font-medium">Risk</th>
-                <th className="w-[12%] px-2.5 py-2 font-medium">Last check</th>
-                <th className="w-[10%] px-2.5 py-2 font-medium">Checks</th>
-                <th className="w-[14%] px-2.5 py-2 font-medium">Scored week</th>
-                <th className="w-[18%] px-2.5 py-2 font-medium">Trend</th>
-                <th className="w-[10%] px-2.5 py-2 font-medium">Status</th>
-                <th className="w-[13%] px-2.5 py-2 font-medium">Confidence</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRows.map((row) => (
-                <tr key={row.vehicleId} className={`border-b border-white/5 ${rowTint(row.anomalyLevel)}`}>
-                  <td className="px-2.5 py-2 text-white font-medium">
-                    <span className="block">{row.registration}</span>
-                    <span className="block text-[10px] text-white/55 tabular-nums">
-                      {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
-                    </span>
-                  </td>
-                  <td className="px-2.5 py-2">
-                    <span className="inline-flex min-w-[44px] justify-center px-1.5 py-0.5 rounded-md border border-white/15 text-white/90 tabular-nums">
+        <div className="space-y-3">
+          {filteredRows.length === 0 ? (
+            <div className="dashboard-card px-4 py-6 text-white/50 text-sm">No vehicles match this filter.</div>
+          ) : null}
+          {filteredRows.map((row) => {
+            const deltaVsLast = row.currentWeekMiles - row.lastWeekMiles;
+            const deltaVsBaseline =
+              row.baselineWeeklyMiles > 0 ? row.currentWeekMiles - row.baselineWeeklyMiles : null;
+            return (
+              <article
+                key={row.vehicleId}
+                className={`dashboard-card border-l-2 ${statusPanelBorder(row.anomalyLevel)} ${rowTint(row.anomalyLevel)} p-3`}
+              >
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                  <div>
+                    <p className="text-white font-semibold tracking-wide">{row.registration}</p>
+                    <p className="text-[11px] text-white/55 mt-0.5 tabular-nums">
+                      Odometer: {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex min-w-[48px] justify-center px-2 py-0.5 rounded-md border border-white/15 text-white/90 text-xs tabular-nums">
                       {row.riskScore}
                     </span>
-                  </td>
-                  <td className="px-2.5 py-2 text-white/75">
-                    <span className="whitespace-nowrap">{row.latestInspectionAt}</span>
-                    <span className="block text-[10px] text-white/45 mt-0.5 tabular-nums">
-                      {row.daysSinceLastInspection != null ? `${row.daysSinceLastInspection}d ago` : '—'}
-                    </span>
-                  </td>
-                  <td className="px-2.5 py-2 text-white/70">
-                    {row.validMileageCount}/{row.inspectionCount}
-                  </td>
-                  <td className="px-2.5 py-2 text-white/80 tabular-nums">
-                    {row.scoredWeekMiles.toLocaleString()} mi
-                    <span className="block text-[10px] text-white/45 mt-0.5">{row.scoredWeekLabel}</span>
-                  </td>
-                  <td className="px-2.5 py-2 text-white/75 text-xs tabular-nums">
-                    <span className="block">This {row.currentWeekMiles.toLocaleString()} | Last {row.lastWeekMiles.toLocaleString()}</span>
-                    <span className="block text-white/55">Avg {row.avgWeeklyMiles.toLocaleString()} | Base {row.baselineWeeklyMiles > 0 ? row.baselineWeeklyMiles.toLocaleString() : '—'}</span>
-                    <span className="block text-white/45">
-                      {row.dataWeeks}/8 weeks
-                    </span>
-                  </td>
-                  <td className="px-2.5 py-2">
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs border capitalize ${levelBadge(row.anomalyLevel)}`}>
+                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs border ${levelBadge()}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${levelDot(row.anomalyLevel)}`} />
                       {levelLabel(row.anomalyLevel)}
                     </span>
-                  </td>
-                  <td className={`px-2.5 py-2 capitalize ${confidenceBadge(row.confidence)}`}>
-                    <span className="block">{row.confidence}</span>
-                    <span className="block text-[10px] text-white/50 mt-0.5 truncate" title={row.anomalyReason}>
-                      {row.anomalyReason}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {filteredRows.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-3 py-6 text-white/50">
-                    No vehicles match this filter.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.5">
+                  <div className="rounded-lg border border-white/10 bg-black/25 p-2">
+                    <p className="text-[10px] uppercase tracking-wide text-white/45">Scored week</p>
+                    <p className="text-sm text-white/90 tabular-nums mt-0.5">
+                      {row.scoredWeekMiles.toLocaleString()} mi
+                    </p>
+                    <p className="text-[10px] text-white/45 mt-0.5">{row.scoredWeekLabel}</p>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-black/25 p-2">
+                    <p className="text-[10px] uppercase tracking-wide text-white/45">Movement</p>
+                    <p className={`text-xs mt-0.5 ${deltaVsBaseline == null ? 'text-slate-300' : movementTone(deltaVsBaseline)}`}>
+                      Baseline: {deltaVsBaseline == null ? 'No baseline yet' : signedMileage(deltaVsBaseline)}
+                    </p>
+                    <p className={`text-xs mt-0.5 ${movementTone(deltaVsLast)}`}>
+                      Week-on-week: {signedMileage(deltaVsLast)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-black/25 p-2">
+                    <p className="text-[10px] uppercase tracking-wide text-white/45">Inspection quality</p>
+                    <p className="text-xs text-white/75 mt-0.5 tabular-nums">
+                      Checks: {row.validMileageCount}/{row.inspectionCount}
+                    </p>
+                    <p className="text-xs text-white/60 mt-0.5 tabular-nums">
+                      Data: {row.dataWeeks}/8 weeks
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-black/25 p-2">
+                    <p className="text-[10px] uppercase tracking-wide text-white/45">Last check</p>
+                    <p className="text-xs text-white/75 mt-0.5">{row.latestInspectionAt}</p>
+                    <p className={`text-xs mt-0.5 capitalize ${confidenceBadge(row.confidence)}`}>
+                      {row.confidence} confidence
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-2.5 grid grid-cols-1 xl:grid-cols-2 gap-2">
+                  <p className="text-[11px] text-white/70 leading-relaxed">
+                    <span className="text-white/50">Reason:</span> {row.anomalyReason}
+                  </p>
+                  <p className="text-[11px] text-white/75 leading-relaxed">
+                    <span className="text-white/50">Action:</span> {row.recommendedAction}
+                  </p>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </div>
