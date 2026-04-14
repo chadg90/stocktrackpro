@@ -109,14 +109,19 @@ export type MileageMonitorRow = {
   validMileageCount: number;
   latestMileage: number | null;
   latestInspectionAt: string;
+  daysSinceLastInspection: number | null;
   currentWeekMiles: number;
   lastWeekMiles: number;
+  scoredWeekMiles: number;
+  scoredWeekLabel: string;
   avgWeeklyMiles: number;
   baselineWeeklyMiles: number;
   dataWeeks: number;
   currentWeekReadings: number;
-  anomalyLevel: 'normal' | 'watch' | 'high' | 'critical' | 'insufficient';
+  anomalyLevel: 'normal' | 'watch' | 'high' | 'critical' | 'insufficient' | 'stale';
   anomalyReason: string;
+  recommendedAction: string;
+  riskScore: number;
   confidence: 'low' | 'medium' | 'high';
 };
 
@@ -258,7 +263,10 @@ export function buildMileageMonitoringRows(
     });
     const latest = list[list.length - 1];
     const latestMileage = latest ? toMileageNumber(latest.mileage) : null;
+    const latestInspectionDate = latest ? toJsDate(latest.inspected_at) : null;
     const latestInspectionAt = latest ? formatFleetDate(latest.inspected_at) : '—';
+    const daysSinceLastInspection =
+      latestInspectionDate != null ? Math.max(0, differenceInCalendarDays(now, latestInspectionDate)) : null;
 
     const weeklyMiles: Record<string, number> = {};
     const weeklyReadings: Record<string, number> = {};
@@ -328,6 +336,16 @@ export function buildMileageMonitoringRows(
       ? Math.round(allRecentWeekMiles.reduce((sum, m) => sum + m, 0) / allRecentWeekMiles.length)
       : 0;
     const dataWeeks = recentWeekKeys.filter((key) => (weeklyMiles[key] || 0) > 0).length;
+    const latestWeekWithMiles =
+      recentWeekKeys.find((key) => (weeklyMiles[key] || 0) > 0) || null;
+    const scoredWeekKey = currentWeekReadings > 0 ? currentWeekKey : latestWeekWithMiles;
+    const scoredWeekMiles = scoredWeekKey ? Math.round(weeklyMiles[scoredWeekKey] || 0) : 0;
+    const scoredWeekLabel =
+      scoredWeekKey === currentWeekKey
+        ? 'Current week'
+        : scoredWeekKey
+          ? `Week of ${scoredWeekKey}`
+          : 'No week data';
 
     let anomalyLevel: MileageMonitorRow['anomalyLevel'] = 'normal';
     let anomalyReason = 'Within normal range for recent usage pattern.';
@@ -344,30 +362,68 @@ export function buildMileageMonitoringRows(
     } else if (validMileageCount === 1) {
       anomalyLevel = 'insufficient';
       anomalyReason = 'Only one mileage reading logged; at least two checks are needed to calculate movement.';
-    } else if (currentWeekReadings === 0) {
-      anomalyLevel = 'insufficient';
-      anomalyReason = 'No mileage reading logged this week.';
     } else if (baselineWeeklyMiles > 0) {
-      const ratio = currentWeekMiles / baselineWeeklyMiles;
-      const uplift = currentWeekMiles - baselineWeeklyMiles;
+      const ratio = scoredWeekMiles / baselineWeeklyMiles;
+      const uplift = scoredWeekMiles - baselineWeeklyMiles;
       if (ratio >= 2.2 && uplift >= 150) {
         anomalyLevel = 'critical';
-        anomalyReason = 'Current week mileage is well above baseline.';
+        anomalyReason = 'Mileage in the scored week is well above baseline.';
       } else if (ratio >= 1.7 && uplift >= 100) {
         anomalyLevel = 'high';
-        anomalyReason = 'Current week mileage is significantly above baseline.';
+        anomalyReason = 'Mileage in the scored week is significantly above baseline.';
       } else if (ratio >= 1.35 && uplift >= 60) {
         anomalyLevel = 'watch';
-        anomalyReason = 'Current week mileage is above expected trend.';
+        anomalyReason = 'Mileage in the scored week is above expected trend.';
       }
-    } else if (currentWeekMiles >= 250) {
+    } else if (scoredWeekMiles >= 250) {
       anomalyLevel = 'watch';
-      anomalyReason = 'No baseline yet; week mileage is high for a new pattern.';
+      anomalyReason = 'No baseline yet; scored week mileage is high for a new pattern.';
+    }
+
+    if (
+      anomalyLevel === 'normal' &&
+      currentWeekReadings === 0 &&
+      validMileageCount >= 2
+    ) {
+      anomalyLevel = 'stale';
+      anomalyReason =
+        daysSinceLastInspection != null
+          ? `No current-week mileage check. Last inspection was ${daysSinceLastInspection} day(s) ago.`
+          : 'No current-week mileage check.';
     }
 
     let confidence: MileageMonitorRow['confidence'] = 'low';
-    if (dataWeeks >= 6 && currentWeekReadings >= 2) confidence = 'high';
-    else if (dataWeeks >= 3 && currentWeekReadings >= 1) confidence = 'medium';
+    if (dataWeeks >= 6 && validMileageCount >= 8) confidence = 'high';
+    else if (dataWeeks >= 3 && validMileageCount >= 4) confidence = 'medium';
+
+    let recommendedAction = 'No action needed.';
+    if (anomalyLevel === 'critical') {
+      recommendedAction = 'Investigate immediately and verify odometer/photos against job activity.';
+    } else if (anomalyLevel === 'high') {
+      recommendedAction = 'Review route and allocation details with the manager this week.';
+    } else if (anomalyLevel === 'watch') {
+      recommendedAction = 'Monitor next check-in to confirm if this is a one-off increase.';
+    } else if (anomalyLevel === 'stale') {
+      recommendedAction = 'Request a fresh vehicle inspection this week.';
+    } else if (anomalyLevel === 'insufficient') {
+      recommendedAction = 'Collect at least two valid mileage readings to score reliably.';
+    }
+
+    const baseScoreByLevel: Record<MileageMonitorRow['anomalyLevel'], number> = {
+      critical: 95,
+      high: 80,
+      watch: 62,
+      stale: 40,
+      insufficient: 24,
+      normal: 8,
+    };
+    const confidenceDelta = confidence === 'high' ? 5 : confidence === 'medium' ? 0 : -8;
+    const stalenessBoost =
+      anomalyLevel === 'stale' && daysSinceLastInspection != null && daysSinceLastInspection >= 14 ? 10 : 0;
+    const riskScore = Math.max(
+      0,
+      Math.min(100, baseScoreByLevel[anomalyLevel] + confidenceDelta + stalenessBoost)
+    );
 
     return {
       vehicleId: vehicle.id,
@@ -376,14 +432,19 @@ export function buildMileageMonitoringRows(
       validMileageCount,
       latestMileage,
       latestInspectionAt,
+      daysSinceLastInspection,
       currentWeekMiles,
       lastWeekMiles,
+      scoredWeekMiles,
+      scoredWeekLabel,
       avgWeeklyMiles,
       baselineWeeklyMiles,
       dataWeeks,
       currentWeekReadings,
       anomalyLevel,
       anomalyReason,
+      recommendedAction,
+      riskScore,
       confidence,
     };
   });
@@ -392,13 +453,16 @@ export function buildMileageMonitoringRows(
     critical: 0,
     high: 1,
     watch: 2,
-    insufficient: 3,
-    normal: 4,
+    stale: 3,
+    insufficient: 4,
+    normal: 5,
   };
 
   return rows.sort((a, b) => {
     const sev = severityRank[a.anomalyLevel] - severityRank[b.anomalyLevel];
     if (sev !== 0) return sev;
+    const risk = b.riskScore - a.riskScore;
+    if (risk !== 0) return risk;
     return b.currentWeekMiles - a.currentWeekMiles;
   });
 }
