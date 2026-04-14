@@ -28,21 +28,21 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
 
   return (
     <section
-      className={`bg-neutral-50 border-y border-neutral-200/90 py-8 sm:py-10 ${className}`.trim()}
+      className={`bg-gradient-to-b from-slate-50 to-neutral-50 border-y border-slate-200/80 py-8 sm:py-10 ${className}`.trim()}
       aria-labelledby="showcase-heading"
     >
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
-          <p className="text-neutral-500 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-3">
+          <p className="text-slate-500 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-3">
             Our customers
           </p>
           <h2
             id="showcase-heading"
-            className="text-neutral-900 text-xl sm:text-2xl font-semibold tracking-tight mb-2"
+            className="text-slate-900 text-xl sm:text-2xl font-semibold tracking-tight mb-2"
           >
             Teams that rely on Stock Track PRO
           </h2>
-          <p className="text-neutral-600 text-sm sm:text-[15px] leading-relaxed">
+          <p className="text-slate-600 text-sm sm:text-[15px] leading-relaxed">
             From groundwork to trades — UK businesses keeping assets and vehicles organised.
           </p>
         </div>
@@ -55,7 +55,7 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
               key={logo.src}
               className={
                 logo.featured
-                  ? 'mx-auto w-full max-w-2xl rounded-2xl bg-white px-6 py-5 sm:px-10 sm:py-7 md:px-12 md:py-8 ring-1 ring-neutral-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
+                  ? 'mx-auto w-full max-w-2xl rounded-2xl bg-white px-6 py-5 sm:px-10 sm:py-7 md:px-12 md:py-8 ring-1 ring-slate-200 shadow-[0_2px_8px_rgba(15,23,42,0.06)]'
                   : 'mx-auto'
               }
             >
@@ -63,7 +63,7 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
               <div
                 className={`relative mx-auto flex shrink-0 items-center justify-center ${
                   logo.featured
-                    ? 'aspect-[5/2] w-full max-h-[112px] sm:max-h-[132px] md:max-h-[152px] min-h-[72px]'
+                    ? 'aspect-[5/2] w-full max-h-[96px] sm:max-h-[116px] md:max-h-[132px] min-h-[64px]'
                     : 'h-10 w-32 sm:h-12 sm:w-36 md:h-14 md:w-40'
                 }`}
               >
@@ -83,14 +83,14 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
           ))}
         </div>
 
-        <p className="text-center text-neutral-500 text-xs sm:text-sm mt-6 max-w-md mx-auto leading-relaxed">
+        <p className="text-center text-slate-600 text-xs sm:text-sm mt-6 max-w-md mx-auto leading-relaxed">
           Your logo could be here — we work with growing fleets and contractors across the UK.
         </p>
 
         <div className="text-center mt-5">
           <Link
             href="/contact"
-            className="inline-flex items-center justify-center rounded-lg bg-neutral-900 text-white text-sm font-semibold px-5 py-2.5 hover:bg-neutral-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-neutral-50"
+            className="inline-flex items-center justify-center rounded-lg bg-slate-900 text-white text-sm font-semibold px-5 py-2.5 hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-50"
           >
             Become a customer
           </Link>
