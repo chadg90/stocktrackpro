@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, AlertTriangle, Gauge, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Gauge } from 'lucide-react';
 import { FleetReportProvider, useFleetReport } from '../fleet-report/FleetReportContext';
 import { buildMileageMonitoringRows } from '@/lib/fleetReportLogic';
 
@@ -123,8 +123,7 @@ function MileageMonitorContent() {
             Mileage Monitor
           </h1>
           <p className="text-zinc-600 dark:text-white/65 mt-1.5 max-w-3xl text-sm">
-            Corporate fleet view of mileage risk, data quality, and required actions. Each vehicle card explains
-            status, reason, and next action.
+            Quick anomaly view for fleet mileage with clear status, risk, and trend context.
           </p>
         </div>
         <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-blue-500/25 dark:bg-black">
@@ -160,30 +159,6 @@ function MileageMonitorContent() {
           <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Average risk score</p>
           <p className="text-xl font-semibold text-blue-700 dark:text-blue-200 mt-1">{avgRiskScore}</p>
           <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Out of 100.</p>
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-zinc-700 dark:border-blue-500/20 dark:bg-blue-500/5 dark:text-white/75">
-        <div className="flex items-start gap-2">
-          <AlertTriangle className="h-4 w-4 mt-0.5 text-blue-600 dark:text-blue-300" />
-          <p>
-            This view is an investigation aid, not proof on its own. Use confidence, inspection frequency, and
-            manager context before making decisions.
-          </p>
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-        <div className="flex items-center gap-2 mb-2">
-          <ShieldCheck className="h-4 w-4 text-blue-600 dark:text-blue-300" />
-          <p className="text-zinc-900 dark:text-white font-medium">How to read this page</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-zinc-700 dark:text-white/80">
-          <p><span className="text-emerald-700 dark:text-emerald-200 font-medium">Normal:</span> current usage is within expected range.</p>
-          <p><span className="text-yellow-700 dark:text-yellow-200 font-medium">Watch:</span> slightly above trend, monitor next week.</p>
-          <p><span className="text-amber-700 dark:text-amber-200 font-medium">High:</span> strong deviation from normal pattern.</p>
-          <p><span className="text-red-700 dark:text-red-200 font-medium">Critical:</span> severe deviation or rollback pattern.</p>
-          <p><span className="text-zinc-700 dark:text-slate-200 font-medium">Missing data:</span> stale check-ins or too few readings.</p>
         </div>
       </div>
 
@@ -281,10 +256,10 @@ function MileageMonitorContent() {
                 </div>
 
                 <div className="mt-2.5 grid grid-cols-1 xl:grid-cols-2 gap-2">
-                  <p className="text-[11px] text-zinc-700 dark:text-white/70 leading-relaxed">
+                  <p className="text-[11px] text-zinc-800 dark:text-white/80 leading-relaxed">
                     <span className="text-zinc-500 dark:text-white/50">Reason:</span> {row.anomalyReason}
                   </p>
-                  <p className="text-[11px] text-zinc-700 dark:text-white/75 leading-relaxed">
+                  <p className="text-[11px] text-zinc-800 dark:text-white/80 leading-relaxed">
                     <span className="text-zinc-500 dark:text-white/50">Action:</span> {row.recommendedAction}
                   </p>
                 </div>
