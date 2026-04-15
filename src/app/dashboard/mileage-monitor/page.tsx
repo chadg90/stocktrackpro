@@ -224,7 +224,7 @@ function MileageMonitorContent() {
           ) : null}
           {visibleRows.map((row) => {
             const deltaVsBaseline =
-              row.baselineWeeklyMiles > 0 ? row.currentWeekMiles - row.baselineWeeklyMiles : null;
+              row.baselineWeeklyMiles > 0 ? row.scoredWeekMiles - row.baselineWeeklyMiles : null;
             const status = normalizeStatus(row.anomalyLevel);
             const weeklySeries = row.recentWeeklyMiles.slice().reverse();
             const maxWeeklyMiles = Math.max(1, ...weeklySeries.map((w) => w.miles));
