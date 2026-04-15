@@ -76,6 +76,7 @@ function MileageMonitorContent() {
   const [filter, setFilter] = useState<'all' | 'attention' | 'missing' | 'normal'>('all');
   const PAGE_SIZE = 12;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [expandedWeekRows, setExpandedWeekRows] = useState<Record<string, boolean>>({});
   const rows = useMemo(
     () => buildMileageMonitoringRows(inspections, vehicles),
     [inspections, vehicles]
@@ -108,6 +109,9 @@ function MileageMonitorContent() {
   }, [rows, filter]);
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
+  }, [filter, rows.length]);
+  useEffect(() => {
+    setExpandedWeekRows({});
   }, [filter, rows.length]);
   const visibleRows = filteredRows.slice(0, visibleCount);
 
@@ -279,20 +283,52 @@ function MileageMonitorContent() {
                   <div className="mt-2 space-y-1.5">
                     {weeklySeries.map((week) => {
                       const widthPct = Math.max(6, Math.round((week.miles / maxWeeklyMiles) * 100));
+                      const weekRowKey = `${row.vehicleId}:${week.weekStart}`;
+                      const isExpanded = !!expandedWeekRows[weekRowKey];
                       return (
-                        <div key={week.weekStart} className="grid grid-cols-[56px_1fr_auto] items-center gap-2">
-                          <p className="text-[11px] font-medium text-zinc-600 dark:text-white/60">
-                            {shortWeekLabel(week.weekStart)} {week.miles.toLocaleString()} mi
-                          </p>
-                          <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700/60 overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${week.hasData ? 'bg-blue-600 dark:bg-blue-400' : 'bg-zinc-400 dark:bg-zinc-500'}`}
-                              style={{ width: `${widthPct}%` }}
-                            />
+                        <div key={week.weekStart}>
+                          <div className="grid grid-cols-[56px_1fr_auto] items-center gap-2">
+                            <p className="text-[11px] font-medium text-zinc-600 dark:text-white/60">
+                              {shortWeekLabel(week.weekStart)}
+                            </p>
+                            <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700/60 overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${week.hasData ? 'bg-blue-600 dark:bg-blue-400' : 'bg-zinc-400 dark:bg-zinc-500'}`}
+                                style={{ width: `${widthPct}%` }}
+                              />
+                            </div>
+                            <p className="text-[11px] font-semibold text-zinc-700 dark:text-white/75 tabular-nums text-right">
+                              {week.miles.toLocaleString()} mi
+                            </p>
                           </div>
-                          <p className="text-[11px] font-semibold text-zinc-700 dark:text-white/75 tabular-nums">
-                            {week.miles.toLocaleString()} mi
-                          </p>
+                          <div className="mt-1 flex items-center justify-between gap-2 pl-[56px]">
+                            <p className="text-[10px] text-zinc-600 dark:text-white/60">
+                              {week.checkCount} check{week.checkCount === 1 ? '' : 's'}
+                            </p>
+                            {week.checkCount > 0 ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedWeekRows((prev) => ({
+                                    ...prev,
+                                    [weekRowKey]: !prev[weekRowKey],
+                                  }))
+                                }
+                                className="text-[10px] font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+                              >
+                                {isExpanded ? 'Hide logs' : 'Show logs'}
+                              </button>
+                            ) : null}
+                          </div>
+                          {isExpanded && week.entries.length > 0 ? (
+                            <div className="mt-1.5 pl-[56px] space-y-1">
+                              {week.entries.slice().reverse().map((entry, idx) => (
+                                <p key={`${week.weekStart}-${idx}`} className="text-[10px] text-zinc-600 dark:text-white/60 tabular-nums">
+                                  {entry.inspectedAt} - {entry.mileage.toLocaleString()} mi
+                                </p>
+                              ))}
+                            </div>
+                          ) : null}
                         </div>
                       );
                     })}

@@ -115,7 +115,13 @@ export type MileageMonitorRow = {
   scoredWeekMiles: number;
   scoredWeekLabel: string;
   avgWeeklyMiles: number;
-  recentWeeklyMiles: { weekStart: string; miles: number; hasData: boolean }[];
+  recentWeeklyMiles: {
+    weekStart: string;
+    miles: number;
+    hasData: boolean;
+    checkCount: number;
+    entries: { inspectedAt: string; mileage: number }[];
+  }[];
   baselineWeeklyMiles: number;
   dataWeeks: number;
   currentWeekReadings: number;
@@ -320,17 +326,23 @@ export function buildMileageMonitoringRows(
     }
 
     const weeklyObservedMiles: Record<string, number> = {};
+    const weeklyEntryDetails: Record<string, { inspectedAt: string; mileage: number }[]> = {};
     let prevObservedMileage: number | null = null;
     let prevObservedAt: Date | null = null;
     for (const insp of list) {
       const at = toJsDate(insp.inspected_at);
       const m = toMileageNumber(insp.mileage);
       if (!at || m == null) continue;
+      const entryKey = weekKey(at);
+      if (!weeklyEntryDetails[entryKey]) weeklyEntryDetails[entryKey] = [];
+      weeklyEntryDetails[entryKey].push({
+        inspectedAt: format(at, 'dd MMM yyyy HH:mm'),
+        mileage: Math.round(m),
+      });
       if (prevObservedMileage != null && prevObservedAt) {
         const delta = m - prevObservedMileage;
         if (delta >= 0) {
-          const key = weekKey(at);
-          weeklyObservedMiles[key] = (weeklyObservedMiles[key] || 0) + delta;
+          weeklyObservedMiles[entryKey] = (weeklyObservedMiles[entryKey] || 0) + delta;
         }
       }
       prevObservedMileage = m;
@@ -360,6 +372,8 @@ export function buildMileageMonitoringRows(
       weekStart: key,
       miles: Math.round(weeklyObservedMiles[key] || 0),
       hasData: (weeklyReadings[key] || 0) > 0,
+      checkCount: weeklyReadings[key] || 0,
+      entries: (weeklyEntryDetails[key] || []).slice(),
     }));
     const dataWeeks = recentWeekKeys.filter((key) => isUsableWeek(key)).length;
     const latestWeekWithData =
