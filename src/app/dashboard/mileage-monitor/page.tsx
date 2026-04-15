@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Gauge } from 'lucide-react';
 import { FleetReportProvider, useFleetReport } from '../fleet-report/FleetReportContext';
@@ -88,6 +88,8 @@ function statusCardAccent(status: StatusTone) {
 function MileageMonitorContent() {
   const { loading, error, inspections, vehicles } = useFleetReport();
   const [filter, setFilter] = useState<'all' | 'attention' | 'missing' | 'normal'>('all');
+  const PAGE_SIZE = 12;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const rows = useMemo(
     () => buildMileageMonitoringRows(inspections, vehicles),
     [inspections, vehicles]
@@ -118,6 +120,10 @@ function MileageMonitorContent() {
     }
     return rows;
   }, [rows, filter]);
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [filter, rows.length]);
+  const visibleRows = filteredRows.slice(0, visibleCount);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-4 space-y-4 text-zinc-900 dark:text-white">
@@ -216,7 +222,7 @@ function MileageMonitorContent() {
           {filteredRows.length === 0 ? (
             <div className="rounded-xl border border-zinc-200 bg-white px-4 py-6 text-zinc-500 text-sm dark:border-blue-500/25 dark:bg-black dark:text-white/50">No vehicles match this filter.</div>
           ) : null}
-          {filteredRows.map((row) => {
+          {visibleRows.map((row) => {
             const deltaVsBaseline =
               row.baselineWeeklyMiles > 0 ? row.currentWeekMiles - row.baselineWeeklyMiles : null;
             const status = normalizeStatus(row.anomalyLevel);
@@ -225,11 +231,11 @@ function MileageMonitorContent() {
             return (
               <article
                 key={row.vehicleId}
-                className={`rounded-xl border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black border-l-2 ${statusPanelBorder(status)} ${rowTint(row.anomalyLevel)} p-4`}
+                className={`rounded-xl border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black border-l-2 ${statusPanelBorder(status)} ${rowTint(row.anomalyLevel)} p-3`}
               >
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
                   <div>
-                    <p className="text-zinc-900 dark:text-white text-[30px] font-bold tracking-wide leading-tight">{row.registration}</p>
+                    <p className="text-zinc-900 dark:text-white text-[26px] font-bold tracking-wide leading-tight">{row.registration}</p>
                     <p className="text-xs text-zinc-700 dark:text-white/70 mt-1 tabular-nums font-medium">
                       Odometer: {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
                     </p>
@@ -283,10 +289,10 @@ function MileageMonitorContent() {
                   </p>
                 </div>
 
-                <div className="mt-2.5 rounded-lg border border-zinc-200 bg-zinc-50 p-2.5 dark:border-white/10 dark:bg-black/25">
+                <div className="mt-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">
-                      Recent weekly mileage (6 weeks)
+                      Exact weekly mileage (6 weeks)
                     </p>
                     <p className="text-xs font-semibold text-zinc-700 dark:text-white/75 tabular-nums">
                       Average: {row.avgWeeklyMiles.toLocaleString()} mi
@@ -315,6 +321,17 @@ function MileageMonitorContent() {
               </article>
             );
           })}
+          {filteredRows.length > visibleRows.length ? (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm font-semibold text-zinc-800 hover:bg-zinc-100 dark:border-slate-400/40 dark:bg-slate-800/50 dark:text-slate-100 dark:hover:bg-slate-700/60"
+              >
+                Load more ({filteredRows.length - visibleRows.length} remaining)
+              </button>
+            </div>
+          ) : null}
         </div>
       )}
     </div>

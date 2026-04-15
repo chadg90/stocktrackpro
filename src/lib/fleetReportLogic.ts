@@ -338,10 +338,28 @@ export function buildMileageMonitoringRows(
     const avgWeeklyMiles = allRecentWeekMiles.length
       ? Math.round(allRecentWeekMiles.reduce((sum, m) => sum + m, 0) / allRecentWeekMiles.length)
       : 0;
+    const weeklyObservedMiles: Record<string, number> = {};
+    let prevObservedMileage: number | null = null;
+    let prevObservedAt: Date | null = null;
+    for (const insp of list) {
+      const at = toJsDate(insp.inspected_at);
+      const m = toMileageNumber(insp.mileage);
+      if (!at || m == null) continue;
+      if (prevObservedMileage != null && prevObservedAt) {
+        const delta = m - prevObservedMileage;
+        if (delta >= 0) {
+          const key = weekKey(at);
+          weeklyObservedMiles[key] = (weeklyObservedMiles[key] || 0) + delta;
+        }
+      }
+      prevObservedMileage = m;
+      prevObservedAt = at;
+    }
+
     const recentWeeklyMiles = recentWeekKeys.slice(0, 6).map((key) => ({
       weekStart: key,
-      miles: Math.round(weeklyMiles[key] || 0),
-      hasData: isUsableWeek(key),
+      miles: Math.round(weeklyObservedMiles[key] || 0),
+      hasData: (weeklyReadings[key] || 0) > 0,
     }));
     const dataWeeks = recentWeekKeys.filter((key) => isUsableWeek(key)).length;
     const latestWeekWithData =
