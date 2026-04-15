@@ -34,14 +34,6 @@ function confidenceBadge(confidence: string) {
   return 'text-zinc-600 dark:text-slate-300';
 }
 
-function baselineSummary(delta: number | null) {
-  if (delta == null) return 'No baseline yet';
-  const miles = `${Math.abs(delta).toLocaleString()} mi`;
-  if (delta > 0) return `${miles} above normal`;
-  if (delta < 0) return `${miles} below normal`;
-  return 'On normal baseline';
-}
-
 function scoredWeekTitle(scoredWeekLabel: string) {
   if (scoredWeekLabel === 'Current week') return 'Current week';
   if (scoredWeekLabel.startsWith('Week of ')) return 'Latest logged week';
@@ -52,12 +44,6 @@ function shortWeekLabel(weekStart: string) {
   const d = new Date(`${weekStart}T00:00:00`);
   if (Number.isNaN(d.getTime())) return weekStart;
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-}
-
-function movementTone(delta: number) {
-  if (delta > 0) return 'text-blue-700 dark:text-blue-200';
-  if (delta < 0) return 'text-zinc-700 dark:text-slate-200';
-  return 'text-zinc-600 dark:text-slate-300';
 }
 
 function rowTint(level: string) {
@@ -223,8 +209,6 @@ function MileageMonitorContent() {
             <div className="rounded-xl border border-zinc-200 bg-white px-4 py-6 text-zinc-500 text-sm dark:border-blue-500/25 dark:bg-black dark:text-white/50">No vehicles match this filter.</div>
           ) : null}
           {visibleRows.map((row) => {
-            const deltaVsBaseline =
-              row.baselineWeeklyMiles > 0 ? row.scoredWeekMiles - row.baselineWeeklyMiles : null;
             const status = normalizeStatus(row.anomalyLevel);
             const weeklySeries = row.recentWeeklyMiles.slice().reverse();
             const maxWeeklyMiles = Math.max(1, ...weeklySeries.map((w) => w.miles));
@@ -251,7 +235,7 @@ function MileageMonitorContent() {
                   </div>
                 </div>
 
-                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.5">
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
                     <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">
                       {scoredWeekTitle(row.scoredWeekLabel)}
@@ -260,12 +244,6 @@ function MileageMonitorContent() {
                       {row.scoredWeekMiles.toLocaleString()} mi
                     </p>
                     <p className="text-xs text-zinc-700 dark:text-white/70 mt-0.5">{row.scoredWeekLabel}</p>
-                  </div>
-                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
-                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Movement</p>
-                    <p className={`text-sm font-medium mt-0.5 ${deltaVsBaseline == null ? 'text-zinc-700 dark:text-slate-200' : movementTone(deltaVsBaseline)}`}>
-                      Vs baseline: {baselineSummary(deltaVsBaseline)}
-                    </p>
                   </div>
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
                     <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Inspection quality</p>
@@ -303,7 +281,9 @@ function MileageMonitorContent() {
                       const widthPct = Math.max(6, Math.round((week.miles / maxWeeklyMiles) * 100));
                       return (
                         <div key={week.weekStart} className="grid grid-cols-[56px_1fr_auto] items-center gap-2">
-                          <p className="text-[11px] font-medium text-zinc-600 dark:text-white/60">{shortWeekLabel(week.weekStart)}</p>
+                          <p className="text-[11px] font-medium text-zinc-600 dark:text-white/60">
+                            {shortWeekLabel(week.weekStart)} {week.miles.toLocaleString()} mi
+                          </p>
                           <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700/60 overflow-hidden">
                             <div
                               className={`h-full rounded-full ${week.hasData ? 'bg-blue-600 dark:bg-blue-400' : 'bg-zinc-400 dark:bg-zinc-500'}`}
