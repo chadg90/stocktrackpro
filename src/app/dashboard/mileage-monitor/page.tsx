@@ -34,19 +34,18 @@ function confidenceBadge(confidence: string) {
   return 'text-zinc-600 dark:text-slate-300';
 }
 
-function signedMileage(delta: number) {
-  const abs = Math.abs(delta).toLocaleString();
-  if (delta > 0) return `+${abs} mi`;
-  if (delta < 0) return `-${abs} mi`;
-  return '0 mi';
-}
-
 function baselineSummary(delta: number | null) {
   if (delta == null) return 'No baseline yet';
   const miles = `${Math.abs(delta).toLocaleString()} mi`;
   if (delta > 0) return `${miles} above normal`;
   if (delta < 0) return `${miles} below normal`;
   return 'On normal baseline';
+}
+
+function scoredWeekTitle(scoredWeekLabel: string) {
+  if (scoredWeekLabel === 'Current week') return 'Current week';
+  if (scoredWeekLabel.startsWith('Week of ')) return 'Latest logged week';
+  return 'Week data';
 }
 
 function movementTone(delta: number) {
@@ -198,7 +197,6 @@ function MileageMonitorContent() {
             <div className="rounded-xl border border-zinc-200 bg-white px-4 py-6 text-zinc-500 text-sm dark:border-blue-500/25 dark:bg-black dark:text-white/50">No vehicles match this filter.</div>
           ) : null}
           {filteredRows.map((row) => {
-            const deltaVsLast = row.currentWeekMiles - row.lastWeekMiles;
             const deltaVsBaseline =
               row.baselineWeeklyMiles > 0 ? row.currentWeekMiles - row.baselineWeeklyMiles : null;
             const status = normalizeStatus(row.anomalyLevel);
@@ -227,7 +225,9 @@ function MileageMonitorContent() {
 
                 <div className="mt-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.5">
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
-                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Current week</p>
+                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">
+                      {scoredWeekTitle(row.scoredWeekLabel)}
+                    </p>
                     <p className="text-base font-semibold text-zinc-900 dark:text-white/95 tabular-nums mt-0.5">
                       {row.scoredWeekMiles.toLocaleString()} mi
                     </p>
@@ -238,17 +238,11 @@ function MileageMonitorContent() {
                     <p className={`text-sm font-medium mt-0.5 ${deltaVsBaseline == null ? 'text-zinc-700 dark:text-slate-200' : movementTone(deltaVsBaseline)}`}>
                       Vs baseline: {baselineSummary(deltaVsBaseline)}
                     </p>
-                    <p className={`text-sm font-medium mt-0.5 ${movementTone(deltaVsLast)}`}>
-                      Week-on-week: {signedMileage(deltaVsLast)}
-                    </p>
                   </div>
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
                     <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Inspection quality</p>
                     <p className="text-sm font-medium text-zinc-800 dark:text-white/85 mt-0.5 tabular-nums">
                       Checks: {row.validMileageCount}/{row.inspectionCount}
-                    </p>
-                    <p className="text-sm font-medium text-zinc-700 dark:text-white/75 mt-0.5 tabular-nums">
-                      Weeks used: {row.dataWeeks}
                     </p>
                   </div>
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
