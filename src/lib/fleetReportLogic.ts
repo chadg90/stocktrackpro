@@ -355,14 +355,14 @@ export function buildMileageMonitoringRows(
       return toMileageNumber(insp.mileage) != null ? count + 1 : count;
     }, 0);
     const isUsableWeek = (key: string) =>
-      (weeklyReadings[key] || 0) >= 2 || (weeklyObservedMiles[key] || 0) > 0;
+      (weeklyReadings[key] || 0) >= 2 || (weeklyMiles[key] || 0) > 0;
     const priorWeekMiles = recentWeekKeys
       .slice(1, 7)
       .filter((key) => isUsableWeek(key))
-      .map((key) => Math.round(weeklyObservedMiles[key] || 0));
+      .map((key) => Math.round(weeklyMiles[key] || 0));
     const allRecentWeekMiles = recentWeekKeys
       .filter((key) => isUsableWeek(key))
-      .map((key) => Math.round(weeklyObservedMiles[key] || 0));
+      .map((key) => Math.round(weeklyMiles[key] || 0));
     const baselineWeeklyMiles = Math.round(median(priorWeekMiles));
     const avgWeeklyMiles = allRecentWeekMiles.length
       ? Math.round(allRecentWeekMiles.reduce((sum, m) => sum + m, 0) / allRecentWeekMiles.length)
@@ -379,6 +379,7 @@ export function buildMileageMonitoringRows(
     const latestWeekWithData =
       recentWeekKeys.find((key) => isUsableWeek(key)) || null;
     const scoredWeekKey = currentWeekReadings > 0 ? currentWeekKey : latestWeekWithData;
+    const scoredWeekMilesForScoring = scoredWeekKey ? Math.round(weeklyMiles[scoredWeekKey] || 0) : 0;
     const scoredWeekMiles = scoredWeekKey ? Math.round(weeklyObservedMiles[scoredWeekKey] || 0) : 0;
     const scoredWeekLabel =
       scoredWeekKey === currentWeekKey
@@ -403,8 +404,8 @@ export function buildMileageMonitoringRows(
       anomalyLevel = 'insufficient';
       anomalyReason = 'Only one mileage reading logged; at least two checks are needed to calculate movement.';
     } else if (baselineWeeklyMiles > 0) {
-      const ratio = scoredWeekMiles / baselineWeeklyMiles;
-      const uplift = scoredWeekMiles - baselineWeeklyMiles;
+      const ratio = scoredWeekMilesForScoring / baselineWeeklyMiles;
+      const uplift = scoredWeekMilesForScoring - baselineWeeklyMiles;
       if (ratio >= 2.2 && uplift >= 150) {
         anomalyLevel = 'critical';
         anomalyReason = 'Mileage in the scored week is well above baseline.';

@@ -71,12 +71,20 @@ function statusCardAccent(status: StatusTone) {
   return 'bg-emerald-700 dark:bg-emerald-300';
 }
 
+function relativeTimeFromDateString(dateStr: string) {
+  const parsed = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  if (Number.isNaN(parsed.getTime())) return 'unknown';
+  const days = Math.floor((Date.now() - parsed.getTime()) / 86400000);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  return `${days} days ago`;
+}
+
 function MileageMonitorContent() {
   const { loading, error, inspections, vehicles } = useFleetReport();
   const [filter, setFilter] = useState<'all' | 'attention' | 'missing' | 'normal'>('all');
-  const PAGE_SIZE = 12;
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [expandedWeekRows, setExpandedWeekRows] = useState<Record<string, boolean>>({});
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
   const rows = useMemo(
     () => buildMileageMonitoringRows(inspections, vehicles),
     [inspections, vehicles]
@@ -108,12 +116,9 @@ function MileageMonitorContent() {
     return rows;
   }, [rows, filter]);
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [filter, rows.length]);
-  useEffect(() => {
     setExpandedWeekRows({});
+    setExpandedCards({});
   }, [filter, rows.length]);
-  const visibleRows = filteredRows.slice(0, visibleCount);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-4 space-y-4 text-zinc-900 dark:text-white">
@@ -212,9 +217,33 @@ function MileageMonitorContent() {
           {filteredRows.length === 0 ? (
             <div className="rounded-xl border border-zinc-200 bg-white px-4 py-6 text-zinc-500 text-sm dark:border-blue-500/25 dark:bg-black dark:text-white/50">No vehicles match this filter.</div>
           ) : null}
-          {visibleRows.map((row) => {
+          {filteredRows.map((row) => {
+            const isExpanded = !!expandedCards[row.vehicleId];
+            if (!isExpanded) {
+              return (
+                <div
+                  key={row.vehicleId}
+                  className="rounded-lg border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black h-11 px-3 flex items-center gap-3"
+                >
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-white min-w-[92px]">{row.registration}</p>
+                  <p className="text-xs text-zinc-700 dark:text-white/70 tabular-nums min-w-[130px]">
+                    {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
+                  </p>
+                  <p className="text-xs text-zinc-700 dark:text-white/70 flex-1">
+                    Last seen: {row.latestInspectionAt} ({relativeTimeFromDateString(row.latestInspectionAt)})
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setExpandedCards((prev) => ({ ...prev, [row.vehicleId]: true }))}
+                    className="text-xs font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+                  >
+                    View →
+                  </button>
+                </div>
+              );
+            }
             const status = normalizeStatus(row.anomalyLevel);
-            const weeklySeries = row.recentWeeklyMiles.slice().reverse();
+            const weeklySeries = row.recentWeeklyMiles;
             const maxWeeklyMiles = Math.max(1, ...weeklySeries.map((w) => w.miles));
             return (
               <article
@@ -227,6 +256,13 @@ function MileageMonitorContent() {
                     <p className="text-xs text-zinc-700 dark:text-white/70 mt-1 tabular-nums font-medium">
                       Odometer: {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
                     </p>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedCards((prev) => ({ ...prev, [row.vehicleId]: false }))}
+                      className="mt-1 text-[11px] font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+                    >
+                      Hide
+                    </button>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="inline-flex min-w-[48px] justify-center px-2.5 py-1 rounded-md border border-zinc-300 text-zinc-900 text-sm font-semibold tabular-nums dark:border-white/15 dark:text-white/95">
@@ -337,17 +373,6 @@ function MileageMonitorContent() {
               </article>
             );
           })}
-          {filteredRows.length > visibleRows.length ? (
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm font-semibold text-zinc-800 hover:bg-zinc-100 dark:border-slate-400/40 dark:bg-slate-800/50 dark:text-slate-100 dark:hover:bg-slate-700/60"
-              >
-                Load more ({filteredRows.length - visibleRows.length} remaining)
-              </button>
-            </div>
-          ) : null}
         </div>
       )}
     </div>
