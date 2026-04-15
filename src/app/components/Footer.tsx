@@ -2,11 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const Footer = () => {
+  const pathname = usePathname();
+  const isDashboardRoute = !!pathname && pathname.startsWith('/dashboard');
 
   return (
-    <footer className="bg-black mt-auto border-t border-blue-500/20">
+    <footer className={`bg-black mt-auto border-t border-blue-500/20 ${isDashboardRoute ? 'lg:pl-64' : ''}`}>
       <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>

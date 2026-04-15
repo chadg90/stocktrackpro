@@ -319,25 +319,6 @@ export function buildMileageMonitoringRows(
       prevDate = at;
     }
 
-    const currentWeekMiles = Math.round(weeklyMiles[currentWeekKey] || 0);
-    const lastWeekMiles = Math.round(weeklyMiles[lastWeekKey] || 0);
-    const currentWeekReadings = weeklyReadings[currentWeekKey] || 0;
-    const validMileageCount = list.reduce((count, insp) => {
-      return toMileageNumber(insp.mileage) != null ? count + 1 : count;
-    }, 0);
-    const isUsableWeek = (key: string) =>
-      (weeklyReadings[key] || 0) >= 2 || (weeklyMiles[key] || 0) > 0;
-    const priorWeekMiles = recentWeekKeys
-      .slice(1, 7)
-      .filter((key) => isUsableWeek(key))
-      .map((key) => Math.round(weeklyMiles[key] || 0));
-    const allRecentWeekMiles = recentWeekKeys
-      .filter((key) => isUsableWeek(key))
-      .map((key) => Math.round(weeklyMiles[key] || 0));
-    const baselineWeeklyMiles = Math.round(median(priorWeekMiles));
-    const avgWeeklyMiles = allRecentWeekMiles.length
-      ? Math.round(allRecentWeekMiles.reduce((sum, m) => sum + m, 0) / allRecentWeekMiles.length)
-      : 0;
     const weeklyObservedMiles: Record<string, number> = {};
     let prevObservedMileage: number | null = null;
     let prevObservedAt: Date | null = null;
@@ -355,6 +336,25 @@ export function buildMileageMonitoringRows(
       prevObservedMileage = m;
       prevObservedAt = at;
     }
+    const currentWeekMiles = Math.round(weeklyObservedMiles[currentWeekKey] || 0);
+    const lastWeekMiles = Math.round(weeklyObservedMiles[lastWeekKey] || 0);
+    const currentWeekReadings = weeklyReadings[currentWeekKey] || 0;
+    const validMileageCount = list.reduce((count, insp) => {
+      return toMileageNumber(insp.mileage) != null ? count + 1 : count;
+    }, 0);
+    const isUsableWeek = (key: string) =>
+      (weeklyReadings[key] || 0) >= 2 || (weeklyObservedMiles[key] || 0) > 0;
+    const priorWeekMiles = recentWeekKeys
+      .slice(1, 7)
+      .filter((key) => isUsableWeek(key))
+      .map((key) => Math.round(weeklyObservedMiles[key] || 0));
+    const allRecentWeekMiles = recentWeekKeys
+      .filter((key) => isUsableWeek(key))
+      .map((key) => Math.round(weeklyObservedMiles[key] || 0));
+    const baselineWeeklyMiles = Math.round(median(priorWeekMiles));
+    const avgWeeklyMiles = allRecentWeekMiles.length
+      ? Math.round(allRecentWeekMiles.reduce((sum, m) => sum + m, 0) / allRecentWeekMiles.length)
+      : 0;
 
     const recentWeeklyMiles = recentWeekKeys.slice(0, 6).map((key) => ({
       weekStart: key,
@@ -365,7 +365,7 @@ export function buildMileageMonitoringRows(
     const latestWeekWithData =
       recentWeekKeys.find((key) => isUsableWeek(key)) || null;
     const scoredWeekKey = currentWeekReadings > 0 ? currentWeekKey : latestWeekWithData;
-    const scoredWeekMiles = scoredWeekKey ? Math.round(weeklyMiles[scoredWeekKey] || 0) : 0;
+    const scoredWeekMiles = scoredWeekKey ? Math.round(weeklyObservedMiles[scoredWeekKey] || 0) : 0;
     const scoredWeekLabel =
       scoredWeekKey === currentWeekKey
         ? 'Current week'
