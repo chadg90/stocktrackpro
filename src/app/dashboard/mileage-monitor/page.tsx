@@ -28,12 +28,6 @@ function levelLabel(status: StatusTone) {
   return 'Normal';
 }
 
-function confidenceBadge(confidence: string) {
-  if (confidence === 'high') return 'text-emerald-700 dark:text-emerald-200';
-  if (confidence === 'medium') return 'text-amber-700 dark:text-amber-200';
-  return 'text-zinc-600 dark:text-slate-300';
-}
-
 function scoredWeekTitle(scoredWeekLabel: string) {
   if (scoredWeekLabel === 'Current week') return 'Current week';
   if (scoredWeekLabel.startsWith('Week of ')) return 'Latest logged week';
@@ -71,12 +65,43 @@ function statusCardAccent(status: StatusTone) {
   return 'bg-emerald-700 dark:bg-emerald-300';
 }
 
+function relativeTime(dateStr: string) {
+  const parsed = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  if (Number.isNaN(parsed.getTime())) return 'unknown';
+  const ms = Date.now() - parsed.getTime();
+  if (ms < 0) return 'today';
+  const hours = Math.floor(ms / 3600000);
+  if (hours < 1) return 'just now';
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.floor(ms / 86400000);
+  if (days === 0) return 'today';
+  if (days === 1) return 'yesterday';
+  return `${days} days ago`;
+}
+
+function formatLastCheckDate(dateStr: string) {
+  const parsed = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  if (Number.isNaN(parsed.getTime())) return dateStr;
+  return parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function escapeCsvCell(value: string | number) {
+  const s = String(value);
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
 function MileageMonitorContent() {
   const { loading, error, inspections, vehicles } = useFleetReport();
   const [filter, setFilter] = useState<'all' | 'attention' | 'missing' | 'normal'>('all');
   const PAGE_SIZE = 12;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [expandedWeekRows, setExpandedWeekRows] = useState<Record<string, boolean>>({});
+  const [expandedMissingRows, setExpandedMissingRows] = useState<Record<string, boolean>>({});
+  const [selectedMissingIds, setSelectedMissingIds] = useState<string[]>([]);
+  const [showNormalSection, setShowNormalSection] = useState(false);
   const rows = useMemo(
     () => buildMileageMonitoringRows(inspections, vehicles),
     [inspections, vehicles]
@@ -84,36 +109,320 @@ function MileageMonitorContent() {
 
   const criticalCount = rows.filter((r) => r.anomalyLevel === 'critical').length;
   const highCount = rows.filter((r) => r.anomalyLevel === 'high').length;
-  const watchCount = rows.filter((r) => r.anomalyLevel === 'watch').length;
   const staleCount = rows.filter((r) => r.anomalyLevel === 'stale').length;
   const insufficientCount = rows.filter((r) => r.anomalyLevel === 'insufficient').length;
   const missingDataCount = staleCount + insufficientCount;
-  const needsReviewCount = criticalCount + highCount + watchCount;
-  const normalCount = rows.filter((r) => normalizeStatus(r.anomalyLevel) === 'normal').length;
-  const avgRiskScore = rows.length
-    ? Math.round(rows.reduce((sum, row) => sum + row.riskScore, 0) / rows.length)
-    : 0;
+  const needsReviewCount = criticalCount + highCount;
+  const normalCount = rows.length - needsReviewCount - missingDataCount;
+
+  const groupedRows = useMemo(() => {
+    const needsAttention = rows
+      .filter((r) => r.anomalyLevel === 'critical' || r.anomalyLevel === 'high')
+      .sort((a, b) => b.riskScore - a.riskScore);
+    const missing = rows
+      .filter((r) => r.anomalyLevel === 'stale' || r.anomalyLevel === 'insufficient')
+      .sort((a, b) => {
+        const aDays = a.daysSinceLastInspection ?? -1;
+        const bDays = b.daysSinceLastInspection ?? -1;
+        return bDays - aDays;
+      });
+    const normal = rows.filter(
+      (r) =>
+        r.anomalyLevel !== 'critical' &&
+        r.anomalyLevel !== 'high' &&
+        r.anomalyLevel !== 'stale' &&
+        r.anomalyLevel !== 'insufficient'
+    );
+    return { needsAttention, missing, normal };
+  }, [rows]);
+
   const filteredRows = useMemo(() => {
     if (filter === 'attention') {
-      return rows.filter(
-        (r) => r.anomalyLevel === 'critical' || r.anomalyLevel === 'high' || r.anomalyLevel === 'watch'
-      );
+      return groupedRows.needsAttention;
     }
     if (filter === 'missing') {
-      return rows.filter((r) => r.anomalyLevel === 'stale' || r.anomalyLevel === 'insufficient');
+      return groupedRows.missing;
     }
     if (filter === 'normal') {
-      return rows.filter((r) => normalizeStatus(r.anomalyLevel) === 'normal');
+      return groupedRows.normal;
     }
     return rows;
-  }, [rows, filter]);
+  }, [rows, filter, groupedRows]);
+
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [filter, rows.length]);
   useEffect(() => {
     setExpandedWeekRows({});
+    setExpandedMissingRows({});
+    setSelectedMissingIds([]);
   }, [filter, rows.length]);
+
   const visibleRows = filteredRows.slice(0, visibleCount);
+  const missingCompact = groupedRows.missing.length > 5;
+  const selectedMissingCount = selectedMissingIds.length;
+
+  const toggleMissingSelection = (vehicleId: string) => {
+    setSelectedMissingIds((prev) =>
+      prev.includes(vehicleId) ? prev.filter((id) => id !== vehicleId) : [...prev, vehicleId]
+    );
+  };
+
+  const selectAllMissing = () => {
+    const allIds = groupedRows.missing.map((r) => r.vehicleId);
+    setSelectedMissingIds((prev) => (prev.length === allIds.length ? [] : allIds));
+  };
+
+  const exportSelectedMissing = () => {
+    const selected = groupedRows.missing.filter((r) => selectedMissingIds.includes(r.vehicleId));
+    if (selected.length === 0) return;
+    const header = ['Registration', 'Risk Score', 'Last Check', 'Days Since Last Check'];
+    const lines = selected.map((row) =>
+      [
+        escapeCsvCell(row.registration),
+        escapeCsvCell(row.riskScore),
+        escapeCsvCell(row.latestInspectionAt),
+        escapeCsvCell(row.daysSinceLastInspection ?? '—'),
+      ].join(',')
+    );
+    const csv = [header.join(','), ...lines].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `missing-data-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const renderAlertStrip = (row: (typeof rows)[number]) => {
+    const status = normalizeStatus(row.anomalyLevel);
+    if (status === 'normal') return null;
+
+    if (status === 'missing') {
+      return (
+        <div className="mt-2 border-t border-[#fde68a] bg-[#fffbeb] text-[#92400e] px-4 py-2 text-[12px]">
+          No data received since {formatLastCheckDate(row.latestInspectionAt)} — tracker may be offline or disconnected
+        </div>
+      );
+    }
+
+    if ((row.anomalyLevel === 'high' || row.anomalyLevel === 'critical') && row.confidence === 'low') {
+      const weekDate = row.scoredWeekLabel.replace('Week of ', '');
+      const lastCheckRelative = row.daysSinceLastInspection != null ? `${row.daysSinceLastInspection} days ago` : relativeTime(row.latestInspectionAt);
+      return (
+        <div className="mt-2 border-t border-[#fecaca] bg-[#fef2f2] text-[#991b1b] px-4 py-2 text-[12px]">
+          Spike detected week of {weekDate} — {row.scoredWeekMiles.toLocaleString()} mi vs {row.avgWeeklyMiles.toLocaleString()} mi avg · Low confidence · Last check {lastCheckRelative}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const renderVehicleCard = (row: (typeof rows)[number], options?: { showMissingCheckbox?: boolean; compactMissing?: boolean }) => {
+    const status = normalizeStatus(row.anomalyLevel);
+    const weeklySeries = row.recentWeeklyMiles;
+    const nonZeroMiles = weeklySeries.map((w) => w.miles).filter((m) => m > 0);
+    const avgSixWeek = nonZeroMiles.length
+      ? Math.round(nonZeroMiles.reduce((sum, m) => sum + m, 0) / nonZeroMiles.length)
+      : 0;
+    const maxWeeklyMiles = Math.max(1, ...weeklySeries.map((w) => w.miles));
+    const compactMissing = !!options?.compactMissing;
+    const isExpandedMissing = !!expandedMissingRows[row.vehicleId];
+    const showAsCompact = compactMissing && !isExpandedMissing;
+
+    if (showAsCompact) {
+      return (
+        <div
+          key={row.vehicleId}
+          className="rounded-lg border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black h-11 px-3 flex items-center gap-3"
+        >
+          {options?.showMissingCheckbox ? (
+            <input
+              type="checkbox"
+              checked={selectedMissingIds.includes(row.vehicleId)}
+              onChange={() => toggleMissingSelection(row.vehicleId)}
+              className="h-4 w-4 rounded border-zinc-300"
+            />
+          ) : null}
+          <p className="text-sm font-semibold text-zinc-900 dark:text-white min-w-[90px]">{row.registration}</p>
+          <p className="text-xs text-zinc-700 dark:text-white/70 tabular-nums min-w-[130px]">
+            {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
+          </p>
+          <p className="text-xs text-zinc-700 dark:text-white/70 flex-1">
+            Last seen: {formatLastCheckDate(row.latestInspectionAt)} ({relativeTime(row.latestInspectionAt)})
+          </p>
+          <button
+            type="button"
+            onClick={() => setExpandedMissingRows((prev) => ({ ...prev, [row.vehicleId]: true }))}
+            className="text-xs font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+          >
+            View →
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <article
+        key={row.vehicleId}
+        className={`rounded-xl border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black border-l-2 ${statusPanelBorder(status)} ${rowTint(row.anomalyLevel)} p-3`}
+      >
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+          <div className="flex items-start gap-2">
+            {options?.showMissingCheckbox ? (
+              <input
+                type="checkbox"
+                checked={selectedMissingIds.includes(row.vehicleId)}
+                onChange={() => toggleMissingSelection(row.vehicleId)}
+                className="mt-1 h-4 w-4 rounded border-zinc-300"
+              />
+            ) : null}
+            <div>
+              <p className="text-zinc-900 dark:text-white text-[26px] font-bold tracking-wide leading-tight">{row.registration}</p>
+              <p className="text-xs text-zinc-700 dark:text-white/70 mt-1 tabular-nums font-medium">
+                Odometer: {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex min-w-[48px] justify-center px-2.5 py-1 rounded-md border border-zinc-300 text-zinc-900 text-sm font-semibold tabular-nums dark:border-white/15 dark:text-white/95">
+              {row.riskScore}
+            </span>
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-semibold border ${levelBadge()}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${statusCardAccent(status)}`} />
+              {levelLabel(status)}
+            </span>
+          </div>
+        </div>
+
+        {renderAlertStrip(row)}
+
+        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
+            <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">
+              {scoredWeekTitle(row.scoredWeekLabel)}
+            </p>
+            <p className="text-base font-semibold text-zinc-900 dark:text-white/95 tabular-nums mt-0.5">
+              {row.scoredWeekMiles.toLocaleString()} mi
+            </p>
+            <p className="text-xs text-zinc-700 dark:text-white/70 mt-0.5">{row.scoredWeekLabel}</p>
+          </div>
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
+            <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Inspection quality</p>
+            <p className="text-sm font-medium text-zinc-800 dark:text-white/85 mt-0.5 tabular-nums">
+              Checks: {row.validMileageCount}/{row.inspectionCount}
+            </p>
+          </div>
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
+            <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Last check</p>
+            <p className="text-sm font-medium text-zinc-800 dark:text-white/85 mt-0.5">{formatLastCheckDate(row.latestInspectionAt)}</p>
+            <p
+              className={`text-[11px] mt-0.5 ${
+                (row.daysSinceLastInspection ?? 0) > 14 ? 'text-[#991b1b]' : 'text-zinc-500 dark:text-white/60'
+              }`}
+            >
+              {relativeTime(row.latestInspectionAt)}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-2">
+          <p className="text-sm text-zinc-900 dark:text-white/90 leading-relaxed font-medium">
+            <span className="text-zinc-700 dark:text-white/70 font-semibold">Last inspection date:</span>{' '}
+            {row.latestInspectionAt}
+          </p>
+        </div>
+
+        <div className="mt-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] uppercase tracking-[0.07em] font-medium text-zinc-500 dark:text-white/60">6-week mileage</p>
+            <p className="text-[10px] text-zinc-500 dark:text-white/60">Avg {avgSixWeek.toLocaleString()} mi</p>
+          </div>
+          <div className="mt-2 space-y-1.5">
+            {weeklySeries.map((week) => {
+              const widthPct = Math.max(6, Math.round((week.miles / maxWeeklyMiles) * 100));
+              const weekRowKey = `${row.vehicleId}:${week.weekStart}`;
+              const isExpanded = !!expandedWeekRows[weekRowKey];
+              const isSpike = avgSixWeek > 0 && week.miles > avgSixWeek * 1.5;
+              const trackerGap = week.checkCount === 0 && week.miles === 0;
+              const confirmedIdle = week.checkCount > 0 && week.miles === 0;
+              return (
+                <div key={week.weekStart}>
+                  <div className="grid grid-cols-[56px_1fr_auto_auto] items-center gap-2">
+                    <p className="text-[11px] font-medium text-zinc-600 dark:text-white/60">
+                      {shortWeekLabel(week.weekStart)}
+                    </p>
+                    <div
+                      className={`h-1.5 rounded-full overflow-hidden ${
+                        trackerGap
+                          ? 'bg-[repeating-linear-gradient(90deg,#d4d4d8_0,#d4d4d8_6px,transparent_6px,transparent_10px)]'
+                          : 'bg-zinc-200 dark:bg-zinc-700/60'
+                      }`}
+                    >
+                      {confirmedIdle ? null : (
+                        <div
+                          className={`h-full rounded-full ${
+                            isSpike
+                              ? 'bg-[#378ADD]'
+                              : week.hasData
+                                ? 'bg-blue-300 dark:bg-blue-400/70'
+                                : 'bg-zinc-400 dark:bg-zinc-500'
+                          }`}
+                          style={{ width: `${widthPct}%` }}
+                        />
+                      )}
+                    </div>
+                    {isSpike ? <span className="h-1.5 w-1.5 rounded-full bg-[#ef4444]" /> : <span className="h-1.5 w-1.5" />}
+                    <p
+                      className={`text-[11px] tabular-nums text-right ${
+                        isSpike
+                          ? 'text-[#185FA5] font-medium'
+                          : 'text-zinc-700 dark:text-white/75 font-semibold'
+                      }`}
+                    >
+                      {week.miles.toLocaleString()} mi
+                    </p>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between gap-2 pl-[56px]">
+                    <p className="text-[10px] text-zinc-600 dark:text-white/60">
+                      {week.checkCount} check{week.checkCount === 1 ? '' : 's'}
+                    </p>
+                    {week.checkCount > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedWeekRows((prev) => ({
+                            ...prev,
+                            [weekRowKey]: !prev[weekRowKey],
+                          }))
+                        }
+                        className="text-[10px] font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+                      >
+                        {isExpanded ? 'Hide logs' : 'Show logs'}
+                      </button>
+                    ) : null}
+                  </div>
+                  {isExpanded && week.entries.length > 0 ? (
+                    <div className="mt-1.5 pl-[56px] space-y-1">
+                      {week.entries.slice().reverse().map((entry, idx) => (
+                        <p key={`${week.weekStart}-${idx}`} className="text-[10px] text-zinc-600 dark:text-white/60 tabular-nums">
+                          {entry.inspectedAt} - {entry.mileage.toLocaleString()} mi
+                        </p>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </article>
+    );
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-4 space-y-4 text-zinc-900 dark:text-white">
@@ -140,46 +449,23 @@ function MileageMonitorContent() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
-        <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Fleet monitored</p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-white mt-1">{rows.length}</p>
-          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Vehicles in this period.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-[10px]">
+        <div className="rounded-[8px] border border-zinc-200 bg-zinc-100 px-[14px] py-[12px] dark:border-blue-500/25 dark:bg-black">
+          <p className="text-[11px] text-zinc-500 dark:text-white/60">Total fleet</p>
+          <p className="text-[22px] font-medium text-zinc-900 dark:text-white mt-1">{rows.length}</p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Needs attention</p>
-          <p className="text-xl font-semibold text-red-700 dark:text-red-200 mt-1">{needsReviewCount}</p>
-          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Watch, High, and Critical.</p>
+        <div className="rounded-[8px] border border-[#fecaca] bg-[#fef2f2] px-[14px] py-[12px]">
+          <p className="text-[11px] text-[#991b1b]/80">Needs attention</p>
+          <p className="text-[22px] font-medium text-[#991b1b] mt-1">{needsReviewCount}</p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Missing data</p>
-          <p className="text-xl font-semibold text-zinc-700 dark:text-slate-200 mt-1">{missingDataCount}</p>
-          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">No check or too little data.</p>
+        <div className="rounded-[8px] border border-[#fde68a] bg-[#fffbeb] px-[14px] py-[12px]">
+          <p className="text-[11px] text-[#92400e]/80">Missing data</p>
+          <p className="text-[22px] font-medium text-[#92400e] mt-1">{missingDataCount}</p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Healthy vehicles</p>
-          <p className="text-xl font-semibold text-emerald-700 dark:text-emerald-200 mt-1">{normalCount}</p>
-          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Currently normal trend.</p>
+        <div className="rounded-[8px] border border-[#86efac] bg-[#f0fdf4] px-[14px] py-[12px]">
+          <p className="text-[11px] text-[#166534]/80">Normal</p>
+          <p className="text-[22px] font-medium text-[#166534] mt-1">{normalCount}</p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-          <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">Average risk score</p>
-          <p className="text-xl font-semibold text-blue-700 dark:text-blue-200 mt-1">{avgRiskScore}</p>
-          <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">Out of 100.</p>
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
-        <p className="text-xs uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">
-          How scoring works
-        </p>
-        <p className="text-sm text-zinc-700 dark:text-white/75 mt-1 leading-relaxed">
-          The score is out of 100 and combines anomaly level, data confidence, and stale-check timing. Higher
-          scores mean higher review priority.
-        </p>
-        <p className="text-xs text-zinc-600 dark:text-white/65 mt-2 leading-relaxed">
-          Base levels: Normal 18, Missing data 24-40, Watch 62, High 80, Critical 95. Confidence can raise the
-          score, and stale vehicles may get an extra boost if inspections are overdue.
-        </p>
       </div>
 
       <div className="inline-flex flex-wrap items-center gap-1.5">
@@ -212,131 +498,57 @@ function MileageMonitorContent() {
           {filteredRows.length === 0 ? (
             <div className="rounded-xl border border-zinc-200 bg-white px-4 py-6 text-zinc-500 text-sm dark:border-blue-500/25 dark:bg-black dark:text-white/50">No vehicles match this filter.</div>
           ) : null}
-          {visibleRows.map((row) => {
-            const status = normalizeStatus(row.anomalyLevel);
-            const weeklySeries = row.recentWeeklyMiles.slice().reverse();
-            const maxWeeklyMiles = Math.max(1, ...weeklySeries.map((w) => w.miles));
-            return (
-              <article
-                key={row.vehicleId}
-                className={`rounded-xl border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black border-l-2 ${statusPanelBorder(status)} ${rowTint(row.anomalyLevel)} p-3`}
-              >
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-                  <div>
-                    <p className="text-zinc-900 dark:text-white text-[26px] font-bold tracking-wide leading-tight">{row.registration}</p>
-                    <p className="text-xs text-zinc-700 dark:text-white/70 mt-1 tabular-nums font-medium">
-                      Odometer: {row.latestMileage != null ? `${row.latestMileage.toLocaleString()} mi` : '—'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex min-w-[48px] justify-center px-2.5 py-1 rounded-md border border-zinc-300 text-zinc-900 text-sm font-semibold tabular-nums dark:border-white/15 dark:text-white/95">
-                      {row.riskScore}
-                    </span>
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-semibold border ${levelBadge()}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${statusCardAccent(status)}`} />
-                      {levelLabel(status)}
-                    </span>
-                  </div>
-                </div>
+          {filter === 'all' ? (
+            <>
+              {groupedRows.needsAttention.length > 0 ? (
+                <section className="space-y-2">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.07em] text-zinc-500 dark:text-white/50">Needs attention</p>
+                  {groupedRows.needsAttention.map((row) => renderVehicleCard(row))}
+                </section>
+              ) : null}
 
-                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
-                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
-                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">
-                      {scoredWeekTitle(row.scoredWeekLabel)}
-                    </p>
-                    <p className="text-base font-semibold text-zinc-900 dark:text-white/95 tabular-nums mt-0.5">
-                      {row.scoredWeekMiles.toLocaleString()} mi
-                    </p>
-                    <p className="text-xs text-zinc-700 dark:text-white/70 mt-0.5">{row.scoredWeekLabel}</p>
-                  </div>
-                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
-                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Inspection quality</p>
-                    <p className="text-sm font-medium text-zinc-800 dark:text-white/85 mt-0.5 tabular-nums">
-                      Checks: {row.validMileageCount}/{row.inspectionCount}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
-                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Last check</p>
-                    <p className="text-sm font-medium text-zinc-800 dark:text-white/85 mt-0.5">{row.latestInspectionAt}</p>
-                    <p className={`text-sm font-medium mt-0.5 capitalize ${confidenceBadge(row.confidence)}`}>
-                      {row.confidence} confidence
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-2.5">
-                  <p className="text-sm text-zinc-900 dark:text-white/90 leading-relaxed font-medium">
-                    <span className="text-zinc-700 dark:text-white/70 font-semibold">Last inspection date:</span>{' '}
-                    {row.latestInspectionAt}
-                  </p>
-                </div>
-
-                <div className="mt-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
+              {groupedRows.missing.length > 0 ? (
+                <section className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">
-                      Exact weekly mileage (6 weeks)
-                    </p>
-                    <p className="text-xs font-semibold text-zinc-700 dark:text-white/75 tabular-nums">
-                      Average: {row.avgWeeklyMiles.toLocaleString()} mi
-                    </p>
+                    <p className="text-[11px] font-medium uppercase tracking-[0.07em] text-zinc-500 dark:text-white/50">Missing data</p>
+                    <button
+                      type="button"
+                      onClick={selectAllMissing}
+                      className="text-xs font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+                    >
+                      Select all {groupedRows.missing.length}
+                    </button>
                   </div>
-                  <div className="mt-2 space-y-1.5">
-                    {weeklySeries.map((week) => {
-                      const widthPct = Math.max(6, Math.round((week.miles / maxWeeklyMiles) * 100));
-                      const weekRowKey = `${row.vehicleId}:${week.weekStart}`;
-                      const isExpanded = !!expandedWeekRows[weekRowKey];
-                      return (
-                        <div key={week.weekStart}>
-                          <div className="grid grid-cols-[56px_1fr_auto] items-center gap-2">
-                            <p className="text-[11px] font-medium text-zinc-600 dark:text-white/60">
-                              {shortWeekLabel(week.weekStart)}
-                            </p>
-                            <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700/60 overflow-hidden">
-                              <div
-                                className={`h-full rounded-full ${week.hasData ? 'bg-blue-600 dark:bg-blue-400' : 'bg-zinc-400 dark:bg-zinc-500'}`}
-                                style={{ width: `${widthPct}%` }}
-                              />
-                            </div>
-                            <p className="text-[11px] font-semibold text-zinc-700 dark:text-white/75 tabular-nums text-right">
-                              {week.miles.toLocaleString()} mi
-                            </p>
-                          </div>
-                          <div className="mt-1 flex items-center justify-between gap-2 pl-[56px]">
-                            <p className="text-[10px] text-zinc-600 dark:text-white/60">
-                              {week.checkCount} check{week.checkCount === 1 ? '' : 's'}
-                            </p>
-                            {week.checkCount > 0 ? (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setExpandedWeekRows((prev) => ({
-                                    ...prev,
-                                    [weekRowKey]: !prev[weekRowKey],
-                                  }))
-                                }
-                                className="text-[10px] font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
-                              >
-                                {isExpanded ? 'Hide logs' : 'Show logs'}
-                              </button>
-                            ) : null}
-                          </div>
-                          {isExpanded && week.entries.length > 0 ? (
-                            <div className="mt-1.5 pl-[56px] space-y-1">
-                              {week.entries.slice().reverse().map((entry, idx) => (
-                                <p key={`${week.weekStart}-${idx}`} className="text-[10px] text-zinc-600 dark:text-white/60 tabular-nums">
-                                  {entry.inspectedAt} - {entry.mileage.toLocaleString()} mi
-                                </p>
-                              ))}
-                            </div>
-                          ) : null}
-                        </div>
-                      );
-                    })}
+                  {groupedRows.missing.map((row) =>
+                    renderVehicleCard(row, {
+                      showMissingCheckbox: true,
+                      compactMissing: missingCompact,
+                    })
+                  )}
+                </section>
+              ) : null}
+
+              {groupedRows.normal.length > 0 ? (
+                <section className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.07em] text-zinc-500 dark:text-white/50">Normal</p>
+                    <button
+                      type="button"
+                      onClick={() => setShowNormalSection((v) => !v)}
+                      className="text-xs font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+                    >
+                      {showNormalSection
+                        ? 'Collapse'
+                        : `${groupedRows.normal.length} vehicles · all normal`}
+                    </button>
                   </div>
-                </div>
-              </article>
-            );
-          })}
+                  {showNormalSection ? groupedRows.normal.map((row) => renderVehicleCard(row)) : null}
+                </section>
+              ) : null}
+            </>
+          ) : (
+            visibleRows.map((row) => renderVehicleCard(row))
+          )}
           {filteredRows.length > visibleRows.length ? (
             <div className="pt-1">
               <button
@@ -350,6 +562,37 @@ function MileageMonitorContent() {
           ) : null}
         </div>
       )}
+
+      {selectedMissingCount > 0 ? (
+        <div className="fixed bottom-4 left-4 right-4 z-50 rounded-xl border border-zinc-300 bg-white/95 backdrop-blur px-4 py-3 shadow-lg dark:border-slate-600 dark:bg-zinc-900/95">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-zinc-800 dark:text-white">{selectedMissingCount} vehicles selected</p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedMissingIds([])}
+                className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-slate-500 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                Mark as reviewed
+              </button>
+              <button
+                type="button"
+                onClick={exportSelectedMissing}
+                className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-slate-500 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                Export list
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedMissingIds([])}
+                className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-slate-500 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
