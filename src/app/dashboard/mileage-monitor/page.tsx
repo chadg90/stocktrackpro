@@ -288,7 +288,7 @@ function MileageMonitorContent() {
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
                     <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Inspection quality</p>
                     <p className="text-sm font-medium text-zinc-800 dark:text-white/85 mt-0.5 tabular-nums">
-                      Checks: {row.validMileageCount}/{row.inspectionCount}
+                      Checks: {row.validMileageCount}
                     </p>
                   </div>
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
