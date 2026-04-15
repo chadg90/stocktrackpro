@@ -115,6 +115,7 @@ export type MileageMonitorRow = {
   scoredWeekMiles: number;
   scoredWeekLabel: string;
   avgWeeklyMiles: number;
+  recentWeeklyMiles: { weekStart: string; miles: number; hasData: boolean }[];
   baselineWeeklyMiles: number;
   dataWeeks: number;
   currentWeekReadings: number;
@@ -337,6 +338,11 @@ export function buildMileageMonitoringRows(
     const avgWeeklyMiles = allRecentWeekMiles.length
       ? Math.round(allRecentWeekMiles.reduce((sum, m) => sum + m, 0) / allRecentWeekMiles.length)
       : 0;
+    const recentWeeklyMiles = recentWeekKeys.slice(0, 6).map((key) => ({
+      weekStart: key,
+      miles: Math.round(weeklyMiles[key] || 0),
+      hasData: isUsableWeek(key),
+    }));
     const dataWeeks = recentWeekKeys.filter((key) => isUsableWeek(key)).length;
     const latestWeekWithData =
       recentWeekKeys.find((key) => isUsableWeek(key)) || null;
@@ -440,6 +446,7 @@ export function buildMileageMonitoringRows(
       scoredWeekMiles,
       scoredWeekLabel,
       avgWeeklyMiles,
+      recentWeeklyMiles,
       baselineWeeklyMiles,
       dataWeeks,
       currentWeekReadings,

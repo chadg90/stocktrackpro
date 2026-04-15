@@ -48,6 +48,12 @@ function scoredWeekTitle(scoredWeekLabel: string) {
   return 'Week data';
 }
 
+function shortWeekLabel(weekStart: string) {
+  const d = new Date(`${weekStart}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return weekStart;
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+}
+
 function movementTone(delta: number) {
   if (delta > 0) return 'text-blue-700 dark:text-blue-200';
   if (delta < 0) return 'text-zinc-700 dark:text-slate-200';
@@ -166,6 +172,20 @@ function MileageMonitorContent() {
         </div>
       </div>
 
+      <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
+        <p className="text-xs uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">
+          How scoring works
+        </p>
+        <p className="text-sm text-zinc-700 dark:text-white/75 mt-1 leading-relaxed">
+          The score is out of 100 and combines anomaly level, data confidence, and stale-check timing. Higher
+          scores mean higher review priority.
+        </p>
+        <p className="text-xs text-zinc-600 dark:text-white/65 mt-2 leading-relaxed">
+          Base levels: Normal 18, Missing data 24-40, Watch 62, High 80, Critical 95. Confidence can raise the
+          score, and stale vehicles may get an extra boost if inspections are overdue.
+        </p>
+      </div>
+
       <div className="inline-flex flex-wrap items-center gap-1.5">
         {[
           { id: 'all', label: `All (${rows.length})` },
@@ -200,6 +220,8 @@ function MileageMonitorContent() {
             const deltaVsBaseline =
               row.baselineWeeklyMiles > 0 ? row.currentWeekMiles - row.baselineWeeklyMiles : null;
             const status = normalizeStatus(row.anomalyLevel);
+            const weeklySeries = row.recentWeeklyMiles.slice().reverse();
+            const maxWeeklyMiles = Math.max(1, ...weeklySeries.map((w) => w.miles));
             return (
               <article
                 key={row.vehicleId}
@@ -259,6 +281,36 @@ function MileageMonitorContent() {
                     <span className="text-zinc-700 dark:text-white/70 font-semibold">Last inspection date:</span>{' '}
                     {row.latestInspectionAt}
                   </p>
+                </div>
+
+                <div className="mt-2.5 rounded-lg border border-zinc-200 bg-zinc-50 p-2.5 dark:border-white/10 dark:bg-black/25">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">
+                      Recent weekly mileage (6 weeks)
+                    </p>
+                    <p className="text-xs font-semibold text-zinc-700 dark:text-white/75 tabular-nums">
+                      Average: {row.avgWeeklyMiles.toLocaleString()} mi
+                    </p>
+                  </div>
+                  <div className="mt-2 space-y-1.5">
+                    {weeklySeries.map((week) => {
+                      const widthPct = Math.max(6, Math.round((week.miles / maxWeeklyMiles) * 100));
+                      return (
+                        <div key={week.weekStart} className="grid grid-cols-[56px_1fr_auto] items-center gap-2">
+                          <p className="text-[11px] font-medium text-zinc-600 dark:text-white/60">{shortWeekLabel(week.weekStart)}</p>
+                          <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700/60 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${week.hasData ? 'bg-blue-600 dark:bg-blue-400' : 'bg-zinc-400 dark:bg-zinc-500'}`}
+                              style={{ width: `${widthPct}%` }}
+                            />
+                          </div>
+                          <p className="text-[11px] font-semibold text-zinc-700 dark:text-white/75 tabular-nums">
+                            {week.miles.toLocaleString()} mi
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </article>
             );
