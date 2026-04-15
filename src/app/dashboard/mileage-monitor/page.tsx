@@ -41,6 +41,14 @@ function signedMileage(delta: number) {
   return '0 mi';
 }
 
+function baselineSummary(delta: number | null) {
+  if (delta == null) return 'No baseline yet';
+  const miles = `${Math.abs(delta).toLocaleString()} mi`;
+  if (delta > 0) return `${miles} above normal`;
+  if (delta < 0) return `${miles} below normal`;
+  return 'On normal baseline';
+}
+
 function movementTone(delta: number) {
   if (delta > 0) return 'text-blue-700 dark:text-blue-200';
   if (delta < 0) return 'text-zinc-700 dark:text-slate-200';
@@ -48,11 +56,11 @@ function movementTone(delta: number) {
 }
 
 function rowTint(level: string) {
-  if (level === 'critical') return 'bg-red-50 dark:bg-red-500/[0.03]';
-  if (level === 'high') return 'bg-amber-50 dark:bg-amber-500/[0.03]';
-  if (level === 'watch') return 'bg-yellow-50 dark:bg-yellow-500/[0.02]';
-  if (level === 'stale') return 'bg-sky-50 dark:bg-sky-500/[0.02]';
-  if (level === 'insufficient') return 'bg-zinc-50 dark:bg-slate-500/[0.03]';
+  if (level === 'critical') return 'bg-zinc-100 dark:bg-zinc-900/45';
+  if (level === 'high') return 'bg-zinc-100 dark:bg-zinc-900/45';
+  if (level === 'watch') return 'bg-zinc-100 dark:bg-zinc-900/45';
+  if (level === 'stale') return 'bg-zinc-100 dark:bg-zinc-900/45';
+  if (level === 'insufficient') return 'bg-zinc-100 dark:bg-zinc-900/45';
   return '';
 }
 
@@ -159,7 +167,7 @@ function MileageMonitorContent() {
         </div>
       </div>
 
-      <div className="inline-flex flex-wrap items-center gap-1.5 rounded-xl border border-zinc-200 bg-zinc-50 p-1.5 dark:border-slate-500/35 dark:bg-slate-700/20">
+      <div className="inline-flex flex-wrap items-center gap-1.5">
         {[
           { id: 'all', label: `All (${rows.length})` },
           { id: 'attention', label: `Needs attention (${needsReviewCount})` },
@@ -170,7 +178,7 @@ function MileageMonitorContent() {
             key={item.id}
             type="button"
             onClick={() => setFilter(item.id as typeof filter)}
-            className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
+            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors ${
               filter === item.id
                 ? 'bg-blue-600 border-blue-600 text-white dark:bg-blue-500/35 dark:border-blue-300/70'
                 : 'bg-white border-zinc-300 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 dark:bg-slate-700/45 dark:border-slate-300/35 dark:text-slate-100 dark:hover:text-white dark:hover:bg-slate-600/50'
@@ -219,7 +227,7 @@ function MileageMonitorContent() {
 
                 <div className="mt-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.5">
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
-                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Scored week</p>
+                    <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Current week</p>
                     <p className="text-base font-semibold text-zinc-900 dark:text-white/95 tabular-nums mt-0.5">
                       {row.scoredWeekMiles.toLocaleString()} mi
                     </p>
@@ -228,7 +236,7 @@ function MileageMonitorContent() {
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
                     <p className="text-[11px] uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60">Movement</p>
                     <p className={`text-sm font-medium mt-0.5 ${deltaVsBaseline == null ? 'text-zinc-700 dark:text-slate-200' : movementTone(deltaVsBaseline)}`}>
-                      Baseline: {deltaVsBaseline == null ? 'No baseline yet' : signedMileage(deltaVsBaseline)}
+                      Vs baseline: {baselineSummary(deltaVsBaseline)}
                     </p>
                     <p className={`text-sm font-medium mt-0.5 ${movementTone(deltaVsLast)}`}>
                       Week-on-week: {signedMileage(deltaVsLast)}
@@ -240,7 +248,7 @@ function MileageMonitorContent() {
                       Checks: {row.validMileageCount}/{row.inspectionCount}
                     </p>
                     <p className="text-sm font-medium text-zinc-700 dark:text-white/75 mt-0.5 tabular-nums">
-                      Data: {row.dataWeeks}/8 weeks
+                      Weeks used: {row.dataWeeks}
                     </p>
                   </div>
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-2 dark:border-white/10 dark:bg-black/25">
@@ -252,12 +260,10 @@ function MileageMonitorContent() {
                   </div>
                 </div>
 
-                <div className="mt-2.5 grid grid-cols-1 xl:grid-cols-2 gap-2">
+                <div className="mt-2.5">
                   <p className="text-sm text-zinc-900 dark:text-white/90 leading-relaxed font-medium">
-                    <span className="text-zinc-700 dark:text-white/70 font-semibold">Reason:</span> {row.anomalyReason}
-                  </p>
-                  <p className="text-sm text-zinc-900 dark:text-white/90 leading-relaxed font-medium">
-                    <span className="text-zinc-700 dark:text-white/70 font-semibold">Action:</span> {row.recommendedAction}
+                    <span className="text-zinc-700 dark:text-white/70 font-semibold">Last inspection date:</span>{' '}
+                    {row.latestInspectionAt}
                   </p>
                 </div>
               </article>
