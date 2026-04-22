@@ -296,10 +296,10 @@ export default function Pricing() {
               </button>
             ) : (
               <Link
-                href={authLoading ? '#' : (profile ? '/contact' : '/dashboard')}
+                href={authLoading ? '#' : (profile ? '/contact' : '/onboarding')}
                 className="block w-full py-4 px-6 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base text-center shadow-lg shadow-blue-500/25 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
               >
-                {authLoading ? '…' : profile ? 'Contact us' : 'Log in to subscribe'}
+                {authLoading ? '…' : profile ? 'Contact us' : 'Start free trial'}
               </Link>
             )}
 

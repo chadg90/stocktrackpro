@@ -16,7 +16,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Trash2, Search, Mail, User as UserIcon, Pencil, ShieldOff } from 'lucide-react';
+import { Trash2, Search, Mail, User as UserIcon, Pencil, ShieldOff, Link2, Check as CheckIcon } from 'lucide-react';
 import Modal from '../components/Modal';
 import { EmptyStateTableRow } from '../components/EmptyState';
 import TableSkeleton from '../components/TableSkeleton';
@@ -59,6 +59,7 @@ type Invite = {
 export default function TeamPage() {
   const [team, setTeam] = useState<Profile[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
+  const [copiedInviteId, setCopiedInviteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -301,6 +302,30 @@ export default function TeamPage() {
     } catch (error) {
       console.error('Error deleting invite:', error);
       alert('Failed to delete invite.');
+    }
+  };
+
+  const handleCopyInviteLink = async (inviteId: string) => {
+    const origin =
+      typeof window !== 'undefined' && window.location?.origin
+        ? window.location.origin
+        : 'https://www.stocktrackpro.co.uk';
+    const link = `${origin}/invite/${inviteId}`;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+      } else if (typeof window !== 'undefined') {
+        window.prompt('Copy the invite link below:', link);
+      }
+      setCopiedInviteId(inviteId);
+      setTimeout(() => {
+        setCopiedInviteId((current) => (current === inviteId ? null : current));
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy invite link:', error);
+      if (typeof window !== 'undefined') {
+        window.prompt('Copy the invite link below:', link);
+      }
     }
   };
 
@@ -624,7 +649,12 @@ export default function TeamPage() {
         <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden mb-8">
           <div className="px-6 py-4 border-b border-blue-500/20 bg-white/5">
             <h2 className="text-white font-semibold">Recent Invites</h2>
-            <p className="text-white/60 text-sm mt-1">Track invite delivery and acceptance status.</p>
+            <p className="text-white/60 text-sm mt-1">
+              Track invite delivery and acceptance status. If the email hasn&apos;t arrived, ask the
+              recipient to check <span className="text-white/80">Junk/Spam</span>, or use{' '}
+              <span className="text-white/80">Copy link</span> below and share it directly via
+              WhatsApp, text, or your own email.
+            </p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -660,14 +690,36 @@ export default function TeamPage() {
                       <td className="px-6 py-3 text-white/70 text-sm">{invite.emailSent ? 'Yes' : 'Pending'}</td>
                       <td className="px-6 py-3 text-white/70 text-sm">{formatDate(invite.expiresAt)}</td>
                       <td className="px-6 py-3 text-right">
-                        <button
-                          onClick={() => handleDeleteInvite(invite.id, invite.email)}
-                          className="p-2 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                          title="Delete invite"
-                          aria-label={`Delete invite for ${invite.email}`}
-                        >
-                          <Trash2 className="h-4 w-4" aria-hidden />
-                        </button>
+                        <div className="flex items-center justify-end gap-1">
+                          {invite.status === 'pending' && (
+                            <button
+                              onClick={() => handleCopyInviteLink(invite.id)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg transition-colors"
+                              title="Copy invite link to share manually"
+                              aria-label={`Copy invite link for ${invite.email}`}
+                            >
+                              {copiedInviteId === invite.id ? (
+                                <>
+                                  <CheckIcon className="h-3.5 w-3.5 text-green-400" aria-hidden />
+                                  Copied
+                                </>
+                              ) : (
+                                <>
+                                  <Link2 className="h-3.5 w-3.5" aria-hidden />
+                                  Copy link
+                                </>
+                              )}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteInvite(invite.id, invite.email)}
+                            className="p-2 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            title="Delete invite"
+                            aria-label={`Delete invite for ${invite.email}`}
+                          >
+                            <Trash2 className="h-4 w-4" aria-hidden />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

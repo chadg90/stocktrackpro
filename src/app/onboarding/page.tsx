@@ -1,33 +1,45 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from 'firebase/auth';
 import { collection, addDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Building2, ArrowRight, Loader2, CheckCircle, Users, MapPin, Package, LayoutDashboard, LogIn } from 'lucide-react';
+import {
+  Building2,
+  ArrowRight,
+  Loader2,
+  CheckCircle,
+  Users,
+  Package,
+  LayoutDashboard,
+  LogIn,
+  Smartphone,
+  CreditCard,
+  Apple,
+} from 'lucide-react';
 import Link from 'next/link';
 
 type OnboardingStep = 'choice' | 'account' | 'company' | 'success';
 
+const TRIAL_DAYS = 7;
+const APP_STORE_URL = 'https://apps.apple.com/gb/app/stock-track-pro/id6744621973';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.stocktrackpro.app';
+
 export default function OnboardingPage() {
-  const router = useRouter();
-  
   // Account creation
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
-  // Company selection
+
+  // Company creation
   const [step, setStep] = useState<OnboardingStep>('choice');
   const [companyName, setCompanyName] = useState('');
-  const [selectedTier, setSelectedTier] = useState<'PRO_STARTER' | 'PRO_TEAM' | 'PRO_BUSINESS' | 'PRO_ENTERPRISE'>('PRO_STARTER');
-  
+
   // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -139,11 +151,14 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Create company with selected tier
+      const trialEnd = new Date();
+      trialEnd.setDate(trialEnd.getDate() + TRIAL_DAYS);
+
       const companyRef = await addDoc(collection(firebaseDb, 'companies'), {
         name: companyName.trim(),
         subscription_status: 'trial',
-        subscription_tier: selectedTier,
+        trial_start_date: serverTimestamp(),
+        trial_end_date: trialEnd.toISOString(),
         created_at: serverTimestamp(),
         created_by: user.uid,
       });
@@ -207,10 +222,10 @@ export default function OnboardingPage() {
             {step === 'success' && "You're all set"}
           </h2>
           <p className="text-white/60 text-sm">
-            {step === 'choice' && 'Join as a new company or sign in to your existing account.'}
+            {step === 'choice' && 'Start a free trial or sign in to your existing account.'}
             {step === 'account' && 'One account for the web dashboard and the app.'}
-            {step === 'company' && 'Create your company and start your free trial.'}
-            {step === 'success' && 'Your company is ready. Here’s what to do next.'}
+            {step === 'company' && `Create your company — your ${TRIAL_DAYS}-day free trial starts immediately.`}
+            {step === 'success' && 'Your company is ready. Follow these four steps to get your team up and running.'}
           </p>
         </div>
 
@@ -223,9 +238,9 @@ export default function OnboardingPage() {
                 className="flex-1 p-6 rounded-xl border-2 border-blue-500 bg-blue-500/10 hover:bg-blue-500/20 transition-colors text-left group"
               >
                 <Building2 className="h-8 w-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-white text-lg mb-2">Join as New company</h3>
+                <h3 className="font-semibold text-white text-lg mb-2">Start a free trial</h3>
                 <p className="text-white/60 text-sm">
-                  Create an account and set up your company. 7-day free trial, then choose a plan.
+                  Create your account and company. {TRIAL_DAYS} days free, no card required. Subscribe later from £8 per vehicle per month.
                 </p>
                 <span className="inline-flex items-center gap-1 text-blue-500 font-medium text-sm mt-3">
                   Get started <ArrowRight className="w-4 h-4" />
@@ -236,9 +251,9 @@ export default function OnboardingPage() {
                 className="flex-1 p-6 rounded-xl border-2 border-white/20 bg-white/5 hover:border-blue-500/50 hover:bg-white/10 transition-colors text-left group flex flex-col"
               >
                 <LogIn className="h-8 w-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-white text-lg mb-2">Login Existing</h3>
+                <h3 className="font-semibold text-white text-lg mb-2">Sign in</h3>
                 <p className="text-white/60 text-sm">
-                  Already have an account? Sign in to the dashboard.
+                  Already have a Stock Track PRO account? Sign in to the dashboard.
                 </p>
                 <span className="inline-flex items-center gap-1 text-blue-500 font-medium text-sm mt-3">
                   Go to login <ArrowRight className="w-4 h-4" />
@@ -246,7 +261,7 @@ export default function OnboardingPage() {
               </Link>
             </div>
             <p className="text-white/50 text-center text-xs">
-              Joining an existing company with an access code? Use the Stock Track PRO app (App Store or Google Play).
+              Joining an existing company? Open the invite email from your manager and follow the link, then sign in using the Stock Track PRO app.
             </p>
           </div>
         ) : step === 'success' ? (
@@ -255,32 +270,96 @@ export default function OnboardingPage() {
               <CheckCircle className="w-8 h-8 text-blue-500 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-white">{createdCompanyName}</p>
-                <p className="text-white/60 text-sm">Company created. You’re the manager.</p>
+                <p className="text-white/60 text-sm">
+                  Company created. You&apos;re the manager. Your {TRIAL_DAYS}-day free trial starts now.
+                </p>
               </div>
             </div>
+
             <div>
-              <p className="text-white/80 text-sm font-medium mb-3">Next steps in your dashboard:</p>
-              <ul className="space-y-3">
+              <p className="text-white/80 text-sm font-medium mb-3">Your next four steps:</p>
+              <ol className="space-y-3">
                 {[
-                  { icon: LayoutDashboard, text: 'Open your dashboard and explore your company view' },
-                  { icon: Users, text: 'Create access codes so your team can join the app' },
-                  { icon: MapPin, text: 'Add locations for assets and vehicles' },
-                  { icon: Package, text: 'Add your first assets and fleet' },
+                  {
+                    icon: LayoutDashboard,
+                    title: 'Open your dashboard',
+                    detail: 'Your company view is ready. Take a minute to look around.',
+                  },
+                  {
+                    icon: Package,
+                    title: 'Add your fleet and tools',
+                    detail: 'Vehicles auto-fill from DVLA on registration. Tools can be added one at a time or imported.',
+                  },
+                  {
+                    icon: Users,
+                    title: 'Invite your team by email',
+                    detail: 'From the Team page, send email invites as Manager or User. Staff click the link, set a password, and sign in on the app.',
+                  },
+                  {
+                    icon: Smartphone,
+                    title: 'Install the mobile app',
+                    detail: 'You and your team use the app for QR scanning, vehicle inspections, and defect logging on the road.',
+                  },
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-white/80 text-sm">
-                    <item.icon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                    <span>{item.text}</span>
+                  <li key={i} className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold text-sm">
+                      {i + 1}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 text-white text-sm font-medium">
+                        <item.icon className="w-4 h-4 text-blue-400" />
+                        {item.title}
+                      </div>
+                      <p className="text-white/60 text-xs mt-1 leading-relaxed">{item.detail}</p>
+                    </div>
                   </li>
                 ))}
-              </ul>
+              </ol>
             </div>
+
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
+              <p className="text-white/80 text-sm font-medium flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-blue-400" />
+                Get the mobile app
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <a
+                  href={APP_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-black/30 py-2.5 px-3 text-sm text-white hover:border-blue-500/50 transition-colors"
+                >
+                  <Apple className="w-4 h-4" />
+                  App Store (iOS)
+                </a>
+                <a
+                  href={PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-black/30 py-2.5 px-3 text-sm text-white hover:border-blue-500/50 transition-colors"
+                >
+                  <Smartphone className="w-4 h-4" />
+                  Google Play (Android)
+                </a>
+              </div>
+            </div>
+
             <Link
               href="/dashboard"
               className="flex items-center justify-center gap-2 w-full text-white font-semibold rounded-xl py-3.5 transition-all btn-brand-blue"
             >
-              Go to Dashboard
+              <LayoutDashboard className="w-4 h-4" />
+              Go to dashboard
               <ArrowRight className="w-4 h-4" />
             </Link>
+
+            <p className="text-white/40 text-xs text-center">
+              Want to subscribe straight away?{' '}
+              <Link href="/dashboard/subscription" className="text-blue-400 hover:underline">
+                Set up billing from the dashboard
+              </Link>
+              . No charge until your trial ends.
+            </p>
           </div>
         ) : (
         <div className="dashboard-card p-8 shadow-xl">
@@ -382,13 +461,10 @@ export default function OnboardingPage() {
             </form>
           ) : (
             <div className="space-y-6">
-              <p className="text-white/70 text-sm text-center">
-                Set up your new company. Access code joining is done in the app.
-              </p>
-              <form onSubmit={handleCreateCompany} className="space-y-4">
+              <form onSubmit={handleCreateCompany} className="space-y-5">
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-1.5">
-                      Company Name
+                      Company name
                     </label>
                     <input
                       type="text"
@@ -399,67 +475,25 @@ export default function OnboardingPage() {
                       required
                     />
                     <p className="text-white/50 text-xs mt-1">
-                      You'll become the manager of this company
+                      You&apos;ll become the manager of this company.
                     </p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">
-                      Choose Your Plan (7-Day Free Trial)
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTier('PRO_STARTER')}
-                        className={`p-3 rounded-lg border-2 text-left transition-colors ${
-                          selectedTier === 'PRO_STARTER'
-                            ? 'border-blue-500 bg-blue-500/10'
-                            : 'border-white/10 bg-white/5 hover:border-white/20'
-                        }`}
-                      >
-                        <div className="font-semibold text-white text-sm">Starter</div>
-                        <div className="text-white/60 text-xs">£19.99/mo</div>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTier('PRO_TEAM')}
-                        className={`p-3 rounded-lg border-2 text-left transition-colors ${
-                          selectedTier === 'PRO_TEAM'
-                            ? 'border-blue-500 bg-blue-500/10'
-                            : 'border-white/10 bg-white/5 hover:border-white/20'
-                        }`}
-                      >
-                        <div className="font-semibold text-white text-sm">Team</div>
-                        <div className="text-white/60 text-xs">£34.99/mo</div>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTier('PRO_BUSINESS')}
-                        className={`p-3 rounded-lg border-2 text-left transition-colors ${
-                          selectedTier === 'PRO_BUSINESS'
-                            ? 'border-blue-500 bg-blue-500/10'
-                            : 'border-white/10 bg-white/5 hover:border-white/20'
-                        }`}
-                      >
-                        <div className="font-semibold text-white text-sm">Business</div>
-                        <div className="text-white/60 text-xs">£49.99/mo</div>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTier('PRO_ENTERPRISE')}
-                        className={`p-3 rounded-lg border-2 text-left transition-colors ${
-                          selectedTier === 'PRO_ENTERPRISE'
-                            ? 'border-blue-500 bg-blue-500/10'
-                            : 'border-white/10 bg-white/5 hover:border-white/20'
-                        }`}
-                      >
-                        <div className="font-semibold text-white text-sm">Enterprise</div>
-                        <div className="text-white/60 text-xs">£119.99/mo</div>
-                      </button>
+                  <div className="rounded-lg border border-blue-500/25 bg-blue-500/5 p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <CreditCard className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-white/80">
+                        <p className="font-medium text-white mb-0.5">
+                          {TRIAL_DAYS}-day free trial — no card required
+                        </p>
+                        <p className="text-white/60 text-xs leading-relaxed">
+                          Explore the full product with your real fleet and team.
+                          When you&apos;re ready, subscribe from the dashboard: £8 per vehicle per
+                          month, or £84 per vehicle per year (save ~12%).
+                          Minimum 5 vehicles. Cancel anytime on monthly plans.
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-white/50 text-xs mt-2">
-                      You can upgrade or change your plan anytime after the trial
-                    </p>
                   </div>
 
                   {error && (
@@ -476,11 +510,11 @@ export default function OnboardingPage() {
                     {loading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Creating Company...
+                        Creating company...
                       </>
                     ) : (
                       <>
-                        Setup new company <ArrowRight className="h-4 w-4" />
+                        Start free trial <ArrowRight className="h-4 w-4" />
                       </>
                     )}
                   </button>

@@ -55,15 +55,13 @@ export default function Home() {
             Track equipment, run inspections, report defects and manage your fleet in real time. Built for trades and contractors.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <a
-              href={WHATSAPP_ENQUIRY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/onboarding"
               className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black btn-brand-blue"
             >
-              Get in touch
+              Start free trial
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-            </a>
+            </Link>
             <Link
               href="/pricing"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
@@ -71,6 +69,17 @@ export default function Home() {
               View pricing
             </Link>
           </div>
+          <p className="mt-4 text-sm text-white/50">
+            7 days free &bull; no card required &bull;{' '}
+            <a
+              href={WHATSAPP_ENQUIRY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/70 hover:text-white underline underline-offset-2"
+            >
+              or talk to us on WhatsApp
+            </a>
+          </p>
         </div>
         <div className="relative h-[50vh] min-h-[320px] lg:h-full lg:min-h-[calc(100vh-6rem)] order-1 lg:order-2">
           <Image
@@ -193,21 +202,16 @@ export default function Home() {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 max-w-3xl mx-auto leading-tight">
             Start managing your fleet and tools today
           </h2>
-          <p className="text-white/70 max-w-xl mx-auto mb-4 text-lg">
-            New users get a 7-day free trial. Subscriptions are managed through the app; managers use the dashboard to review company data.
-          </p>
-          <p className="text-white/50 text-sm mb-10">
-            New company? <a href={WHATSAPP_ENQUIRY_URL} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">Message us on WhatsApp</a> and we will help you get set up quickly.
+          <p className="text-white/70 max-w-xl mx-auto mb-10 text-lg">
+            Set up your company, invite your team and start running inspections today. 7 days free, no card required.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href={WHATSAPP_ENQUIRY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/onboarding"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black"
             >
-              Get started
-            </a>
+              Start free trial
+            </Link>
             <Link
               href="/pricing"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
@@ -215,6 +219,17 @@ export default function Home() {
               View pricing
             </Link>
           </div>
+          <p className="mt-6 text-white/50 text-sm">
+            Prefer to talk first?{' '}
+            <a
+              href={WHATSAPP_ENQUIRY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              Message us on WhatsApp
+            </a>
+          </p>
         </div>
       </section>
     </div>

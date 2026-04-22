@@ -23,7 +23,7 @@ const baseNavItems = [
   { name: 'FAQ', href: '/faq' },
   { name: 'Contact', href: '/contact' },
 ];
-const WHATSAPP_ENQUIRY_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
+const ONBOARDING_URL = '/onboarding';
 
 function NavbarNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
   return (
@@ -39,15 +39,13 @@ function NavbarNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
         </Link>
       ))}
       <div className="ml-4 pl-4 border-l border-white/20 flex items-center gap-2">
-        <a
-          href={WHATSAPP_ENQUIRY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href={ONBOARDING_URL}
           className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-white font-semibold text-sm hover:scale-[1.02] transition-all duration-200 btn-brand-blue"
           onClick={onLinkClick}
         >
-          Get started
-        </a>
+          Start free trial
+        </Link>
         <Link
           href="/dashboard"
           className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
@@ -75,15 +73,13 @@ function NavbarMobileNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
         </Link>
       ))}
       <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
-        <a
-          href={WHATSAPP_ENQUIRY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href={ONBOARDING_URL}
           className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-white font-semibold btn-brand-blue"
           onClick={onLinkClick}
         >
-          Get started
-        </a>
+          Start free trial
+        </Link>
         <Link
           href="/dashboard"
           className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl border border-white/20 text-white/90 hover:text-white hover:bg-white/5"

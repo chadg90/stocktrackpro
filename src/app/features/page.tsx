@@ -20,7 +20,7 @@ const WHATSAPP_ENQUIRY_URL =
 export const metadata: Metadata = {
   title: 'Features | Stock Track PRO',
   description:
-    'Every feature in Stock Track PRO: QR asset tracking, fleet inspections, defect management, MOT & tax monitoring, team roles, and manager dashboard.',
+    'Every feature in Stock Track PRO: QR asset tracking, fleet inspections, defect workflow from flagged to fixed, MOT & tax monitoring, team roles, and manager dashboard.',
   alternates: { canonical: '/features' },
 };
 
@@ -76,18 +76,21 @@ const features: Feature[] = [
       'When a problem arises, you have a documented record that the vehicle was checked and by whom \u2014 useful for insurance, clients, and compliance.',
   },
   {
-    title: 'Defect workflow',
+    title: 'Defect workflow: flagged to fixed',
     icon: Shield,
     summary:
-      'When a defect is logged, the vehicle status moves automatically. The team knows what\u2019s in use, what\u2019s in maintenance, and what\u2019s back on the road.',
+      'Defects don\u2019t get stuck in a spreadsheet. The moment a driver raises one, the vehicle moves into maintenance, your fitter sees it in their My Jobs list, and everyone can track progress through to resolution \u2014 scheduled, waiting for parts, or completed.',
     bullets: [
-      'Severity levels with mandatory descriptions',
-      'Vehicle status updates automatically on defect creation',
-      'Resolve defects from the dashboard to return the vehicle to active',
-      'Full history of past defects by vehicle and inspector',
+      'Severity levels and mandatory descriptions at the point of reporting',
+      'Vehicle fleet status updates automatically when a defect is raised',
+      'Fitter\u2019s "My Jobs" screen groups open defects by vehicle and priority',
+      'Each defect tracked through Open \u2192 Scheduled \u2192 Waiting for parts \u2192 Completed',
+      'Reporter\u2019s name and contact number surfaced so fitters can clarify quickly',
+      'One-tap resolve returns a vehicle to active \u2014 blocked automatically if any defect is still open',
+      'Full history of past defects per vehicle, inspector and fitter',
     ],
     useCase:
-      'No more "I thought it was fixed" — the record is clear, and the status reflects reality.',
+      'A driver flags a brake issue at 7am. The vehicle shows as in maintenance, the fitter sees it on their phone, marks it "Waiting for parts", and resolves the job once fitted \u2014 the vehicle returns to active automatically, with a complete audit trail.',
   },
   {
     title: 'MOT & tax monitoring',
@@ -232,21 +235,30 @@ export default function Features() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/pricing"
+              href="/onboarding"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue"
             >
-              View pricing
+              Start free trial
               <ArrowRight className="w-4 h-4" />
             </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-blue-500/50 hover:bg-white/5 transition-all duration-200 font-medium"
+            >
+              View pricing
+            </Link>
+          </div>
+          <p className="mt-5 text-sm text-white/50">
+            7 days free &bull; no card required &bull;{' '}
             <a
               href={WHATSAPP_ENQUIRY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-blue-500/50 hover:bg-white/5 transition-all duration-200 font-medium"
+              className="text-white/70 hover:text-white underline underline-offset-2"
             >
-              Talk to us on WhatsApp
+              or talk to us on WhatsApp
             </a>
-          </div>
+          </p>
         </div>
       </section>
     </div>
