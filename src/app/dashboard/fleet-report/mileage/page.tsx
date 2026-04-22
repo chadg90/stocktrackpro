@@ -8,16 +8,16 @@ export default function FleetReportMileagePage() {
 
   return (
     <div className="space-y-4">
-      <p className="text-white/55 text-sm max-w-3xl">
-        Each row is one inspection, grouped logically by vehicle in the export. <strong className="text-white">Delta</strong> is vs the previous inspection on the same vehicle. Flags catch odometer rollbacks, very high implied daily mileage, or missing readings when a prior value exists.
+      <p className="text-zinc-600 dark:text-white/60 text-sm max-w-3xl">
+        Each row is one inspection, grouped logically by vehicle in the export. <strong className="text-zinc-900 dark:text-white">Delta</strong> is vs the previous inspection on the same vehicle. Flags catch odometer rollbacks, very high implied daily mileage, or missing readings when a prior value exists.
       </p>
       {loading && mileageRows.length === 0 ? (
-        <p className="text-white/50 text-sm">Loading…</p>
+        <p className="text-zinc-600 dark:text-white/60 text-sm">Loading…</p>
       ) : (
         <div className="dashboard-card overflow-x-auto">
           <table className="w-full text-sm text-left min-w-[900px]">
             <thead>
-              <tr className="border-b border-white/10 text-white/50">
+              <tr className="border-b border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-white/55">
                 <th className="px-3 py-2 font-medium">Registration</th>
                 <th className="px-3 py-2 font-medium">Inspected</th>
                 <th className="px-3 py-2 font-medium">Mileage</th>
@@ -33,33 +33,37 @@ export default function FleetReportMileagePage() {
                 return (
                   <tr
                     key={row['Inspection ID']}
-                    className={`border-b border-white/5 ${flagged ? 'bg-amber-500/5' : ''}`}
+                    className={`border-b border-zinc-100 dark:border-white/5 ${flagged ? 'bg-amber-50 dark:bg-amber-500/5' : ''}`}
                   >
-                    <td className="px-3 py-2 text-white">{row.Registration}</td>
-                    <td className="px-3 py-2 text-white/80 whitespace-nowrap">{row['Inspected At']}</td>
-                    <td className="px-3 py-2 text-white tabular-nums">{row.Mileage}</td>
-                    <td className="px-3 py-2 text-white/70 tabular-nums">{row['Delta Miles']}</td>
+                    <td className="px-3 py-2 text-zinc-900 dark:text-white font-medium">{row.Registration}</td>
+                    <td className="px-3 py-2 text-zinc-700 dark:text-white/80 whitespace-nowrap">{row['Inspected At']}</td>
+                    <td className="px-3 py-2 text-zinc-900 dark:text-white tabular-nums">{row.Mileage}</td>
+                    <td className="px-3 py-2 text-zinc-600 dark:text-white/70 tabular-nums">{row['Delta Miles']}</td>
                     <td className="px-3 py-2">
                       {flagged ? (
-                        <span className="text-amber-300 font-medium">{row['Anomaly Flag']}</span>
+                        <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+                          {row['Anomaly Flag']}
+                        </span>
                       ) : (
-                        <span className="text-white/40">No</span>
+                        <span className="inline-flex items-center rounded-full border border-zinc-300 bg-zinc-50 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:border-white/15 dark:bg-white/5 dark:text-white/55">
+                          No
+                        </span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-white/60 max-w-xs">{row['Anomaly Detail']}</td>
-                    <td className="px-3 py-2 text-white/70">{row.Inspector}</td>
+                    <td className="px-3 py-2 text-zinc-600 dark:text-white/60 max-w-xs">{row['Anomaly Detail']}</td>
+                    <td className="px-3 py-2 text-zinc-700 dark:text-white/70">{row.Inspector}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
           {mileageRows.length > 400 && (
-            <p className="text-white/40 text-xs px-3 py-2 border-t border-white/10">
+            <p className="text-zinc-500 dark:text-white/50 text-xs px-3 py-2 border-t border-zinc-200 dark:border-white/10">
               Showing first 400 rows — full history is in the Excel export.
             </p>
           )}
           {mileageRows.length === 0 && (
-            <p className="text-white/50 text-sm p-6">No inspections in the loaded period.</p>
+            <p className="text-zinc-600 dark:text-white/60 text-sm p-6">No inspections in the loaded period.</p>
           )}
         </div>
       )}

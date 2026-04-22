@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import React, { Suspense, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Navbar from '../components/Navbar';
 import {
   onAuthStateChanged,
@@ -47,6 +48,24 @@ const DashboardAnalyticsCharts = dynamic(
           <div className="h-80 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
           <div className="h-80 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
         </div>
+      </div>
+    ),
+  }
+);
+
+const DashboardDetailedView = dynamic(
+  () => import('./components/DashboardDetailedView'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-6" aria-busy="true">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="h-32 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+          <div className="h-32 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+          <div className="h-32 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+          <div className="h-32 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
+        </div>
+        <div className="h-[350px] rounded-xl bg-white/5 border border-white/10 animate-pulse" />
       </div>
     ),
   }
@@ -162,6 +181,19 @@ const formatShortDate = (value?: string | Timestamp) => {
 };
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={null}>
+      <DashboardPageInner />
+    </Suspense>
+  );
+}
+
+function DashboardPageInner() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const initialView = searchParams?.get('view') === 'detailed' ? 'detailed' : 'summary';
+
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -169,6 +201,26 @@ export default function DashboardPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const [view, setView] = useState<'summary' | 'detailed'>(initialView);
+
+  useEffect(() => {
+    const v = searchParams?.get('view');
+    if (v === 'detailed' && view !== 'detailed') setView('detailed');
+    if (v !== 'detailed' && view !== 'summary') setView('summary');
+  }, [searchParams, view]);
+
+  const handleChangeView = useCallback(
+    (next: 'summary' | 'detailed') => {
+      setView(next);
+      const params = new URLSearchParams(searchParams?.toString() ?? '');
+      if (next === 'detailed') params.set('view', 'detailed');
+      else params.delete('view');
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
   // Date range filter (supports up to 24 months of history)
   const [dateRange, setDateRange] = useState<'7' | '30' | '90' | '365' | '730' | 'all'>('30');
@@ -659,6 +711,13 @@ export default function DashboardPage() {
     return (inspections.length / rangeSpanDays).toFixed(1);
   }, [inspections, rangeSpanDays]);
 
+  const rangeLabel = useMemo(() => {
+    if (dateRange === 'all') return 'all time';
+    if (dateRange === '365') return 'last 12 months';
+    if (dateRange === '730') return 'last 24 months';
+    return `last ${dateRange} days`;
+  }, [dateRange]);
+
   // Export data preparation (full columns for compliance / weekly archives)
   const exportData = useMemo(() => {
     const historyRows = historyItems.map((h) => {
@@ -870,6 +929,28 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
+                  <div
+                    className="inline-flex items-center gap-0.5 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-white/10 dark:bg-white/5"
+                    role="tablist"
+                    aria-label="Dashboard view"
+                  >
+                    {(['summary', 'detailed'] as const).map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        role="tab"
+                        aria-selected={view === v}
+                        onClick={() => handleChangeView(v)}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+                          view === v
+                            ? 'bg-blue-600 text-white keep-light-on-dark dark:bg-blue-500'
+                            : 'text-zinc-600 hover:text-zinc-900 dark:text-white/70 dark:hover:text-white'
+                        }`}
+                      >
+                        {v === 'summary' ? 'Summary' : 'Detailed'}
+                      </button>
+                    ))}
+                  </div>
                   <div className="flex items-center gap-2">
                     <span className="text-white/50 text-sm hidden sm:inline">Period</span>
                     <div className="flex items-center gap-0.5 bg-white/5 border border-white/10 rounded-lg p-0.5">
@@ -940,6 +1021,19 @@ export default function DashboardPage() {
                 </div>
               )}
 
+              {view === 'detailed' ? (
+                <DashboardDetailedView
+                  vehicles={vehicles}
+                  assets={assets}
+                  users={users}
+                  inspections={inspections}
+                  defects={defects}
+                  historyItems={historyItems}
+                  rangeSpanDays={rangeSpanDays}
+                  rangeLabel={rangeLabel}
+                />
+              ) : (
+              <>
               {/* KPI Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <div className="dashboard-card p-5">
@@ -1070,6 +1164,8 @@ export default function DashboardPage() {
                   </table>
                 </div>
               </div>
+              </>
+              )}
             </div>
           )}
         </div>

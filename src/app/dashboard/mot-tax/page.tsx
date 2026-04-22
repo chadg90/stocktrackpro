@@ -41,7 +41,7 @@ type RawVehicle = {
   dvla_sync_error?: string | null;
 };
 
-type ExpiryBucket = 'expired' | 'urgent' | 'warning' | 'ok' | 'unknown';
+type ExpiryBucket = 'expired' | 'urgent' | 'warning' | 'ok' | 'not_due' | 'unknown';
 
 type VehicleRow = RawVehicle & {
   motDaysRemaining: number | null;
@@ -75,8 +75,10 @@ function daysBetween(target: Date | null): number | null {
   return Math.ceil((end.getTime() - start.getTime()) / 86400000);
 }
 
-function bucketFor(days: number | null): ExpiryBucket {
-  if (days === null) return 'unknown';
+function bucketFor(days: number | null, type: 'mot' | 'tax'): ExpiryBucket {
+  if (days === null) {
+    return type === 'mot' ? 'not_due' : 'unknown';
+  }
   if (days < 0) return 'expired';
   if (days <= URGENT_DAYS) return 'urgent';
   if (days <= WARNING_DAYS) return 'warning';
@@ -84,7 +86,7 @@ function bucketFor(days: number | null): ExpiryBucket {
 }
 
 function worstOf(a: ExpiryBucket, b: ExpiryBucket): ExpiryBucket {
-  const order: ExpiryBucket[] = ['expired', 'urgent', 'warning', 'unknown', 'ok'];
+  const order: ExpiryBucket[] = ['expired', 'urgent', 'warning', 'unknown', 'not_due', 'ok'];
   return order.indexOf(a) <= order.indexOf(b) ? a : b;
 }
 
@@ -114,8 +116,10 @@ function formatRelative(date: Date | null): string {
   });
 }
 
-function daysLabel(days: number | null): string {
-  if (days === null) return 'No data';
+function daysLabel(days: number | null, bucket: ExpiryBucket): string {
+  if (days === null) {
+    return bucket === 'not_due' ? 'No MOT required yet' : 'No data';
+  }
   if (days < 0) return `Expired ${Math.abs(days)}d ago`;
   if (days === 0) return 'Expires today';
   return `${days}d remaining`;
@@ -124,15 +128,33 @@ function daysLabel(days: number | null): string {
 function bucketClasses(bucket: ExpiryBucket): string {
   switch (bucket) {
     case 'expired':
-      return 'bg-red-100 text-red-800 border-red-300 dark:bg-red-500/15 dark:text-red-200 dark:border-red-500/40';
+      return 'bg-red-100 text-red-900 border-red-400 dark:bg-red-500/20 dark:text-red-100 dark:border-red-500/50';
     case 'urgent':
-      return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-200 dark:border-red-500/30';
+      return 'bg-red-100 text-red-900 border-red-400 dark:bg-red-500/20 dark:text-red-100 dark:border-red-500/50';
     case 'warning':
-      return 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-500/10 dark:text-amber-200 dark:border-amber-500/30';
+      return 'bg-amber-100 text-amber-900 border-amber-400 dark:bg-amber-500/15 dark:text-amber-100 dark:border-amber-500/40';
     case 'ok':
-      return 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-200 dark:border-emerald-500/30';
+      return 'bg-emerald-100 text-emerald-900 border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-100 dark:border-emerald-500/40';
+    case 'not_due':
+      return 'bg-sky-100 text-sky-900 border-sky-400 dark:bg-sky-500/15 dark:text-sky-100 dark:border-sky-500/40';
     default:
-      return 'bg-zinc-100 text-zinc-700 border-zinc-300 dark:bg-slate-800/60 dark:text-slate-200 dark:border-slate-600/40';
+      return 'bg-zinc-200 text-zinc-800 border-zinc-400 dark:bg-slate-700/60 dark:text-slate-100 dark:border-slate-500/50';
+  }
+}
+
+function cardTint(bucket: ExpiryBucket): string {
+  switch (bucket) {
+    case 'expired':
+      return 'bg-red-50/60 dark:bg-red-500/[0.04]';
+    case 'urgent':
+      return 'bg-red-50/40 dark:bg-red-500/[0.03]';
+    case 'warning':
+      return 'bg-amber-50/40 dark:bg-amber-500/[0.03]';
+    case 'ok':
+    case 'not_due':
+      return 'bg-white dark:bg-black';
+    default:
+      return 'bg-zinc-50/60 dark:bg-slate-900/20';
   }
 }
 
@@ -146,6 +168,8 @@ function bucketLabel(bucket: ExpiryBucket): string {
       return 'Due soon';
     case 'ok':
       return 'OK';
+    case 'not_due':
+      return 'Not yet due';
     default:
       return 'Unknown';
   }
@@ -161,6 +185,8 @@ function rowAccent(bucket: ExpiryBucket): string {
       return 'border-l-4 border-l-amber-400';
     case 'ok':
       return 'border-l-4 border-l-emerald-400';
+    case 'not_due':
+      return 'border-l-4 border-l-sky-400';
     default:
       return 'border-l-4 border-l-slate-400';
   }
@@ -251,8 +277,8 @@ export default function MotTaxPage() {
         const taxDate = tsToDate(vehicle.tax_expiry_date || null);
         const motDays = daysBetween(motDate);
         const taxDays = daysBetween(taxDate);
-        const motBucket = bucketFor(motDays);
-        const taxBucket = bucketFor(taxDays);
+        const motBucket = bucketFor(motDays, 'mot');
+        const taxBucket = bucketFor(taxDays, 'tax');
         const worst = worstOf(motBucket, taxBucket);
         const soonest = Math.min(
           motDate ? motDate.getTime() : Number.POSITIVE_INFINITY,
@@ -274,7 +300,8 @@ export default function MotTaxPage() {
           urgent: 1,
           warning: 2,
           unknown: 3,
-          ok: 4,
+          not_due: 4,
+          ok: 5,
         };
         const diff = priority[a.worstBucket] - priority[b.worstBucket];
         if (diff !== 0) return diff;
@@ -298,7 +325,9 @@ export default function MotTaxPage() {
     const warning = rows.filter(
       (r) => r.worstBucket === 'warning'
     ).length;
-    const ok = rows.filter((r) => r.worstBucket === 'ok').length;
+    const ok = rows.filter(
+      (r) => r.worstBucket === 'ok' || r.worstBucket === 'not_due'
+    ).length;
     const unknown = rows.filter((r) => r.worstBucket === 'unknown').length;
     return { expired, urgent, warning, ok, unknown, total: rows.length };
   }, [rows]);
@@ -440,7 +469,7 @@ export default function MotTaxPage() {
           </div>
           <div className="relative w-full lg:w-72">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-white/40"
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 dark:text-white/40"
               aria-hidden
             />
             <input
@@ -448,7 +477,7 @@ export default function MotTaxPage() {
               placeholder="Search reg, make, model…"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:bg-slate-900/60 dark:border-slate-600/40 dark:text-white dark:placeholder:text-white/40"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:bg-slate-900/60 dark:border-slate-600/40 dark:text-white dark:placeholder:text-white/40"
               aria-label="Search vehicles"
             />
           </div>
@@ -467,7 +496,7 @@ export default function MotTaxPage() {
         </div>
       ) : filteredRows.length === 0 ? (
         <div className="rounded-xl border border-zinc-200 bg-white p-10 text-center dark:border-blue-500/25 dark:bg-black">
-          <ShieldCheck className="h-10 w-10 mx-auto text-zinc-400 dark:text-white/40" />
+          <ShieldCheck className="h-10 w-10 mx-auto text-zinc-500 dark:text-white/40" />
           <p className="mt-3 text-sm font-medium text-zinc-700 dark:text-white/80">
             {rows.length === 0
               ? 'No vehicles found for this company.'
@@ -475,7 +504,7 @@ export default function MotTaxPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {filteredRows.map((row) => {
             const motDate = tsToDate(row.mot_expiry_date || null);
             const taxDate = tsToDate(row.tax_expiry_date || null);
@@ -484,55 +513,44 @@ export default function MotTaxPage() {
             return (
               <div
                 key={row.id}
-                className={`rounded-xl border border-zinc-200 bg-white dark:border-blue-500/25 dark:bg-black shadow-sm ${rowAccent(
+                className={`rounded-lg border border-zinc-200 dark:border-blue-500/20 shadow-sm ${rowAccent(
                   row.worstBucket
-                )}`}
+                )} ${cardTint(row.worstBucket)}`}
               >
-                <div className="flex flex-col lg:flex-row lg:items-center gap-3 p-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center rounded-md border border-zinc-300 bg-zinc-50 px-2 py-0.5 text-sm font-mono font-bold text-zinc-900 dark:border-slate-600/40 dark:bg-slate-900/60 dark:text-white">
-                        {row.registration || '—'}
+                <div className="flex flex-col lg:flex-row lg:items-center gap-2 px-3 py-2">
+                  <div className="flex items-center gap-2 min-w-0 lg:w-56 shrink-0">
+                    <span className="inline-flex items-center rounded border border-zinc-400 bg-white px-1.5 py-0.5 text-xs font-mono font-bold text-zinc-900 dark:border-slate-500/50 dark:bg-slate-900/80 dark:text-white">
+                      {row.registration || '—'}
+                    </span>
+                    <span className="text-xs font-medium text-zinc-800 dark:text-white/90 truncate">
+                      {[row.make, row.model].filter(Boolean).join(' ') || 'Unknown'}
+                    </span>
+                    {row.dvla_year && (
+                      <span className="text-[11px] text-zinc-500 dark:text-white/50 shrink-0">
+                        · {row.dvla_year}
                       </span>
-                      <span className="text-sm text-zinc-700 dark:text-white/80 truncate">
-                        {[row.make, row.model].filter(Boolean).join(' ') || 'Unknown model'}
-                      </span>
-                      {row.dvla_year && (
-                        <span className="text-xs text-zinc-500 dark:text-white/50">
-                          · {row.dvla_year}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <ExpiryBlock
-                        title="MOT"
-                        date={motDate}
-                        days={row.motDaysRemaining}
-                        status={row.mot_status}
-                        bucket={row.motBucket}
-                      />
-                      <ExpiryBlock
-                        title="Tax"
-                        date={taxDate}
-                        days={row.taxDaysRemaining}
-                        status={row.tax_status}
-                        bucket={row.taxBucket}
-                      />
-                    </div>
-
-                    {row.dvla_sync_error && (
-                      <p className="mt-2 text-xs text-red-700 dark:text-red-200 flex items-center gap-1.5">
-                        <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
-                        Last sync issue: {row.dvla_sync_error}
-                      </p>
                     )}
                   </div>
 
-                  <div className="flex flex-col items-start lg:items-end gap-2 lg:min-w-[190px]">
-                    <span className="text-xs text-zinc-500 dark:text-white/55 flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5" aria-hidden />
-                      Last sync: {formatRelative(lastSync)}
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-1.5 min-w-0">
+                    <InlineExpiry
+                      title="MOT"
+                      date={motDate}
+                      days={row.motDaysRemaining}
+                      bucket={row.motBucket}
+                    />
+                    <InlineExpiry
+                      title="TAX"
+                      date={taxDate}
+                      days={row.taxDaysRemaining}
+                      bucket={row.taxBucket}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0 lg:justify-end">
+                    <span className="text-[11px] text-zinc-600 dark:text-white/55 flex items-center gap-1 whitespace-nowrap">
+                      <Clock className="h-3 w-3" aria-hidden />
+                      {formatRelative(lastSync)}
                     </span>
                     <button
                       type="button"
@@ -540,16 +558,24 @@ export default function MotTaxPage() {
                         handleRefreshVehicle(row.id, row.registration || '')
                       }
                       disabled={refreshing}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors dark:border-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400"
+                      className="inline-flex items-center gap-1 rounded-md border border-blue-600 bg-blue-600 px-2 py-1 text-[11px] font-semibold text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors dark:border-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400"
+                      aria-label={`Refresh ${row.registration || 'vehicle'} from DVLA`}
                     >
                       <RefreshCw
-                        className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`}
+                        className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`}
                         aria-hidden
                       />
-                      {refreshing ? 'Refreshing…' : 'Refresh from DVLA'}
+                      {refreshing ? 'Refreshing' : 'Refresh'}
                     </button>
                   </div>
                 </div>
+
+                {row.dvla_sync_error && (
+                  <p className="px-3 pb-2 text-[11px] text-red-800 dark:text-red-200 flex items-center gap-1.5">
+                    <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />
+                    Sync issue: {row.dvla_sync_error}
+                  </p>
+                )}
               </div>
             );
           })}
@@ -607,47 +633,44 @@ function KpiCard({
   );
 }
 
-function ExpiryBlock({
+function InlineExpiry({
   title,
   date,
   days,
-  status,
   bucket,
 }: {
   title: string;
   date: Date | null;
   days: number | null;
-  status: string | null | undefined;
   bucket: ExpiryBucket;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-slate-600/30 dark:bg-slate-900/40">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-white/55">
-          {title}
-        </p>
-        <span
-          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${bucketClasses(
-            bucket
-          )}`}
-        >
-          {bucket === 'ok' ? (
-            <CheckCircle2 className="h-3 w-3" aria-hidden />
-          ) : bucket === 'unknown' ? (
-            <HelpCircle className="h-3 w-3" aria-hidden />
-          ) : (
-            <AlertTriangle className="h-3 w-3" aria-hidden />
-          )}
-          {bucketLabel(bucket)}
+    <div className="flex items-center gap-2 min-w-0 rounded-md border border-zinc-200 bg-white/70 px-2 py-1 dark:border-slate-700/50 dark:bg-slate-900/40">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-white/55 shrink-0 w-7">
+        {title}
+      </span>
+      <span
+        className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0 text-[10px] font-semibold shrink-0 ${bucketClasses(
+          bucket
+        )}`}
+      >
+        {bucket === 'ok' || bucket === 'not_due' ? (
+          <CheckCircle2 className="h-2.5 w-2.5" aria-hidden />
+        ) : bucket === 'unknown' ? (
+          <HelpCircle className="h-2.5 w-2.5" aria-hidden />
+        ) : (
+          <AlertTriangle className="h-2.5 w-2.5" aria-hidden />
+        )}
+        {bucketLabel(bucket)}
+      </span>
+      <span className="text-xs font-semibold text-zinc-900 dark:text-white truncate">
+        {date ? formatDate(date) : bucket === 'not_due' ? 'Not required yet' : '—'}
+      </span>
+      {date && (
+        <span className="text-[11px] text-zinc-600 dark:text-white/65 truncate">
+          {daysLabel(days, bucket)}
         </span>
-      </div>
-      <p className="mt-1 text-base font-semibold text-zinc-900 dark:text-white">
-        {formatDate(date)}
-      </p>
-      <p className="text-[11px] text-zinc-600 dark:text-white/60">
-        {daysLabel(days)}
-        {status ? ` · ${status}` : ''}
-      </p>
+      )}
     </div>
   );
 }

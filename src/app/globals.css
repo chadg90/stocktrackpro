@@ -109,7 +109,15 @@ body {
     @apply text-zinc-600;
   }
 
+  .theme-light .dashboard-card .text-white\/65 {
+    @apply text-zinc-600;
+  }
+
   .theme-light .dashboard-card .text-white\/60 {
+    @apply text-zinc-500;
+  }
+
+  .theme-light .dashboard-card .text-white\/55 {
     @apply text-zinc-500;
   }
 
@@ -119,6 +127,10 @@ body {
 
   .theme-light .dashboard-card .text-white\/40 {
     @apply text-zinc-400;
+  }
+
+  .theme-light .dashboard-card .text-white\/35 {
+    @apply text-zinc-500;
   }
 
   .theme-light .dashboard-card .text-white\/30 {
@@ -141,13 +153,25 @@ body {
   .theme-light main .text-white\/70 {
     color: #475569 !important;
   }
+  .theme-light main .text-white\/65 {
+    color: #475569 !important;
+  }
   .theme-light main .text-white\/60 {
+    color: #475569 !important;
+  }
+  .theme-light main .text-white\/55 {
     color: #475569 !important;
   }
   .theme-light main .text-white\/50 {
     color: #64748b !important;
   }
+  .theme-light main .text-white\/45 {
+    color: #64748b !important;
+  }
   .theme-light main .text-white\/40 {
+    color: #64748b !important;
+  }
+  .theme-light main .text-white\/35 {
     color: #64748b !important;
   }
   .theme-light main .text-white\/30 {
