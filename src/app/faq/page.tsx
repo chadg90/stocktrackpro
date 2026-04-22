@@ -29,7 +29,7 @@ export default function FAQ() {
     },
     {
       question: "Can I cancel anytime?",
-      answer: "Yes. There is no long-term contract. If you subscribed on the web, use Manage Billing in the dashboard to update or cancel. If you subscribed in the app, cancel through your App Store or Google Play subscription settings.",
+      answer: "Monthly plans can be cancelled anytime and the subscription ends at the end of the current billing month. Annual plans are a 12-month term paid upfront at a discount — you can cancel the renewal at any time (so you won\u2019t be charged again), but unused months within the paid year are not refunded. Web subscriptions are managed from Manage Billing in the dashboard; in-app subscriptions are managed in your App Store or Google Play settings.",
     },
     {
       question: "Is my data secure?",

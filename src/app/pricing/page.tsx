@@ -132,7 +132,7 @@ export default function Pricing() {
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/70">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-blue-400" aria-hidden />
-              No contract, cancel anytime
+              No long-term contract
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Wrench className="h-4 w-4 text-emerald-400" aria-hidden />
@@ -304,7 +304,11 @@ export default function Pricing() {
             )}
 
             <p className="text-center text-white/40 text-xs mt-3">
-              New companies receive a 7-day free trial &bull; Cancel anytime &bull; No contract
+              {billingCycle === 'yearly' ? (
+                <>New companies receive a 7-day free trial &bull; 12-month term, paid upfront &bull; Cancel renewal anytime</>
+              ) : (
+                <>New companies receive a 7-day free trial &bull; Cancel anytime &bull; No long-term contract</>
+              )}
             </p>
 
             {/* Features */}
@@ -335,7 +339,8 @@ export default function Pricing() {
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Minimum {MIN_VEHICLES} vehicles (£{MIN_VEHICLES * PRICE_PER_VEHICLE_MONTHLY}/month or £{MIN_VEHICLES * PRICE_PER_VEHICLE_YEARLY}/year)</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Vehicle count changes take effect from your next billing cycle</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>New companies receive a 7-day free trial</span></li>
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Cancel anytime — no long-term contracts</span></li>
+              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span><strong className="text-white/90">Monthly:</strong> cancel anytime — no long-term contract</span></li>
+              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span><strong className="text-white/90">Annual:</strong> 12-month term paid upfront — cancel renewal anytime; unused months are not refunded</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>All prices include VAT at 20%</span></li>
             </ul>
           </div>

@@ -226,8 +226,9 @@ export default function Features() {
             See how it fits your business
           </h3>
           <p className="text-white/70 max-w-lg mx-auto mb-8">
-            Every feature on this page is included in a single subscription
-            starting at £8 per vehicle per month. No contract, cancel anytime.
+            Every feature on this page is included in a single subscription.
+            Monthly (£8 per vehicle) or annual (£84 per vehicle, save ~12%).
+            No long-term contract.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

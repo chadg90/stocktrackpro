@@ -53,7 +53,7 @@ export default function PricingSection() {
           <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-sm text-gray-600">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-blue-600" aria-hidden />
-              No contract, cancel anytime
+              No long-term contract
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Wrench className="h-4 w-4 text-emerald-600" aria-hidden />
@@ -156,7 +156,12 @@ export default function PricingSection() {
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-500">
-          Minimum {MIN_VEHICLES} vehicles &bull; 7-day free trial &bull; All prices include VAT &bull; Cancel anytime
+          Minimum {MIN_VEHICLES} vehicles &bull; 7-day free trial &bull; All prices include VAT
+          {billingCycle === 'yearly' ? (
+            <> &bull; 12-month term, paid upfront</>
+          ) : (
+            <> &bull; Cancel anytime</>
+          )}
         </p>
       </div>
     </section>
