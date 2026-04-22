@@ -23,6 +23,7 @@ import {
   Moon,
   Tag,
   LifeBuoy,
+  ShieldCheck,
 } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -70,6 +71,7 @@ const navigationGroups: NavigationGroup[] = [
     label: 'Reports & Analytics',
     items: [
       { name: 'Fleet report', href: '/dashboard/fleet-report', icon: ClipboardList, managerOnly: true },
+      { name: 'MOT & Tax', href: '/dashboard/mot-tax', icon: ShieldCheck, managerOnly: true },
       { name: 'Mileage monitor', href: '/dashboard/mileage-monitor', icon: Gauge, managerOnly: true },
       { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
       { name: 'Activity History', href: '/dashboard/history', icon: History },
