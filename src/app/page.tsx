@@ -145,58 +145,36 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Platform views */}
-      <section className="py-20 sm:py-28 border-t border-white/10">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">
-            Product
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 text-center max-w-2xl mx-auto">
-            The screens you’ll use
-          </h2>
-          <p className="text-white/55 text-center max-w-xl mx-auto mb-14">
-            Dashboard, app, and key workflows in one place.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[
-              { title: "Manager dashboard", description: "Totals for assets, vehicles, and team at a glance." },
-              { title: "Vehicle inspection", description: "Checklist, photos, and defect logging." },
-              { title: "QR scan", description: "Check items in or out and see who has them." },
-              { title: "Asset list", description: "Tools and equipment by location or project." },
-              { title: "Vehicle status", description: "Active, in maintenance, or defects." },
-            ].map((item, index) => (
-              <div key={index} className="p-6 rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-colors">
-                <h3 className="font-semibold text-white mb-2">{item.title}</h3>
-                <p className="text-white/60 text-sm leading-relaxed">{item.description}</p>
-              </div>
-            ))}
+          <div className="mt-12 flex justify-center">
+            <Link
+              href="/features"
+              className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-400 transition-colors font-medium text-sm"
+            >
+              Explore every feature in detail
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Benefits */}
+      {/* Outcomes */}
       <section className="py-20 sm:py-28 bg-white/[0.02] border-t border-white/10">
         <div className="container mx-auto px-4">
           <p className="text-center text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">
             Outcomes
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 text-center max-w-2xl mx-auto">
-            Why companies choose us
+            Fewer lost tools. Safer vehicles. A clearer picture.
           </h2>
           <p className="text-white/55 text-center max-w-xl mx-auto mb-14">
-            Clear outcomes from day one.
+            What our customers get after switching to Stock Track PRO.
           </p>
           <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              "Stop losing tools and assets.",
-              "Reduce downtime with faster defect reporting.",
-              "Keep vehicles safe and compliant.",
-              "See team activity in one place.",
-              "Get audit trails for insurance and compliance.",
-              "Use on iOS, Android, and web dashboard.",
+              "Stop losing tools with QR-based accountability.",
+              "Reduce vehicle downtime through faster defect reporting.",
+              "Stay compliant with full inspection audit trails.",
+              "See fleet and team activity in one place.",
             ].map((benefit, index) => (
               <div key={index} className="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-black/40 hover:border-blue-500/20 transition-colors">
                 <Check className="w-5 h-5 text-blue-500 flex-shrink-0" />
@@ -230,14 +208,6 @@ export default function Home() {
             >
               Get started
             </a>
-            <Link
-              href={WHATSAPP_ENQUIRY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
-            >
-              Contact
-            </Link>
             <Link
               href="/pricing"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"

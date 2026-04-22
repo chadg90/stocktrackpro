@@ -1,52 +1,153 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Navbar from '../components/Navbar';
 import Link from 'next/link';
-import { Car, ClipboardList, QrCode, Users, Wrench, RefreshCw, Shield, ArrowRight } from 'lucide-react';
-const WHATSAPP_ENQUIRY_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
+import {
+  Car,
+  ClipboardList,
+  QrCode,
+  Users,
+  Wrench,
+  Shield,
+  Gauge,
+  FileCheck,
+  ArrowRight,
+} from 'lucide-react';
+
+const WHATSAPP_ENQUIRY_URL =
+  'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
+
+export const metadata: Metadata = {
+  title: 'Features | Stock Track PRO',
+  description:
+    'Every feature in Stock Track PRO: QR asset tracking, fleet inspections, defect management, MOT & tax monitoring, team roles, and manager dashboard.',
+  alternates: { canonical: '/features' },
+};
+
+type Feature = {
+  title: string;
+  icon: React.ElementType;
+  summary: string;
+  bullets: string[];
+  useCase: string;
+};
+
+const features: Feature[] = [
+  {
+    title: 'QR-based asset & tool tracking',
+    icon: QrCode,
+    summary:
+      'Every tool or piece of equipment gets a QR code. Staff scan to check items in or out, and the app records who has it, where, and when — no paper logs, no spreadsheets.',
+    bullets: [
+      'Print or stick QR labels on any tool, container, or piece of kit',
+      'One-tap check-out and check-in from the mobile app',
+      'Full audit trail of who had each item and for how long',
+      'Search and filter by location, project, or person',
+    ],
+    useCase:
+      'A site team loses less kit because accountability is built into the process — scan, collect, return.',
+  },
+  {
+    title: 'Fleet management',
+    icon: Car,
+    summary:
+      'Track every vehicle in your fleet from one dashboard. Registration lookups, mileage, inspection history, and service information stay up to date without manual admin.',
+    bullets: [
+      'Add vehicles by registration — DVLA details populate automatically',
+      'Live mileage baseline with spotting of unusual increases',
+      'Assign vehicles to drivers and set usage expectations',
+      'View every vehicle\u2019s full inspection and defect history',
+    ],
+    useCase:
+      'Managers see at a glance which vehicles need attention, which are overdue for inspection, and who\u2019s driving what.',
+  },
+  {
+    title: 'Vehicle inspections',
+    icon: Wrench,
+    summary:
+      'Structured pre-use inspections with required photos and a clear checklist. Drivers can\u2019t skip steps, and every submission is time-stamped and attributed.',
+    bullets: [
+      'Six-photo walkaround (front, rear, driver side, passenger side, interior, odometer)',
+      'Overall condition plus per-item checklist',
+      'Automatic mileage capture from the odometer photo step',
+      'Managers get notified immediately when a defect is raised',
+    ],
+    useCase:
+      'When a problem arises, you have a documented record that the vehicle was checked and by whom \u2014 useful for insurance, clients, and compliance.',
+  },
+  {
+    title: 'Defect workflow',
+    icon: Shield,
+    summary:
+      'When a defect is logged, the vehicle status moves automatically. The team knows what\u2019s in use, what\u2019s in maintenance, and what\u2019s back on the road.',
+    bullets: [
+      'Severity levels with mandatory descriptions',
+      'Vehicle status updates automatically on defect creation',
+      'Resolve defects from the dashboard to return the vehicle to active',
+      'Full history of past defects by vehicle and inspector',
+    ],
+    useCase:
+      'No more "I thought it was fixed" — the record is clear, and the status reflects reality.',
+  },
+  {
+    title: 'MOT & tax monitoring',
+    icon: FileCheck,
+    summary:
+      'Connected to DVLA data so MOT dates, tax status, and vehicle details refresh on demand. Avoid the fine and the awkward conversation with a customer.',
+    bullets: [
+      'See MOT and tax status on every vehicle card',
+      'On-demand refresh direct from DVLA per vehicle',
+      'Cached to stay fast and keep API usage predictable',
+      'Flagging of vehicles approaching MOT or with expired tax',
+    ],
+    useCase:
+      'No spreadsheet of expiry dates, no forgotten renewals \u2014 the dashboard tells you before it matters.',
+  },
+  {
+    title: 'Team roles & permissions',
+    icon: Users,
+    summary:
+      'Two clean roles keep the system simple. Managers get full company-wide oversight from the web dashboard; staff use the mobile app to do their day job.',
+    bullets: [
+      'Invite team members by email in single or bulk',
+      'Scoped access \u2014 staff only see what they need',
+      'Managers handle vehicles, inspections, reporting, and billing',
+      'Remove or reassign team members at any time',
+    ],
+    useCase:
+      'Onboarding a new driver takes under a minute \u2014 they download the app, accept the invite, and they\u2019re scanning and inspecting the same day.',
+  },
+  {
+    title: 'Manager dashboard',
+    icon: Gauge,
+    summary:
+      'A single web dashboard for everything a manager needs: fleet status, defect alerts, asset inventory, team activity, and subscription management.',
+    bullets: [
+      'At-a-glance metrics for total assets, vehicles, and team',
+      'Defect notifications with full context',
+      'Reports and exports for insurance or audit requests',
+      'Manage vehicle count and billing cycle from one place',
+    ],
+    useCase:
+      'You start the day, open the dashboard, and know exactly what needs attention \u2014 no chasing, no phone calls.',
+  },
+  {
+    title: 'Asset history & accountability',
+    icon: ClipboardList,
+    summary:
+      'Every check-in, check-out, inspection, and defect is logged against the user and timestamped. The full history is there when you need it.',
+    bullets: [
+      'Per-item and per-user activity logs',
+      'Inspection photos stored securely in the cloud',
+      'Export activity for audits or incident reviews',
+      'Searchable history across assets and vehicles',
+    ],
+    useCase:
+      'If something goes missing or goes wrong, you have the evidence \u2014 who had it, when, and what condition it was in.',
+  },
+];
 
 export default function Features() {
-  const featureBlocks = [
-    {
-      title: "Fleet Management",
-      description: "Track vehicles, mileage, inspections, service dates, and defects with full history.",
-      icon: Car,
-    },
-    {
-      title: "Asset and Tool Tracking",
-      description: "Track tools across sites, projects, and users. QR scanning makes check-in and check-out instant.",
-      icon: ClipboardList,
-    },
-    {
-      title: "Vehicle Inspections",
-      description: "Structured inspections with required photos, checklist items, and defect flagging.",
-      icon: Wrench,
-    },
-    {
-      title: "Defect Workflow",
-      description: "Mark a defect to move a vehicle into maintenance. Resolve the defect to return it to active status.",
-      icon: Shield,
-    },
-    {
-      title: "QR Code Module",
-      description: "Apply QR codes to tools for scanning, check items in or out, and track who had the item last.",
-      icon: QrCode,
-    },
-    {
-      title: "Team Roles",
-      description: "Manager provides company oversight. Users focus on field work with scoped access.",
-      icon: Users,
-    },
-  ];
-
-  const dashboardHighlights = [
-    "At-a-glance metrics for total assets, vehicles, and team members (company scoped).",
-    "Manual refresh from the header to pull the latest data.",
-    "Quick navigation to team management, assets, locations, history, inspections, defects, and reports.",
-    "Invite team members by email and manage access by role.",
-    "Defect notification modal shows vehicle, inspector, date, type, severity, and description with options to view the full report or dismiss.",
-    "Dashboard is used to review data, exports, and billing controls for web subscriptions.",
-  ];
-
   return (
     <div className="min-h-screen bg-black text-white antialiased">
       <Navbar />
@@ -56,92 +157,94 @@ export default function Features() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(59,130,246,0.12),transparent)]" />
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
         <div className="container relative mx-auto px-4">
-          <p className="text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">
+          <p className="text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4 text-center">
             Features
           </p>
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-6 leading-tight">
-              Built for small businesses, trades, and contractors
+              Everything a fleet and asset manager actually needs
             </h1>
             <p className="text-lg text-white/75 leading-relaxed">
-              Fleet and asset management on iOS, Android, and the web dashboard.
+              No bloat. No upsells to other products. One subscription covers
+              tool tracking, fleet management, inspections, and compliance across
+              iOS, Android, and the web dashboard.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Feature cards */}
+      {/* Feature deep dives */}
       <section className="py-16 sm:py-20 border-t border-white/10">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {featureBlocks.map((feature) => (
-              <div
-                key={feature.title}
-                className="group p-7 sm:p-8 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-blue-500/30 hover:bg-white/[0.04] transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/5"
-              >
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-5 text-blue-500 group-hover:bg-blue-500/20 transition-colors">
-                  <feature.icon className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
-                <p className="text-white/60 text-sm leading-relaxed">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Manager Dashboard block */}
-      <section className="py-16 sm:py-20 bg-white/[0.02] border-t border-white/10">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto p-8 sm:p-10 rounded-2xl border border-white/10 bg-black/40 hover:border-blue-500/20 transition-all duration-300">
-            <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0 text-blue-500">
-                <RefreshCw className="w-6 h-6" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-white mb-3">Manager Dashboard</h2>
-                <p className="text-white/70 mb-6 leading-relaxed">
-                  Managers with an active subscription can view company data across tools, vehicles, users, and reports. Actions focus on reviewing data, exporting, and onboarding, with web subscription billing managed in the dashboard.
-                </p>
-                <ul className="space-y-3 text-white/80">
-                  {dashboardHighlights.map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
-                      <span className="text-sm sm:text-base leading-relaxed">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+          <div className="max-w-5xl mx-auto space-y-6">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <article
+                  key={feature.title}
+                  className="group p-7 sm:p-10 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-blue-500/30 hover:bg-white/[0.04] transition-all duration-300"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-5 sm:gap-6">
+                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500/20 transition-colors flex-shrink-0">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-xl sm:text-2xl font-semibold text-white mb-3">
+                        {feature.title}
+                      </h2>
+                      <p className="text-white/75 leading-relaxed mb-5">
+                        {feature.summary}
+                      </p>
+                      <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 mb-5">
+                        {feature.bullets.map((b) => (
+                          <li
+                            key={b}
+                            className="flex items-start gap-2.5 text-sm text-white/80"
+                          >
+                            <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                            <span className="leading-relaxed">{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-sm text-white/55 italic border-l-2 border-blue-500/40 pl-4">
+                        {feature.useCase}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="relative py-20 sm:py-24 overflow-hidden">
+      <section className="relative py-20 sm:py-24 overflow-hidden border-t border-white/10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_100%,rgba(59,130,246,0.1),transparent_70%)]" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
         <div className="container relative mx-auto px-4 text-center">
-          <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">Ready to get started?</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+            See how it fits your business
+          </h3>
           <p className="text-white/70 max-w-lg mx-auto mb-8">
-            New users receive a 7-day free trial. Contact us on WhatsApp for a quick setup conversation.
+            Every feature on this page is included in a single subscription
+            starting at £8 per vehicle per month. No contract, cancel anytime.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/pricing"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue"
+            >
+              View pricing
+              <ArrowRight className="w-4 h-4" />
+            </Link>
             <a
               href={WHATSAPP_ENQUIRY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue"
-            >
-              Contact
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-            </a>
-            <Link
-              href="/pricing"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-blue-500/50 hover:bg-white/5 transition-all duration-200 font-medium"
             >
-              View pricing
-            </Link>
+              Talk to us on WhatsApp
+            </a>
           </div>
         </div>
       </section>

@@ -3,20 +3,18 @@ import { MetadataRoute } from 'next'
 export const dynamic = 'force-static'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://stocktrackpro.com'
-  
-  // List all static routes
+  const baseUrl = 'https://stocktrackpro.co.uk'
+
   const routes = [
     '',
-    '/benefits',
     '/features',
-    '/faq',
-    '/how-to',
     '/pricing',
+    '/faq',
     '/contact',
+    '/terms',
+    '/subscription-terms',
     '/privacy',
     '/cookies',
-    '/terms'
   ]
 
   return routes.map(route => ({
@@ -25,4 +23,4 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: 'weekly',
     priority: route === '' ? 1 : 0.8,
   }))
-} 
+}
