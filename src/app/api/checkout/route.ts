@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStripe, getStripePriceId, MIN_VEHICLES } from '@/lib/stripe-server';
+import { getStripe, getStripePriceId, MIN_VEHICLES, type BillingCycle } from '@/lib/stripe-server';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
@@ -91,7 +91,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { vehicle_count, company_id: companyId } = body as { vehicle_count?: number; company_id?: string };
+    const { vehicle_count, company_id: companyId, billing_cycle } = body as {
+      vehicle_count?: number;
+      company_id?: string;
+      billing_cycle?: string;
+    };
 
     const vehicleCount = Number(vehicle_count);
     if (!vehicleCount || vehicleCount < MIN_VEHICLES || vehicleCount > 500 || !Number.isInteger(vehicleCount)) {
@@ -106,6 +110,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const cycle: BillingCycle = billing_cycle === 'yearly' ? 'yearly' : 'monthly';
 
     console.log('[Checkout] Fetching profile for uid:', uid);
     // Initialize Firebase Admin early (may be slow on cold start)
@@ -159,7 +164,7 @@ export async function POST(request: NextRequest) {
 
     let priceId: string;
     try {
-      priceId = getStripePriceId(TIER);
+      priceId = getStripePriceId(TIER, cycle);
     } catch (priceError) {
       console.error('Price ID error:', priceError);
       return NextResponse.json(
@@ -181,6 +186,7 @@ export async function POST(request: NextRequest) {
     console.log('[Checkout] Configuration:', {
       mode: isLiveMode ? 'LIVE' : 'TEST',
       vehicleCount,
+      billingCycle: cycle,
       priceId,
       baseUrl,
       successUrl,
@@ -227,11 +233,13 @@ export async function POST(request: NextRequest) {
         metadata: {
           company_id: trimmedCompanyId,
           vehicle_count: String(vehicleCount),
+          billing_cycle: cycle,
         },
         subscription_data: {
           metadata: {
             company_id: trimmedCompanyId,
             vehicle_count: String(vehicleCount),
+            billing_cycle: cycle,
           },
           ...(isNewCompany && { trial_period_days: 7 }),
         },

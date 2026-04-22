@@ -1,247 +1,161 @@
-# Stripe Integration Setup Guide
+# Stripe Integration Setup
 
-This guide walks you through completing the Stripe integration for Stock Track PRO.
+Stock Track PRO uses a single **per-vehicle product** with two recurring prices (monthly and annual). This guide walks through configuring Stripe for both test and live mode.
 
-## Prerequisites
+## Pricing model
 
-- ✅ Stripe account created and logged in
-- ✅ Environment variables configured (`.env.local`)
+- **Monthly:** £8 per vehicle per month
+- **Annual:** £84 per vehicle per year (≈ £7/month effective — ~12% saving)
+- **Minimum:** 5 vehicles
+- **Trial:** 7-day free trial for brand-new companies (no repeat trials on re-subscribe)
+- Quantity = number of subscribed vehicles
 
-## Step 1: Create Products and Prices in Stripe
+## Step 1: Create the product and prices in Stripe
 
-1. Go to [Stripe Dashboard](https://dashboard.stripe.com) → **Products**
-2. Create **4 products** (one for each tier):
-
-### Product 1: Starter
-- **Name:** Stock Track PRO - Starter
-- **Description:** Perfect for individual users
-- **Pricing:** 
-  - **Recurring:** Monthly
-  - **Price:** £19.99 GBP
-- **Metadata:** (optional) `tier: PRO_STARTER`
-
-### Product 2: Team
-- **Name:** Stock Track PRO - Team
-- **Description:** Ideal for small teams
-- **Pricing:**
-  - **Recurring:** Monthly
-  - **Price:** £49.99 GBP
-- **Metadata:** (optional) `tier: PRO_TEAM`
-
-### Product 3: Business
-- **Name:** Stock Track PRO - Business
-- **Description:** For growing businesses
-- **Pricing:**
-  - **Recurring:** Monthly
-  - **Price:** £99.99 GBP
-- **Metadata:** (optional) `tier: PRO_BUSINESS`
-
-### Product 4: Enterprise
-- **Name:** Stock Track PRO - Enterprise
-- **Description:** For large organizations
-- **Pricing:**
-  - **Recurring:** Monthly
-  - **Price:** £119.99 GBP
-- **Metadata:** (optional) `tier: PRO_ENTERPRISE`
-
-3. **Copy the Price IDs** (they start with `price_...`) for each product
-4. Add them to your `.env.local`:
-   ```bash
-   STRIPE_PRICE_STARTER=price_xxxxx
-   STRIPE_PRICE_TEAM=price_xxxxx
-   STRIPE_PRICE_BUSINESS=price_xxxxx
-   STRIPE_PRICE_ENTERPRISE=price_xxxxx
-   ```
-
-## Step 2: Set Up Webhook Endpoint
-
-1. Go to Stripe Dashboard → **Developers** → **Webhooks**
-2. Click **Add endpoint**
-3. **Endpoint URL:** `https://yourdomain.com/api/webhooks/stripe`
-   - Replace `yourdomain.com` with your actual domain (e.g., `stocktrackpro.co.uk`)
-   - For local testing: Use Stripe CLI (see below)
-4. **Events to send:** Select these events:
-   - `checkout.session.completed` (fires immediately after checkout, including trials)
-   - `invoice.paid` (fires when invoice is paid, including after trial ends)
-   - `customer.subscription.updated` (fires when subscription changes)
-   - `customer.subscription.deleted` (fires when subscription is canceled)
-5. Click **Add endpoint**
-6. **Copy the Signing secret** (starts with `whsec_...`)
-7. Add to `.env.local`:
-   ```bash
-   STRIPE_WEBHOOK_SECRET=whsec_xxxxx
-   ```
-
-### Local Testing with Stripe CLI
-
-If testing locally, install Stripe CLI and forward webhooks:
+1. Stripe Dashboard → **Products** → **Add product**
+2. Set **Name:** `Stock Track PRO — Per Vehicle`
+3. Description (optional): `Vehicle inspections, MOT/Tax monitoring, defects, and asset tracking — billed per vehicle.`
+4. Under **Pricing**, add **two** recurring prices on the same product:
+   - **Price 1 — Monthly:** £8.00 GBP, recurring monthly. Copy the price ID (starts with `price_…`).
+   - **Price 2 — Annual:** £84.00 GBP, recurring yearly. Copy the price ID.
+5. Paste both into your `.env.local` (and your hosting provider's environment variables):
 
 ```bash
-# Install Stripe CLI (if not installed)
-# macOS: brew install stripe/stripe-cli/stripe
-# Or download from https://stripe.com/docs/stripe-cli
+STRIPE_PRICE_PER_VEHICLE=price_xxxxxxxxxx        # monthly price
+STRIPE_PRICE_PER_VEHICLE_YEARLY=price_xxxxxxxxxx # annual price
+```
 
-# Login
+> Important: the codebase uses the **quantity** on the subscription line item to multiply by vehicle count. Don't create separate products per-tier — it's one product, two prices.
+
+## Step 2: Webhook endpoint
+
+1. Stripe Dashboard → **Developers** → **Webhooks** → **Add endpoint**
+2. **Endpoint URL:** `https://<your-domain>/api/webhooks/stripe`
+3. Select these events (and only these):
+   - `checkout.session.completed`
+   - `invoice.paid`
+   - `customer.subscription.updated`
+   - `customer.subscription.deleted`
+4. Save, reveal the **Signing secret** (`whsec_…`) and add it to your env:
+
+```bash
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxx
+```
+
+### Local webhook testing
+
+Install the Stripe CLI and forward events to your local dev server:
+
+```bash
+# macOS
+brew install stripe/stripe-cli/stripe
 stripe login
-
-# Forward webhooks to local server
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
-
-# Copy the webhook signing secret shown (whsec_...)
-# Add to .env.local as STRIPE_WEBHOOK_SECRET
 ```
 
-## Step 3: Configure Billing Portal
+Use the `whsec_…` shown in the terminal for local testing.
 
-1. Go to Stripe Dashboard → **Settings** → **Billing** → **Customer portal**
-2. **Enable** the Customer portal
-3. Configure settings:
-   - ✅ Allow customers to update payment methods
-   - ✅ Allow customers to cancel subscriptions
-   - ✅ Allow customers to update billing details
-   - ✅ Show invoice history
-4. **Save changes**
+## Step 3: Customer portal configuration
 
-## Step 4: Verify Environment Variables
+1. Stripe Dashboard → **Settings** → **Billing** → **Customer portal**
+2. Enable the portal
+3. Recommended settings:
+   - Allow customers to update payment methods: **On**
+   - Allow customers to cancel subscriptions: **On** (at end of period)
+   - Allow customers to update quantities: **Off** (we handle this through our dashboard UI so vehicle count stays in sync with Firestore)
+   - Show invoice history: **On**
+4. Optional: copy the configuration ID and set `STRIPE_PORTAL_CONFIGURATION_ID` in your env.
 
-Ensure your `.env.local` has all required Stripe variables:
+## Step 4: Environment variables (summary)
+
+Required in `.env.local` and on Vercel/your host:
 
 ```bash
-# Stripe API Keys
-STRIPE_SECRET_KEY=sk_live_...  # or sk_test_... for testing
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...  # or pk_test_... for testing
+STRIPE_SECRET_KEY=sk_live_or_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_or_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Stripe Price IDs
-STRIPE_PRICE_STARTER=price_...
-STRIPE_PRICE_TEAM=price_...
-STRIPE_PRICE_BUSINESS=price_...
-STRIPE_PRICE_ENTERPRISE=price_...
-
-# Website URL (for redirects)
-NEXT_PUBLIC_APP_URL=https://stocktrackpro.co.uk
+STRIPE_PRICE_PER_VEHICLE=price_...         # £8/vehicle/month
+STRIPE_PRICE_PER_VEHICLE_YEARLY=price_...  # £84/vehicle/year
+NEXT_PUBLIC_APP_URL=https://www.stocktrackpro.co.uk
 ```
 
-## Step 5: Test the Integration
+Optional:
 
-### Test Checkout Flow
+```bash
+STRIPE_PORTAL_CONFIGURATION_ID=bpc_...
+NEXT_PUBLIC_SUBSCRIPTION_SUCCESS_PATH=/return/subscription-success
+NEXT_PUBLIC_SUBSCRIPTION_CANCEL_PATH=/return/subscription-cancel
+```
 
-1. Log in to your dashboard as a manager/admin
-2. Go to **Pricing** page (`/pricing`)
-3. Click **Subscribe** on any tier
-4. You should be redirected to Stripe Checkout
-5. Use Stripe test card: `4242 4242 4242 4242`
-   - Expiry: Any future date
-   - CVC: Any 3 digits
-   - ZIP: Any 5 digits
-6. Complete checkout
-7. You should be redirected to `/return/subscription-success`
-8. Check Firestore `companies/{companyId}` document:
-   - `subscription_status` should be `active`
-   - `subscription_tier` should match the tier
-   - `stripe_subscription_id` should be set
-   - `stripe_customer_id` should be set
+## Step 5: Test the integration
 
-### Test Webhook
+### Test checkout
 
-1. In Stripe Dashboard → **Developers** → **Webhooks**
-2. Find your endpoint and click **Send test webhook**
-3. Select event: `customer.subscription.updated`
-4. Check your server logs (Vercel logs or local console) for webhook processing
-5. Verify the company document in Firestore was updated
+1. Log in as a manager/admin
+2. Go to `/pricing` and pick monthly or annual
+3. Click **Subscribe**
+4. Use card `4242 4242 4242 4242`, any future expiry, any CVC, any postcode
+5. Complete checkout → you are returned to `/return/subscription-success`
+6. Verify in Firestore `companies/{companyId}`:
+   - `subscription_status` = `trial` (new company) or `active`
+   - `subscription_type` = `stripe`
+   - `subscribed_vehicles` = your chosen count
+   - `billing_cycle` = `monthly` or `yearly`
+   - `stripe_subscription_id` = set
+   - `stripe_customer_id` = set
+   - `trial_end_date` = set (if on trial)
 
-### Test Billing Portal
+### Test webhook locally
 
-1. In dashboard, click **Manage subscription** (in sidebar)
-2. Should open Stripe Customer Portal
-3. Verify you can:
-   - Update payment method
-   - View invoices
-   - Cancel subscription (if needed)
+```bash
+stripe trigger checkout.session.completed
+stripe trigger invoice.paid
+stripe trigger customer.subscription.updated
+```
+
+Check logs for `Updated company … subscription` output and verify Firestore reflects the change.
+
+## Legacy / grandfathered customers
+
+Companies flagged as legacy are bypassed entirely by plan limits and should not go through the public checkout.
+
+To flag a company as legacy, set `legacy: true` on the `companies/{companyId}` Firestore document. You can do this from the Firebase Console or via the helper script:
+
+```bash
+node scripts/set-legacy-company.js <companyId>
+```
+
+This unsets plan limits on users, vehicles and assets, and shows a "Legacy plan" badge on the dashboard subscription page.
+
+## Going live
+
+1. Switch to **Live mode** in the Stripe dashboard
+2. Repeat Steps 1–3 in live mode (new product, new prices, new webhook endpoint)
+3. Replace test env vars with live ones (`sk_live_…`, `pk_live_…`, live `whsec_…`, live `price_…`)
+4. Redeploy
+
+## Security
+
+- ✅ Webhook signature verification (`stripe.webhooks.constructEvent`)
+- ✅ Idempotency via the `stripe_webhook_events` collection (duplicate events are skipped)
+- ✅ Rate limiting on `/api/checkout` and `/api/webhooks/stripe`
+- ✅ Manager/admin role required to start checkout or open the billing portal
+- ✅ Origin/Referer check on `/api/checkout`
+- ✅ Re-subscribe protection: a second active Stripe subscription cannot be created while one exists
 
 ## Troubleshooting
 
-### Checkout fails with "Invalid tier"
-- Verify price IDs in `.env.local` match Stripe Dashboard
-- Ensure tier names match exactly: `PRO_STARTER`, `PRO_TEAM`, `PRO_BUSINESS`, `PRO_ENTERPRISE`
+**"Missing env: STRIPE_PRICE_PER_VEHICLE(_YEARLY)"**
+The price ID for the chosen billing cycle isn't set. Double-check the env variable names and that they start with `price_`.
 
-### Webhook not receiving events
-- Verify webhook URL is correct and accessible
-- Check webhook signing secret matches
-- For local testing, ensure Stripe CLI is forwarding
-- Check Vercel/server logs for errors
+**Webhook returns 400 "Invalid signature"**
+The `STRIPE_WEBHOOK_SECRET` does not match the endpoint. Copy the signing secret again from the Stripe dashboard (or CLI). For local dev you must use the secret printed by `stripe listen`, not the one from the dashboard.
 
-### Subscription not updating in Firestore
-- Check webhook endpoint is receiving events
-- Verify `company_id` is in subscription metadata
-- Check Firestore security rules allow webhook updates
-- Review server logs for webhook processing errors
+**`billing_cycle` missing on company doc for old subscriptions**
+The webhook will populate `billing_cycle` on the next `customer.subscription.updated` event. You can also trigger a manual refresh from the dashboard subscription page ("Sync Subscription").
 
-### "Could not load the default credentials" error
+**"Could not load the default credentials"**
+`FIREBASE_SERVICE_ACCOUNT_JSON` is missing or malformed (must be minified to a single line). Use `cat service-account.json | jq -c .` to convert.
 
-This means `FIREBASE_SERVICE_ACCOUNT_JSON` is not set correctly in Vercel.
-
-**Fix:**
-1. Go to **Vercel Dashboard** → Your Project → **Settings** → **Environment Variables**
-2. Find or add `FIREBASE_SERVICE_ACCOUNT_JSON`
-3. **Important:** The JSON must be on a **single line** (no line breaks)
-   - Copy the entire JSON from Firebase Console
-   - Remove all line breaks/newlines
-   - Paste it as one continuous string
-   - Example: `{"type":"service_account","project_id":"...","private_key":"...","client_email":"..."}`
-4. Make sure it's set for **Production** environment (and Preview if needed)
-5. **Redeploy** your site after adding/updating the variable
-
-**To convert multi-line JSON to single line:**
-- Use an online JSON minifier, or
-- Copy the JSON and remove all newlines manually, or
-- Use this command: `cat service-account.json | jq -c .` (if you have jq installed)
-
-### Billing portal says "No subscription linked"
-- Ensure company has `stripe_customer_id` set
-- This is set automatically when checkout completes
-- If missing, check webhook processed `invoice.paid` event
-
-## App vs website subscriptions
-
-The dashboard shows a subscription as **active** whenever the company document has `subscription_status` set to `'active'` or `'trial'` in Firestore. That can be set in two ways:
-
-1. **Website**: User completes Stripe Checkout → webhooks update the company → `subscription_status` and `stripe_customer_id` are set. "Manage Billing Portal" then works.
-2. **App**: When the user completes a subscription inside the app (e.g. in-app purchase or Stripe in-app), the app should call the **Set subscription status** API so the dashboard shows them as active.
-
-### Set subscription status API (for app use)
-
-- **Endpoint:** `POST /api/subscription/set-status`
-- **Auth:** `Authorization: Bearer <firebase-id-token>` (manager or admin only)
-- **Body:** `{ "subscription_status": "active" | "trial" | "inactive", "subscription_tier": "PRO_STARTER" | "PRO_TEAM" | "PRO_BUSINESS" | "PRO_ENTERPRISE" (optional) }`
-- **Effect:** Updates the company document with `subscription_status` and optional `subscription_tier`, and sets `subscription_type: 'app'`. No Stripe customer is required; the dashboard will show the subscription as active and allow access.
-
-After the app calls this API, the user will see the subscription as active on the dashboard. "Manage Billing Portal" will remain disabled (and show a friendly message) until they also have a Stripe subscription linked via the website.
-
-## Going Live
-
-1. **Switch to Live Mode** in Stripe Dashboard
-2. **Update API keys** in `.env.local`:
-   - Replace `sk_test_...` with `sk_live_...`
-   - Replace `pk_test_...` with `pk_live_...`
-3. **Create live products/prices** (repeat Step 1 in live mode)
-4. **Update price IDs** in `.env.local` with live price IDs
-5. **Create live webhook endpoint** (repeat Step 2 in live mode)
-6. **Update webhook secret** in `.env.local`
-7. **Deploy** to production with updated environment variables
-
-## Security Notes
-
-- ✅ Never commit `.env.local` to git (already in `.gitignore`)
-- ✅ Use environment variables in Vercel/your hosting platform
-- ✅ Webhook signature verification is already implemented
-- ✅ Rate limiting is enabled on checkout and webhook endpoints
-- ✅ Only managers/admins can start checkout (verified in API)
-
-## Support
-
-If you encounter issues:
-1. Check Stripe Dashboard → **Developers** → **Logs** for API errors
-2. Check your server logs (Vercel Functions logs)
-3. Verify all environment variables are set correctly
-4. Test with Stripe test mode first before going live
+**Billing portal error: "No subscription linked"**
+The company has no `stripe_customer_id`. This is set when checkout completes. If missing, verify the webhook ran and the `invoice.paid` event fired.

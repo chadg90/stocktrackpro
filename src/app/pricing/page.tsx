@@ -2,16 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
-import { Check } from 'lucide-react';
+import { Check, ShieldCheck, Wrench, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 
-const PRICE_PER_VEHICLE = 8;
+const PRICE_PER_VEHICLE_MONTHLY = 8;
+const PRICE_PER_VEHICLE_YEARLY = 84; // = £7/vehicle/month effective, save ~12.5%
 const MIN_VEHICLES = 5;
 const MAX_VEHICLES = 100;
 
+type BillingCycle = 'monthly' | 'yearly';
 type Tier = { label: string; assets: string; users: string; colour: string };
 
 function getTier(count: number): Tier {
@@ -28,6 +30,7 @@ export default function Pricing() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [vehicleCount, setVehicleCount] = useState(MIN_VEHICLES);
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) { setAuthLoading(false); return; }
@@ -49,7 +52,13 @@ export default function Pricing() {
     profile?.company_id && (profile?.role === 'manager' || profile?.role === 'admin')
   );
 
-  const monthlyTotal = vehicleCount * PRICE_PER_VEHICLE;
+  const unitPrice = billingCycle === 'yearly' ? PRICE_PER_VEHICLE_YEARLY : PRICE_PER_VEHICLE_MONTHLY;
+  const cycleLabel = billingCycle === 'yearly' ? '/year' : '/month';
+  const billedTotal = vehicleCount * unitPrice;
+  const monthlyEquivalent =
+    billingCycle === 'yearly' ? (vehicleCount * PRICE_PER_VEHICLE_YEARLY) / 12 : billedTotal;
+  const monthlyAtMonthlyRate = vehicleCount * PRICE_PER_VEHICLE_MONTHLY;
+  const yearlySavings = Math.max(0, monthlyAtMonthlyRate * 12 - vehicleCount * PRICE_PER_VEHICLE_YEARLY);
 
   const handleSubscribe = async () => {
     if (!profile?.company_id || !authUser) return;
@@ -60,7 +69,11 @@ export default function Pricing() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ vehicle_count: vehicleCount, company_id: profile.company_id }),
+        body: JSON.stringify({
+          vehicle_count: vehicleCount,
+          company_id: profile.company_id,
+          billing_cycle: billingCycle,
+        }),
         signal: AbortSignal.timeout(25000),
       });
       const contentType = res.headers.get('content-type');
@@ -114,6 +127,23 @@ export default function Pricing() {
           <p className="text-lg sm:text-xl text-white/75 leading-relaxed">
             Pay per vehicle. No tiers, no hidden fees. Scale up or down — changes take effect from your next billing cycle.
           </p>
+
+          {/* Trust strip — one-liner value anchors */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/70">
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-blue-400" aria-hidden />
+              No contract, cancel anytime
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Wrench className="h-4 w-4 text-emerald-400" aria-hidden />
+              Asset &amp; tool tracking included
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="h-4 w-4 text-amber-400" aria-hidden />
+              7-day free trial
+            </span>
+          </div>
+
           <p className="text-sm text-white/45 mt-3">
             Already subscribed? Managers can manage billing from the dashboard subscription page.
           </p>
@@ -128,6 +158,51 @@ export default function Pricing() {
               </span>
             </div>
 
+            {/* Billing cycle toggle */}
+            <div className="mt-4 mb-6 flex justify-center">
+              <div
+                role="tablist"
+                aria-label="Billing cycle"
+                className="inline-flex items-center rounded-full bg-white/5 p-1 border border-white/10"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={billingCycle === 'monthly'}
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-all ${
+                    billingCycle === 'monthly'
+                      ? 'bg-blue-500 text-white shadow'
+                      : 'text-white/60 hover:text-white/85'
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={billingCycle === 'yearly'}
+                  onClick={() => setBillingCycle('yearly')}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-all inline-flex items-center gap-1.5 ${
+                    billingCycle === 'yearly'
+                      ? 'bg-blue-500 text-white shadow'
+                      : 'text-white/60 hover:text-white/85'
+                  }`}
+                >
+                  Annual
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                      billingCycle === 'yearly'
+                        ? 'bg-white/20 text-white'
+                        : 'bg-emerald-500/20 text-emerald-300'
+                    }`}
+                  >
+                    Save 12%
+                  </span>
+                </button>
+              </div>
+            </div>
+
             {/* Price display */}
             <div className="text-center mb-8 mt-2">
               <div className="flex items-center justify-center gap-2 mb-3">
@@ -137,13 +212,27 @@ export default function Pricing() {
               </div>
               <div className="flex items-end justify-center gap-1 mb-1">
                 <span className="text-5xl sm:text-6xl font-bold text-white transition-all duration-200">
-                  £{monthlyTotal.toFixed(0)}
+                  £{billedTotal.toFixed(0)}
                 </span>
-                <span className="text-white/50 text-lg mb-2">/month</span>
+                <span className="text-white/50 text-lg mb-2">{cycleLabel}</span>
               </div>
               <p className="text-white/50 text-sm">
-                £{PRICE_PER_VEHICLE} per vehicle &times; {vehicleCount} vehicle{vehicleCount !== 1 ? 's' : ''}
+                {billingCycle === 'yearly' ? (
+                  <>
+                    £{PRICE_PER_VEHICLE_YEARLY} per vehicle per year &times; {vehicleCount} vehicle{vehicleCount !== 1 ? 's' : ''}
+                    <span className="text-emerald-300/90"> · £{monthlyEquivalent.toFixed(2)}/month equivalent</span>
+                  </>
+                ) : (
+                  <>
+                    £{PRICE_PER_VEHICLE_MONTHLY} per vehicle &times; {vehicleCount} vehicle{vehicleCount !== 1 ? 's' : ''}
+                  </>
+                )}
               </p>
+              {billingCycle === 'yearly' && yearlySavings > 0 && (
+                <p className="text-emerald-300/85 text-xs mt-1">
+                  You save £{yearlySavings.toFixed(0)} per year vs monthly billing.
+                </p>
+              )}
             </div>
 
             {/* Slider */}
@@ -201,7 +290,9 @@ export default function Pricing() {
                 className="w-full py-4 px-6 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
                 aria-busy={checkoutLoading}
               >
-                {checkoutLoading ? 'Redirecting to checkout…' : `Subscribe — £${monthlyTotal}/month`}
+                {checkoutLoading
+                  ? 'Redirecting to checkout…'
+                  : `Subscribe — £${billedTotal}${cycleLabel}`}
               </button>
             ) : (
               <Link
@@ -213,7 +304,7 @@ export default function Pricing() {
             )}
 
             <p className="text-center text-white/40 text-xs mt-3">
-              New companies receive a 7-day free trial &bull; Cancel anytime
+              New companies receive a 7-day free trial &bull; Cancel anytime &bull; No contract
             </p>
 
             {/* Features */}
@@ -227,6 +318,9 @@ export default function Pricing() {
                   </li>
                 ))}
               </ul>
+              <p className="mt-4 text-xs text-white/45 leading-relaxed">
+                Asset &amp; tool tracking alone is typically sold as a separate product (from around £50/month elsewhere) — it&apos;s included with every Stock Track PRO plan at no extra cost.
+              </p>
             </div>
           </div>
 
@@ -237,8 +331,8 @@ export default function Pricing() {
               Subscription Terms
             </h3>
             <ul className="space-y-2 text-sm text-white/70">
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Billed monthly — £{PRICE_PER_VEHICLE} per vehicle</span></li>
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Minimum {MIN_VEHICLES} vehicles (£{MIN_VEHICLES * PRICE_PER_VEHICLE}/month)</span></li>
+              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Billed monthly — £{PRICE_PER_VEHICLE_MONTHLY} per vehicle, or annually — £{PRICE_PER_VEHICLE_YEARLY} per vehicle (save ~12%)</span></li>
+              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Minimum {MIN_VEHICLES} vehicles (£{MIN_VEHICLES * PRICE_PER_VEHICLE_MONTHLY}/month or £{MIN_VEHICLES * PRICE_PER_VEHICLE_YEARLY}/year)</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Vehicle count changes take effect from your next billing cycle</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>New companies receive a 7-day free trial</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Cancel anytime — no long-term contracts</span></li>

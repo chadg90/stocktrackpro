@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, ShieldCheck, Wrench } from 'lucide-react';
 import Link from 'next/link';
 
-const PRICE_PER_VEHICLE = 8;
+const PRICE_PER_VEHICLE_MONTHLY = 8;
+const PRICE_PER_VEHICLE_YEARLY = 84;
 const MIN_VEHICLES = 5;
 const MAX_VEHICLES = 100;
 
+type BillingCycle = 'monthly' | 'yearly';
 type Tier = { label: string; assets: string; users: string };
 function getTier(count: number): Tier {
   if (count <= 15) return { label: 'Starter',    assets: '1,000 assets',    users: 'Up to 15 users'    };
@@ -18,7 +20,11 @@ function getTier(count: number): Tier {
 
 export default function PricingSection() {
   const [vehicleCount, setVehicleCount] = useState(MIN_VEHICLES);
-  const monthlyTotal = vehicleCount * PRICE_PER_VEHICLE;
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
+  const unitPrice = billingCycle === 'yearly' ? PRICE_PER_VEHICLE_YEARLY : PRICE_PER_VEHICLE_MONTHLY;
+  const billedTotal = vehicleCount * unitPrice;
+  const monthlyEquivalent =
+    billingCycle === 'yearly' ? (vehicleCount * PRICE_PER_VEHICLE_YEARLY) / 12 : billedTotal;
   const tier = getTier(vehicleCount);
 
   const features = [
@@ -39,25 +45,72 @@ export default function PricingSection() {
     <section id="pricing" className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Simple, transparent pricing</h2>
           <p className="mt-3 text-lg text-gray-600">
-            £{PRICE_PER_VEHICLE} per vehicle per month. All features included. No tiers.
+            Pay per vehicle. All features included. No tiers, no hidden fees.
           </p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-sm text-gray-600">
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-blue-600" aria-hidden />
+              No contract, cancel anytime
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Wrench className="h-4 w-4 text-emerald-600" aria-hidden />
+              Asset &amp; tool tracking included
+            </span>
+          </div>
         </div>
 
         {/* Card */}
         <div className="rounded-2xl bg-white shadow-xl border border-gray-200 overflow-hidden">
-          <div className="bg-blue-600 px-8 py-6 text-center">
+          <div className="bg-blue-600 px-8 pt-6 pb-5 text-center">
+            <div className="mb-4 flex justify-center">
+              <div
+                role="tablist"
+                aria-label="Billing cycle"
+                className="inline-flex items-center rounded-full bg-white/15 p-1"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={billingCycle === 'monthly'}
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition ${
+                    billingCycle === 'monthly' ? 'bg-white text-blue-700 shadow' : 'text-white/85 hover:text-white'
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={billingCycle === 'yearly'}
+                  onClick={() => setBillingCycle('yearly')}
+                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition inline-flex items-center gap-1.5 ${
+                    billingCycle === 'yearly' ? 'bg-white text-blue-700 shadow' : 'text-white/85 hover:text-white'
+                  }`}
+                >
+                  Annual
+                  <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                    billingCycle === 'yearly' ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-400/25 text-white'
+                  }`}>
+                    Save 12%
+                  </span>
+                </button>
+              </div>
+            </div>
             <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-3">
               {tier.label}
             </span>
             <div className="flex items-end justify-center gap-1">
-              <span className="text-5xl font-bold text-white">£{monthlyTotal}</span>
-              <span className="text-blue-200 text-lg mb-1">/month</span>
+              <span className="text-5xl font-bold text-white">£{billedTotal}</span>
+              <span className="text-blue-200 text-lg mb-1">{billingCycle === 'yearly' ? '/year' : '/month'}</span>
             </div>
             <p className="text-blue-200 text-sm mt-1">
-              £{PRICE_PER_VEHICLE} &times; {vehicleCount} vehicle{vehicleCount !== 1 ? 's' : ''}
+              {billingCycle === 'yearly'
+                ? `£${PRICE_PER_VEHICLE_YEARLY} × ${vehicleCount} vehicle${vehicleCount !== 1 ? 's' : ''} · £${monthlyEquivalent.toFixed(2)}/month equivalent`
+                : `£${PRICE_PER_VEHICLE_MONTHLY} × ${vehicleCount} vehicle${vehicleCount !== 1 ? 's' : ''}`}
             </p>
           </div>
 
@@ -88,7 +141,7 @@ export default function PricingSection() {
               href="/pricing"
               className="block w-full bg-blue-600 text-white text-center rounded-xl py-3 px-6 font-semibold hover:bg-blue-700 transition-colors mb-6"
             >
-              Get Started — £{monthlyTotal}/month
+              Get Started — £{billedTotal}{billingCycle === 'yearly' ? '/year' : '/month'}
             </Link>
 
             <ul className="space-y-2">

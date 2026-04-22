@@ -7,10 +7,13 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { CreditCard, Check, ExternalLink, AlertCircle, Calendar, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
-const PRICE_PER_VEHICLE = 8;
+const PRICE_PER_VEHICLE_MONTHLY = 8;
+const PRICE_PER_VEHICLE_YEARLY = 84;
 const MIN_VEHICLES = 5;
 const MAX_VEHICLES = 100;
 const WHATSAPP_SUPPORT_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%20support%2C%20I%20need%20help%20with%20billing%3A';
+
+type BillingCycle = 'monthly' | 'yearly';
 
 type Profile = {
   company_id?: string;
@@ -24,6 +27,7 @@ type Company = {
   subscription_type?: string;
   trial_end_date?: any;
   subscribed_vehicles?: number;
+  billing_cycle?: BillingCycle;
   legacy?: boolean;
 };
 
@@ -52,6 +56,7 @@ export default function SubscriptionPage() {
   const [syncing, setSyncing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [vehicleCount, setVehicleCount] = useState<number>(MIN_VEHICLES);
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
 
   const loadSubscriptionData = async (user: User) => {
     if (!firebaseDb) return;
@@ -72,6 +77,9 @@ export default function SubscriptionPage() {
               setVehicleCount(Math.min(companyData.subscribed_vehicles, MAX_VEHICLES));
             } else {
               setVehicleCount(MIN_VEHICLES);
+            }
+            if (companyData.billing_cycle === 'yearly' || companyData.billing_cycle === 'monthly') {
+              setBillingCycle(companyData.billing_cycle);
             }
           }
         }
@@ -121,6 +129,7 @@ export default function SubscriptionPage() {
         body: JSON.stringify({
           vehicle_count: vehicleCount,
           company_id: profile.company_id,
+          billing_cycle: billingCycle,
         }),
         signal: AbortSignal.timeout(25000),
       });
@@ -250,7 +259,15 @@ export default function SubscriptionPage() {
     ? { label: 'Legacy Plan', assets: 'As agreed', users: 'As agreed', colour: 'text-amber-700 dark:text-amber-300' }
     : tier;
   const currentVehicles = company?.subscribed_vehicles || 0;
-  const monthlyTotal = vehicleCount * PRICE_PER_VEHICLE;
+  const currentCycle: BillingCycle = company?.billing_cycle === 'yearly' ? 'yearly' : 'monthly';
+  const unitPrice = billingCycle === 'yearly' ? PRICE_PER_VEHICLE_YEARLY : PRICE_PER_VEHICLE_MONTHLY;
+  const billedTotal = vehicleCount * unitPrice;
+  const monthlyEquivalent = billingCycle === 'yearly' ? billedTotal / 12 : billedTotal;
+  const estimatedCurrentMonthly = currentVehicles
+    ? currentCycle === 'yearly'
+      ? (currentVehicles * PRICE_PER_VEHICLE_YEARLY) / 12
+      : currentVehicles * PRICE_PER_VEHICLE_MONTHLY
+    : 0;
 
   return (
     <div className="space-y-8">
@@ -281,7 +298,7 @@ export default function SubscriptionPage() {
             Legacy pricing: your company remains on its initial agreed price long term.
           </p>
           <p className="text-amber-800 dark:text-amber-200/90 text-sm mt-1">
-            This account is excluded from new per-vehicle pricing unless you request a plan change.
+            This account is excluded from new per-vehicle pricing, including the monthly and annual plans available to new customers. Contact support via WhatsApp if you&apos;d like to discuss a plan change.
           </p>
         </div>
       )}
@@ -308,8 +325,17 @@ export default function SubscriptionPage() {
           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Estimated Monthly</p>
             <p className="text-white font-semibold text-lg">
-              {company?.legacy ? 'Legacy pricing' : (currentVehicles ? formatCurrency(currentVehicles * PRICE_PER_VEHICLE) : '—')}
+              {company?.legacy
+                ? 'Legacy pricing'
+                : currentVehicles
+                  ? formatCurrency(estimatedCurrentMonthly)
+                  : '—'}
             </p>
+            {!company?.legacy && currentVehicles > 0 && (
+              <p className="text-white/45 text-xs mt-1">
+                {currentCycle === 'yearly' ? 'Billed annually' : 'Billed monthly'}
+              </p>
+            )}
           </div>
           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Feature Tier</p>
@@ -361,11 +387,11 @@ export default function SubscriptionPage() {
         </div>
       </div>
 
-      {canManage && (
+      {canManage && !company?.legacy && (
         <div className="dashboard-card p-8">
-          <h2 className="text-2xl font-semibold text-white mb-2">Update Vehicle Count</h2>
+          <h2 className="text-2xl font-semibold text-white mb-2">Update Vehicle Count or Billing Cycle</h2>
           <p className="text-white/75 mb-6">
-            £{PRICE_PER_VEHICLE} per vehicle per month (minimum {MIN_VEHICLES}). Changes apply from your next billing cycle.
+            £{PRICE_PER_VEHICLE_MONTHLY}/vehicle monthly or £{PRICE_PER_VEHICLE_YEARLY}/vehicle yearly (save ~12%). Minimum {MIN_VEHICLES} vehicles. Changes apply from your next billing cycle.
           </p>
 
           {checkoutError && (
@@ -376,6 +402,44 @@ export default function SubscriptionPage() {
           )}
 
           <div className="max-w-2xl">
+            {/* Billing cycle toggle */}
+            <div className="mb-5">
+              <p className="text-sm text-white/60 mb-2">Billing cycle</p>
+              <div
+                role="tablist"
+                aria-label="Billing cycle"
+                className="inline-flex items-center rounded-full bg-white/5 p-1 border border-white/10"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={billingCycle === 'monthly'}
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-full transition ${
+                    billingCycle === 'monthly' ? 'bg-blue-500 text-white shadow' : 'text-white/60 hover:text-white/85'
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={billingCycle === 'yearly'}
+                  onClick={() => setBillingCycle('yearly')}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-full transition inline-flex items-center gap-1.5 ${
+                    billingCycle === 'yearly' ? 'bg-blue-500 text-white shadow' : 'text-white/60 hover:text-white/85'
+                  }`}
+                >
+                  Annual
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                    billingCycle === 'yearly' ? 'bg-white/20 text-white' : 'bg-emerald-500/20 text-emerald-300'
+                  }`}>
+                    Save 12%
+                  </span>
+                </button>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between text-sm text-white/60 mb-3">
               <span>Vehicles</span>
               <span className="text-white font-semibold">{vehicleCount}</span>
@@ -398,10 +462,21 @@ export default function SubscriptionPage() {
               <span>{MAX_VEHICLES}+</span>
             </div>
             <div className="mt-4 flex items-center justify-between text-sm">
-              <span className="text-white/60">Estimated monthly total</span>
-              <span className="text-white font-semibold">{formatCurrency(monthlyTotal)}</span>
+              <span className="text-white/60">
+                {billingCycle === 'yearly' ? 'Billed yearly' : 'Billed monthly'}
+              </span>
+              <span className="text-white font-semibold">
+                {formatCurrency(billedTotal)}
+                {billingCycle === 'yearly' ? '/yr' : '/mo'}
+              </span>
             </div>
-            <div className="mt-2 text-sm text-white/70">
+            {billingCycle === 'yearly' && (
+              <div className="mt-1 flex items-center justify-between text-xs">
+                <span className="text-white/45">Monthly equivalent</span>
+                <span className="text-emerald-300/90">{formatCurrency(monthlyEquivalent)}/mo</span>
+              </div>
+            )}
+            <div className="mt-3 text-sm text-white/70">
               <span className={effectiveTier.colour}>{effectiveTier.label}</span> includes {effectiveTier.assets}, {effectiveTier.users}
             </div>
             <button
@@ -409,7 +484,9 @@ export default function SubscriptionPage() {
               disabled={checkoutLoading}
               className="mt-6 w-full py-3 px-4 rounded-lg font-semibold transition-all bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 disabled:opacity-50"
             >
-              {checkoutLoading ? 'Processing...' : `Continue to Checkout — ${formatCurrency(monthlyTotal)}/month`}
+              {checkoutLoading
+                ? 'Processing...'
+                : `Continue to Checkout — ${formatCurrency(billedTotal)}${billingCycle === 'yearly' ? '/year' : '/month'}`}
             </button>
           </div>
         </div>

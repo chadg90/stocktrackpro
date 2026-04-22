@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
         const subscriptionId = session.subscription as string | null;
         const companyId = session.metadata?.company_id;
         const vehicleCountRaw = session.metadata?.vehicle_count;
+        const billingCycleMeta = session.metadata?.billing_cycle;
 
         if (!subscriptionId || !companyId) {
           console.warn('Stripe webhook: checkout.session.completed missing subscription_id or company_id');
@@ -69,6 +70,13 @@ export async function POST(request: NextRequest) {
         const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
         const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
         const status = subscription.status;
+        const intervalFromPrice = subscription.items?.data?.[0]?.price?.recurring?.interval;
+        const billingCycle: 'monthly' | 'yearly' =
+          intervalFromPrice === 'year'
+            ? 'yearly'
+            : intervalFromPrice === 'month'
+              ? 'monthly'
+              : billingCycleMeta === 'yearly' ? 'yearly' : 'monthly';
 
         let firebaseStatus: string;
         if (status === 'trialing') {
@@ -89,6 +97,7 @@ export async function POST(request: NextRequest) {
           {
             subscription_status: firebaseStatus,
             subscription_type: 'stripe',
+            billing_cycle: billingCycle,
             ...(subscribedVehicles && { subscribed_vehicles: subscribedVehicles }),
             ...(expiryDate && { subscription_expiry_date: expiryDate }),
             ...(trialEndDate && { trial_end_date: trialEndDate }),
@@ -98,7 +107,7 @@ export async function POST(request: NextRequest) {
           },
           { merge: true }
         );
-        console.log('Updated company', companyId, 'subscription from checkout.session.completed', { status: firebaseStatus, subscribedVehicles });
+        console.log('Updated company', companyId, 'subscription from checkout.session.completed', { status: firebaseStatus, subscribedVehicles, billingCycle });
         break;
       }
 
@@ -143,6 +152,9 @@ export async function POST(request: NextRequest) {
         if (!companyId) break;
 
         const status = subscription.status;
+        const intervalFromPrice = subscription.items?.data?.[0]?.price?.recurring?.interval;
+        const billingCycle: 'monthly' | 'yearly' | null =
+          intervalFromPrice === 'year' ? 'yearly' : intervalFromPrice === 'month' ? 'monthly' : null;
         
         // Map Stripe status to Firebase status
         let firebaseStatus: string;
@@ -173,6 +185,7 @@ export async function POST(request: NextRequest) {
           {
             subscription_status: firebaseStatus,
             subscription_type: 'stripe',
+            ...(billingCycle && { billing_cycle: billingCycle }),
             ...(subscribedVehicles && { subscribed_vehicles: subscribedVehicles }),
             ...(expiryDate && { subscription_expiry_date: expiryDate }),
             ...(trialEndDate && { trial_end_date: trialEndDate }),
@@ -182,7 +195,7 @@ export async function POST(request: NextRequest) {
           },
           { merge: true }
         );
-        console.log('Updated company', companyId, 'subscription (customer.subscription.updated)', { stripeStatus: status, firebaseStatus, subscribedVehicles });
+        console.log('Updated company', companyId, 'subscription (customer.subscription.updated)', { stripeStatus: status, firebaseStatus, subscribedVehicles, billingCycle });
         break;
       }
 

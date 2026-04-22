@@ -15,17 +15,20 @@ export function getStripe(): Stripe {
 }
 
 export type SubscriptionTier = 'PRO_PER_VEHICLE';
+export type BillingCycle = 'monthly' | 'yearly';
 
-export function getStripePriceId(_tier: SubscriptionTier): string {
-  const priceId = process.env.STRIPE_PRICE_PER_VEHICLE;
+export function getStripePriceId(_tier: SubscriptionTier, cycle: BillingCycle = 'monthly'): string {
+  const envVar = cycle === 'yearly' ? 'STRIPE_PRICE_PER_VEHICLE_YEARLY' : 'STRIPE_PRICE_PER_VEHICLE';
+  const priceId = process.env[envVar];
   if (!priceId) {
-    throw new Error('Missing env: STRIPE_PRICE_PER_VEHICLE');
+    throw new Error(`Missing env: ${envVar}`);
   }
   return priceId;
 }
 
 export const MIN_VEHICLES = 5;
-export const PRICE_PER_VEHICLE = 8; // GBP
+export const PRICE_PER_VEHICLE = 8; // GBP, monthly
+export const PRICE_PER_VEHICLE_YEARLY = 84; // GBP per vehicle per year (~£7/mo, save ~12.5%)
 
 /** Create a Stripe Customer Portal session for managing subscription. Requires company to have stripe_customer_id. */
 export async function createBillingPortalSession(

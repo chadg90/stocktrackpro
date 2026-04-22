@@ -27,16 +27,18 @@ export default function SubscriptionTermsPage() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">1. Plan Model</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4">
-              <li>Standard pricing is charged per subscribed vehicle, per month.</li>
+              <li>Standard pricing is charged per subscribed vehicle, billed either monthly or annually at your choice.</li>
+              <li>Annual billing is charged in advance at a discounted rate (approximately 12% lower than paying monthly).</li>
               <li>Minimum subscription quantity is 5 vehicles.</li>
-              <li>Displayed pricing is in GBP and may be subject to VAT or applicable taxes.</li>
+              <li>Displayed pricing is in GBP and includes VAT unless stated otherwise.</li>
             </ul>
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">2. Billing Cycle and Renewal</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4">
-              <li>Subscriptions renew automatically each month unless cancelled before renewal.</li>
+              <li>Subscriptions renew automatically at the end of each billing period (monthly or yearly) unless cancelled before renewal.</li>
               <li>Billing is processed by Stripe using your selected payment method.</li>
               <li>Failed payments may result in suspension of subscription features until resolved.</li>
+              <li>You may switch between monthly and annual billing at any time from the dashboard subscription page; the change takes effect at the next renewal.</li>
             </ul>
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">3. Vehicle Quantity Changes</h2>
