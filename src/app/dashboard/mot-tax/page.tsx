@@ -517,12 +517,12 @@ export default function MotTaxPage() {
                   row.worstBucket
                 )} ${cardTint(row.worstBucket)}`}
               >
-                <div className="flex flex-col lg:flex-row lg:items-center gap-2 px-3 py-2">
+                <div className="flex flex-col lg:flex-row lg:items-center gap-2.5 px-4 py-2.5">
                   <div className="flex items-center gap-2 min-w-0 lg:w-56 shrink-0">
-                    <span className="inline-flex items-center rounded border border-zinc-400 bg-white px-1.5 py-0.5 text-xs font-mono font-bold text-zinc-900 dark:border-slate-500/50 dark:bg-slate-900/80 dark:text-white">
+                    <span className="inline-flex items-center rounded border border-zinc-400 bg-white px-2 py-0.5 text-xs font-mono font-bold text-zinc-900 dark:border-slate-500/50 dark:bg-slate-900/80 dark:text-white">
                       {row.registration || '—'}
                     </span>
-                    <span className="text-xs font-medium text-zinc-800 dark:text-white/90 truncate">
+                    <span className="text-sm font-medium text-zinc-800 dark:text-white/90 truncate">
                       {[row.make, row.model].filter(Boolean).join(' ') || 'Unknown'}
                     </span>
                     {row.dvla_year && (
@@ -548,7 +548,7 @@ export default function MotTaxPage() {
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 lg:justify-end">
-                    <span className="text-[11px] text-zinc-600 dark:text-white/55 flex items-center gap-1 whitespace-nowrap">
+                    <span className="text-xs text-zinc-600 dark:text-white/55 flex items-center gap-1 whitespace-nowrap">
                       <Clock className="h-3 w-3" aria-hidden />
                       {formatRelative(lastSync)}
                     </span>
@@ -558,7 +558,7 @@ export default function MotTaxPage() {
                         handleRefreshVehicle(row.id, row.registration || '')
                       }
                       disabled={refreshing}
-                      className="inline-flex items-center gap-1 rounded-md border border-blue-600 bg-blue-600 px-2 py-1 text-[11px] font-semibold text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors dark:border-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400"
+                      className="inline-flex items-center gap-1 rounded-md border border-blue-600 bg-blue-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors dark:border-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400"
                       aria-label={`Refresh ${row.registration || 'vehicle'} from DVLA`}
                     >
                       <RefreshCw
@@ -571,7 +571,7 @@ export default function MotTaxPage() {
                 </div>
 
                 {row.dvla_sync_error && (
-                  <p className="px-3 pb-2 text-[11px] text-red-800 dark:text-red-200 flex items-center gap-1.5">
+                  <p className="px-4 pb-2.5 text-xs text-red-800 dark:text-red-200 flex items-center gap-1.5">
                     <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />
                     Sync issue: {row.dvla_sync_error}
                   </p>
@@ -645,29 +645,29 @@ function InlineExpiry({
   bucket: ExpiryBucket;
 }) {
   return (
-    <div className="flex items-center gap-2 min-w-0 rounded-md border border-zinc-200 bg-white/70 px-2 py-1 dark:border-slate-700/50 dark:bg-slate-900/40">
-      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-white/55 shrink-0 w-7">
+    <div className="flex items-center gap-2.5 min-w-0 rounded-md border border-zinc-200 bg-white/70 px-2.5 py-1.5 dark:border-slate-700/50 dark:bg-slate-900/40">
+      <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-white/55 shrink-0 w-8">
         {title}
       </span>
       <span
-        className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0 text-[10px] font-semibold shrink-0 ${bucketClasses(
+        className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[11px] font-semibold shrink-0 ${bucketClasses(
           bucket
         )}`}
       >
         {bucket === 'ok' || bucket === 'not_due' ? (
-          <CheckCircle2 className="h-2.5 w-2.5" aria-hidden />
+          <CheckCircle2 className="h-3 w-3" aria-hidden />
         ) : bucket === 'unknown' ? (
-          <HelpCircle className="h-2.5 w-2.5" aria-hidden />
+          <HelpCircle className="h-3 w-3" aria-hidden />
         ) : (
-          <AlertTriangle className="h-2.5 w-2.5" aria-hidden />
+          <AlertTriangle className="h-3 w-3" aria-hidden />
         )}
         {bucketLabel(bucket)}
       </span>
-      <span className="text-xs font-semibold text-zinc-900 dark:text-white truncate">
+      <span className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
         {date ? formatDate(date) : bucket === 'not_due' ? 'Not required yet' : '—'}
       </span>
       {date && (
-        <span className="text-[11px] text-zinc-600 dark:text-white/65 truncate">
+        <span className="text-xs text-zinc-600 dark:text-white/65 truncate">
           {daysLabel(days, bucket)}
         </span>
       )}
