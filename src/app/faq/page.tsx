@@ -5,7 +5,7 @@ export default function FAQ() {
   const faqs = [
     {
       question: "How do I get an account?",
-      answer: "New companies can get started from this website by selecting Get Started. You can then set up your company and invite your team. Existing team members should use their invite link and then sign in to the app (App Store or Google Play). Managers sign in to the web dashboard via Log in.",
+      answer: "New companies sign up on this website by selecting Start free trial — accounts and subscriptions can only be created on the web. You then set up your company and invite your team by email. Invited team members open their invite link to set a password, then sign in to the companion app on iOS or Android. Managers sign in to the web dashboard via Log in.",
     },
     {
       question: "Do I need QR codes to use the app?",
@@ -21,15 +21,15 @@ export default function FAQ() {
     },
     {
       question: "Does this work on Android and iOS?",
-      answer: "Yes. The app is on both Android and iOS. Managers also get access to a web dashboard for analytics, team management, and subscription (web payers can manage billing in the dashboard).",
+      answer: "Yes. The companion app runs on both Android and iOS and is used by your team day-to-day for QR scanning, vehicle inspections, and defect logging. Managers also get a web dashboard for analytics, team management, and billing.",
     },
     {
-      question: "How do I subscribe—app or web?",
-      answer: "Managers can subscribe on the web (Pricing page, card payment) or in the app (App Store / Google Play). Web subscriptions can be managed or cancelled from the dashboard. In-app subscriptions are managed in your device’s store settings. New users receive a 7-day free trial.",
+      question: "How do I subscribe?",
+      answer: "Subscriptions are set up on the website only — the mobile app is a companion app and does not handle payment. Managers subscribe from the Pricing page or from the Subscription section of the web dashboard, using a card via our Stripe checkout. New companies get a 7-day free trial; no card is required to start the trial.",
     },
     {
       question: "Can I cancel anytime?",
-      answer: "Monthly plans can be cancelled anytime and the subscription ends at the end of the current billing month. Annual plans are a 12-month term paid upfront at a discount — you can cancel the renewal at any time (so you won\u2019t be charged again), but unused months within the paid year are not refunded. Web subscriptions are managed from Manage Billing in the dashboard; in-app subscriptions are managed in your App Store or Google Play settings.",
+      answer: "Yes. Cancel from Manage Billing in the web dashboard. Monthly plans can be cancelled anytime and access continues until the end of the current billing month. Annual plans are a 12-month term paid upfront at a discount — you can cancel the renewal at any time (so you won\u2019t be charged again), but unused months within the paid year are not refunded.",
     },
     {
       question: "Is my data secure?",

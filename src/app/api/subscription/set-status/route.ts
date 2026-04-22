@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 
 /**
- * Set subscription status on the company (e.g. when user subscribes via the app).
+ * Set subscription status on the company.
  * Dashboard access is driven by company.subscription_status ('active' | 'trial').
- * This allows app-originated subscriptions to show as active on the dashboard
- * without requiring a Stripe customer.
+ * Subscriptions are sold on the website only (via Stripe). This endpoint is
+ * reserved for internal/admin use — for example, flagging a legacy or
+ * manually-managed company as active without a Stripe customer record.
  */
 const VALID_STATUSES = ['active', 'trial', 'inactive'];
 const VALID_TIERS = ['PRO_STARTER', 'PRO_TEAM', 'PRO_BUSINESS', 'PRO_ENTERPRISE'];

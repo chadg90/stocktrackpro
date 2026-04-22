@@ -25,8 +25,10 @@ export default function SubscriptionTermsPage() {
 
             <p className="text-zinc-300 mb-4">
               These Subscription Terms apply to all paid Stock Track PRO subscriptions purchased
-              through our website checkout or through in-app purchase on the App Store or Google
-              Play. They should be read alongside our{' '}
+              through our website checkout. The Stock Track PRO mobile app is a companion app used
+              by your team to log inspections, scan assets and report defects; subscriptions are
+              not sold or renewed through the app itself. These Subscription Terms should be read
+              alongside our{' '}
               <Link href="/terms" className="text-blue-400 hover:text-blue-300">
                 Terms and Conditions
               </Link>{' '}
@@ -87,11 +89,7 @@ export default function SubscriptionTermsPage() {
                 Subscriptions renew automatically at the end of each billing period (monthly or
                 yearly) unless cancelled before renewal.
               </li>
-              <li>Website subscriptions are billed by Stripe using your chosen payment method.</li>
-              <li>
-                In-app subscriptions (iOS / Android) are billed by Apple or Google and governed by
-                their standard terms in addition to these Subscription Terms.
-              </li>
+              <li>Subscriptions are billed by Stripe using the payment method you provide at checkout.</li>
               <li>
                 You can switch between monthly and annual billing from the dashboard. A change from
                 monthly to annual takes effect at the next renewal.
@@ -129,10 +127,6 @@ export default function SubscriptionTermsPage() {
               <li>
                 Fees already paid are non-refundable except where required by law or where we have
                 materially failed to provide the service.
-              </li>
-              <li>
-                In-app subscriptions must be cancelled through the App Store or Google Play. Refunds
-                for in-app purchases are handled by Apple or Google under their own policies.
               </li>
             </ul>
 

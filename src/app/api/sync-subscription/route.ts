@@ -74,12 +74,12 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({
             success: true,
             synced: false,
-            message: 'Your subscription is already active. Billing is managed via the app or another channel. Manage Billing Portal is only available for subscriptions started on the website.',
+            message: 'Your subscription is already active but not linked to Stripe (likely a legacy or manually-managed account). For billing changes, contact support@stocktrackpro.co.uk.',
             subscription_status: currentStatus,
           });
         }
         return NextResponse.json({ 
-          error: 'No Stripe customer found. Subscribe on the website (Pricing page) or complete subscription in the app first.',
+          error: 'No Stripe customer found. Subscribe from the Pricing page on the website to activate billing.',
           hasSubscription: false 
         }, { status: 400 });
       }
@@ -123,12 +123,12 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({
             success: true,
             synced: false,
-            message: 'Your subscription is already active. Billing is managed via the app or another channel.',
+            message: 'Your subscription is already active but not linked to Stripe (likely a legacy or manually-managed account). For billing changes, contact support@stocktrackpro.co.uk.',
             subscription_status: currentStatus,
           });
         }
         return NextResponse.json({ 
-          error: 'No Stripe subscription found for this company. Subscribe on the website (Pricing page) or complete subscription in the app first.',
+          error: 'No Stripe subscription found for this company. Subscribe from the Pricing page on the website to activate billing.',
           hasSubscription: false 
         }, { status: 400 });
       }

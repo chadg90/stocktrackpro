@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Pricing',
-  description: 'View Stock Track PRO plans and pricing. Starter, Team, Business and Enterprise tiers. Start a free trial or subscribe on web or in the app.',
+  description: 'Stock Track PRO pricing — £8 per vehicle per month or £84 per vehicle per year. All features included. Start a 7-day free trial and subscribe on the web.',
   alternates: { canonical: '/pricing' },
   openGraph: {
     title: 'Pricing | Stock Track PRO',
