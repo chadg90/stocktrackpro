@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Features',
-  description: 'Stock Track PRO features: fleet management, vehicle inspections, asset and tool tracking, QR check-in/out, defect workflow, and team management.',
+  description: 'Stock Track PRO features: fleet management, vehicle inspections, defect workflow, MOT and tax monitoring, and team management.',
   alternates: { canonical: '/features' },
   openGraph: {
     title: 'Features | Stock Track PRO',
-    description: 'Fleet management, inspections, asset tracking, QR check-in, defect workflow, and team management for trades and contractors.',
+    description: 'Fleet management, inspections, defect workflow, MOT and tax monitoring, and team management for trades and contractors.',
     url: 'https://stocktrackpro.com/features',
     siteName: 'Stock Track PRO',
     locale: 'en_GB',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Features | Stock Track PRO',
-    description: 'Fleet management, inspections, asset tracking, QR check-in, and team management.',
+    description: 'Fleet management, inspections, defect workflow, and team management.',
   },
 };
 

@@ -6,7 +6,6 @@ import { Timestamp } from 'firebase/firestore';
 import { differenceInDays, eachDayOfInterval, format, subDays } from 'date-fns';
 import {
   CheckCircle,
-  Package,
   TrendingUp,
   Truck,
   Users,
@@ -126,7 +125,7 @@ export default function DashboardDetailedView({
   rangeSpanDays,
   rangeLabel,
 }: DashboardDetailedViewProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'fleet' | 'assets' | 'users'>(
+  const [activeTab, setActiveTab] = useState<'overview' | 'fleet' | 'users'>(
     'overview'
   );
 
@@ -327,7 +326,6 @@ export default function DashboardDetailedView({
           [
             { id: 'overview', label: 'Overview', icon: TrendingUp },
             { id: 'fleet', label: 'Fleet details', icon: Truck },
-            { id: 'assets', label: 'Asset details', icon: Package },
             { id: 'users', label: 'User details', icon: Users },
           ] as const
         ).map((tab) => (
@@ -446,7 +444,7 @@ export default function DashboardDetailedView({
                       dataKey="actions"
                       stroke="#8b5cf6"
                       fill="url(#ddAct)"
-                      name="Asset actions"
+                      name="Workflow actions"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -579,82 +577,6 @@ export default function DashboardDetailedView({
         </div>
       )}
 
-      {activeTab === 'assets' && (
-        <div className="space-y-6">
-          <div className="dashboard-card p-6">
-            <h3 className="font-semibold text-zinc-900 dark:text-white mb-4">
-              Asset utilisation by type
-            </h3>
-            {assetUtilizationByType.length > 0 ? (
-              <ChartErrorBoundary>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={assetUtilizationByType} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.25)" />
-                    <XAxis type="number" stroke="#94a3b8" domain={[0, 100]} tick={{ fontSize: 11 }} />
-                    <YAxis dataKey="name" type="category" stroke="#94a3b8" width={100} tick={{ fontSize: 11 }} />
-                    <Tooltip
-                      contentStyle={tooltipStyle}
-                      formatter={(value) => [`${value}%`, 'Utilisation rate']}
-                    />
-                    <Bar dataKey="rate" fill="#8b5cf6" name="Utilisation %" radius={[0, 6, 6, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartErrorBoundary>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-zinc-500 dark:text-white/50">
-                No asset data
-              </div>
-            )}
-          </div>
-
-          <div className="dashboard-card p-6">
-            <h3 className="font-semibold text-zinc-900 dark:text-white mb-4">
-              Asset type breakdown
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b border-zinc-200 dark:border-white/10">
-                  <tr className="text-zinc-600 dark:text-white/70 text-sm">
-                    <th className="px-4 py-3 text-left font-medium">Type</th>
-                    <th className="px-4 py-3 text-right font-medium">Total</th>
-                    <th className="px-4 py-3 text-right font-medium">Active</th>
-                    <th className="px-4 py-3 text-right font-medium">Utilisation</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100 dark:divide-white/5">
-                  {assetUtilizationByType.map((a) => (
-                    <tr key={a.name} className="hover:bg-zinc-50 dark:hover:bg-white/5">
-                      <td className="px-4 py-3 text-zinc-900 dark:text-white font-medium">
-                        {a.name}
-                      </td>
-                      <td className="px-4 py-3 text-right text-zinc-900 dark:text-white">
-                        {a.total}
-                      </td>
-                      <td className="px-4 py-3 text-right text-blue-700 dark:text-blue-300">
-                        {a.active}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span
-                          className={`font-semibold ${
-                            a.rate >= 70
-                              ? 'text-green-700 dark:text-green-300'
-                              : a.rate >= 40
-                              ? 'text-amber-700 dark:text-amber-300'
-                              : 'text-red-700 dark:text-red-300'
-                          }`}
-                        >
-                          {a.rate}%
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
       {activeTab === 'users' && (
         <div className="space-y-6">
           <div className="dashboard-card p-6">
@@ -668,7 +590,7 @@ export default function DashboardDetailedView({
                     <th className="px-4 py-3 text-left font-medium">Rank</th>
                     <th className="px-4 py-3 text-left font-medium">User</th>
                     <th className="px-4 py-3 text-right font-medium">Inspections</th>
-                    <th className="px-4 py-3 text-right font-medium">Asset actions</th>
+                    <th className="px-4 py-3 text-right font-medium">Workflow actions</th>
                     <th className="px-4 py-3 text-right font-medium">Defects found</th>
                     <th className="px-4 py-3 text-right font-medium">Total activity</th>
                   </tr>
@@ -715,7 +637,7 @@ export default function DashboardDetailedView({
                     <Tooltip contentStyle={tooltipStyle} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
                     <Bar dataKey="inspections" fill="#3b82f6" name="Inspections" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="actions" fill="#8b5cf6" name="Asset actions" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="actions" fill="#8b5cf6" name="Workflow actions" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartErrorBoundary>

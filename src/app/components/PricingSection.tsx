@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, ShieldCheck, Wrench } from 'lucide-react';
+import { Check, ShieldCheck, Truck } from 'lucide-react';
 import Link from 'next/link';
 
 const PRICE_PER_VEHICLE_MONTHLY = 8;
@@ -10,12 +10,12 @@ const MIN_VEHICLES = 5;
 const MAX_VEHICLES = 100;
 
 type BillingCycle = 'monthly' | 'yearly';
-type Tier = { label: string; assets: string; users: string };
+type Tier = { label: string; users: string };
 function getTier(count: number): Tier {
-  if (count <= 15) return { label: 'Starter',    assets: '1,000 assets',    users: 'Up to 15 users'    };
-  if (count <= 35) return { label: 'Growth',     assets: '5,000 assets',    users: 'Up to 35 users'    };
-  if (count <= 75) return { label: 'Business',   assets: '20,000 assets',   users: 'Up to 75 users'    };
-  return               { label: 'Enterprise', assets: 'Unlimited assets', users: 'Unlimited users'   };
+  if (count <= 15) return { label: 'Starter', users: 'Up to 15 users' };
+  if (count <= 35) return { label: 'Growth', users: 'Up to 35 users' };
+  if (count <= 75) return { label: 'Business', users: 'Up to 75 users' };
+  return { label: 'Enterprise', users: 'Unlimited users' };
 }
 
 export default function PricingSection() {
@@ -28,7 +28,6 @@ export default function PricingSection() {
   const tier = getTier(vehicleCount);
 
   const features = [
-    tier.assets,
     tier.users,
     'Unlimited vehicle inspections',
     'Defect reporting & workflow',
@@ -36,7 +35,7 @@ export default function PricingSection() {
     'Full company dashboard',
     'Team management & invites',
     'QR code scanning',
-    'Asset & tool tracking',
+    'Defect workflow tracking',
     'iOS & Android mobile app',
     'Priority email support',
   ];
@@ -56,8 +55,8 @@ export default function PricingSection() {
               No long-term contract
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Wrench className="h-4 w-4 text-emerald-600" aria-hidden />
-              Asset &amp; tool tracking included
+              <Truck className="h-4 w-4 text-emerald-600" aria-hidden />
+              Fleet-focused workflow
             </span>
           </div>
         </div>

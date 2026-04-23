@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'FAQ | Stock Track PRO',
-  description: 'Frequently asked questions about Stock Track PRO asset and fleet management.',
+  description: 'Frequently asked questions about Stock Track PRO fleet management.',
   openGraph: {
     title: 'FAQ | Stock Track PRO',
     description: 'Frequently asked questions about Stock Track PRO.',

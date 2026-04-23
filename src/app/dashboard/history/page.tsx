@@ -5,7 +5,7 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 import { onAuthStateChanged } from 'firebase/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Clock, Search, Package, Truck } from 'lucide-react';
+import { Clock, Search, Truck } from 'lucide-react';
 import ExportButton from '../components/ExportButton';
 import ImageViewerModal from '../components/ImageViewerModal';
 import AuthenticatedImage from '../components/AuthenticatedImage';
@@ -104,7 +104,7 @@ export default function HistoryPage() {
   const [bootstrapping, setBootstrapping] = useState(true);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'assets' | 'fleet'>('assets');
+  const [activeTab, setActiveTab] = useState<'assets' | 'fleet'>('fleet');
   const [assetPage, setAssetPage] = useState(1);
   const [fleetPage, setFleetPage] = useState(1);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
@@ -324,20 +324,6 @@ export default function HistoryPage() {
       <div className="flex gap-2 mb-6 border-b border-white/10">
         <button
           type="button"
-          onClick={() => setActiveTab('assets')}
-          className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${
-            activeTab === 'assets'
-              ? 'border-blue-500 text-blue-500'
-              : 'border-transparent text-white/60 hover:text-white'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Package className="h-4 w-4" />
-            Asset History
-          </div>
-        </button>
-        <button
-          type="button"
           onClick={() => setActiveTab('fleet')}
           className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${
             activeTab === 'fleet'
@@ -347,7 +333,7 @@ export default function HistoryPage() {
         >
           <div className="flex items-center gap-2">
             <Truck className="h-4 w-4" />
-            Vehicle Inspections
+            Fleet Inspections
           </div>
         </button>
       </div>
@@ -362,7 +348,7 @@ export default function HistoryPage() {
             placeholder={
               activeTab === 'assets'
                 ? 'Search by action, asset ID, or user (current page)...'
-                : 'Search by vehicle, inspector, or defect (current page)...'
+                : 'Search by vehicle, inspector, or defect status (current page)...'
             }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -371,7 +357,7 @@ export default function HistoryPage() {
         </div>
         <ExportButton
           data={getCurrentData()}
-          filename={activeTab === 'assets' ? 'asset-history' : 'vehicle-inspections'}
+          filename={activeTab === 'assets' ? 'asset-history' : 'fleet-inspections'}
           fieldMappings={
             activeTab === 'assets'
               ? {

@@ -29,7 +29,7 @@ import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDay
 import { activityHistoryStartFromDashboardRange, TOOL_HISTORY_ANALYTICS_CAP } from '@/lib/dvsaRetention';
 import ExportButton from './components/ExportButton';
 import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
-import { RefreshCw, Users, Truck, Package, TrendingDown, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { RefreshCw, Users, Truck, TrendingDown, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 const DashboardAnalyticsCharts = dynamic(
   () => import('./components/DashboardAnalyticsCharts'),
@@ -925,7 +925,7 @@ function DashboardPageInner() {
                     )}
                   </div>
                   <p className="text-white/60 text-sm mt-1">
-                    Vehicles, assets and team performance at a glance
+                    Fleet and team performance at a glance
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -992,11 +992,9 @@ function DashboardPageInner() {
                     pdfMeta={{ organization: profile?.company_name }}
                     multiSheetData={[
                       { name: 'Vehicles', data: exportData.vehicles },
-                      { name: 'Assets', data: exportData.assets },
                       { name: 'Users', data: exportData.users },
                       { name: 'Inspections', data: exportData.inspections },
                       { name: 'Defects', data: exportData.defects },
-                      { name: 'Asset History', data: exportData.history },
                     ]}
                   />
                   <button
@@ -1035,7 +1033,7 @@ function DashboardPageInner() {
               ) : (
               <>
               {/* KPI Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                 <div className="dashboard-card p-5">
                   <div className="flex items-center justify-between mb-3">
                     <div className="w-10 h-10 rounded-lg bg-blue-500/15 flex items-center justify-center">
@@ -1049,21 +1047,6 @@ function DashboardPageInner() {
                   <p className="dashboard-kpi-value">{vehiclesCount ?? '—'}</p>
                   <p className="dashboard-kpi-label">Fleet vehicles</p>
                   <p className="text-white/40 text-xs mt-1">{activeVehiclesCount ?? 0} active</p>
-                </div>
-
-                <div className="dashboard-card p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-purple-500/15 flex items-center justify-center">
-                      <Package className="h-5 w-5 text-purple-400" />
-                    </div>
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${assetUtilization >= 70 ? 'text-green-300' : 'text-amber-300'}`}>
-                      {assetUtilization >= 70 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                      {assetUtilization}%
-                    </span>
-                  </div>
-                  <p className="dashboard-kpi-value">{assetsCount ?? '—'}</p>
-                  <p className="dashboard-kpi-label">Total assets</p>
-                  <p className="text-white/40 text-xs mt-1">{activeAssetsCount ?? 0} active</p>
                 </div>
 
                 <div className="dashboard-card p-5">
@@ -1096,9 +1079,6 @@ function DashboardPageInner() {
                 vehicleStatusBreakdown={vehicleStatusBreakdown}
                 vehiclesByMake={vehiclesByMake}
                 inspectionsByVehicle={inspectionsByVehicle}
-                assetStatusBreakdown={assetStatusBreakdown}
-                assetsByType={assetsByType}
-                assetUsageByAction={assetUsageByAction}
                 usersByRole={usersByRole}
                 userActivity={userActivity}
                 inspectionsOverTime={inspectionsOverTime}
@@ -1125,12 +1105,6 @@ function DashboardPageInner() {
                         <td className="px-4 py-3 text-white">{vehiclesCount ?? '—'}</td>
                         <td className="px-4 py-3 text-blue-300">{activeVehiclesCount ?? '—'}</td>
                         <td className="px-4 py-3 text-green-300">{fleetUtilization}%</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 text-white">Assets</td>
-                        <td className="px-4 py-3 text-white">{assetsCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-blue-300">{activeAssetsCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-green-300">{assetUtilization}%</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-3 text-white">

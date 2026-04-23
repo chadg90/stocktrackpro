@@ -13,7 +13,6 @@ import {
   Loader2,
   CheckCircle,
   Users,
-  Package,
   LayoutDashboard,
   LogIn,
   Smartphone,
@@ -286,9 +285,9 @@ export default function OnboardingPage() {
                     detail: 'Your company view is ready. Take a minute to look around.',
                   },
                   {
-                    icon: Package,
-                    title: 'Add your fleet and tools',
-                    detail: 'Vehicles auto-fill from DVLA on registration. Tools can be added one at a time or imported.',
+                    icon: LayoutDashboard,
+                    title: 'Add your fleet',
+                    detail: 'Vehicles auto-fill from DVLA on registration. Start with active vehicles first, then set inspection habits.',
                   },
                   {
                     icon: Users,

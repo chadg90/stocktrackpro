@@ -9,7 +9,7 @@ export default function FAQ() {
     },
     {
       question: "Do I need QR codes to use the app?",
-      answer: "QR codes are used for tools and assets so staff can scan to check in and out. Fleet vehicles are added in the dashboard and selected from a list in the app (e.g. for inspections). You can use fleet only, assets only, or both.",
+      answer: "No. You can run your fleet without QR codes. Vehicles are added in the dashboard and selected in the app for inspections, defects, and job workflow updates.",
     },
     {
       question: "Do I need a limited company to use the app?",
@@ -17,7 +17,7 @@ export default function FAQ() {
     },
     {
       question: "Can I use this for fleet only?",
-      answer: "Yes. Every plan includes both tool and fleet management; you can use one or both. Vehicle inspections and defect workflow are included where stated on the plan.",
+      answer: "Yes. Stock Track PRO is now focused on fleet management. Vehicle inspections, defect workflow, MOT and tax tracking, and team management are included.",
     },
     {
       question: "Does this work on Android and iOS?",

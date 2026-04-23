@@ -31,16 +31,16 @@ type Company = {
   legacy?: boolean;
 };
 
-type Tier = { label: string; assets: string; users: string; colour: string };
+type Tier = { label: string; users: string; colour: string };
 
 function getTier(count: number): Tier {
   if (count <= 15)
-    return { label: 'Starter', assets: '1,000 assets', users: 'Up to 15 users', colour: 'text-sky-800 dark:text-sky-400' };
+    return { label: 'Starter', users: 'Up to 15 users', colour: 'text-sky-800 dark:text-sky-400' };
   if (count <= 35)
-    return { label: 'Growth', assets: '5,000 assets', users: 'Up to 35 users', colour: 'text-indigo-800 dark:text-indigo-400' };
+    return { label: 'Growth', users: 'Up to 35 users', colour: 'text-indigo-800 dark:text-indigo-400' };
   if (count <= 75)
-    return { label: 'Business', assets: '20,000 assets', users: 'Up to 75 users', colour: 'text-violet-800 dark:text-violet-400' };
-  return { label: 'Enterprise', assets: 'Unlimited assets', users: 'Unlimited users', colour: 'text-blue-800 dark:text-blue-400' };
+    return { label: 'Business', users: 'Up to 75 users', colour: 'text-violet-800 dark:text-violet-400' };
+  return { label: 'Enterprise', users: 'Unlimited users', colour: 'text-blue-800 dark:text-blue-400' };
 }
 
 const formatCurrency = (value: number) => `£${value.toFixed(2)}`;
@@ -256,7 +256,7 @@ export default function SubscriptionPage() {
   const subscriptionStatus = company?.subscription_status;
   const tier = getTier(vehicleCount);
   const effectiveTier = company?.legacy
-    ? { label: 'Legacy Plan', assets: 'As agreed', users: 'As agreed', colour: 'text-amber-700 dark:text-amber-300' }
+    ? { label: 'Legacy Plan', users: 'As agreed', colour: 'text-amber-700 dark:text-amber-300' }
     : tier;
   const currentVehicles = company?.subscribed_vehicles || 0;
   const currentCycle: BillingCycle = company?.billing_cycle === 'yearly' ? 'yearly' : 'monthly';
@@ -477,7 +477,7 @@ export default function SubscriptionPage() {
               </div>
             )}
             <div className="mt-3 text-sm text-white/70">
-              <span className={effectiveTier.colour}>{effectiveTier.label}</span> includes {effectiveTier.assets}, {effectiveTier.users}
+              <span className={effectiveTier.colour}>{effectiveTier.label}</span> includes {effectiveTier.users}
             </div>
             <button
               onClick={handleSubscribe}

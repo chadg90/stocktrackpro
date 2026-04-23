@@ -1,7 +1,7 @@
 {
   "name": "Stock Track PRO",
   "short_name": "Stock Track",
-  "description": "Professional asset and equipment management system with QR-based tracking",
+  "description": "Professional fleet management system with inspections, defects, and compliance workflows",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

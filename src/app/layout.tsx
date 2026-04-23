@@ -17,11 +17,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://stocktrackpro.com'),
   title: {
-    default: "Stock Track PRO | Professional Asset & Equipment Management System",
+    default: "Stock Track PRO | Professional Fleet Management System",
     template: "%s | Stock Track PRO",
   },
-  description: "Transform your equipment management with Stock Track PRO. Our QR-based tracking system helps construction companies, workshops, and industrial facilities manage assets efficiently. Trusted by UK businesses.",
-  keywords: "asset tracking, equipment management, QR code tracking, construction assets, workshop management, industrial equipment tracking, UK asset management, asset tracking software",
+  description: "Transform your fleet operations with Stock Track PRO. Vehicle inspections, defect workflow, DVLA checks, and compliance reporting for UK businesses.",
+  keywords: "fleet management software, vehicle inspection app, defect management, DVLA fleet checks, MOT monitoring, mileage tracking, compliance software UK",
   authors: [{ name: "Stock Track PRO" }],
   generator: "Next.js",
   applicationName: "Stock Track PRO",
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "Stock Track PRO | Professional Asset & Equipment Management System",
-    description: "Transform your equipment management with Stock Track PRO. Our QR-based tracking system helps construction companies, workshops, and industrial facilities manage assets efficiently. Trusted by UK businesses.",
+    title: "Stock Track PRO | Professional Fleet Management System",
+    description: "Transform your fleet operations with Stock Track PRO. Vehicle inspections, defect workflow, DVLA checks, and compliance reporting for UK businesses.",
     url: "https://stocktrackpro.com",
     siteName: "Stock Track PRO",
     images: [
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Stock Track PRO - Professional Asset Management System",
+        alt: "Stock Track PRO - Professional Fleet Management System",
       },
     ],
     locale: "en_GB",
@@ -55,8 +55,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stock Track PRO | Professional Asset & Equipment Management System",
-    description: "Transform your equipment management with Stock Track PRO. Our QR-based tracking system helps construction companies, workshops, and industrial facilities manage assets efficiently. Trusted by UK businesses.",
+    title: "Stock Track PRO | Professional Fleet Management System",
+    description: "Transform your fleet operations with Stock Track PRO. Vehicle inspections, defect workflow, DVLA checks, and compliance reporting for UK businesses.",
     images: ["/og-image.jpg"],
     creator: "@stocktrackpro",
     site: "@stocktrackpro",
@@ -113,7 +113,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#3b82f6" />
         <meta name="application-name" content="Stock Track PRO" />
         <meta name="apple-mobile-web-app-title" content="Stock Track PRO" />
-        <meta name="msapplication-tooltip" content="Professional Asset & Equipment Management System" />
+        <meta name="msapplication-tooltip" content="Professional Fleet Management System" />
         <meta name="language" content="en-GB" />
         <meta name="copyright" content={`© ${new Date().getFullYear()} Stock Track PRO Ltd`} />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
@@ -129,7 +129,7 @@ export default function RootLayout({
               "name": "Stock Track PRO",
               "applicationCategory": "BusinessApplication",
               "operatingSystem": "All",
-              "description": "Professional asset and equipment management system with QR-based tracking",
+              "description": "Professional fleet management platform with inspections, defect workflow and compliance tracking",
               "offers": {
                 "@type": "Offer",
                 "price": "7.99",

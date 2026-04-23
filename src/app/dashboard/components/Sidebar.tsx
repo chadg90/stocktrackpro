@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
-  Package,
   Truck,
   Users,
   LogOut,
@@ -59,10 +58,9 @@ const navigationGroups: NavigationGroup[] = [
     ]
   },
   {
-    label: 'Assets & Fleet',
+    label: 'Fleet',
     items: [
       { name: 'Fleet', href: '/dashboard/fleet', icon: Truck },
-      { name: 'Assets', href: '/dashboard/assets', icon: Package },
       { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
     ]
   },

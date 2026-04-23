@@ -26,7 +26,7 @@ export default function SubscriptionTermsPage() {
             <p className="text-zinc-300 mb-4">
               These Subscription Terms apply to all paid Stock Track PRO subscriptions purchased
               through our website checkout. The Stock Track PRO mobile app is a companion app used
-              by your team to log inspections, scan assets and report defects; subscriptions are
+              by your team to log inspections, update defects and complete fleet workflows; subscriptions are
               not sold or renewed through the app itself. These Subscription Terms should be read
               alongside our{' '}
               <Link href="/terms" className="text-blue-400 hover:text-blue-300">
@@ -57,8 +57,8 @@ export default function SubscriptionTermsPage() {
               <li>Minimum subscription quantity is 5 vehicles.</li>
               <li>Displayed pricing is in GBP and includes UK VAT at 20%.</li>
               <li>
-                Your subscribed vehicle count controls the total number of vehicles, tools and
-                assets your company can manage at any one time in the platform.
+                Your subscribed vehicle count controls the total number of vehicles your company can
+                manage at any one time in the platform.
               </li>
             </ul>
 
@@ -107,8 +107,8 @@ export default function SubscriptionTermsPage() {
                 not re-prorated.
               </li>
               <li>
-                Feature limits (the number of vehicles, tools and assets you can manage) are tied to
-                the active subscribed vehicle quantity.
+                Feature limits (the number of vehicles you can manage) are tied to the active
+                subscribed vehicle quantity.
               </li>
             </ul>
 
@@ -150,7 +150,7 @@ export default function SubscriptionTermsPage() {
             <h2 className="text-2xl font-bold text-white mt-10 mb-4">7. Data Retention After Cancellation</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
-                After cancellation, your company data (vehicles, inspections, defects, tools, team
+                After cancellation, your company data (vehicles, inspections, defects, and team
                 profiles) remains in our systems for a reasonable period so that you can
                 reactivate your subscription and recover your data if needed.
               </li>

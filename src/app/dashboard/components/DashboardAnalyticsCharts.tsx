@@ -16,7 +16,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { Truck, Package, Users, TrendingUp, CheckCircle } from 'lucide-react';
+import { Truck, Users, TrendingUp, CheckCircle } from 'lucide-react';
 import ChartErrorBoundary from './ChartErrorBoundary';
 
 const COLORS = ['#2563eb', '#7c3aed', '#0f766e', '#ea580c', '#c026d3', '#0284c7', '#16a34a', '#475569'];
@@ -25,9 +25,6 @@ export type DashboardAnalyticsChartsProps = {
   vehicleStatusBreakdown: { name: string; value: number }[];
   vehiclesByMake: { name: string; value: number }[];
   inspectionsByVehicle: { id: string; count: number; defects: number; name: string }[];
-  assetStatusBreakdown: { name: string; value: number }[];
-  assetsByType: { name: string; value: number }[];
-  assetUsageByAction: { name: string; value: number }[];
   usersByRole: { name: string; value: number }[];
   userActivity: { id: string; inspections: number; actions: number; name: string; total: number }[];
   inspectionsOverTime: { date: string; count: number }[];
@@ -39,9 +36,6 @@ export default function DashboardAnalyticsCharts({
   vehicleStatusBreakdown,
   vehiclesByMake,
   inspectionsByVehicle,
-  assetStatusBreakdown,
-  assetsByType,
-  assetUsageByAction,
   usersByRole,
   userActivity,
   inspectionsOverTime,
@@ -131,84 +125,6 @@ export default function DashboardAnalyticsCharts({
               </div>
             ) : (
               <div className="h-[250px] flex items-center justify-center text-white/50">No inspection data</div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <Package className="h-5 w-5 text-purple-400 shrink-0" />
-          <h2 className="dashboard-section-title">Asset analytics</h2>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="dashboard-card p-6">
-            <h3 className="text-white font-semibold mb-4">Asset Status Distribution</h3>
-            {assetStatusBreakdown.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart margin={{ top: 0, right: 8, bottom: 8, left: 8 }}>
-                  <Pie
-                    data={assetStatusBreakdown}
-                    cx="50%"
-                    cy="42%"
-                    innerRadius={48}
-                    outerRadius={72}
-                    paddingAngle={2}
-                    dataKey="value"
-                    label={false}
-                  >
-                    {assetStatusBreakdown.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
-                  <Legend
-                    verticalAlign="bottom"
-                    wrapperStyle={{ paddingTop: 12 }}
-                    formatter={(value: string, entry: { payload?: { value?: number } }) => {
-                      const v = entry?.payload?.value ?? 0;
-                      const total = assetStatusBreakdown.reduce((s, x) => s + x.value, 0);
-                      const pct = total ? ((v / total) * 100).toFixed(0) : '0';
-                      return `${value}: ${v} (${pct}%)`;
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-white/50">No asset data</div>
-            )}
-          </div>
-
-          <div className="dashboard-card p-6">
-            <h3 className="text-white font-semibold mb-4">Assets by type</h3>
-            {assetsByType.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={assetsByType} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                  <XAxis type="number" stroke="#888" />
-                  <YAxis dataKey="name" type="category" stroke="#888" width={80} />
-                  <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #3b82f6', borderRadius: '8px' }} />
-                  <Bar dataKey="value" fill="#9B59B6" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[250px] flex items-center justify-center text-white/50">No asset data</div>
-            )}
-          </div>
-
-          <div className="dashboard-card p-6">
-            <h3 className="text-white font-semibold mb-4">Asset activity</h3>
-            {assetUsageByAction.length > 0 ? (
-              <div className="space-y-3 max-h-[250px] overflow-y-auto">
-                {assetUsageByAction.map((a) => (
-                  <div key={a.name} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
-                    <span className="text-white text-sm capitalize">{a.name}</span>
-                    <span className="text-purple-400 text-sm font-semibold">{a.value}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-[250px] flex items-center justify-center text-white/50">No activity data</div>
             )}
           </div>
         </div>

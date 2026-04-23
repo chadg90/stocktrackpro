@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
-import { Check, ShieldCheck, Wrench, Clock } from 'lucide-react';
+import { Check, ShieldCheck, Truck, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -14,13 +14,13 @@ const MIN_VEHICLES = 5;
 const MAX_VEHICLES = 100;
 
 type BillingCycle = 'monthly' | 'yearly';
-type Tier = { label: string; assets: string; users: string; colour: string };
+type Tier = { label: string; users: string; colour: string };
 
 function getTier(count: number): Tier {
-  if (count <= 15) return { label: 'Starter',    assets: '1,000 assets',   users: 'Up to 15 users',     colour: 'text-sky-400'    };
-  if (count <= 35) return { label: 'Growth',     assets: '5,000 assets',   users: 'Up to 35 users',     colour: 'text-indigo-400' };
-  if (count <= 75) return { label: 'Business',   assets: '20,000 assets',  users: 'Up to 75 users',     colour: 'text-violet-400' };
-  return               { label: 'Enterprise', assets: 'Unlimited assets', users: 'Unlimited users',    colour: 'text-blue-400'   };
+  if (count <= 15) return { label: 'Starter', users: 'Up to 15 users', colour: 'text-sky-400' };
+  if (count <= 35) return { label: 'Growth', users: 'Up to 35 users', colour: 'text-indigo-400' };
+  if (count <= 75) return { label: 'Business', users: 'Up to 75 users', colour: 'text-violet-400' };
+  return { label: 'Enterprise', users: 'Unlimited users', colour: 'text-blue-400' };
 }
 
 export default function Pricing() {
@@ -98,7 +98,6 @@ export default function Pricing() {
   const tier = getTier(vehicleCount);
 
   const features = [
-    tier.assets,
     tier.users,
     'Unlimited vehicle inspections',
     'Defect reporting & workflow',
@@ -106,7 +105,7 @@ export default function Pricing() {
     'Full company dashboard',
     'Team management & invite system',
     'QR code scanning',
-    'Asset & tool tracking',
+    'Defect workflow tracking',
     'Mobile app for iOS & Android',
     'Priority email support',
   ];
@@ -135,8 +134,8 @@ export default function Pricing() {
               No long-term contract
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Wrench className="h-4 w-4 text-emerald-400" aria-hidden />
-              Asset &amp; tool tracking included
+              <Truck className="h-4 w-4 text-emerald-400" aria-hidden />
+              Fleet-focused workflow
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Clock className="h-4 w-4 text-amber-400" aria-hidden />
@@ -323,7 +322,7 @@ export default function Pricing() {
                 ))}
               </ul>
               <p className="mt-4 text-xs text-white/45 leading-relaxed">
-                Asset &amp; tool tracking alone is typically sold as a separate product (from around £50/month elsewhere) — it&apos;s included with every Stock Track PRO plan at no extra cost.
+                Built for fleet operations: inspections, defects, MOT/tax visibility, and manager reporting in one plan.
               </p>
             </div>
           </div>

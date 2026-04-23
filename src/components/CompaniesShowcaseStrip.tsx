@@ -43,7 +43,7 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
             Teams that rely on Stock Track PRO
           </h2>
           <p className="text-slate-600 text-sm sm:text-[15px] leading-relaxed">
-            From groundwork to trades — UK businesses keeping assets and vehicles organised.
+            From groundwork to trades — UK businesses keeping fleets compliant and organised.
           </p>
         </div>
 
