@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { AlertTriangle, CheckCircle, Truck, Package, Users, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Truck, Users, X } from 'lucide-react';
 import { Timestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 
-export type NotificationType = 'defect' | 'defect_resolved' | 'inspection' | 'asset' | 'team';
+export type NotificationType = 'defect' | 'defect_resolved' | 'inspection' | 'team';
 
 export interface Notification {
   id: string;
@@ -35,8 +35,6 @@ const getNotificationIcon = (type: NotificationType) => {
       return <CheckCircle className="h-5 w-5 text-green-400" />;
     case 'inspection':
       return <Truck className="h-5 w-5 text-blue-400" />;
-    case 'asset':
-      return <Package className="h-5 w-5 text-purple-400" />;
     case 'team':
       return <Users className="h-5 w-5 text-yellow-400" />;
     default:

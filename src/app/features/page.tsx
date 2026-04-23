@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Navbar from '../components/Navbar';
 import Link from 'next/link';
-import { Car, QrCode, Users, Wrench, Shield, Gauge, FileCheck, ArrowRight } from 'lucide-react';
+import { Car, Users, Wrench, Shield, Gauge, FileCheck, ArrowRight, Smartphone } from 'lucide-react';
 
 const WHATSAPP_ENQUIRY_URL =
   'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
@@ -24,10 +24,10 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    title: 'QR-assisted fleet workflows',
-    icon: QrCode,
+    title: 'Mobile-first fleet workflows',
+    icon: Smartphone,
     summary:
-      'Use QR-assisted workflows in the app to speed up inspections and handovers. Your team captures required checks quickly with a clear audit trail by user and timestamp.',
+      'Use the mobile app to run daily inspections, defect updates, and handovers quickly. Every action is time-stamped and tied to the user for clear accountability.',
     bullets: [
       'Faster daily vehicle checks from the mobile app',
       'Consistent inspection flows across teams and sites',

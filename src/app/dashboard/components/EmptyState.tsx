@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { 
-  Package, 
   Truck, 
   Users, 
   AlertTriangle, 
@@ -20,7 +19,6 @@ import {
 // ============================================
 
 export type EmptyStateType = 
-  | 'assets' 
   | 'vehicles' 
   | 'team' 
   | 'defects' 
@@ -51,12 +49,6 @@ const emptyStateConfig: Record<EmptyStateType, {
   description: string;
   actionLabel?: string;
 }> = {
-  assets: {
-    icon: Package,
-    title: 'No assets found',
-    description: 'Start by adding your first asset to track equipment and tools.',
-    actionLabel: 'Add Asset',
-  },
   vehicles: {
     icon: Truck,
     title: 'No vehicles found',
@@ -66,7 +58,7 @@ const emptyStateConfig: Record<EmptyStateType, {
   team: {
     icon: Users,
     title: 'No team members found',
-    description: 'Invite team members to collaborate on asset and fleet management.',
+    description: 'Invite team members to collaborate on fleet management.',
     actionLabel: 'Invite Member',
   },
   defects: {
@@ -77,12 +69,12 @@ const emptyStateConfig: Record<EmptyStateType, {
   history: {
     icon: History,
     title: 'No activity history',
-    description: 'Activity will appear here as your team uses assets and vehicles.',
+    description: 'Activity will appear here as your team uses the fleet workflows.',
   },
   locations: {
     icon: MapPin,
     title: 'No locations added',
-    description: 'Add locations to organize where your assets and vehicles are stored.',
+    description: 'Add locations to organize where your vehicles are stored.',
     actionLabel: 'Add Location',
   },
   notifications: {

@@ -297,7 +297,7 @@ export default function OnboardingPage() {
                   {
                     icon: Smartphone,
                     title: 'Install the mobile app',
-                    detail: 'You and your team use the app for QR scanning, vehicle inspections, and defect logging on the road.',
+                    detail: 'You and your team use the app for vehicle inspections, defect logging, and job progress updates on the road.',
                   },
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3">

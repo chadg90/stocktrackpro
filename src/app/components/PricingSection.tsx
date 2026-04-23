@@ -34,7 +34,6 @@ export default function PricingSection() {
     'MOT & Tax expiry reminders',
     'Full company dashboard',
     'Team management & invites',
-    'QR code scanning',
     'Defect workflow tracking',
     'iOS & Android mobile app',
     'Priority email support',

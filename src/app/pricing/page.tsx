@@ -104,7 +104,6 @@ export default function Pricing() {
     'MOT & Tax expiry reminders',
     'Full company dashboard',
     'Team management & invite system',
-    'QR code scanning',
     'Defect workflow tracking',
     'Mobile app for iOS & Android',
     'Priority email support',

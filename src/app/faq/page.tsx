@@ -8,8 +8,8 @@ export default function FAQ() {
       answer: "New companies sign up on this website by selecting Start free trial — accounts and subscriptions can only be created on the web. You then set up your company and invite your team by email. Invited team members open their invite link to set a password, then sign in to the companion app on iOS or Android. Managers sign in to the web dashboard via Log in.",
     },
     {
-      question: "Do I need QR codes to use the app?",
-      answer: "No. You can run your fleet without QR codes. Vehicles are added in the dashboard and selected in the app for inspections, defects, and job workflow updates.",
+      question: "Do I need special hardware to use the app?",
+      answer: "No. You can run Stock Track PRO with standard smartphones and your web browser. Vehicles are added in the dashboard and selected in the app for inspections, defects, and workflow updates.",
     },
     {
       question: "Do I need a limited company to use the app?",
@@ -21,7 +21,7 @@ export default function FAQ() {
     },
     {
       question: "Does this work on Android and iOS?",
-      answer: "Yes. The companion app runs on both Android and iOS and is used by your team day-to-day for QR scanning, vehicle inspections, and defect logging. Managers also get a web dashboard for analytics, team management, and billing.",
+      answer: "Yes. The companion app runs on both Android and iOS and is used by your team day-to-day for vehicle inspections, defect logging, and workflow updates. Managers also get a web dashboard for analytics, team management, and billing.",
     },
     {
       question: "How do I subscribe?",

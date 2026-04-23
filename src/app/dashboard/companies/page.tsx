@@ -16,7 +16,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Pencil, Trash2, Search, Building2, Users, Truck, Package, Plus } from 'lucide-react';
+import { Pencil, Trash2, Search, Building2, Users, Truck, Plus } from 'lucide-react';
 import Modal from '../components/Modal';
 
 type Company = {
@@ -239,7 +239,6 @@ export default function CompaniesPage() {
                 <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Company Name</th>
                 <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium hidden md:table-cell">ID</th>
                 <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Vehicles</th>
-                <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Assets</th>
                 <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium">Users</th>
                 <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium hidden lg:table-cell">Subscription</th>
                 <th className="px-3 sm:px-6 py-3 sm:py-4 font-medium text-right">Actions</th>
@@ -248,13 +247,13 @@ export default function CompaniesPage() {
             <tbody className="divide-y divide-white/10">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-white/50">
+                  <td colSpan={6} className="px-6 py-8 text-center text-white/50">
                     Loading companies...
                   </td>
                 </tr>
               ) : filteredCompanies.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-white/50">
+                  <td colSpan={6} className="px-6 py-8 text-center text-white/50">
                     No companies found.
                   </td>
                 </tr>
@@ -279,12 +278,6 @@ export default function CompaniesPage() {
                       <div className="flex items-center gap-1.5 sm:gap-2">
                         <Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/40" />
                         <span className="text-white text-sm sm:text-base">{company.vehiclesCount}</span>
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/40" />
-                        <span className="text-white text-sm sm:text-base">{company.assetsCount}</span>
                       </div>
                     </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4">

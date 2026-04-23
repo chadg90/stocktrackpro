@@ -167,7 +167,7 @@ export default function RootLayout({
                 }
               },
               "featureList": [
-                "QR code tracking system",
+                "Mobile-first fleet workflows",
                 "Real-time location tracking",
                 "Mobile access",
                 "Cost control",

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Navbar from './components/Navbar';
 import { CompaniesShowcaseStrip, type ShowcaseLogo } from '@/components/CompaniesShowcaseStrip';
-import { Wrench, QrCode, Map, Smartphone, Users, ClipboardList, ArrowRight, Check, Zap, Droplets, Truck } from 'lucide-react';
+import { Wrench, Map, Smartphone, Users, ClipboardList, ArrowRight, Check, Zap, Droplets, Truck } from 'lucide-react';
 import Link from 'next/link';
 const WHATSAPP_ENQUIRY_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
 
@@ -135,7 +135,7 @@ export default function Home() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {[
-              { icon: QrCode, title: "QR vehicle workflows", description: "Use QR-enabled workflows in the app to speed up inspections and job handovers." },
+              { icon: Smartphone, title: "Mobile fleet workflows", description: "Use the app to complete inspections, update defects, and track progress in the field." },
               { icon: Map, title: "Fleet tracking", description: "Monitor vehicles, inspections, mileage, and service dates across every site." },
               { icon: Smartphone, title: "Mobile-first operations", description: "Drivers and fitters complete inspections, raise defects, and update job progress from the app." },
               { icon: Users, title: "Team & roles", description: "Managers oversee the company and team; staff work in the field." },

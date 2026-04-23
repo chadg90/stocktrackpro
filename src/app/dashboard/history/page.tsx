@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -16,9 +16,7 @@ import TablePagination from '../components/TablePagination';
 import {
   HISTORY_PAGE_SIZE,
   historyQueryKeys,
-  fetchToolHistoryAssetsPage,
   fetchVehicleInspectionsHistoryPage,
-  type ToolHistoryRow,
   type VehicleInspectionRow,
   type HistoryPagePayload,
 } from '@/lib/historyFirestore';
@@ -37,19 +35,17 @@ type Profile = {
   email?: string;
 };
 
-type Tool = {
-  id: string;
-  name?: string;
-  brand?: string;
-  model?: string;
-};
-
 type Vehicle = {
   id: string;
   registration?: string;
   make?: string;
   model?: string;
   name?: string;
+};
+
+type Mappings = {
+  vehicles: Record<string, Vehicle>;
+  users: Record<string, Profile>;
 };
 
 const formatDate = (value?: string | Timestamp) => {
@@ -64,29 +60,13 @@ const formatDate = (value?: string | Timestamp) => {
   }
 };
 
-type Mappings = {
-  tools: Record<string, Tool>;
-  vehicles: Record<string, Vehicle>;
-  users: Record<string, Profile>;
-};
-
 async function fetchMappings(companyId: string): Promise<Mappings> {
   if (!firebaseDb) throw new Error('Firebase not configured');
-
-  const toolsQ = query(collection(firebaseDb, 'tools'), where('company_id', '==', companyId));
+  const { collection, query, where, getDocs } = await import('firebase/firestore');
   const vehiclesQ = query(collection(firebaseDb, 'vehicles'), where('company_id', '==', companyId));
   const usersQ = query(collection(firebaseDb, 'profiles'), where('company_id', '==', companyId));
+  const [vehiclesSnap, usersSnap] = await Promise.all([getDocs(vehiclesQ), getDocs(usersQ)]);
 
-  const [toolsSnap, vehiclesSnap, usersSnap] = await Promise.all([
-    getDocs(toolsQ),
-    getDocs(vehiclesQ),
-    getDocs(usersQ),
-  ]);
-
-  const tools: Record<string, Tool> = {};
-  toolsSnap.docs.forEach((d) => {
-    tools[d.id] = { id: d.id, ...d.data() } as Tool;
-  });
   const vehicles: Record<string, Vehicle> = {};
   vehiclesSnap.docs.forEach((d) => {
     vehicles[d.id] = { id: d.id, ...d.data() } as Vehicle;
@@ -96,7 +76,7 @@ async function fetchMappings(companyId: string): Promise<Mappings> {
     users[d.id] = { id: d.id, ...d.data() } as Profile;
   });
 
-  return { tools, vehicles, users };
+  return { vehicles, users };
 }
 
 export default function HistoryPage() {
@@ -104,13 +84,11 @@ export default function HistoryPage() {
   const [bootstrapping, setBootstrapping] = useState(true);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'assets' | 'fleet'>('fleet');
-  const [assetPage, setAssetPage] = useState(1);
   const [fleetPage, setFleetPage] = useState(1);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
-  const [viewingImageAlt, setViewingImageAlt] = useState<string>('');
+  const [viewingImageAlt, setViewingImageAlt] = useState('');
   const [viewingImages, setViewingImages] = useState<string[]>([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) {
@@ -129,17 +107,11 @@ export default function HistoryPage() {
         const snap = await getDoc(profileRef);
         if (snap.exists()) {
           const data = snap.data() as Profile;
-          if (data.company_id) {
-            setCompanyId(data.company_id);
-          } else {
-            setCompanyId(null);
-            console.error('User profile missing company_id');
-          }
+          setCompanyId(data.company_id ?? null);
         } else {
           setCompanyId(null);
         }
-      } catch (e) {
-        console.error(e);
+      } catch {
         setCompanyId(null);
       } finally {
         setBootstrapping(false);
@@ -150,14 +122,8 @@ export default function HistoryPage() {
   }, []);
 
   useEffect(() => {
-    setAssetPage(1);
     setFleetPage(1);
-  }, [companyId]);
-
-  useEffect(() => {
-    setAssetPage(1);
-    setFleetPage(1);
-  }, [searchTerm]);
+  }, [companyId, searchTerm]);
 
   const mappingsQuery = useQuery({
     queryKey: historyQueryKeys.mappings(companyId ?? ''),
@@ -166,31 +132,8 @@ export default function HistoryPage() {
     staleTime: 10 * 60 * 1000,
   });
 
-  const assetsPageEnabled =
-    Boolean(firebaseDb && companyId && activeTab === 'assets') &&
-    (assetPage === 1 ||
-      Boolean(
-        queryClient.getQueryData<HistoryPagePayload<ToolHistoryRow>>(
-          historyQueryKeys.assets(companyId!, assetPage - 1)
-        )
-      ));
-
-  const assetsQuery = useQuery({
-    queryKey: historyQueryKeys.assets(companyId ?? '', assetPage),
-    queryFn: async () => {
-      const prev =
-        assetPage > 1
-          ? queryClient.getQueryData<HistoryPagePayload<ToolHistoryRow>>(
-              historyQueryKeys.assets(companyId!, assetPage - 1)
-            )
-          : undefined;
-      return fetchToolHistoryAssetsPage(firebaseDb!, companyId!, assetPage, prev);
-    },
-    enabled: assetsPageEnabled,
-  });
-
   const fleetPageEnabled =
-    Boolean(firebaseDb && companyId && activeTab === 'fleet') &&
+    Boolean(firebaseDb && companyId) &&
     (fleetPage === 1 ||
       Boolean(
         queryClient.getQueryData<HistoryPagePayload<VehicleInspectionRow>>(
@@ -212,21 +155,8 @@ export default function HistoryPage() {
     enabled: fleetPageEnabled,
   });
 
-  const tools = mappingsQuery.data?.tools ?? {};
   const vehicles = mappingsQuery.data?.vehicles ?? {};
   const users = mappingsQuery.data?.users ?? {};
-
-  const filteredAssetHistory = useMemo(() => {
-    const rows = assetsQuery.data?.items ?? [];
-    const q = searchTerm.toLowerCase();
-    if (!q) return rows;
-    return rows.filter(
-      (item) =>
-        item.action?.toLowerCase().includes(q) ||
-        item.tool_id?.toLowerCase().includes(q) ||
-        item.user_id?.toLowerCase().includes(q)
-    );
-  }, [assetsQuery.data?.items, searchTerm]);
 
   const filteredVehicleInspections = useMemo(() => {
     const rows = fleetQuery.data?.items ?? [];
@@ -240,74 +170,38 @@ export default function HistoryPage() {
     );
   }, [fleetQuery.data?.items, searchTerm]);
 
-  const tableLoading =
-    bootstrapping ||
-    mappingsQuery.isPending ||
-    (activeTab === 'assets' && assetsQuery.isPending) ||
-    (activeTab === 'fleet' && fleetQuery.isPending);
-
-  const getCurrentData = () => {
-    if (activeTab === 'assets') {
-      return filteredAssetHistory.map((item) => {
-        const tool = item.tool_id ? tools[item.tool_id] : null;
-        const user = item.user_id ? users[item.user_id] : null;
-        let userName = 'Unknown';
-        if (user) {
-          if (user.first_name || user.last_name) {
-            userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-          } else if (user.display_name) {
-            userName = user.display_name.trim();
-          } else {
-            userName = user.displayName || user.name || user.email?.split('@')[0] || 'Unknown';
-          }
-        } else if (item.user_id) {
-          userName = item.user_id;
-        }
-        const toolName = tool
-          ? tool.name || `${tool.brand} ${tool.model}`.trim() || item.tool_id
-          : item.tool_id || '—';
-        return {
-          id: item.id,
-          timestamp: item.timestamp,
-          action: item.action || '',
-          item_name: toolName,
-          user_name: userName,
-          details: item.details || '',
-        };
-      });
-    }
-    return filteredVehicleInspections.map((item) => {
-      const vehicle = item.vehicle_id ? vehicles[item.vehicle_id] : null;
-      const user = item.inspected_by ? users[item.inspected_by] : null;
-      let userName = 'Unknown';
-      if (user) {
-        if (user.first_name || user.last_name) {
-          userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-        } else if (user.display_name) {
-          userName = user.display_name.trim();
-        } else {
-          userName = user.displayName || user.name || user.email?.split('@')[0] || 'Unknown';
-        }
-      } else if (item.inspected_by) {
-        userName = item.inspected_by;
-      }
-      const vehicleName = vehicle
-        ? vehicle.registration || vehicle.name || `${vehicle.make} ${vehicle.model}`.trim() || item.vehicle_id
-        : item.vehicle_id || '—';
-      return {
-        id: item.id,
-        timestamp: item.inspected_at,
-        action: item.has_defect ? 'Inspection with Defect' : 'Inspection',
-        item_name: vehicleName,
-        user_name: userName,
-        details: item.notes || (item.has_defect ? 'Defect found' : 'No defects'),
-        mileage: item.mileage || '',
-      };
-    });
-  };
-
-  const serverHasMoreAssets = assetsQuery.data?.hasMore ?? false;
+  const tableLoading = bootstrapping || mappingsQuery.isPending || fleetQuery.isPending;
   const serverHasMoreFleet = fleetQuery.data?.hasMore ?? false;
+
+  const exportData = filteredVehicleInspections.map((item) => {
+    const vehicle = item.vehicle_id ? vehicles[item.vehicle_id] : null;
+    const user = item.inspected_by ? users[item.inspected_by] : null;
+    let userName = 'Unknown';
+    if (user) {
+      if (user.first_name || user.last_name) {
+        userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+      } else if (user.display_name) {
+        userName = user.display_name.trim();
+      } else {
+        userName = user.displayName || user.name || user.email?.split('@')[0] || 'Unknown';
+      }
+    } else if (item.inspected_by) {
+      userName = item.inspected_by;
+    }
+    const vehicleName = vehicle
+      ? vehicle.registration || vehicle.name || `${vehicle.make} ${vehicle.model}`.trim() || item.vehicle_id
+      : item.vehicle_id || '—';
+
+    return {
+      id: item.id,
+      timestamp: item.inspected_at,
+      status: item.has_defect ? 'Defect Found' : 'No Defects',
+      vehicle: vehicleName,
+      inspector: userName,
+      mileage: item.mileage || '',
+      notes: item.notes || (item.has_defect ? 'Defect found' : ''),
+    };
+  });
 
   return (
     <div>
@@ -315,27 +209,17 @@ export default function HistoryPage() {
         <div>
           <h1 className="text-3xl font-bold text-white">Activity History</h1>
           <p className="text-white/70 text-sm mt-1">
-            Audit log (last {DVSA_HISTORY_MONTHS} months, {HISTORY_PAGE_SIZE} rows per page). Thumbnails load as you
-            scroll.
+            Fleet inspection audit log (last {DVSA_HISTORY_MONTHS} months, {HISTORY_PAGE_SIZE} rows per
+            page). Thumbnails load as you scroll.
           </p>
         </div>
       </div>
 
-      <div className="flex gap-2 mb-6 border-b border-white/10">
-        <button
-          type="button"
-          onClick={() => setActiveTab('fleet')}
-          className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${
-            activeTab === 'fleet'
-              ? 'border-blue-500 text-blue-500'
-              : 'border-transparent text-white/60 hover:text-white'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Truck className="h-4 w-4" />
-            Fleet Inspections
-          </div>
-        </button>
+      <div className="mb-6 border-b border-white/10">
+        <div className="px-4 py-2 font-medium text-sm border-b-2 border-blue-500 text-blue-500 inline-flex items-center gap-2">
+          <Truck className="h-4 w-4" />
+          Fleet Inspections
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -345,46 +229,31 @@ export default function HistoryPage() {
           </div>
           <input
             type="text"
-            placeholder={
-              activeTab === 'assets'
-                ? 'Search by action, asset ID, or user (current page)...'
-                : 'Search by vehicle, inspector, or defect status (current page)...'
-            }
+            placeholder="Search by vehicle, inspector, or defect status (current page)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 w-full bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
           />
         </div>
         <ExportButton
-          data={getCurrentData()}
-          filename={activeTab === 'assets' ? 'asset-history' : 'fleet-inspections'}
-          fieldMappings={
-            activeTab === 'assets'
-              ? {
-                  id: 'ID',
-                  timestamp: 'Timestamp',
-                  action: 'Action',
-                  item_name: 'Asset',
-                  user_name: 'User',
-                  details: 'Details',
-                }
-              : {
-                  id: 'ID',
-                  timestamp: 'Timestamp',
-                  action: 'Action',
-                  item_name: 'Vehicle',
-                  user_name: 'Inspector',
-                  details: 'Notes',
-                  mileage: 'Mileage',
-                }
-          }
+          data={exportData}
+          filename="fleet-inspections"
+          fieldMappings={{
+            id: 'ID',
+            timestamp: 'Timestamp',
+            status: 'Status',
+            vehicle: 'Vehicle',
+            inspector: 'Inspector',
+            mileage: 'Mileage',
+            notes: 'Notes',
+          }}
         />
       </div>
       <p className="text-white/40 text-xs -mt-4 mb-6">
         Search only filters the rows on the current page. Export includes the current page only.
       </p>
 
-      {(assetsQuery.isError || fleetQuery.isError || mappingsQuery.isError) && (
+      {(fleetQuery.isError || mappingsQuery.isError) && (
         <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm text-amber-200">
           Some data could not be loaded. If this persists, deploy the Firestore composite indexes (see
           firestore.indexes.json in the project) or check the browser console.
@@ -397,77 +266,23 @@ export default function HistoryPage() {
             <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">
               <tr>
                 <th className="px-6 py-4 font-medium">Timestamp</th>
-                <th className="px-6 py-4 font-medium">{activeTab === 'assets' ? 'Action' : 'Status'}</th>
-                <th className="px-6 py-4 font-medium">{activeTab === 'assets' ? 'Asset' : 'Vehicle'}</th>
-                <th className="px-6 py-4 font-medium">{activeTab === 'assets' ? 'User' : 'Inspector'}</th>
-                {activeTab === 'fleet' && <th className="px-6 py-4 font-medium">Mileage</th>}
-                {activeTab === 'fleet' && <th className="px-6 py-4 font-medium">Images</th>}
-                <th className="px-6 py-4 font-medium">{activeTab === 'assets' ? 'Details' : 'Notes'}</th>
+                <th className="px-6 py-4 font-medium">Status</th>
+                <th className="px-6 py-4 font-medium">Vehicle</th>
+                <th className="px-6 py-4 font-medium">Inspector</th>
+                <th className="px-6 py-4 font-medium">Mileage</th>
+                <th className="px-6 py-4 font-medium">Images</th>
+                <th className="px-6 py-4 font-medium">Notes</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
               {tableLoading ? (
-                <TableSkeleton cols={activeTab === 'assets' ? 5 : 7} />
-              ) : (activeTab === 'assets' ? filteredAssetHistory : filteredVehicleInspections).length === 0 ? (
-                <EmptyStateTableRow
-                  colSpan={activeTab === 'assets' ? 5 : 7}
-                  message={activeTab === 'assets' ? 'No asset history found.' : 'No vehicle inspections found.'}
-                />
-              ) : activeTab === 'assets' ? (
-                filteredAssetHistory.map((item) => {
-                  const tool = item.tool_id ? tools[item.tool_id] : null;
-                  const user = item.user_id ? users[item.user_id] : null;
-
-                  let userName = '—';
-                  if (user) {
-                    if (user.first_name || user.last_name) {
-                      userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-                    } else if (user.display_name) {
-                      userName = user.display_name.trim();
-                    } else {
-                      userName = user.displayName || user.name || user.email?.split('@')[0] || 'Unknown';
-                    }
-                  } else if (item.user_id) {
-                    userName = item.user_id;
-                  }
-
-                  const toolName = tool
-                    ? tool.name || `${tool.brand} ${tool.model}`.trim() || item.tool_id
-                    : item.tool_id || '—';
-
-                  return (
-                    <tr key={item.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4 text-white/70 text-sm whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5 opacity-50" />
-                          {formatDate(item.timestamp)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                          ${
-                            item.action?.includes('check_out')
-                              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                              : item.action?.includes('check_in')
-                                ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                                : 'bg-white/10 text-white/60 border border-white/20'
-                          }`}
-                        >
-                          {item.action?.replace('_', ' ')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-white text-sm">{toolName}</td>
-                      <td className="px-6 py-4 text-white/80 text-sm">{userName}</td>
-                      <td className="px-6 py-4 text-white/60 text-sm">{item.details || '—'}</td>
-                    </tr>
-                  );
-                })
+                <TableSkeleton cols={7} />
+              ) : filteredVehicleInspections.length === 0 ? (
+                <EmptyStateTableRow colSpan={7} message="No fleet inspection history found." />
               ) : (
                 filteredVehicleInspections.map((item) => {
                   const vehicle = item.vehicle_id ? vehicles[item.vehicle_id] : null;
                   const user = item.inspected_by ? users[item.inspected_by] : null;
-
                   let userName = '—';
                   if (user) {
                     if (user.first_name || user.last_name) {
@@ -511,8 +326,7 @@ export default function HistoryPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                          ${
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             item.has_defect
                               ? 'bg-red-500/10 text-red-400 border border-red-500/20'
                               : 'bg-green-500/10 text-green-400 border border-green-500/20'
@@ -587,25 +401,14 @@ export default function HistoryPage() {
             </tbody>
           </table>
         </div>
-        {activeTab === 'assets' ? (
-          <TablePagination
-            variant="cursor"
-            currentPage={assetPage}
-            pageSize={HISTORY_PAGE_SIZE}
-            itemsOnCurrentPage={filteredAssetHistory.length}
-            hasNextPage={serverHasMoreAssets}
-            onPageChange={setAssetPage}
-          />
-        ) : (
-          <TablePagination
-            variant="cursor"
-            currentPage={fleetPage}
-            pageSize={HISTORY_PAGE_SIZE}
-            itemsOnCurrentPage={filteredVehicleInspections.length}
-            hasNextPage={serverHasMoreFleet}
-            onPageChange={setFleetPage}
-          />
-        )}
+        <TablePagination
+          variant="cursor"
+          currentPage={fleetPage}
+          pageSize={HISTORY_PAGE_SIZE}
+          itemsOnCurrentPage={filteredVehicleInspections.length}
+          hasNextPage={serverHasMoreFleet}
+          onPageChange={setFleetPage}
+        />
       </div>
 
       <ImageViewerModal

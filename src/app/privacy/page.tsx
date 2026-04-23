@@ -24,7 +24,7 @@ export default function PrivacyPolicy() {
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">1. Introduction</h2>
               <p className="text-white/80">
-                StockTrackPro ("we", "our", "us") is committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, how we use it, and your rights when using our website, dashboard, and companion mobile app.
+                StockTrackPro (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) is committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, how we use it, and your rights when using our website, dashboard, and companion mobile app.
               </p>
             </div>
 
@@ -43,7 +43,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Company, asset, vehicle, inspection, and defect reporting data</span>
+                  <span>Company, vehicle, inspection, and defect reporting data</span>
                 </li>
               </ul>
 
@@ -64,19 +64,11 @@ export default function PrivacyPolicy() {
               </ul>
 
               <h3 className="text-xl font-semibold text-white mb-3">2.3 Camera, Photos, and Notifications</h3>
-              <p className="text-white/80 mb-4">We request access to your device's camera for:</p>
+              <p className="text-white/80 mb-4">We request access to your device&apos;s camera for:</p>
               <ul className="space-y-3 text-white/80">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Scanning QR codes for asset and vehicle management</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Taking vehicle inspection photos (6 photos per inspection)</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>QR code scanning is only used when you actively choose to scan</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
@@ -101,7 +93,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Firestore: Storing and managing asset inventory, vehicle fleet data, user profiles, and company data</span>
+                  <span>Firestore: Storing and managing vehicle fleet data, user profiles, and company data</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
@@ -221,7 +213,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Asset, vehicle, and inspection data is retained per company requirements</span>
+                  <span>Vehicle and inspection data is retained per company requirements</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
@@ -247,15 +239,15 @@ export default function PrivacyPolicy() {
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">2.</span>
-                    <span>Tap on <strong className="text-white">"Manage Account"</strong></span>
+                    <span>Tap on <strong className="text-white">&quot;Manage Account&quot;</strong></span>
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">3.</span>
-                    <span>When the alert appears asking "Choose an action", tap <strong className="text-white">"Delete Account"</strong></span>
+                    <span>When the alert appears asking &quot;Choose an action&quot;, tap <strong className="text-white">&quot;Delete Account&quot;</strong></span>
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">4.</span>
-                    <span>Confirm your decision by tapping <strong className="text-white">"Delete"</strong> in the confirmation alert</span>
+                    <span>Confirm your decision by tapping <strong className="text-white">&quot;Delete&quot;</strong> in the confirmation alert</span>
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">5.</span>
@@ -293,7 +285,7 @@ export default function PrivacyPolicy() {
             </div>
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">10. Children's Privacy</h2>
+              <h2 className="text-2xl font-semibold text-white mb-4">10. Children&apos;s Privacy</h2>
               <p className="text-white/80">
                 Our service is not intended for and does not target children under 13. We do not knowingly collect information from children under 13.
               </p>
