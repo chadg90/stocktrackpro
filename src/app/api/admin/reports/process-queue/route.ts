@@ -32,6 +32,25 @@ function formatMonthLabel(monthValue: string): string {
   return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 }
 
+function getRecentMonthValues(monthValue: string, count: number): string[] {
+  const [yearStr, monthStr] = monthValue.split('-');
+  const base = new Date(Number(yearStr), Number(monthStr) - 1, 1);
+  const values: string[] = [];
+  for (let i = count - 1; i >= 0; i -= 1) {
+    const dt = new Date(base);
+    dt.setMonth(dt.getMonth() - i);
+    values.push(`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`);
+  }
+  return values;
+}
+
+function isWithinRange(value: Timestamp | string | undefined, start: Date, end: Date): boolean {
+  if (!value) return false;
+  const dt = value instanceof Timestamp ? value.toDate() : new Date(value);
+  if (Number.isNaN(dt.getTime())) return false;
+  return dt >= start && dt < end;
+}
+
 async function assertAdmin(request: NextRequest): Promise<string> {
   const authHeader = request.headers.get('authorization');
   const idToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -57,13 +76,23 @@ async function buildMonthlyStats(companyId: string, month: string): Promise<{
   openDefects: number;
   criticalOpenDefects: number;
   inactivityDays: number | null;
+  usersReportedCount: number;
+  usersNotReportedCount: number;
+  trend: Array<{ month: string; checks: number; defectsReported: number; defectsResolved: number }>;
+  openDefectsList: Array<{
+    vehicle: string;
+    description: string;
+    raised: string;
+    priority: 'critical' | 'standard';
+    status: 'open' | 'resolved';
+  }>;
 }> {
   const db = getAdminDb();
   const { start, end } = monthToRange(month);
   const startTs = Timestamp.fromDate(start);
   const endTs = Timestamp.fromDate(end);
 
-  const [checksSnap, reportedSnap, resolvedSnap, allDefectsSnap, latestInspectionSnap] = await Promise.all([
+  const [checksSnap, reportedSnap, resolvedSnap, allDefectsSnap, latestInspectionSnap, allInspectionsSnap, profilesSnap, vehiclesSnap] = await Promise.all([
     db
       .collection('vehicle_inspections')
       .where('company_id', '==', companyId)
@@ -89,6 +118,9 @@ async function buildMonthlyStats(companyId: string, month: string): Promise<{
       .orderBy('inspected_at', 'desc')
       .limit(1)
       .get(),
+    db.collection('vehicle_inspections').where('company_id', '==', companyId).get(),
+    db.collection('profiles').where('company_id', '==', companyId).get(),
+    db.collection('vehicles').where('company_id', '==', companyId).get(),
   ]);
 
   const checksCompleted = checksSnap.size;
@@ -97,7 +129,18 @@ async function buildMonthlyStats(companyId: string, month: string): Promise<{
   const resolutionRate = defectsReported > 0 ? Math.round((defectsResolved / defectsReported) * 100) : null;
 
   const openDefects = allDefectsSnap.docs
-    .map((doc) => doc.data() as { status?: string; severity?: string })
+    .map((doc) => doc.data() as {
+      status?: string;
+      severity?: string;
+      vehicle_registration?: string;
+      registration?: string;
+      vehicle_id?: string;
+      description?: string;
+      defect?: string;
+      notes?: string;
+      reported_at?: Timestamp | string;
+      reported_by?: string;
+    })
     .filter((defect) => defect.status !== 'resolved');
   const criticalOpenDefects = openDefects.filter((defect) => {
     const sev = (defect.severity || '').toLowerCase();
@@ -107,6 +150,99 @@ async function buildMonthlyStats(companyId: string, month: string): Promise<{
   const latestInspectionData = latestInspectionSnap.docs[0]?.data() as { inspected_at?: Timestamp } | undefined;
   const latestDate = latestInspectionData?.inspected_at?.toDate?.();
   const inactivityDays = latestDate ? Math.floor((Date.now() - latestDate.getTime()) / 86400000) : null;
+  const profilesById: Record<string, { first_name?: string; last_name?: string; display_name?: string; email?: string }> = {};
+  profilesSnap.docs.forEach((profileDoc) => {
+    profilesById[profileDoc.id] = profileDoc.data() as {
+      first_name?: string;
+      last_name?: string;
+      display_name?: string;
+      email?: string;
+    };
+  });
+  const vehiclesById: Record<string, { registration?: string; make?: string; model?: string }> = {};
+  vehiclesSnap.docs.forEach((vehicleDoc) => {
+    vehiclesById[vehicleDoc.id] = vehicleDoc.data() as { registration?: string; make?: string; model?: string };
+  });
+
+  const allInspections = allInspectionsSnap.docs.map((docSnap) =>
+    docSnap.data() as { inspected_at?: Timestamp | string; inspected_by?: string }
+  );
+  const allDefects = allDefectsSnap.docs.map((docSnap) =>
+    docSnap.data() as {
+      reported_at?: Timestamp | string;
+      resolved_at?: Timestamp | string;
+      reported_by?: string;
+    }
+  );
+  const inspectionsInMonth = allInspections.filter((inspection) =>
+    isWithinRange(inspection.inspected_at, start, end)
+  );
+  const defectsInMonth = allDefects.filter((defect) => isWithinRange(defect.reported_at, start, end));
+  const reportingUsers = new Set<string>();
+  inspectionsInMonth.forEach((inspection) => {
+    if (inspection.inspected_by) reportingUsers.add(inspection.inspected_by);
+  });
+  defectsInMonth.forEach((defect) => {
+    if (defect.reported_by) reportingUsers.add(defect.reported_by);
+  });
+  const usersReportedCount = reportingUsers.size;
+  const usersNotReportedCount = Math.max(0, profilesSnap.size - usersReportedCount);
+
+  const openDefectsList = openDefects.map((defect) => {
+    const mappedVehicle = defect.vehicle_id ? vehiclesById[defect.vehicle_id] : undefined;
+    const reporter = defect.reported_by ? profilesById[defect.reported_by] : undefined;
+    const reporterName = reporter
+      ? reporter.display_name ||
+        `${reporter.first_name || ''} ${reporter.last_name || ''}`.trim() ||
+        reporter.email ||
+        ''
+      : '';
+    const raised = defect.reported_at
+      ? (defect.reported_at instanceof Timestamp
+          ? defect.reported_at.toDate()
+          : new Date(defect.reported_at)
+        ).toLocaleDateString('en-GB')
+      : 'Unknown date';
+    const baseDescription = defect.description || defect.defect || defect.notes || 'Defect reported';
+    const priority: 'critical' | 'standard' =
+      (defect.severity || '').toLowerCase() === 'critical' || (defect.severity || '').toLowerCase() === 'high'
+        ? 'critical'
+        : 'standard';
+
+    return {
+      vehicle:
+        defect.vehicle_registration ||
+        defect.registration ||
+        mappedVehicle?.registration ||
+        (mappedVehicle?.make || mappedVehicle?.model
+          ? `${mappedVehicle?.make || ''} ${mappedVehicle?.model || ''}`.trim()
+          : '') ||
+        'Unknown vehicle',
+      description: reporterName ? `${baseDescription} (reported by ${reporterName})` : baseDescription,
+      raised,
+      priority,
+      status: 'open' as const,
+    };
+  });
+
+  const trend = getRecentMonthValues(month, 4).map((monthValue) => {
+    const range = monthToRange(monthValue);
+    const checks = allInspections.filter((inspection) =>
+      isWithinRange(inspection.inspected_at, range.start, range.end)
+    ).length;
+    const defectsReported = allDefects.filter((defect) =>
+      isWithinRange(defect.reported_at, range.start, range.end)
+    ).length;
+    const defectsResolved = allDefects.filter((defect) =>
+      isWithinRange(defect.resolved_at, range.start, range.end)
+    ).length;
+    return {
+      month: formatMonthLabel(monthValue),
+      checks,
+      defectsReported,
+      defectsResolved,
+    };
+  });
 
   return {
     checksCompleted,
@@ -116,6 +252,10 @@ async function buildMonthlyStats(companyId: string, month: string): Promise<{
     openDefects: openDefects.length,
     criticalOpenDefects,
     inactivityDays,
+    usersReportedCount,
+    usersNotReportedCount,
+    trend,
+    openDefectsList,
   };
 }
 
@@ -192,6 +332,10 @@ export async function POST(request: NextRequest) {
             criticalOpenDefects: stats.criticalOpenDefects,
             daysSinceLastCheck: stats.inactivityDays,
             inactivityDays: stats.inactivityDays,
+            usersReportedCount: stats.usersReportedCount,
+            usersNotReportedCount: stats.usersNotReportedCount,
+            trend: stats.trend,
+            openDefectsList: stats.openDefectsList,
             summaryNote:
               `Automated monthly dispatch for ${companyName}. ` +
               `Checks: ${stats.checksCompleted}, defects reported: ${stats.defectsReported}, defects resolved: ${stats.defectsResolved}.`,

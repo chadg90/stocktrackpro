@@ -42,6 +42,7 @@ type Inspection = {
   id: string;
   company_id?: string;
   inspected_at?: Timestamp | string;
+  inspected_by?: string;
 };
 
 type Defect = {
@@ -57,6 +58,14 @@ type Defect = {
   description?: string;
   defect?: string;
   notes?: string;
+  reported_by?: string;
+};
+
+type Vehicle = {
+  id: string;
+  registration?: string;
+  make?: string;
+  model?: string;
 };
 
 type CompanySnapshot = {
@@ -76,6 +85,8 @@ type ReportStats = {
   openDefects: number;
   criticalOpenDefects: number;
   daysSinceLastCheck: number | null;
+  usersReportedCount: number;
+  usersNotReportedCount: number;
 };
 
 type ReportComparison = {
@@ -139,6 +150,11 @@ function isWithinRange(value: Timestamp | string | undefined, start: Date, end: 
   const dt = toDate(value);
   if (!dt) return false;
   return dt >= start && dt < end;
+}
+
+function profileDisplayName(profile: Profile): string {
+  const full = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+  return profile.display_name || full || profile.email || 'Unknown user';
 }
 
 function getRecentMonthValues(monthValue: string, count: number): string[] {
@@ -394,11 +410,29 @@ export default function AdminReportsPage() {
         getDocs(query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', selectedCompanyId))),
         getDocs(query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', selectedCompanyId))),
       ]);
+      const [vehiclesSnap, profilesSnap] = await Promise.all([
+        getDocs(query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', selectedCompanyId))),
+        getDocs(query(collection(firebaseDb!, 'profiles'), where('company_id', '==', selectedCompanyId))),
+      ]);
+      const vehiclesById: Record<string, Vehicle> = {};
+      vehiclesSnap.docs.forEach((vehicleDoc) => {
+        vehiclesById[vehicleDoc.id] = { id: vehicleDoc.id, ...(vehicleDoc.data() as Omit<Vehicle, 'id'>) };
+      });
+      const profilesById: Record<string, Profile> = {};
+      profilesSnap.docs.forEach((profileDoc) => {
+        profilesById[profileDoc.id] = { ...(profileDoc.data() as Profile) };
+      });
 
       const checksCompleted = inspectionsByCompanySnap.docs.filter((docSnap) => {
         const inspection = docSnap.data() as Inspection;
         return isWithinRange(inspection.inspected_at, start, end);
       }).length;
+      const inspectionsInMonth = inspectionsByCompanySnap.docs
+        .map((docSnap) => docSnap.data() as Inspection)
+        .filter((inspection) => isWithinRange(inspection.inspected_at, start, end));
+      const defectsReportedInMonth = allDefectsByCompanySnap.docs
+        .map((docSnap) => docSnap.data() as Defect)
+        .filter((defect) => isWithinRange(defect.reported_at, start, end));
       const defectsReported = allDefectsByCompanySnap.docs.filter((docSnap) => {
         const defect = docSnap.data() as Defect;
         return isWithinRange(defect.reported_at, start, end);
@@ -429,14 +463,36 @@ export default function AdminReportsPage() {
       const openRows: OpenDefectRow[] = openDefects.map((defect) => {
         const raisedDate = toDate(defect.reported_at);
         const sev = (defect.severity || '').toLowerCase();
+        const mappedVehicle = defect.vehicle_id ? vehiclesById[defect.vehicle_id] : undefined;
+        const vehicleName =
+          defect.vehicle_registration ||
+          defect.registration ||
+          mappedVehicle?.registration ||
+          (mappedVehicle?.make || mappedVehicle?.model
+            ? `${mappedVehicle?.make || ''} ${mappedVehicle?.model || ''}`.trim()
+            : '') ||
+          'Unknown vehicle';
+        const reporterName = defect.reported_by ? profileDisplayName(profilesById[defect.reported_by] || {}) : '';
         return {
-          vehicle: defect.vehicle_registration || defect.registration || defect.vehicle_id || 'Unknown vehicle',
-          description: defect.description || defect.defect || defect.notes || 'Defect reported',
+          vehicle: vehicleName,
+          description: reporterName
+            ? `${defect.description || defect.defect || defect.notes || 'Defect reported'} (reported by ${reporterName})`
+            : defect.description || defect.defect || defect.notes || 'Defect reported',
           raised: raisedDate ? raisedDate.toLocaleDateString('en-GB') : 'Unknown date',
           priority: sev === 'critical' || sev === 'high' ? 'critical' : 'standard',
           status: defect.status === 'resolved' ? 'resolved' : 'open',
         };
       });
+      const reportingUserIds = new Set<string>();
+      inspectionsInMonth.forEach((inspection) => {
+        if (inspection.inspected_by) reportingUserIds.add(inspection.inspected_by);
+      });
+      defectsReportedInMonth.forEach((defect) => {
+        if (defect.reported_by) reportingUserIds.add(defect.reported_by);
+      });
+      const totalUsers = profilesSnap.size;
+      const usersReportedCount = reportingUserIds.size;
+      const usersNotReportedCount = Math.max(0, totalUsers - usersReportedCount);
 
       const nextStats: ReportStats = {
         checksCompleted,
@@ -446,6 +502,8 @@ export default function AdminReportsPage() {
         openDefects: openDefects.length,
         criticalOpenDefects,
         daysSinceLastCheck,
+        usersReportedCount,
+        usersNotReportedCount,
       };
       setStats(nextStats);
       setOpenDefectRows(openRows);
@@ -543,6 +601,8 @@ export default function AdminReportsPage() {
           comparison,
           trend,
           openDefectsList: openDefectRows,
+          usersReportedCount: result.usersReportedCount,
+          usersNotReportedCount: result.usersNotReportedCount,
         },
         { logoDataUrl }
       );

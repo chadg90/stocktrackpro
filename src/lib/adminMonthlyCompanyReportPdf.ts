@@ -41,6 +41,8 @@ export type MonthlyCompanyReportInput = {
   } | null;
   trend?: ReportTrendPoint[];
   openDefectsList?: OpenDefectRow[];
+  usersReportedCount?: number;
+  usersNotReportedCount?: number;
   summaryNote?: string;
 };
 
@@ -80,27 +82,27 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
   // Header
   const logoX = contentX;
   const logoY = y + 1;
-  doc.setFillColor(...BLUE);
-  doc.roundedRect(logoX, logoY, 10, 10, 1.8, 1.8, 'F');
-  const sq = 1.8;
-  const gap = 1.2;
-  const gx = logoX + 2.4;
-  const gy = logoY + 2.4;
-  doc.setFillColor(255, 255, 255);
-  doc.rect(gx, gy, sq, sq, 'F');
-  doc.setFillColor(220, 232, 255);
-  doc.rect(gx + sq + gap, gy, sq, sq, 'F');
-  doc.rect(gx, gy + sq + gap, sq, sq, 'F');
-  doc.setFillColor(180, 210, 255);
-  doc.rect(gx + sq + gap, gy + sq + gap, sq, sq, 'F');
+  doc.setFillColor(15, 15, 15);
+  doc.roundedRect(logoX, logoY, 12, 12, 1.8, 1.8, 'F');
+  if (options.logoDataUrl) {
+    try {
+      doc.addImage(options.logoDataUrl, 'PNG', logoX + 1.2, logoY + 1.2, 9.6, 9.6);
+    } catch {
+      doc.setFillColor(...BLUE);
+      doc.roundedRect(logoX + 1.2, logoY + 1.2, 9.6, 9.6, 1.4, 1.4, 'F');
+    }
+  } else {
+    doc.setFillColor(...BLUE);
+    doc.roundedRect(logoX + 1.2, logoY + 1.2, 9.6, 9.6, 1.4, 1.4, 'F');
+  }
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...BLACK);
   doc.setFontSize(10);
-  doc.text('Stock Track PRO', logoX + 13, y + 5);
+  doc.text('Stock Track PRO', logoX + 15, y + 5);
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  doc.text('Monthly fleet performance report', logoX + 13, y + 9.5);
+  doc.text('Monthly fleet performance report', logoX + 15, y + 9.5);
 
   const rightX = contentX + contentW - 2;
   doc.setFontSize(9);
@@ -187,6 +189,20 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
     }
   });
   y += cardH + 10;
+
+  const usersReported = Math.max(0, Math.round(input.usersReportedCount || 0));
+  const usersNotReported = Math.max(0, Math.round(input.usersNotReportedCount || 0));
+  doc.setFillColor(249, 250, 251);
+  doc.setDrawColor(...LIGHT_GRAY);
+  doc.roundedRect(contentX, y - 2, contentW, 8, 1.2, 1.2, 'FD');
+  doc.setFontSize(8);
+  doc.setTextColor(...MUTED);
+  doc.text(
+    `User reporting coverage: ${usersReported} submitted checks/defects, ${usersNotReported} did not submit in this period`,
+    contentX + 2.5,
+    y + 2.7
+  );
+  y += 9;
 
   // Section 2 - trend
   sectionLabel('2 - Trend: checks, defects reported & resolved');
