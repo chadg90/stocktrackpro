@@ -16,6 +16,13 @@ export type MonthlyCompanyReportInput = {
   openDefects: number;
   criticalOpenDefects: number;
   inactivityDays: number | null;
+  comparison?: {
+    previousMonthLabel: string;
+    checksDelta: number;
+    defectsReportedDelta: number;
+    defectsResolvedDelta: number;
+    resolutionRateDelta: number | null;
+  } | null;
   summaryNote?: string;
 };
 
@@ -146,6 +153,34 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
     doc.text(lineWrapped, margin, y);
     y += lineWrapped.length * 4 + 1;
   });
+
+  if (input.comparison) {
+    y += 2;
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...BLACK);
+    doc.setFontSize(11);
+    doc.text(`Month-on-month comparison (vs ${input.comparison.previousMonthLabel})`, margin, y);
+    y += 5.5;
+    autoTable(doc, {
+      startY: y,
+      head: [['Metric', 'Change']],
+      body: [
+        ['Checks completed', `${input.comparison.checksDelta >= 0 ? '+' : ''}${input.comparison.checksDelta}`],
+        ['Defects reported', `${input.comparison.defectsReportedDelta >= 0 ? '+' : ''}${input.comparison.defectsReportedDelta}`],
+        ['Defects resolved', `${input.comparison.defectsResolvedDelta >= 0 ? '+' : ''}${input.comparison.defectsResolvedDelta}`],
+        [
+          'Resolution rate',
+          input.comparison.resolutionRateDelta === null
+            ? 'N/A'
+            : `${input.comparison.resolutionRateDelta >= 0 ? '+' : ''}${input.comparison.resolutionRateDelta}pp`,
+        ],
+      ],
+      styles: { fontSize: 9, textColor: BLACK },
+      headStyles: { fillColor: BLUE, textColor: 255, fontStyle: 'bold' },
+      margin: { left: margin, right: margin },
+    });
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 4;
+  }
 
   const footerY = pageHeight - 18;
   doc.setDrawColor(...LIGHT_GRAY);

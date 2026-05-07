@@ -72,6 +72,14 @@ type ReportStats = {
   daysSinceLastCheck: number | null;
 };
 
+type ReportComparison = {
+  previousMonthLabel: string;
+  checksDelta: number;
+  defectsReportedDelta: number;
+  defectsResolvedDelta: number;
+  resolutionRateDelta: number | null;
+};
+
 type SentReportHistoryItem = {
   id: string;
   company_name: string;
@@ -112,6 +120,15 @@ function formatMonthLabel(monthValue: string): string {
   return date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 }
 
+function getPreviousMonthValue(monthValue: string): string {
+  const [yearStr, monthStr] = monthValue.split('-');
+  const date = new Date(Number(yearStr), Number(monthStr) - 1, 1);
+  date.setMonth(date.getMonth() - 1);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
 export default function AdminReportsPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -123,6 +140,7 @@ export default function AdminReportsPage() {
   const [template, setTemplate] = useState<MonthlyCompanyReportTemplate>('executive');
   const [previewLoading, setPreviewLoading] = useState(false);
   const [stats, setStats] = useState<ReportStats | null>(null);
+  const [comparison, setComparison] = useState<ReportComparison | null>(null);
   const [snapshot, setSnapshot] = useState<CompanySnapshot | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [recipientEmail, setRecipientEmail] = useState('');
@@ -304,6 +322,48 @@ export default function AdminReportsPage() {
     [companies, selectedCompanyId]
   );
 
+  async function getMonthStats(
+    companyId: string,
+    monthValue: string
+  ): Promise<Pick<ReportStats, 'checksCompleted' | 'defectsReported' | 'defectsResolved' | 'resolutionRate'>> {
+    if (!firebaseDb) {
+      return { checksCompleted: 0, defectsReported: 0, defectsResolved: 0, resolutionRate: null };
+    }
+    const { start, end } = monthToRange(monthValue);
+    const [inspectionsSnap, defectsReportedSnap, defectsResolvedSnap] = await Promise.all([
+      getDocs(
+        query(
+          collection(firebaseDb!, 'vehicle_inspections'),
+          where('company_id', '==', companyId),
+          where('inspected_at', '>=', Timestamp.fromDate(start)),
+          where('inspected_at', '<', Timestamp.fromDate(end))
+        )
+      ),
+      getDocs(
+        query(
+          collection(firebaseDb!, 'vehicle_defects'),
+          where('company_id', '==', companyId),
+          where('reported_at', '>=', Timestamp.fromDate(start)),
+          where('reported_at', '<', Timestamp.fromDate(end))
+        )
+      ),
+      getDocs(
+        query(
+          collection(firebaseDb!, 'vehicle_defects'),
+          where('company_id', '==', companyId),
+          where('resolved_at', '>=', Timestamp.fromDate(start)),
+          where('resolved_at', '<', Timestamp.fromDate(end))
+        )
+      ),
+    ]);
+
+    const checksCompleted = inspectionsSnap.size;
+    const defectsReported = defectsReportedSnap.size;
+    const defectsResolved = defectsResolvedSnap.size;
+    const resolutionRate = defectsReported > 0 ? Math.round((defectsResolved / defectsReported) * 100) : null;
+    return { checksCompleted, defectsReported, defectsResolved, resolutionRate };
+  }
+
   async function calculateStats(): Promise<ReportStats | null> {
     if (!firebaseDb || !selectedCompanyId || !selectedMonth) return null;
     const { start, end } = monthToRange(selectedMonth);
@@ -379,6 +439,18 @@ export default function AdminReportsPage() {
         daysSinceLastCheck,
       };
       setStats(nextStats);
+      const previousMonthValue = getPreviousMonthValue(selectedMonth);
+      const previousStats = await getMonthStats(selectedCompanyId, previousMonthValue);
+      setComparison({
+        previousMonthLabel: formatMonthLabel(previousMonthValue),
+        checksDelta: nextStats.checksCompleted - previousStats.checksCompleted,
+        defectsReportedDelta: nextStats.defectsReported - previousStats.defectsReported,
+        defectsResolvedDelta: nextStats.defectsResolved - previousStats.defectsResolved,
+        resolutionRateDelta:
+          nextStats.resolutionRate === null || previousStats.resolutionRate === null
+            ? null
+            : nextStats.resolutionRate - previousStats.resolutionRate,
+      });
       setStatusMessage('Preview ready.');
       return nextStats;
     } catch (error) {
@@ -441,6 +513,7 @@ export default function AdminReportsPage() {
           openDefects: result.openDefects,
           criticalOpenDefects: result.criticalOpenDefects,
           inactivityDays: result.daysSinceLastCheck,
+          comparison,
         },
         { logoDataUrl }
       );
@@ -631,6 +704,53 @@ export default function AdminReportsPage() {
               <p className="text-white/50 text-xs">Resolution rate</p>
               <p className="text-white text-xl font-semibold">
                 {stats.resolutionRate === null ? 'N/A' : `${stats.resolutionRate}%`}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {comparison && (
+          <div className="rounded-lg border border-white/10 p-3 bg-white/[0.02]">
+            <p className="text-white/60 text-xs mb-2">
+              Month-on-month vs {comparison.previousMonthLabel}
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+              <p className="text-white/80">
+                Checks:{' '}
+                <span className={comparison.checksDelta >= 0 ? 'text-emerald-300' : 'text-red-300'}>
+                  {comparison.checksDelta >= 0 ? '+' : ''}
+                  {comparison.checksDelta}
+                </span>
+              </p>
+              <p className="text-white/80">
+                Defects reported:{' '}
+                <span className={comparison.defectsReportedDelta <= 0 ? 'text-emerald-300' : 'text-red-300'}>
+                  {comparison.defectsReportedDelta >= 0 ? '+' : ''}
+                  {comparison.defectsReportedDelta}
+                </span>
+              </p>
+              <p className="text-white/80">
+                Defects resolved:{' '}
+                <span className={comparison.defectsResolvedDelta >= 0 ? 'text-emerald-300' : 'text-red-300'}>
+                  {comparison.defectsResolvedDelta >= 0 ? '+' : ''}
+                  {comparison.defectsResolvedDelta}
+                </span>
+              </p>
+              <p className="text-white/80">
+                Resolution rate:{' '}
+                <span
+                  className={
+                    comparison.resolutionRateDelta === null
+                      ? 'text-white/60'
+                      : comparison.resolutionRateDelta >= 0
+                        ? 'text-emerald-300'
+                        : 'text-red-300'
+                  }
+                >
+                  {comparison.resolutionRateDelta === null
+                    ? 'N/A'
+                    : `${comparison.resolutionRateDelta >= 0 ? '+' : ''}${comparison.resolutionRateDelta}pp`}
+                </span>
               </p>
             </div>
           </div>
