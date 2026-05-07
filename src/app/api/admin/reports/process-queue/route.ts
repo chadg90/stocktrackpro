@@ -190,6 +190,7 @@ export async function POST(request: NextRequest) {
             resolutionRate: stats.resolutionRate,
             openDefects: stats.openDefects,
             criticalOpenDefects: stats.criticalOpenDefects,
+            daysSinceLastCheck: stats.inactivityDays,
             inactivityDays: stats.inactivityDays,
             summaryNote:
               `Automated monthly dispatch for ${companyName}. ` +

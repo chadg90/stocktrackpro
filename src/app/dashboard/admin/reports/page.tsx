@@ -19,6 +19,8 @@ import { Building2, Calendar, FileText, Mail, ShieldAlert, Activity, CheckCircle
 import {
   exportAdminMonthlyCompanyReportPDF,
   type MonthlyCompanyReportTemplate,
+  type OpenDefectRow,
+  type ReportTrendPoint,
 } from '@/lib/adminMonthlyCompanyReportPdf';
 
 type Profile = {
@@ -49,6 +51,12 @@ type Defect = {
   resolved_at?: Timestamp | string;
   status?: string;
   severity?: string;
+  vehicle_registration?: string;
+  registration?: string;
+  vehicle_id?: string;
+  description?: string;
+  defect?: string;
+  notes?: string;
 };
 
 type CompanySnapshot = {
@@ -133,6 +141,18 @@ function isWithinRange(value: Timestamp | string | undefined, start: Date, end: 
   return dt >= start && dt < end;
 }
 
+function getRecentMonthValues(monthValue: string, count: number): string[] {
+  const [yearStr, monthStr] = monthValue.split('-');
+  const base = new Date(Number(yearStr), Number(monthStr) - 1, 1);
+  const result: string[] = [];
+  for (let i = count - 1; i >= 0; i -= 1) {
+    const dt = new Date(base);
+    dt.setMonth(dt.getMonth() - i);
+    result.push(`${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`);
+  }
+  return result;
+}
+
 export default function AdminReportsPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -145,6 +165,8 @@ export default function AdminReportsPage() {
   const [previewLoading, setPreviewLoading] = useState(false);
   const [stats, setStats] = useState<ReportStats | null>(null);
   const [comparison, setComparison] = useState<ReportComparison | null>(null);
+  const [trend, setTrend] = useState<ReportTrendPoint[]>([]);
+  const [openDefectRows, setOpenDefectRows] = useState<OpenDefectRow[]>([]);
   const [snapshot, setSnapshot] = useState<CompanySnapshot | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [recipientEmail, setRecipientEmail] = useState('');
@@ -328,6 +350,8 @@ export default function AdminReportsPage() {
   useEffect(() => {
     setStats(null);
     setComparison(null);
+    setTrend([]);
+    setOpenDefectRows([]);
   }, [selectedCompanyId, selectedMonth]);
 
   async function getMonthStats(
@@ -402,6 +426,17 @@ export default function AdminReportsPage() {
         : null;
 
       const resolutionRate = defectsReported > 0 ? Math.round((defectsResolved / defectsReported) * 100) : null;
+      const openRows: OpenDefectRow[] = openDefects.map((defect) => {
+        const raisedDate = toDate(defect.reported_at);
+        const sev = (defect.severity || '').toLowerCase();
+        return {
+          vehicle: defect.vehicle_registration || defect.registration || defect.vehicle_id || 'Unknown vehicle',
+          description: defect.description || defect.defect || defect.notes || 'Defect reported',
+          raised: raisedDate ? raisedDate.toLocaleDateString('en-GB') : 'Unknown date',
+          priority: sev === 'critical' || sev === 'high' ? 'critical' : 'standard',
+          status: defect.status === 'resolved' ? 'resolved' : 'open',
+        };
+      });
 
       const nextStats: ReportStats = {
         checksCompleted,
@@ -413,8 +448,21 @@ export default function AdminReportsPage() {
         daysSinceLastCheck,
       };
       setStats(nextStats);
+      setOpenDefectRows(openRows);
       const previousMonthValue = getPreviousMonthValue(selectedMonth);
       const previousStats = await getMonthStats(selectedCompanyId, previousMonthValue);
+      const trendValues = getRecentMonthValues(selectedMonth, 4);
+      const trendSeries: ReportTrendPoint[] = [];
+      for (const monthValue of trendValues) {
+        const point = await getMonthStats(selectedCompanyId, monthValue);
+        trendSeries.push({
+          month: formatMonthLabel(monthValue),
+          checks: point.checksCompleted,
+          defectsReported: point.defectsReported,
+          defectsResolved: point.defectsResolved,
+        });
+      }
+      setTrend(trendSeries);
       setComparison({
         previousMonthLabel: formatMonthLabel(previousMonthValue),
         checksDelta: nextStats.checksCompleted - previousStats.checksCompleted,
@@ -491,8 +539,10 @@ export default function AdminReportsPage() {
           resolutionRate: result.resolutionRate,
           openDefects: result.openDefects,
           criticalOpenDefects: result.criticalOpenDefects,
-          inactivityDays: result.daysSinceLastCheck,
+          daysSinceLastCheck: result.daysSinceLastCheck,
           comparison,
+          trend,
+          openDefectsList: openDefectRows,
         },
         { logoDataUrl }
       );
