@@ -10,8 +10,6 @@ import {
   addDoc,
   query,
   where,
-  orderBy,
-  limit,
   Timestamp,
   serverTimestamp,
 } from 'firebase/firestore';
@@ -129,6 +127,12 @@ function getPreviousMonthValue(monthValue: string): string {
   return `${year}-${month}`;
 }
 
+function isWithinRange(value: Timestamp | string | undefined, start: Date, end: Date): boolean {
+  const dt = toDate(value);
+  if (!dt) return false;
+  return dt >= start && dt < end;
+}
+
 export default function AdminReportsPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -191,16 +195,15 @@ export default function AdminReportsPage() {
         });
       }
 
-      const latestInspectionSnap = await getDocs(
-        query(
-          collection(firebaseDb!, 'vehicle_inspections'),
-          where('company_id', '==', company.id),
-          orderBy('inspected_at', 'desc'),
-          limit(1)
-        )
+      const inspectionsByCompanySnap = await getDocs(
+        query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', company.id))
       );
-      const latest = latestInspectionSnap.docs[0]?.data() as Inspection | undefined;
-      const latestDate = toDate(latest?.inspected_at);
+      const latestDate =
+        inspectionsByCompanySnap.docs
+          .map((docSnap) => (docSnap.data() as Inspection).inspected_at)
+          .map((value) => toDate(value))
+          .filter((dt): dt is Date => dt !== null)
+          .sort((a, b) => b.getTime() - a.getTime())[0] || null;
       const daysSinceLastCheck = latestDate
         ? Math.floor((Date.now() - latestDate.getTime()) / 86400000)
         : null;
@@ -335,36 +338,23 @@ export default function AdminReportsPage() {
       return { checksCompleted: 0, defectsReported: 0, defectsResolved: 0, resolutionRate: null };
     }
     const { start, end } = monthToRange(monthValue);
-    const [inspectionsSnap, defectsReportedSnap, defectsResolvedSnap] = await Promise.all([
-      getDocs(
-        query(
-          collection(firebaseDb!, 'vehicle_inspections'),
-          where('company_id', '==', companyId),
-          where('inspected_at', '>=', Timestamp.fromDate(start)),
-          where('inspected_at', '<', Timestamp.fromDate(end))
-        )
-      ),
-      getDocs(
-        query(
-          collection(firebaseDb!, 'vehicle_defects'),
-          where('company_id', '==', companyId),
-          where('reported_at', '>=', Timestamp.fromDate(start)),
-          where('reported_at', '<', Timestamp.fromDate(end))
-        )
-      ),
-      getDocs(
-        query(
-          collection(firebaseDb!, 'vehicle_defects'),
-          where('company_id', '==', companyId),
-          where('resolved_at', '>=', Timestamp.fromDate(start)),
-          where('resolved_at', '<', Timestamp.fromDate(end))
-        )
-      ),
+    const [inspectionsByCompanySnap, defectsByCompanySnap] = await Promise.all([
+      getDocs(query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', companyId))),
+      getDocs(query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId))),
     ]);
 
-    const checksCompleted = inspectionsSnap.size;
-    const defectsReported = defectsReportedSnap.size;
-    const defectsResolved = defectsResolvedSnap.size;
+    const checksCompleted = inspectionsByCompanySnap.docs.filter((docSnap) => {
+      const inspection = docSnap.data() as Inspection;
+      return isWithinRange(inspection.inspected_at, start, end);
+    }).length;
+    const defectsReported = defectsByCompanySnap.docs.filter((docSnap) => {
+      const defect = docSnap.data() as Defect;
+      return isWithinRange(defect.reported_at, start, end);
+    }).length;
+    const defectsResolved = defectsByCompanySnap.docs.filter((docSnap) => {
+      const defect = docSnap.data() as Defect;
+      return isWithinRange(defect.resolved_at, start, end);
+    }).length;
     const resolutionRate = defectsReported > 0 ? Math.round((defectsResolved / defectsReported) * 100) : null;
     return { checksCompleted, defectsReported, defectsResolved, resolutionRate };
   }
@@ -376,38 +366,25 @@ export default function AdminReportsPage() {
     setPreviewLoading(true);
     setStatusMessage(null);
     try {
-      const inspectionsSnap = await getDocs(
-        query(
-          collection(firebaseDb!, 'vehicle_inspections'),
-          where('company_id', '==', selectedCompanyId),
-          where('inspected_at', '>=', Timestamp.fromDate(start)),
-          where('inspected_at', '<', Timestamp.fromDate(end))
-        )
-      );
+      const [inspectionsByCompanySnap, allDefectsByCompanySnap] = await Promise.all([
+        getDocs(query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', selectedCompanyId))),
+        getDocs(query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', selectedCompanyId))),
+      ]);
 
-      const defectsReportedSnap = await getDocs(
-        query(
-          collection(firebaseDb!, 'vehicle_defects'),
-          where('company_id', '==', selectedCompanyId),
-          where('reported_at', '>=', Timestamp.fromDate(start)),
-          where('reported_at', '<', Timestamp.fromDate(end))
-        )
-      );
+      const checksCompleted = inspectionsByCompanySnap.docs.filter((docSnap) => {
+        const inspection = docSnap.data() as Inspection;
+        return isWithinRange(inspection.inspected_at, start, end);
+      }).length;
+      const defectsReported = allDefectsByCompanySnap.docs.filter((docSnap) => {
+        const defect = docSnap.data() as Defect;
+        return isWithinRange(defect.reported_at, start, end);
+      }).length;
+      const defectsResolved = allDefectsByCompanySnap.docs.filter((docSnap) => {
+        const defect = docSnap.data() as Defect;
+        return isWithinRange(defect.resolved_at, start, end);
+      }).length;
 
-      const defectsResolvedSnap = await getDocs(
-        query(
-          collection(firebaseDb!, 'vehicle_defects'),
-          where('company_id', '==', selectedCompanyId),
-          where('resolved_at', '>=', Timestamp.fromDate(start)),
-          where('resolved_at', '<', Timestamp.fromDate(end))
-        )
-      );
-
-      const allOpenDefectsSnap = await getDocs(
-        query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', selectedCompanyId))
-      );
-
-      const openDefects = allOpenDefectsSnap.docs
+      const openDefects = allDefectsByCompanySnap.docs
         .map((item) => item.data() as Defect)
         .filter((defect) => defect.status !== 'resolved');
       const criticalOpenDefects = openDefects.filter((defect) => {
@@ -415,23 +392,15 @@ export default function AdminReportsPage() {
         return severity === 'critical' || severity === 'high';
       }).length;
 
-      const latestInspectionSnap = await getDocs(
-        query(
-          collection(firebaseDb!, 'vehicle_inspections'),
-          where('company_id', '==', selectedCompanyId),
-          orderBy('inspected_at', 'desc'),
-          limit(1)
-        )
-      );
-      const latestInspection = latestInspectionSnap.docs[0]?.data() as Inspection | undefined;
-      const latestInspectionDate = toDate(latestInspection?.inspected_at);
+      const latestInspectionDate = inspectionsByCompanySnap.docs
+        .map((docSnap) => (docSnap.data() as Inspection).inspected_at)
+        .map((value) => toDate(value))
+        .filter((dt): dt is Date => dt !== null)
+        .sort((a, b) => b.getTime() - a.getTime())[0] || null;
       const daysSinceLastCheck = latestInspectionDate
         ? Math.floor((Date.now() - latestInspectionDate.getTime()) / 86400000)
         : null;
 
-      const checksCompleted = inspectionsSnap.size;
-      const defectsReported = defectsReportedSnap.size;
-      const defectsResolved = defectsResolvedSnap.size;
       const resolutionRate = defectsReported > 0 ? Math.round((defectsResolved / defectsReported) * 100) : null;
 
       const nextStats: ReportStats = {
@@ -460,7 +429,8 @@ export default function AdminReportsPage() {
       return nextStats;
     } catch (error) {
       console.error(error);
-      setStatusMessage('Could not load data for the selected month. Check indexes/permissions.');
+      const details = error instanceof Error ? error.message : 'Unknown query error';
+      setStatusMessage(`Could not load data for selected month: ${details}`);
       return null;
     } finally {
       setPreviewLoading(false);
