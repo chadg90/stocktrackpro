@@ -322,6 +322,11 @@ export default function AdminReportsPage() {
     [companies, selectedCompanyId]
   );
 
+  useEffect(() => {
+    setStats(null);
+    setComparison(null);
+  }, [selectedCompanyId, selectedMonth, template]);
+
   async function getMonthStats(
     companyId: string,
     monthValue: string
@@ -490,11 +495,15 @@ export default function AdminReportsPage() {
       setStatusMessage('Select a month first.');
       return;
     }
+    if (!stats || !comparison) {
+      setStatusMessage('Click "Preview stats" first, then generate the PDF.');
+      return;
+    }
 
     setPdfGenerating(true);
     try {
-      const result = stats || (await calculateStats());
-      if (!result || !selectedCompany) {
+      const result = stats;
+      if (!selectedCompany) {
         setStatusMessage('Unable to generate PDF: no report data for this selection.');
         return;
       }
@@ -678,7 +687,7 @@ export default function AdminReportsPage() {
           <button
             type="button"
             onClick={handleGeneratePDF}
-            disabled={pdfGenerating}
+            disabled={pdfGenerating || !stats || !comparison}
             className="inline-flex items-center gap-2 rounded-lg border border-blue-400/40 text-blue-300 hover:bg-blue-500/10 px-4 py-2"
           >
             <FileText className="h-4 w-4" />
