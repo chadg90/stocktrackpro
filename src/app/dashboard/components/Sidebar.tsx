@@ -22,6 +22,7 @@ import {
   Tag,
   LifeBuoy,
   ShieldCheck,
+  BarChart3,
 } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -97,6 +98,7 @@ const navigationGroups: NavigationGroup[] = [
     label: 'Admin',
     items: [
       { name: 'Promo Codes', href: '/dashboard/admin/promo-codes', icon: Tag, adminOnly: true },
+      { name: 'Admin Reports', href: '/dashboard/admin/reports', icon: BarChart3, adminOnly: true },
     ]
   },
 ];
