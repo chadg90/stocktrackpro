@@ -387,7 +387,7 @@ export default function AdminReportsPage() {
     const result = stats || (await calculateStats());
     if (!result || !selectedCompany) return;
 
-    exportAdminMonthlyCompanyReportPDF({
+    await exportAdminMonthlyCompanyReportPDF({
       companyName: selectedCompany.name || selectedCompany.id,
       monthLabel: formatMonthLabel(selectedMonth),
       generatedAt: new Date(),

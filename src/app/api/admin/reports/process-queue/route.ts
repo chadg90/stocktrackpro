@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { Timestamp } from 'firebase-admin/firestore';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
+import { buildAdminMonthlyCompanyReportPdfBytes, type MonthlyCompanyReportTemplate } from '@/lib/adminMonthlyCompanyReportPdf';
 
 function getTransporter() {
   const user = process.env.SMTP_USER;
@@ -51,13 +54,16 @@ async function buildMonthlyStats(companyId: string, month: string): Promise<{
   defectsReported: number;
   defectsResolved: number;
   resolutionRate: number | null;
+  openDefects: number;
+  criticalOpenDefects: number;
+  inactivityDays: number | null;
 }> {
   const db = getAdminDb();
   const { start, end } = monthToRange(month);
   const startTs = Timestamp.fromDate(start);
   const endTs = Timestamp.fromDate(end);
 
-  const [checksSnap, reportedSnap, resolvedSnap] = await Promise.all([
+  const [checksSnap, reportedSnap, resolvedSnap, allDefectsSnap, latestInspectionSnap] = await Promise.all([
     db
       .collection('vehicle_inspections')
       .where('company_id', '==', companyId)
@@ -76,13 +82,52 @@ async function buildMonthlyStats(companyId: string, month: string): Promise<{
       .where('resolved_at', '>=', startTs)
       .where('resolved_at', '<', endTs)
       .get(),
+    db.collection('vehicle_defects').where('company_id', '==', companyId).get(),
+    db
+      .collection('vehicle_inspections')
+      .where('company_id', '==', companyId)
+      .orderBy('inspected_at', 'desc')
+      .limit(1)
+      .get(),
   ]);
 
   const checksCompleted = checksSnap.size;
   const defectsReported = reportedSnap.size;
   const defectsResolved = resolvedSnap.size;
   const resolutionRate = defectsReported > 0 ? Math.round((defectsResolved / defectsReported) * 100) : null;
-  return { checksCompleted, defectsReported, defectsResolved, resolutionRate };
+
+  const openDefects = allDefectsSnap.docs
+    .map((doc) => doc.data() as { status?: string; severity?: string })
+    .filter((defect) => defect.status !== 'resolved');
+  const criticalOpenDefects = openDefects.filter((defect) => {
+    const sev = (defect.severity || '').toLowerCase();
+    return sev === 'critical' || sev === 'high';
+  }).length;
+
+  const latestInspectionData = latestInspectionSnap.docs[0]?.data() as { inspected_at?: Timestamp } | undefined;
+  const latestDate = latestInspectionData?.inspected_at?.toDate?.();
+  const inactivityDays = latestDate ? Math.floor((Date.now() - latestDate.getTime()) / 86400000) : null;
+
+  return {
+    checksCompleted,
+    defectsReported,
+    defectsResolved,
+    resolutionRate,
+    openDefects: openDefects.length,
+    criticalOpenDefects,
+    inactivityDays,
+  };
+}
+
+function loadServerLogoDataUrl(): string | undefined {
+  const logoPath = join(process.cwd(), 'public', 'logo.png');
+  if (!existsSync(logoPath)) return undefined;
+  try {
+    const raw = readFileSync(logoPath);
+    return `data:image/png;base64,${raw.toString('base64')}`;
+  } catch {
+    return undefined;
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -113,7 +158,7 @@ export async function POST(request: NextRequest) {
       const companyId = queueData.company_id || '';
       const month = queueData.month || '';
       const recipientEmail = queueData.recipient_email || '';
-      const template = queueData.template || 'executive';
+      const template = (queueData.template || 'executive') as MonthlyCompanyReportTemplate;
 
       if (!companyId || !month || !recipientEmail) {
         failed += 1;
@@ -132,6 +177,29 @@ export async function POST(request: NextRequest) {
         ]);
         const companyName = companySnap.exists ? companySnap.data()?.name || companyId : companyId;
         const monthLabel = formatMonthLabel(month);
+        const reportBytes = buildAdminMonthlyCompanyReportPdfBytes(
+          {
+            companyName,
+            monthLabel,
+            generatedAt: new Date(),
+            generatedBy: 'Stock Track PRO Admin Processor',
+            template,
+            checksCompleted: stats.checksCompleted,
+            defectsReported: stats.defectsReported,
+            defectsResolved: stats.defectsResolved,
+            resolutionRate: stats.resolutionRate,
+            openDefects: stats.openDefects,
+            criticalOpenDefects: stats.criticalOpenDefects,
+            inactivityDays: stats.inactivityDays,
+            summaryNote:
+              `Automated monthly dispatch for ${companyName}. ` +
+              `Checks: ${stats.checksCompleted}, defects reported: ${stats.defectsReported}, defects resolved: ${stats.defectsResolved}.`,
+          },
+          { logoDataUrl: loadServerLogoDataUrl() }
+        );
+        const reportFilename = `stp-monthly-report-${companyName
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')}-${month}.pdf`;
 
         await transporter.sendMail({
           from: process.env.SMTP_FROM || process.env.SMTP_USER,
@@ -144,7 +212,15 @@ export async function POST(request: NextRequest) {
             `Defects reported: ${stats.defectsReported}\n` +
             `Defects resolved: ${stats.defectsResolved}\n` +
             `Resolution rate: ${stats.resolutionRate === null ? 'N/A' : `${stats.resolutionRate}%`}\n\n` +
+            `Attached: monthly PDF report.\n` +
             `Generated by Stock Track PRO Admin Panel.`,
+          attachments: [
+            {
+              filename: reportFilename,
+              content: Buffer.from(reportBytes),
+              contentType: 'application/pdf',
+            },
+          ],
         });
 
         await queueDoc.ref.update({
