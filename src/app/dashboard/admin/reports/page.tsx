@@ -134,7 +134,7 @@ export default function AdminReportsPage() {
 
   const loadCompanies = useCallback(async (): Promise<void> => {
     if (!firebaseDb) return;
-    const companySnap = await getDocs(query(collection(firebaseDb, 'companies')));
+    const companySnap = await getDocs(query(collection(firebaseDb!, 'companies')));
     const data = companySnap.docs.map((item) => ({ id: item.id, ...(item.data() as Omit<Company, 'id'>) }));
     data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     setCompanies(data);
@@ -145,7 +145,7 @@ export default function AdminReportsPage() {
 
   const loadAdminSnapshot = useCallback(async (): Promise<void> => {
     if (!firebaseDb) return;
-    const companySnap = await getDocs(query(collection(firebaseDb, 'companies')));
+    const companySnap = await getDocs(query(collection(firebaseDb!, 'companies')));
     const companyList = companySnap.docs.map((item) => ({ id: item.id, ...(item.data() as Omit<Company, 'id'>) }));
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -157,7 +157,7 @@ export default function AdminReportsPage() {
     for (const company of companyList) {
       const defectsSnap = await getDocs(
         query(
-          collection(firebaseDb, 'vehicle_defects'),
+          collection(firebaseDb!, 'vehicle_defects'),
           where('company_id', '==', company.id),
           where('reported_at', '>=', Timestamp.fromDate(monthStart)),
           where('reported_at', '<', Timestamp.fromDate(monthEnd))
@@ -173,7 +173,7 @@ export default function AdminReportsPage() {
 
       const latestInspectionSnap = await getDocs(
         query(
-          collection(firebaseDb, 'vehicle_inspections'),
+          collection(firebaseDb!, 'vehicle_inspections'),
           where('company_id', '==', company.id),
           orderBy('inspected_at', 'desc'),
           limit(1)
@@ -230,7 +230,7 @@ export default function AdminReportsPage() {
 
       try {
         setAuthIdToken(await user.getIdToken());
-        const profileSnap = await getDoc(doc(firebaseDb, 'profiles', user.uid));
+        const profileSnap = await getDoc(doc(firebaseDb!, 'profiles', user.uid));
         if (!profileSnap.exists()) {
           setIsAdmin(false);
           setLoading(false);
@@ -287,7 +287,7 @@ export default function AdminReportsPage() {
     try {
       const inspectionsSnap = await getDocs(
         query(
-          collection(firebaseDb, 'vehicle_inspections'),
+          collection(firebaseDb!, 'vehicle_inspections'),
           where('company_id', '==', selectedCompanyId),
           where('inspected_at', '>=', Timestamp.fromDate(start)),
           where('inspected_at', '<', Timestamp.fromDate(end))
@@ -296,7 +296,7 @@ export default function AdminReportsPage() {
 
       const defectsReportedSnap = await getDocs(
         query(
-          collection(firebaseDb, 'vehicle_defects'),
+          collection(firebaseDb!, 'vehicle_defects'),
           where('company_id', '==', selectedCompanyId),
           where('reported_at', '>=', Timestamp.fromDate(start)),
           where('reported_at', '<', Timestamp.fromDate(end))
@@ -305,7 +305,7 @@ export default function AdminReportsPage() {
 
       const defectsResolvedSnap = await getDocs(
         query(
-          collection(firebaseDb, 'vehicle_defects'),
+          collection(firebaseDb!, 'vehicle_defects'),
           where('company_id', '==', selectedCompanyId),
           where('resolved_at', '>=', Timestamp.fromDate(start)),
           where('resolved_at', '<', Timestamp.fromDate(end))
@@ -313,7 +313,7 @@ export default function AdminReportsPage() {
       );
 
       const allOpenDefectsSnap = await getDocs(
-        query(collection(firebaseDb, 'vehicle_defects'), where('company_id', '==', selectedCompanyId))
+        query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', selectedCompanyId))
       );
 
       const openDefects = allOpenDefectsSnap.docs
@@ -326,7 +326,7 @@ export default function AdminReportsPage() {
 
       const latestInspectionSnap = await getDocs(
         query(
-          collection(firebaseDb, 'vehicle_inspections'),
+          collection(firebaseDb!, 'vehicle_inspections'),
           where('company_id', '==', selectedCompanyId),
           orderBy('inspected_at', 'desc'),
           limit(1)
@@ -366,7 +366,7 @@ export default function AdminReportsPage() {
 
   async function logReportEvent(action: 'preview' | 'pdf_generated' | 'email_queued'): Promise<void> {
     if (!firebaseDb || !adminUserId || !selectedCompanyId || !selectedMonth) return;
-    await addDoc(collection(firebaseDb, 'admin_report_events'), {
+    await addDoc(collection(firebaseDb!, 'admin_report_events'), {
       action,
       admin_user_id: adminUserId,
       company_id: selectedCompanyId,
@@ -412,7 +412,7 @@ export default function AdminReportsPage() {
     }
     setQueueLoading(true);
     try {
-      await addDoc(collection(firebaseDb, 'admin_report_dispatch_queue'), {
+      await addDoc(collection(firebaseDb!, 'admin_report_dispatch_queue'), {
         company_id: selectedCompanyId,
         month: selectedMonth,
         template,
