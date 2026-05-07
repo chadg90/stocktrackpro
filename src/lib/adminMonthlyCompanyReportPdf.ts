@@ -53,6 +53,7 @@ const DANGER: [number, number, number] = [217, 64, 64];
 const BLACK: [number, number, number] = [17, 24, 39];
 const MUTED: [number, number, number] = [107, 114, 128];
 const LIGHT_GRAY: [number, number, number] = [229, 231, 235];
+const DARK_BG: [number, number, number] = [15, 15, 15];
 
 type PdfRenderOptions = {
   logoDataUrl?: string;
@@ -69,6 +70,16 @@ function buildFilename(input: MonthlyCompanyReportInput): string {
   return `stp-monthly-report-${filenameCompany}-${filenameMonth}.pdf`;
 }
 
+function sanitizeText(str: string | undefined | null): string {
+  if (!str) return '';
+  return str
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
+    .replace(/[\uFFFD\uFFFE\uFFFF]/g, '')
+    .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF\u0100-\u017F]/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOptions = {}): jsPDF {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -82,19 +93,23 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
   // Header
   const logoX = contentX;
   const logoY = y + 1;
-  doc.setFillColor(15, 15, 15);
+  doc.setFillColor(...DARK_BG);
   doc.roundedRect(logoX, logoY, 12, 12, 1.8, 1.8, 'F');
-  if (options.logoDataUrl) {
-    try {
-      doc.addImage(options.logoDataUrl, 'PNG', logoX + 1.2, logoY + 1.2, 9.6, 9.6);
-    } catch {
-      doc.setFillColor(...BLUE);
-      doc.roundedRect(logoX + 1.2, logoY + 1.2, 9.6, 9.6, 1.4, 1.4, 'F');
-    }
-  } else {
-    doc.setFillColor(...BLUE);
-    doc.roundedRect(logoX + 1.2, logoY + 1.2, 9.6, 9.6, 1.4, 1.4, 'F');
-  }
+  doc.setFillColor(...BLUE);
+  doc.roundedRect(logoX + 1.2, logoY + 1.2, 9.6, 9.6, 1.4, 1.4, 'F');
+  const sq = 1.8;
+  const gap = 1.1;
+  const gx = logoX + 2.8;
+  const gy = logoY + 2.8;
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(gx, gy, sq, sq, 0.25, 0.25, 'F');
+  doc.setFillColor(255, 255, 255);
+  doc.setGState(new (doc as any).GState({ opacity: 0.6 }));
+  doc.roundedRect(gx + sq + gap, gy, sq, sq, 0.25, 0.25, 'F');
+  doc.roundedRect(gx, gy + sq + gap, sq, sq, 0.25, 0.25, 'F');
+  doc.setGState(new (doc as any).GState({ opacity: 0.35 }));
+  doc.roundedRect(gx + sq + gap, gy + sq + gap, sq, sq, 0.25, 0.25, 'F');
+  doc.setGState(new (doc as any).GState({ opacity: 1 }));
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...BLACK);
@@ -107,10 +122,11 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
   const rightX = contentX + contentW - 2;
   doc.setFontSize(9);
   doc.setTextColor(...BLACK);
-  doc.text(input.companyName, rightX, y + 3.5, { align: 'right' });
+  doc.text(sanitizeText(input.companyName), rightX, y + 3.5, { align: 'right' });
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  doc.text(input.monthLabel, rightX, y + 7, { align: 'right' });
+  doc.text(sanitizeText(input.monthLabel), rightX, y + 7, { align: 'right' });
+  doc.setFontSize(7);
   doc.text(`Ref ${referenceId}`, rightX, y + 10.3, { align: 'right' });
   doc.text(input.generatedAt.toLocaleDateString('en-GB'), rightX, y + 13.6, { align: 'right' });
 
@@ -185,24 +201,40 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
       const good = card.betterWhenUp ? up : !up;
       doc.setFontSize(7.5);
       doc.setTextColor(...(good ? SUCCESS : DANGER));
-      doc.text(`${up ? '↑' : '↓'} ${Math.abs(Math.round(card.delta))}`, x + 2.2, y + 15.4);
+      const arrow = String.fromCharCode(up ? 8593 : 8595);
+      doc.text(`${arrow} ${Math.abs(Math.round(card.delta))}`, x + 2.2, y + 15.4);
     }
   });
   y += cardH + 10;
 
   const usersReported = Math.max(0, Math.round(input.usersReportedCount || 0));
   const usersNotReported = Math.max(0, Math.round(input.usersNotReportedCount || 0));
+  const usersTotal = usersReported + usersNotReported;
+  const coveragePct = usersTotal > 0 ? Math.round((usersReported / usersTotal) * 100) : 0;
   doc.setFillColor(249, 250, 251);
   doc.setDrawColor(...LIGHT_GRAY);
-  doc.roundedRect(contentX, y - 2, contentW, 8, 1.2, 1.2, 'FD');
+  doc.roundedRect(contentX, y - 2, contentW, 14, 1.2, 1.2, 'FD');
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
+  doc.text('User reporting coverage', contentX + 2.5, y + 2.5);
+  doc.setTextColor(...BLACK);
   doc.text(
-    `User reporting coverage: ${usersReported} submitted checks/defects, ${usersNotReported} did not submit in this period`,
-    contentX + 2.5,
-    y + 2.7
+    `${usersReported} of ${usersTotal} users submitted (${coveragePct}%)`,
+    contentX + contentW - 2.5,
+    y + 2.5,
+    { align: 'right' }
   );
-  y += 9;
+  const barX = contentX + 2.5;
+  const barY = y + 4.5;
+  const barW = contentW - 5;
+  doc.setFillColor(...LIGHT_GRAY);
+  doc.roundedRect(barX, barY, barW, 2.2, 0.8, 0.8, 'F');
+  doc.setFillColor(...BLUE);
+  doc.roundedRect(barX, barY, Math.max(0.8, (barW * coveragePct) / 100), 2.2, 0.8, 0.8, 'F');
+  doc.setFontSize(7);
+  doc.setTextColor(156, 163, 175);
+  doc.text(`${usersNotReported} users did not submit any checks or defects in this period`, contentX + 2.5, y + 10.5);
+  y += 16;
 
   // Section 2 - trend
   sectionLabel('2 - Trend: checks, defects reported & resolved');
@@ -252,7 +284,7 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
       { v: p.defectsResolved, c: SUCCESS },
     ];
     barVals.forEach((b, bi) => {
-      const h = (b.v / yMax) * (chartH - 12);
+      const h = Math.max(1.2, (b.v / yMax) * (chartH - 12));
       const bx = gxBase + bi * (bw + 0.8);
       const by = chartY + chartH - 5 - h;
       doc.setFillColor(...b.c);
@@ -280,16 +312,22 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
       startY: y,
       head: [['Vehicle', 'Defect description', 'Date raised', 'Priority', 'Status']],
       body: openRows.map((row) => [
-        row.vehicle,
-        row.description,
+        sanitizeText(row.vehicle),
+        sanitizeText(row.description),
         row.raised,
         row.priority === 'critical' ? 'Critical' : 'Standard',
         row.status === 'open' ? 'Open' : 'Resolved',
       ]),
       margin: { left: contentX, right: contentX },
-      styles: { fontSize: 8, textColor: BLACK, lineColor: LIGHT_GRAY, lineWidth: 0.12 },
+      styles: { fontSize: 8, textColor: BLACK, lineColor: LIGHT_GRAY, lineWidth: 0.12, valign: 'top', overflow: 'linebreak' },
       headStyles: { fillColor: [249, 250, 251], textColor: [75, 85, 99], fontStyle: 'normal' },
-      columnStyles: { 0: { fontStyle: 'bold' } },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 24 },
+        1: { cellWidth: 'auto' },
+        2: { cellWidth: 24 },
+        3: { cellWidth: 17 },
+        4: { cellWidth: 17 },
+      },
       didParseCell: (data) => {
         if (data.section !== 'body') return;
         if (data.column.index === 3) {
@@ -341,7 +379,7 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
     doc.setDrawColor(...LIGHT_GRAY);
     doc.line(contentX, rowY + 8.8, contentX + contentW, rowY + 8.8);
   });
-  y += 40;
+  y += 34;
 
   // Footer
   const footerY = Math.min(pageHeight - 12, y + 4);

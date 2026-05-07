@@ -15,13 +15,8 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Building2, Calendar, FileText, Mail, ShieldAlert, Activity, CheckCircle2, RefreshCw } from 'lucide-react';
-import {
-  exportAdminMonthlyCompanyReportPDF,
-  type MonthlyCompanyReportTemplate,
-  type OpenDefectRow,
-  type ReportTrendPoint,
-} from '@/lib/adminMonthlyCompanyReportPdf';
+import { Building2, Calendar, FileText, ShieldAlert, Activity, CheckCircle2 } from 'lucide-react';
+import { type MonthlyCompanyReportTemplate, type OpenDefectRow, type ReportTrendPoint } from '@/lib/adminMonthlyCompanyReportPdf';
 
 type Profile = {
   role?: string;
@@ -97,21 +92,6 @@ type ReportComparison = {
   resolutionRateDelta: number | null;
 };
 
-type SentReportHistoryItem = {
-  id: string;
-  company_name: string;
-  month_label: string;
-  template: string;
-  recipient_email: string;
-  sent_at: string | null;
-  stats?: {
-    checksCompleted?: number;
-    defectsReported?: number;
-    defectsResolved?: number;
-    resolutionRate?: number | null;
-  };
-};
-
 const HIGH_DEFECT_THRESHOLD = 10;
 const INACTIVITY_ALERT_DAYS = 14;
 
@@ -185,13 +165,7 @@ export default function AdminReportsPage() {
   const [openDefectRows, setOpenDefectRows] = useState<OpenDefectRow[]>([]);
   const [snapshot, setSnapshot] = useState<CompanySnapshot | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [recipientEmail, setRecipientEmail] = useState('');
-  const [queueLoading, setQueueLoading] = useState(false);
   const [authIdToken, setAuthIdToken] = useState<string | null>(null);
-  const [historyLoading, setHistoryLoading] = useState(false);
-  const [queueProcessing, setQueueProcessing] = useState(false);
-  const [sentHistory, setSentHistory] = useState<SentReportHistoryItem[]>([]);
-  const [logoDataUrl, setLogoDataUrl] = useState<string | undefined>(undefined);
   const [pdfGenerating, setPdfGenerating] = useState(false);
 
   const loadCompanies = useCallback(async (): Promise<void> => {
@@ -309,7 +283,6 @@ export default function AdminReportsPage() {
         }
 
         await Promise.all([loadCompanies(), loadAdminSnapshot()]);
-        await loadSentHistory(await user.getIdToken());
       } finally {
         setLoading(false);
       }
@@ -317,46 +290,6 @@ export default function AdminReportsPage() {
 
     return () => unsub();
   }, [loadCompanies, loadAdminSnapshot]);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function preloadLogo(): Promise<void> {
-      try {
-        const logoResponse = await fetch('/logo.png');
-        if (!logoResponse.ok) return;
-        const blob = await logoResponse.blob();
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result));
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-        if (!cancelled) setLogoDataUrl(dataUrl);
-      } catch {
-        // Keep fallback branding if logo preload fails.
-      }
-    }
-    preloadLogo();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  async function loadSentHistory(token: string): Promise<void> {
-    setHistoryLoading(true);
-    try {
-      const response = await fetch('/api/admin/reports/history?limit=20', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const payload = (await response.json()) as { items?: SentReportHistoryItem[] };
-      setSentHistory(payload.items || []);
-    } catch (error) {
-      console.error(error);
-      setStatusMessage('Could not load sent report history.');
-    } finally {
-      setHistoryLoading(false);
-    }
-  }
 
   const selectedCompany = useMemo(
     () => companies.find((company) => company.id === selectedCompanyId) || null,
@@ -543,7 +476,7 @@ export default function AdminReportsPage() {
     }
   }
 
-  async function logReportEvent(action: 'preview' | 'pdf_generated' | 'email_queued'): Promise<void> {
+  async function logReportEvent(action: 'preview' | 'pdf_generated'): Promise<void> {
     if (!firebaseDb || !adminUserId || !selectedCompanyId || !selectedMonth) return;
     await addDoc(collection(firebaseDb!, 'admin_report_events'), {
       action,
@@ -584,90 +517,59 @@ export default function AdminReportsPage() {
         return;
       }
 
-      exportAdminMonthlyCompanyReportPDF(
-        {
-          companyName: selectedCompany.name || selectedCompany.id,
-          monthLabel: formatMonthLabel(selectedMonth),
-          generatedAt: new Date(),
-          generatedBy: adminName,
-          template,
-          checksCompleted: result.checksCompleted,
-          defectsReported: result.defectsReported,
-          defectsResolved: result.defectsResolved,
-          resolutionRate: result.resolutionRate,
-          openDefects: result.openDefects,
-          criticalOpenDefects: result.criticalOpenDefects,
-          daysSinceLastCheck: result.daysSinceLastCheck,
-          comparison,
-          trend,
-          openDefectsList: openDefectRows,
-          usersReportedCount: result.usersReportedCount,
-          usersNotReportedCount: result.usersNotReportedCount,
-        },
-        { logoDataUrl }
-      );
-      await logReportEvent('pdf_generated');
-      setStatusMessage('PDF generated and downloaded.');
-    } catch (error) {
-      console.error(error);
-      setStatusMessage('PDF generation failed. Please try again.');
-    } finally {
-      setPdfGenerating(false);
-    }
-  }
-
-  async function handleQueueEmail(): Promise<void> {
-    if (!firebaseDb || !selectedCompanyId || !selectedMonth || !adminUserId || !recipientEmail.trim()) {
-      setStatusMessage('Enter a recipient email before queuing.');
-      return;
-    }
-    setQueueLoading(true);
-    try {
-      await addDoc(collection(firebaseDb!, 'admin_report_dispatch_queue'), {
-        company_id: selectedCompanyId,
-        month: selectedMonth,
+      if (!authIdToken) {
+        setStatusMessage('Session expired. Refresh and try again.');
+        return;
+      }
+      const reportInput = {
+        companyName: selectedCompany.name || selectedCompany.id,
+        monthLabel: formatMonthLabel(selectedMonth),
+        generatedAt: new Date(),
+        generatedBy: adminName,
         template,
-        recipient_email: recipientEmail.trim().toLowerCase(),
-        requested_by: adminUserId,
-        status: 'queued',
-        created_at: serverTimestamp(),
-      });
-      await logReportEvent('email_queued');
-      setStatusMessage('Monthly report email queued.');
-    } catch (error) {
-      console.error(error);
-      setStatusMessage('Unable to queue email right now.');
-    } finally {
-      setQueueLoading(false);
-    }
-  }
-
-  async function handleProcessQueueNow(): Promise<void> {
-    if (!authIdToken) {
-      setStatusMessage('Session expired. Refresh and try again.');
-      return;
-    }
-    setQueueProcessing(true);
-    try {
-      const response = await fetch('/api/admin/reports/process-queue', {
+        checksCompleted: result.checksCompleted,
+        defectsReported: result.defectsReported,
+        defectsResolved: result.defectsResolved,
+        resolutionRate: result.resolutionRate,
+        openDefects: result.openDefects,
+        criticalOpenDefects: result.criticalOpenDefects,
+        daysSinceLastCheck: result.daysSinceLastCheck,
+        comparison,
+        trend,
+        openDefectsList: openDefectRows,
+        usersReportedCount: result.usersReportedCount,
+        usersNotReportedCount: result.usersNotReportedCount,
+      };
+      const response = await fetch('/api/admin/reports/generate-pdf', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authIdToken}`,
         },
+        body: JSON.stringify(reportInput),
       });
-      const payload = (await response.json()) as { processed?: number; sent?: number; failed?: number; error?: string };
       if (!response.ok) {
-        setStatusMessage(payload.error || 'Failed to process queued emails.');
-        return;
+        const payload = (await response.json()) as { error?: string };
+        throw new Error(payload.error || 'Failed to generate PDF');
       }
-      setStatusMessage(`Queue processed: ${payload.processed || 0}, sent: ${payload.sent || 0}, failed: ${payload.failed || 0}.`);
-      await loadSentHistory(authIdToken);
+      const blob = await response.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      const disposition = response.headers.get('Content-Disposition');
+      const filenameMatch = disposition?.match(/filename=\"?([^"]+)\"?/i);
+      a.download = filenameMatch?.[1] || 'stp-monthly-report.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(downloadUrl);
+      await logReportEvent('pdf_generated');
+      setStatusMessage('PDF generated and downloaded.');
     } catch (error) {
       console.error(error);
-      setStatusMessage('Queue processing failed.');
+      setStatusMessage(error instanceof Error ? error.message : 'PDF generation failed. Please try again.');
     } finally {
-      setQueueProcessing(false);
+      setPdfGenerating(false);
     }
   }
 
@@ -692,9 +594,7 @@ export default function AdminReportsPage() {
     <div className="space-y-6">
       <div className="dashboard-card p-6">
         <h1 className="text-3xl font-bold text-white mb-2">Admin Reports Panel</h1>
-        <p className="text-white/60">
-          Generate company monthly PDFs, queue scheduled sends, and monitor admin-level risk signals.
-        </p>
+        <p className="text-white/60">Generate company monthly PDFs and monitor admin-level risk signals.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -833,42 +733,6 @@ export default function AdminReportsPage() {
           </div>
         )}
 
-        <div className="pt-3 border-t border-white/10">
-          <p className="text-white/70 text-sm mb-2">Schedule / queue delivery</p>
-          <div className="flex flex-col md:flex-row gap-3">
-            <input
-              type="email"
-              placeholder="recipient@company.co.uk"
-              value={recipientEmail}
-              onChange={(event) => setRecipientEmail(event.target.value)}
-              className="flex-1 rounded-lg bg-black border border-white/20 px-3 py-2 text-white"
-            />
-            <button
-              type="button"
-              onClick={handleQueueEmail}
-              disabled={queueLoading}
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-400/40 text-emerald-300 hover:bg-emerald-500/10 px-4 py-2 disabled:opacity-60"
-            >
-              <Mail className="h-4 w-4" />
-              {queueLoading ? 'Queueing...' : 'Queue monthly email'}
-            </button>
-          </div>
-          <p className="text-white/40 text-xs mt-2">
-            Queued emails are stored for backend dispatch processing.
-          </p>
-          <div className="mt-3">
-            <button
-              type="button"
-              onClick={handleProcessQueueNow}
-              disabled={queueProcessing}
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-blue-400/40 text-blue-300 hover:bg-blue-500/10 px-4 py-2 disabled:opacity-60"
-            >
-              <RefreshCw className={`h-4 w-4 ${queueProcessing ? 'animate-spin' : ''}`} />
-              {queueProcessing ? 'Processing queue...' : 'Process queue now'}
-            </button>
-          </div>
-        </div>
-
         {statusMessage && (
           <p className="text-sm text-blue-300">{statusMessage}</p>
         )}
@@ -953,53 +817,6 @@ export default function AdminReportsPage() {
         </div>
       </div>
 
-      <div className="dashboard-card p-5">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-white font-semibold">Sent reports history</h3>
-          <button
-            type="button"
-            onClick={() => authIdToken && loadSentHistory(authIdToken)}
-            disabled={historyLoading || !authIdToken}
-            className="text-xs text-blue-300 hover:underline disabled:opacity-50"
-          >
-            {historyLoading ? 'Refreshing...' : 'Refresh'}
-          </button>
-        </div>
-        {sentHistory.length === 0 ? (
-          <p className="text-white/50 text-sm">No sent report history yet.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-white/50 border-b border-white/10">
-                <tr>
-                  <th className="py-2 pr-3">Company</th>
-                  <th className="py-2 pr-3">Month</th>
-                  <th className="py-2 pr-3">Template</th>
-                  <th className="py-2 pr-3">Recipient</th>
-                  <th className="py-2 pr-3">KPIs</th>
-                  <th className="py-2">Sent</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {sentHistory.map((item) => (
-                  <tr key={item.id} className="text-white/80">
-                    <td className="py-2 pr-3">{item.company_name}</td>
-                    <td className="py-2 pr-3">{item.month_label}</td>
-                    <td className="py-2 pr-3 capitalize">{item.template}</td>
-                    <td className="py-2 pr-3">{item.recipient_email}</td>
-                    <td className="py-2 pr-3 text-xs text-white/60">
-                      C:{item.stats?.checksCompleted ?? 0} / R:{item.stats?.defectsResolved ?? 0} / D:{item.stats?.defectsReported ?? 0}
-                    </td>
-                    <td className="py-2">
-                      {item.sent_at ? new Date(item.sent_at).toLocaleString('en-GB') : '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
