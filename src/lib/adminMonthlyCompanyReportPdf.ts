@@ -162,24 +162,11 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
   return doc;
 }
 
-export async function exportAdminMonthlyCompanyReportPDF(input: MonthlyCompanyReportInput): Promise<void> {
-  let logoDataUrl: string | undefined;
-  try {
-    const logoResponse = await fetch('/logo.png');
-    if (logoResponse.ok) {
-      const blob = await logoResponse.blob();
-      logoDataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    }
-  } catch {
-    // If logo cannot be loaded on client, PDF still renders with text branding.
-  }
-
-  const doc = renderReportDoc(input, { logoDataUrl });
+export function exportAdminMonthlyCompanyReportPDF(
+  input: MonthlyCompanyReportInput,
+  options: PdfRenderOptions = {}
+): void {
+  const doc = renderReportDoc(input, options);
   doc.save(buildFilename(input));
 }
 

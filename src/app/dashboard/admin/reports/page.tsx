@@ -131,6 +131,8 @@ export default function AdminReportsPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [queueProcessing, setQueueProcessing] = useState(false);
   const [sentHistory, setSentHistory] = useState<SentReportHistoryItem[]>([]);
+  const [logoDataUrl, setLogoDataUrl] = useState<string | undefined>(undefined);
+  const [pdfGenerating, setPdfGenerating] = useState(false);
 
   const loadCompanies = useCallback(async (): Promise<void> => {
     if (!firebaseDb) return;
@@ -256,6 +258,30 @@ export default function AdminReportsPage() {
 
     return () => unsub();
   }, [loadCompanies, loadAdminSnapshot]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function preloadLogo(): Promise<void> {
+      try {
+        const logoResponse = await fetch('/logo.png');
+        if (!logoResponse.ok) return;
+        const blob = await logoResponse.blob();
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result));
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        if (!cancelled) setLogoDataUrl(dataUrl);
+      } catch {
+        // Keep fallback branding if logo preload fails.
+      }
+    }
+    preloadLogo();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function loadSentHistory(token: string): Promise<void> {
     setHistoryLoading(true);
@@ -384,25 +410,48 @@ export default function AdminReportsPage() {
   }
 
   async function handleGeneratePDF(): Promise<void> {
-    const result = stats || (await calculateStats());
-    if (!result || !selectedCompany) return;
+    if (!selectedCompanyId) {
+      setStatusMessage('Select a company first.');
+      return;
+    }
+    if (!selectedMonth) {
+      setStatusMessage('Select a month first.');
+      return;
+    }
 
-    await exportAdminMonthlyCompanyReportPDF({
-      companyName: selectedCompany.name || selectedCompany.id,
-      monthLabel: formatMonthLabel(selectedMonth),
-      generatedAt: new Date(),
-      generatedBy: adminName,
-      template,
-      checksCompleted: result.checksCompleted,
-      defectsReported: result.defectsReported,
-      defectsResolved: result.defectsResolved,
-      resolutionRate: result.resolutionRate,
-      openDefects: result.openDefects,
-      criticalOpenDefects: result.criticalOpenDefects,
-      inactivityDays: result.daysSinceLastCheck,
-    });
-    await logReportEvent('pdf_generated');
-    setStatusMessage('PDF generated and downloaded.');
+    setPdfGenerating(true);
+    try {
+      const result = stats || (await calculateStats());
+      if (!result || !selectedCompany) {
+        setStatusMessage('Unable to generate PDF: no report data for this selection.');
+        return;
+      }
+
+      exportAdminMonthlyCompanyReportPDF(
+        {
+          companyName: selectedCompany.name || selectedCompany.id,
+          monthLabel: formatMonthLabel(selectedMonth),
+          generatedAt: new Date(),
+          generatedBy: adminName,
+          template,
+          checksCompleted: result.checksCompleted,
+          defectsReported: result.defectsReported,
+          defectsResolved: result.defectsResolved,
+          resolutionRate: result.resolutionRate,
+          openDefects: result.openDefects,
+          criticalOpenDefects: result.criticalOpenDefects,
+          inactivityDays: result.daysSinceLastCheck,
+        },
+        { logoDataUrl }
+      );
+      await logReportEvent('pdf_generated');
+      setStatusMessage('PDF generated and downloaded.');
+    } catch (error) {
+      console.error(error);
+      setStatusMessage('PDF generation failed. Please try again.');
+    } finally {
+      setPdfGenerating(false);
+    }
   }
 
   async function handleQueueEmail(): Promise<void> {
@@ -556,10 +605,11 @@ export default function AdminReportsPage() {
           <button
             type="button"
             onClick={handleGeneratePDF}
+            disabled={pdfGenerating}
             className="inline-flex items-center gap-2 rounded-lg border border-blue-400/40 text-blue-300 hover:bg-blue-500/10 px-4 py-2"
           >
             <FileText className="h-4 w-4" />
-            Generate PDF
+            {pdfGenerating ? 'Generating PDF...' : 'Generate PDF'}
           </button>
         </div>
 
