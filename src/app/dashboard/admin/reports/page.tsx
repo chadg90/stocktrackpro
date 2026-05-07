@@ -141,7 +141,7 @@ export default function AdminReportsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().slice(0, 7));
-  const [template, setTemplate] = useState<MonthlyCompanyReportTemplate>('executive');
+  const template: MonthlyCompanyReportTemplate = 'executive';
   const [previewLoading, setPreviewLoading] = useState(false);
   const [stats, setStats] = useState<ReportStats | null>(null);
   const [comparison, setComparison] = useState<ReportComparison | null>(null);
@@ -328,7 +328,7 @@ export default function AdminReportsPage() {
   useEffect(() => {
     setStats(null);
     setComparison(null);
-  }, [selectedCompanyId, selectedMonth, template]);
+  }, [selectedCompanyId, selectedMonth]);
 
   async function getMonthStats(
     companyId: string,
@@ -606,7 +606,7 @@ export default function AdminReportsPage() {
 
       <div className="dashboard-card p-6 space-y-4">
         <h2 className="text-xl font-semibold text-white">Monthly Company Report Generator</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <label className="text-sm text-white/80">
             <span className="mb-1 block">Company</span>
             <select
@@ -629,18 +629,6 @@ export default function AdminReportsPage() {
               onChange={(event) => setSelectedMonth(event.target.value)}
               className="w-full rounded-lg bg-black border border-white/20 px-3 py-2 text-white"
             />
-          </label>
-          <label className="text-sm text-white/80">
-            <span className="mb-1 block">Template</span>
-            <select
-              value={template}
-              onChange={(event) => setTemplate(event.target.value as MonthlyCompanyReportTemplate)}
-              className="w-full rounded-lg bg-black border border-white/20 px-3 py-2 text-white"
-            >
-              <option value="executive">Executive summary</option>
-              <option value="compliance">Compliance focus</option>
-              <option value="performance">Performance focus</option>
-            </select>
           </label>
         </div>
 

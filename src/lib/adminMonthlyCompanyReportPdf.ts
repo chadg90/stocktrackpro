@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-export type MonthlyCompanyReportTemplate = 'executive' | 'compliance' | 'performance';
+export type MonthlyCompanyReportTemplate = 'executive';
 
 export type MonthlyCompanyReportInput = {
   companyName: string;
