@@ -3,6 +3,8 @@ import type { MonthlyCompanyReportInput } from '@/lib/adminMonthlyCompanyReportP
 import { buildAdminMonthlyCompanyReportHtmlPdfBytes } from '@/lib/adminMonthlyCompanyReportHtmlPdf';
 import { buildReportFilename } from '@/lib/adminMonthlyCompanyReportInput';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 export const maxDuration = 30;
 export const runtime = 'nodejs';
@@ -63,7 +65,11 @@ export async function POST(request: NextRequest) {
     await assertAdmin(request);
     const payload = (await request.json()) as MonthlyCompanyReportInput;
     const reportInput = normalizeReportInput(payload);
-    const pdfBytes = await buildAdminMonthlyCompanyReportHtmlPdfBytes(reportInput);
+    const logoPath = join(process.cwd(), 'public', 'untitled-design-15.png');
+    const logoDataUrl = existsSync(logoPath)
+      ? `data:image/png;base64,${readFileSync(logoPath).toString('base64')}`
+      : undefined;
+    const pdfBytes = await buildAdminMonthlyCompanyReportHtmlPdfBytes(reportInput, { logoDataUrl });
     const filename = buildReportFilename(reportInput.companyName, reportInput.monthLabel);
 
     return new NextResponse(Buffer.from(pdfBytes), {

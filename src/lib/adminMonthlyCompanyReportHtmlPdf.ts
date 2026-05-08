@@ -33,7 +33,11 @@ function sanitizeText(str: string): string {
     .trim();
 }
 
-function buildHtml(input: MonthlyCompanyReportInput): string {
+type HtmlRenderOptions = {
+  logoDataUrl?: string;
+};
+
+function buildHtml(input: MonthlyCompanyReportInput, options: HtmlRenderOptions = {}): string {
   const companyName = esc(input.companyName);
   const month = esc(input.monthLabel);
   const ref = `STP-MONTHLY-${input.generatedAt.toISOString().replace(/[-:.TZ]/g, '').slice(0, 12)}`;
@@ -112,28 +116,11 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
 </head><body>
 <div class="wrap">
   <header class="hdr">
-    <div style="display:flex; align-items:center; gap:10px; flex-shrink:0; background:#000; padding:2px; border-radius:10px;">
-      <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
-        <div style="width:36px; height:36px; min-width:36px; background:#1a56db;
-          border-radius:8px; display:flex; align-items:center;
-          justify-content:center; flex-shrink:0;">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-            xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="2" width="7" height="7" rx="1.5" fill="white"/>
-            <rect x="11" y="2" width="7" height="7" rx="1.5" fill="white"
-              opacity="0.6"/>
-            <rect x="2" y="11" width="7" height="7" rx="1.5" fill="white"
-              opacity="0.6"/>
-            <rect x="11" y="11" width="7" height="7" rx="1.5" fill="white"
-              opacity="0.35"/>
-          </svg>
-        </div>
-        <div>
-          <div style="font-size:14px; font-weight:500; color:#111827;
-            line-height:1.2;">Stock Track PRO</div>
-          <div style="font-size:11px; color:#6b7280;
-            line-height:1.2;">Monthly fleet performance report</div>
-        </div>
+    <div style="display:flex; align-items:center; gap:10px; flex-shrink:0; background:#000; padding:6px 8px; border-radius:10px;">
+      <img src="${options.logoDataUrl || '/untitled-design-15.png'}" alt="Stock Track PRO logo" style="width:120px; height:auto; object-fit:contain; flex-shrink:0; display:block;" />
+      <div>
+        <div style="font-size:14px; font-weight:500; color:#111827; line-height:1.2;">Stock Track PRO</div>
+        <div style="font-size:11px; color:#6b7280; line-height:1.2;">Monthly fleet performance report</div>
       </div>
     </div>
     <div class="meta-right">
@@ -234,7 +221,10 @@ setTimeout(renderChart, 80);
 </body></html>`;
 }
 
-export async function buildAdminMonthlyCompanyReportHtmlPdfBytes(input: MonthlyCompanyReportInput): Promise<Uint8Array> {
+export async function buildAdminMonthlyCompanyReportHtmlPdfBytes(
+  input: MonthlyCompanyReportInput,
+  options: HtmlRenderOptions = {}
+): Promise<Uint8Array> {
   const chromiumPath = await chromium.executablePath();
   const localChromeCandidates = [
     process.env.PUPPETEER_EXECUTABLE_PATH || '',
@@ -256,7 +246,7 @@ export async function buildAdminMonthlyCompanyReportHtmlPdfBytes(input: MonthlyC
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 794, height: 1123 });
-    await page.setContent(buildHtml(input), { waitUntil: 'networkidle0' });
+    await page.setContent(buildHtml(input, options), { waitUntil: 'networkidle0' });
     const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '0', right: '0', bottom: '0', left: '0' } });
     return new Uint8Array(pdfBuffer);
   } finally {
