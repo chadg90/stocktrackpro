@@ -94,7 +94,7 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     .card.critical{background:#fce8e8}
     .card .v{font-size:20px;font-weight:500}
     .coverage{margin-top:8px;background:#f9fafb;border:.5px solid #e5e7eb;border-radius:8px;padding:8px 12px}
-    .bar{height:6px;background:#e5e7eb;border-radius:3px}.bar>span{display:block;height:6px;background:#1a56db;border-radius:3px}
+    .bar{height:6px;background:#e5e7eb;border-radius:3px}.bar>span{display:block;height:6px;background:#3b82f6;border-radius:3px}
     .legend{display:flex;gap:14px;font-size:12px;color:#6b7280;margin-bottom:8px}
     .legend i{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:6px}
     table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:13px}
@@ -105,7 +105,7 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     .badge{padding:2px 7px;border-radius:999px;font-size:11px}
     .pri-critical{background:#fce8e8;color:#a03030}.pri-standard{background:#fff3cd;color:#7a4a00}.status-open{background:#fff3cd;color:#7a4a00}
     .actions{padding-bottom:0}.actions li{padding:6px 0;margin:0;list-style:none;display:flex;gap:10px}
-    .num{width:20px;height:20px;border-radius:50%;background:#1a56db;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+    .num{width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
     .ftr{margin:12px 24px 0;padding:14px 0;border-top:.5px solid #e5e7eb;color:#6b7280;font-size:11px;display:flex;justify-content:space-between}
     @media print {
       .section { page-break-inside: avoid; }
@@ -150,7 +150,7 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
 
   <section class="section">
     <p class="label">2 — Trend: checks, defects reported & resolved</p>
-    <div class="legend"><span><i style="background:#1a56db"></i>Checks</span><span><i style="background:#e6a817"></i>Defects reported</span><span><i style="background:#1a7a3a"></i>Defects resolved</span></div>
+    <div class="legend"><span><i style="background:#3b82f6"></i>Checks</span><span><i style="background:#e6a817"></i>Defects reported</span><span><i style="background:#1a7a3a"></i>Defects resolved</span></div>
     <div style="position:relative; width:100%; height:140px;">
       <canvas id="trend"></canvas>
     </div>
@@ -170,7 +170,7 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     </ul>
   </section>
 
-  <footer class="ftr report-footer"><div>Confidential — prepared for operational review · <span style="color:#1a56db">stocktrackpro.co.uk</span></div><div>© 2026 Stock Track PRO Ltd</div></footer>
+  <footer class="ftr report-footer"><div>Confidential — prepared for operational review · <span style="color:#3b82f6">stocktrackpro.co.uk</span></div><div>© 2026 Stock Track PRO Ltd</div></footer>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
@@ -180,7 +180,7 @@ function renderChart() {
     new Chart(ctx, {
       type:'bar',
       data:{labels:${chartLabels},datasets:[
-        {label:'Checks',data:${chartChecks},backgroundColor:'#1a56db',minBarLength:4,borderRadius:4},
+        {label:'Checks',data:${chartChecks},backgroundColor:'#3b82f6',minBarLength:4,borderRadius:4},
         {label:'Defects reported',data:${chartReported},backgroundColor:'#e6a817',minBarLength:4,borderRadius:4},
         {label:'Defects resolved',data:${chartResolved},backgroundColor:'#1a7a3a',minBarLength:4,borderRadius:4}
       ]},
@@ -217,7 +217,7 @@ function renderChart() {
       g.fillRect(x, y, barW, h);
     });
   }
-  drawBars(checks, '#1a56db', 4);
+  drawBars(checks, '#3b82f6', 4);
   drawBars(reported, '#e6a817', 4 + barW + 2);
   drawBars(resolved, '#1a7a3a', 4 + (barW + 2) * 2);
   g.fillStyle = '#6b7280';
