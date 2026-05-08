@@ -1,7 +1,6 @@
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync } from 'node:fs';
 import type { MonthlyCompanyReportInput } from '@/lib/adminMonthlyCompanyReportPdf';
 
 function esc(str: string): string {
@@ -24,7 +23,6 @@ function arrow(delta: number, goodWhenUp: boolean): { symbol: string; cls: strin
 }
 
 function buildHtml(input: MonthlyCompanyReportInput): string {
-  const chartJsUmd = readFileSync(join(process.cwd(), 'node_modules', 'chart.js', 'dist', 'chart.umd.js'), 'utf8');
   const companyName = esc(input.companyName);
   const month = esc(input.monthLabel);
   const ref = `STP-MONTHLY-${input.generatedAt.toISOString().replace(/[-:.TZ]/g, '').slice(0, 12)}`;
@@ -140,18 +138,59 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
 
   <footer class="ftr"><div>Confidential — prepared for operational review · <span style="color:#1a56db">stocktrackpro.co.uk</span></div><div>© 2026 Stock Track PRO Ltd</div></footer>
 </div>
-<script>${chartJsUmd}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 const ctx = document.getElementById('trend');
-new Chart(ctx, {
-  type:'bar',
-  data:{labels:${chartLabels},datasets:[
-    {label:'Checks',data:${chartChecks},backgroundColor:'#1a56db',minBarLength:4,borderRadius:4},
-    {label:'Defects reported',data:${chartReported},backgroundColor:'#e6a817',minBarLength:4,borderRadius:4},
-    {label:'Defects resolved',data:${chartResolved},backgroundColor:'#1a7a3a',minBarLength:4,borderRadius:4}
-  ]},
-  options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:0}},y:{beginAtZero:true,ticks:{stepSize:5},grid:{color:'#0000000f'}}}}
-});
+function renderChart() {
+  if (typeof Chart !== 'undefined') {
+    new Chart(ctx, {
+      type:'bar',
+      data:{labels:${chartLabels},datasets:[
+        {label:'Checks',data:${chartChecks},backgroundColor:'#1a56db',minBarLength:4,borderRadius:4},
+        {label:'Defects reported',data:${chartReported},backgroundColor:'#e6a817',minBarLength:4,borderRadius:4},
+        {label:'Defects resolved',data:${chartResolved},backgroundColor:'#1a7a3a',minBarLength:4,borderRadius:4}
+      ]},
+      options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:0}},y:{beginAtZero:true,ticks:{stepSize:5},grid:{color:'#0000000f'}}}}
+    });
+    return;
+  }
+
+  // Fallback render so PDF generation does not fail if CDN load is blocked.
+  const c = ctx;
+  const g = c.getContext('2d');
+  if (!g) return;
+  const labels = ${chartLabels};
+  const checks = ${chartChecks};
+  const reported = ${chartReported};
+  const resolved = ${chartResolved};
+  const width = c.width || 720;
+  const height = c.height || 180;
+  g.clearRect(0, 0, width, height);
+  const max = Math.max(5, ...checks, ...reported, ...resolved);
+  const chartTop = 12;
+  const chartBottom = height - 24;
+  const chartLeft = 20;
+  const chartRight = width - 8;
+  const chartH = chartBottom - chartTop;
+  const groupW = (chartRight - chartLeft) / labels.length;
+  const barW = Math.min(8, groupW / 5);
+  function drawBars(values, color, offset) {
+    g.fillStyle = color;
+    values.forEach((v, i) => {
+      const h = Math.max(4, (v / max) * chartH);
+      const x = chartLeft + i * groupW + offset;
+      const y = chartBottom - h;
+      g.fillRect(x, y, barW, h);
+    });
+  }
+  drawBars(checks, '#1a56db', 4);
+  drawBars(reported, '#e6a817', 4 + barW + 2);
+  drawBars(resolved, '#1a7a3a', 4 + (barW + 2) * 2);
+  g.fillStyle = '#6b7280';
+  g.font = '11px Helvetica Neue, Helvetica, Arial, sans-serif';
+  labels.forEach((l, i) => g.fillText(l, chartLeft + i * groupW + 6, height - 8));
+}
+setTimeout(renderChart, 80);
 </script>
 </body></html>`;
 }
