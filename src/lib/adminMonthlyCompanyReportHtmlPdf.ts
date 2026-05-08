@@ -35,7 +35,7 @@ function sanitizeText(str: string): string {
 }
 
 function buildHtml(input: MonthlyCompanyReportInput): string {
-  const logoPath = join(process.cwd(), 'public', 'logo.png');
+  const logoPath = join(process.cwd(), 'public', 'report-logo-uploaded.png');
   const logoBase64 = readFileSync(logoPath).toString('base64');
   const logoSrc = `data:image/png;base64,${logoBase64}`;
   const companyName = esc(input.companyName);
@@ -120,8 +120,8 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     <div style="display:flex; align-items:center; gap:10px;">
       <img
         src="${logoSrc}"
-        style="width:36px; height:36px; min-width:36px; object-fit:contain;
-          flex-shrink:0; border-radius:8px;"
+        style="width:220px; height:auto; max-height:56px; object-fit:contain;
+          flex-shrink:0;"
         alt="Stock Track PRO logo"
       />
       <div>
