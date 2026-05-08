@@ -124,12 +124,6 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
           flex-shrink:0;"
         alt="Stock Track PRO logo"
       />
-      <div>
-        <div style="font-size:14px; font-weight:500; color:#111827;
-          line-height:1.2;">Stock Track PRO</div>
-        <div style="font-size:11px; color:#6b7280;
-          line-height:1.2;">Monthly fleet performance report</div>
-      </div>
     </div>
     <div class="meta-right">
       <div style="font-weight:700">${companyName}</div><div>${month}</div><div class="ref">Ref ${ref}</div><div>${input.generatedAt.toLocaleDateString('en-GB')}</div>
