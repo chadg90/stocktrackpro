@@ -22,6 +22,17 @@ function arrow(delta: number, goodWhenUp: boolean): { symbol: string; cls: strin
   };
 }
 
+function sanitizeText(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/\r\n|\r|\n/g, '<br>')
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
+    .replace(/[\uFFFD\uFFFE\uFFFF]/g, '')
+    .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF\u0100-\u017F<>\/\s]/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function buildHtml(input: MonthlyCompanyReportInput): string {
   const companyName = esc(input.companyName);
   const month = esc(input.monthLabel);
@@ -33,6 +44,9 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
   const cChecks = arrow(input.comparison?.checksDelta ?? 0, true);
   const cReported = arrow(input.comparison?.defectsReportedDelta ?? 0, false);
   const cResolved = arrow(input.comparison?.defectsResolvedDelta ?? 0, true);
+  const checksColor = cChecks.cls === 'good' ? '#1a7a3a' : '#d94040';
+  const reportedColor = cReported.cls === 'good' ? '#1a7a3a' : '#d94040';
+  const resolvedColor = cResolved.cls === 'good' ? '#1a7a3a' : '#d94040';
   const prev = esc(input.comparison?.previousMonthLabel || 'Previous month');
   const trend = (input.trend || []).slice(-4);
   const usersReported = Math.max(0, Math.round(input.usersReportedCount || 0));
@@ -45,7 +59,7 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
       const priClass = row.priority === 'critical' ? 'pri-critical' : 'pri-standard';
       return `<tr>
         <td>${esc(row.vehicle)}</td>
-        <td>${esc(row.description)}</td>
+        <td>${sanitizeText(row.description)}</td>
         <td>${esc(row.raised)}</td>
         <td><span class="badge ${priClass}">${row.priority === 'critical' ? 'Critical' : 'Standard'}</span></td>
         <td><span class="badge status-open">Open</span></td>
@@ -67,7 +81,6 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     .wrap{max-width:720px;margin:0 auto;padding:0 24px}
     .hdr{padding:20px 0 16px;border-bottom:.5px solid #e5e7eb;display:flex;justify-content:space-between;gap:16px}
     .brand{display:flex;gap:10px;align-items:flex-start}
-    .mark{width:36px;height:36px;background:#1a56db;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .meta-right{text-align:right}
     .meta-right .ref{font-size:11px;color:#9ca3af}
     .alert{margin-top:16px;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;border:.5px solid #d94040;background:#fce8e8;color:#7a1a1a;font-size:13px}
@@ -77,7 +90,6 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     .card{background:#f9fafb;border-radius:8px;padding:12px 14px}
     .card.critical{background:#fce8e8}
     .card .v{font-size:22px;font-weight:500}
-    .kpi-change{font-size:11px;margin:0}.good{color:#1a7a3a}.bad{color:#d94040}
     .coverage{margin-top:12px;background:#f9fafb;border:.5px solid #e5e7eb;border-radius:8px;padding:12px 14px}
     .bar{height:6px;background:#e5e7eb;border-radius:3px}.bar>span{display:block;height:6px;background:#1a56db;border-radius:3px}
     .legend{display:flex;gap:14px;font-size:12px;color:#6b7280;margin-bottom:8px}
@@ -90,14 +102,39 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     .actions{padding-bottom:0}.actions li{margin:0 0 10px;list-style:none;display:flex;gap:10px}.actions li:last-child{margin-bottom:0}
     .num{width:20px;height:20px;border-radius:50%;background:#1a56db;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
     .ftr{margin-top:20px;padding:14px 0;border-top:.5px solid #e5e7eb;color:#6b7280;font-size:11px;display:flex;justify-content:space-between}
-    @media print { .section{break-inside:avoid} }
+    @media print {
+      .section { page-break-inside: avoid; }
+      .defects-table { page-break-inside: avoid; }
+      .actions-list { page-break-inside: avoid; }
+      .footer { page-break-before: avoid; }
+    }
   </style>
 </head><body>
 <div class="wrap">
   <header class="hdr">
-    <div class="brand">
-      <div class="mark"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="7" height="7" rx="1.5" fill="white"/><rect x="11" y="2" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/><rect x="2" y="11" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/><rect x="11" y="11" width="7" height="7" rx="1.5" fill="white" opacity="0.35"/></svg></div>
-      <div><div style="font-size:14px;font-weight:500">Stock Track PRO</div><div style="font-size:11px;color:#6b7280">Monthly fleet performance report</div></div>
+    <div style="display:flex; align-items:center; gap:10px; flex-shrink:0; background:#000; padding:2px; border-radius:10px;">
+      <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+        <div style="width:36px; height:36px; min-width:36px; background:#1a56db;
+          border-radius:8px; display:flex; align-items:center;
+          justify-content:center; flex-shrink:0;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="7" height="7" rx="1.5" fill="white"/>
+            <rect x="11" y="2" width="7" height="7" rx="1.5" fill="white"
+              opacity="0.6"/>
+            <rect x="2" y="11" width="7" height="7" rx="1.5" fill="white"
+              opacity="0.6"/>
+            <rect x="11" y="11" width="7" height="7" rx="1.5" fill="white"
+              opacity="0.35"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-size:14px; font-weight:500; color:#111827;
+            line-height:1.2;">Stock Track PRO</div>
+          <div style="font-size:11px; color:#6b7280;
+            line-height:1.2;">Monthly fleet performance report</div>
+        </div>
+      </div>
     </div>
     <div class="meta-right">
       <div style="font-weight:700">${companyName}</div><div>${month}</div><div class="ref">Ref ${ref}</div><div>${input.generatedAt.toLocaleDateString('en-GB')}</div>
@@ -108,9 +145,9 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
   <section class="section">
     <p class="label">1 — Key performance indicators · ${month}</p>
     <div class="kpis">
-      <div class="card"><div style="font-size:11px;color:#6b7280">Checks completed</div><div class="v">${checks}</div><p class="kpi-change ${cChecks.cls}">${cChecks.symbol} ${cChecks.text} vs ${prev}</p></div>
-      <div class="card"><div style="font-size:11px;color:#6b7280">Defects reported</div><div class="v">${reported}</div><p class="kpi-change ${cReported.cls}">${cReported.symbol} ${cReported.text} vs ${prev}</p></div>
-      <div class="card"><div style="font-size:11px;color:#6b7280">Defects resolved</div><div class="v">${resolved}</div><p class="kpi-change ${cResolved.cls}">${cResolved.symbol} ${cResolved.text} vs ${prev}</p></div>
+      <div class="card"><div style="font-size:11px;color:#6b7280">Checks completed</div><div class="v">${checks}</div><p style="font-size:11px; margin:4px 0 0; color:${checksColor};">${cChecks.symbol} ${cChecks.text} vs ${prev}</p></div>
+      <div class="card"><div style="font-size:11px;color:#6b7280">Defects reported</div><div class="v">${reported}</div><p style="font-size:11px; margin:4px 0 0; color:${reportedColor};">${cReported.symbol} ${cReported.text} vs ${prev}</p></div>
+      <div class="card"><div style="font-size:11px;color:#6b7280">Defects resolved</div><div class="v">${resolved}</div><p style="font-size:11px; margin:4px 0 0; color:${resolvedColor};">${cResolved.symbol} ${cResolved.text} vs ${prev}</p></div>
       <div class="card ${critical > 0 ? 'critical' : ''}"><div style="font-size:11px;${critical > 0 ? 'color:#a03030' : 'color:#6b7280'}">Critical open defects</div><div class="v" style="${critical > 0 ? 'color:#d94040' : ''}">${critical}</div></div>
     </div>
     <div class="coverage"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:#6b7280">User reporting coverage</span><span style="font-size:12px;font-weight:500">${usersReported} of ${usersTotal} users submitted (${coverage}%)</span></div><div class="bar"><span style="width:${coverage}%"></span></div><p style="font-size:11px;color:#9ca3af;margin:6px 0 0">${usersNot} users did not submit any checks or defects in this period</p></div>
@@ -119,15 +156,17 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
   <section class="section">
     <p class="label">2 — Trend: checks, defects reported & resolved</p>
     <div class="legend"><span><i style="background:#1a56db"></i>Checks</span><span><i style="background:#e6a817"></i>Defects reported</span><span><i style="background:#1a7a3a"></i>Defects resolved</span></div>
-    <canvas id="trend" height="180"></canvas>
+    <div style="position:relative; width:100%; height:160px;">
+      <canvas id="trend"></canvas>
+    </div>
   </section>
 
-  <section class="section">
+  <section class="section defects-table">
     <p class="label">3 — Open defects requiring action</p>
     ${openRows ? `<table><colgroup><col style="width:90px"><col style="width:auto"><col style="width:90px"><col style="width:65px"><col style="width:65px"></colgroup><thead><tr><th>Vehicle</th><th>Defect description</th><th>Date raised</th><th>Priority</th><th>Status</th></tr></thead><tbody>${openRows}</tbody></table>` : `<div style="background:#e8f5e9;border:.5px solid #1a7a3a;color:#1a7a3a;border-radius:8px;padding:10px">No open defects at month-end</div>`}
   </section>
 
-  <section class="section actions">
+  <section class="section actions actions-list">
     <p class="label">4 — Recommended actions</p>
     <ul>
       <li><span class="num">1</span><span>${critical > 0 ? `Resolve ${critical} critical defect(s) immediately. Confirm repair and close in Stock Track PRO before further vehicle use.` : 'Continue daily checks and resolve raised defects within agreed SLA.'}</span></li>
@@ -136,7 +175,7 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     </ul>
   </section>
 
-  <footer class="ftr"><div>Confidential — prepared for operational review · <span style="color:#1a56db">stocktrackpro.co.uk</span></div><div>© 2026 Stock Track PRO Ltd</div></footer>
+  <footer class="ftr footer"><div>Confidential — prepared for operational review · <span style="color:#1a56db">stocktrackpro.co.uk</span></div><div>© 2026 Stock Track PRO Ltd</div></footer>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
