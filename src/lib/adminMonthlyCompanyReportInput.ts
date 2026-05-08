@@ -11,8 +11,18 @@ export function sanitizeText(str: string | undefined | null): string {
 }
 
 export function normalizeReportInput(input: MonthlyCompanyReportInput): MonthlyCompanyReportInput {
+  const generatedAtRaw = (input as unknown as { generatedAt?: Date | string }).generatedAt;
+  const generatedAt =
+    generatedAtRaw instanceof Date
+      ? generatedAtRaw
+      : generatedAtRaw
+        ? new Date(generatedAtRaw)
+        : new Date();
+  const safeGeneratedAt = Number.isNaN(generatedAt.getTime()) ? new Date() : generatedAt;
+
   return {
     ...input,
+    generatedAt: safeGeneratedAt,
     companyName: sanitizeText(input.companyName),
     monthLabel: sanitizeText(input.monthLabel),
     openDefectsList: (input.openDefectsList || []).map((row) => ({
