@@ -167,6 +167,7 @@ export default function AdminReportsPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [authIdToken, setAuthIdToken] = useState<string | null>(null);
   const [pdfGenerating, setPdfGenerating] = useState(false);
+  const [supportsMonthInput, setSupportsMonthInput] = useState(true);
 
   const loadCompanies = useCallback(async (): Promise<void> => {
     if (!firebaseDb) return;
@@ -302,6 +303,15 @@ export default function AdminReportsPage() {
     setTrend([]);
     setOpenDefectRows([]);
   }, [selectedCompanyId, selectedMonth]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const probe = document.createElement('input');
+    probe.setAttribute('type', 'month');
+    probe.value = '2026-05';
+    const supports = probe.type === 'month' && probe.value === '2026-05';
+    setSupportsMonthInput(supports);
+  }, []);
 
   async function getMonthStats(
     companyId: string,
@@ -590,6 +600,24 @@ export default function AdminReportsPage() {
     );
   }
 
+  const [selectedYear, selectedMonthPart] = selectedMonth.split('-');
+  const monthOptions = [
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+  ];
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 6 }, (_, i) => String(currentYear - i));
+
   return (
     <div className="space-y-6">
       <div className="dashboard-card p-6">
@@ -633,12 +661,39 @@ export default function AdminReportsPage() {
           </label>
           <label className="text-sm text-white/80">
             <span className="mb-1 block">Month</span>
-            <input
-              type="month"
-              value={selectedMonth}
-              onChange={(event) => setSelectedMonth(event.target.value)}
-              className="w-full rounded-lg bg-black border border-white/20 px-3 py-2 text-white"
-            />
+            {supportsMonthInput ? (
+              <input
+                type="month"
+                value={selectedMonth}
+                onChange={(event) => setSelectedMonth(event.target.value)}
+                className="w-full rounded-lg bg-black border border-white/20 px-3 py-2 text-white"
+              />
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={selectedMonthPart || '01'}
+                  onChange={(event) => setSelectedMonth(`${selectedYear || String(currentYear)}-${event.target.value}`)}
+                  className="w-full rounded-lg bg-black border border-white/20 px-3 py-2 text-white"
+                >
+                  {monthOptions.map((monthOption) => (
+                    <option key={monthOption.value} value={monthOption.value}>
+                      {monthOption.label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={selectedYear || String(currentYear)}
+                  onChange={(event) => setSelectedMonth(`${event.target.value}-${selectedMonthPart || '01'}`)}
+                  className="w-full rounded-lg bg-black border border-white/20 px-3 py-2 text-white"
+                >
+                  {yearOptions.map((yearOption) => (
+                    <option key={yearOption} value={yearOption}>
+                      {yearOption}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </label>
         </div>
 

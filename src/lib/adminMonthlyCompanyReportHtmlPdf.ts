@@ -1,6 +1,7 @@
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { MonthlyCompanyReportInput } from '@/lib/adminMonthlyCompanyReportPdf';
 
 function esc(str: string): string {
@@ -34,6 +35,9 @@ function sanitizeText(str: string): string {
 }
 
 function buildHtml(input: MonthlyCompanyReportInput): string {
+  const logoPath = join(process.cwd(), 'public', 'logo.png');
+  const logoBase64 = readFileSync(logoPath).toString('base64');
+  const logoSrc = `data:image/png;base64,${logoBase64}`;
   const companyName = esc(input.companyName);
   const month = esc(input.monthLabel);
   const ref = `STP-MONTHLY-${input.generatedAt.toISOString().replace(/[-:.TZ]/g, '').slice(0, 12)}`;
@@ -114,20 +118,12 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
 <div class="wrap">
   <header class="hdr">
     <div style="display:flex; align-items:center; gap:10px;">
-      <div style="width:36px; height:36px; min-width:36px; background:#1a56db;
-        border-radius:8px; display:flex; align-items:center;
-        justify-content:center; flex-shrink:0;">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="2" width="7" height="7" rx="1.5" fill="white"/>
-          <rect x="11" y="2" width="7" height="7" rx="1.5" fill="white"
-            opacity="0.6"/>
-          <rect x="2" y="11" width="7" height="7" rx="1.5" fill="white"
-            opacity="0.6"/>
-          <rect x="11" y="11" width="7" height="7" rx="1.5" fill="white"
-            opacity="0.35"/>
-        </svg>
-      </div>
+      <img
+        src="${logoSrc}"
+        style="width:36px; height:36px; min-width:36px; object-fit:contain;
+          flex-shrink:0; border-radius:8px;"
+        alt="Stock Track PRO logo"
+      />
       <div>
         <div style="font-size:14px; font-weight:500; color:#111827;
           line-height:1.2;">Stock Track PRO</div>
