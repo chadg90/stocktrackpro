@@ -2,12 +2,14 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Pricing',
-  description: 'Stock Track PRO pricing — £8 per vehicle per month or £84 per vehicle per year. All features included. Start a 7-day free trial and subscribe on the web.',
+  description:
+    '£8 per vehicle per month (VAT included). Unlimited driver and manager accounts, full defects workflow, MOT tracking — start a 7-day free trial on the web.',
   alternates: { canonical: '/pricing' },
   openGraph: {
     title: 'Pricing | Stock Track PRO',
-    description: 'View plans and pricing. Starter, Team, Business and Enterprise. Free trial available.',
-    url: 'https://stocktrackpro.com/pricing',
+    description:
+      'Simple per-vehicle pricing for UK fleet compliance software — inspections, defects, MOT and tax alerts. 7-day free trial.',
+    url: 'https://www.stocktrackpro.co.uk/pricing',
     siteName: 'Stock Track PRO',
     locale: 'en_GB',
     type: 'website',
@@ -15,7 +17,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Pricing | Stock Track PRO',
-    description: 'View plans and pricing. Starter, Team, Business and Enterprise. Free trial available.',
+    description: '£8 per vehicle per month — fleet inspection software UK operators can trial free for 7 days.',
   },
 };
 

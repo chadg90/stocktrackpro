@@ -237,7 +237,7 @@ export default function OnboardingPage() {
                 className="flex-1 p-6 rounded-xl border-2 border-blue-500 bg-blue-500/10 hover:bg-blue-500/20 transition-colors text-left group"
               >
                 <Building2 className="h-8 w-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-white text-lg mb-2">Start a free trial</h3>
+                <h3 className="font-semibold text-white text-lg mb-2">Start 7-Day Free Trial</h3>
                 <p className="text-white/60 text-sm">
                   Create your account and company. {TRIAL_DAYS} days free, no card required. Subscribe later from £8 per vehicle per month.
                 </p>
@@ -513,7 +513,7 @@ export default function OnboardingPage() {
                       </>
                     ) : (
                       <>
-                        Start free trial <ArrowRight className="h-4 w-4" />
+                        Start 7-Day Free Trial <ArrowRight className="h-4 w-4" />
                       </>
                     )}
                   </button>

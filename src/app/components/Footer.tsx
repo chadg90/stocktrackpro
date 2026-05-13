@@ -17,10 +17,15 @@ const Footer = () => {
             <p className="text-white text-sm mt-1">
               Email: <Link href="mailto:support@stocktrackpro.co.uk" className="hover:text-blue-500">support@stocktrackpro.co.uk</Link>
             </p>
+            <p className="text-white/55 text-xs mt-3 max-w-md leading-relaxed">
+              Stock Track PRO Ltd · UK fleet compliance software · £8 per vehicle per month including VAT · 7-day free trial ·
+              subscriptions via this website
+            </p>
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-white/90">
             <Link href="/" className="hover:text-blue-500">Home</Link>
             <Link href="/features" className="hover:text-blue-500">Features</Link>
+            <Link href="/compliance-centre" className="hover:text-blue-500">Compliance Centre</Link>
             <Link href="/pricing" className="hover:text-blue-500">Pricing</Link>
             <Link href="/faq" className="hover:text-blue-500">FAQ</Link>
             <Link href="/contact" className="hover:text-blue-500">Contact</Link>

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
+import SiteWideJsonLd from "@/components/seo/SiteWideJsonLd";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,13 +16,15 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://stocktrackpro.com'),
+  metadataBase: new URL('https://www.stocktrackpro.co.uk'),
   title: {
-    default: "Stock Track PRO | Professional Fleet Management System",
+    default: "Stock Track PRO | UK Fleet Management & Defect Reporting Software",
     template: "%s | Stock Track PRO",
   },
-  description: "Transform your fleet operations with Stock Track PRO. Vehicle inspections, defect workflow, DVLA checks, and compliance reporting for UK businesses.",
-  keywords: "fleet management software, vehicle inspection app, defect management, DVLA fleet checks, MOT monitoring, mileage tracking, compliance software UK",
+  description:
+    "Stock Track PRO is UK fleet management software for SMEs. Track MOTs, vehicle tax, daily inspections, and defect resolution — all in one platform. Try free for 7 days.",
+  keywords:
+    "fleet inspection software UK, vehicle defect reporting app, O-licence compliance software, MOT tracking software for fleets, fleet management app for vans, DVLA fleet checks, fleet compliance UK",
   authors: [{ name: "Stock Track PRO" }],
   generator: "Next.js",
   applicationName: "Stock Track PRO",
@@ -38,16 +41,17 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "Stock Track PRO | Professional Fleet Management System",
-    description: "Transform your fleet operations with Stock Track PRO. Vehicle inspections, defect workflow, DVLA checks, and compliance reporting for UK businesses.",
-    url: "https://stocktrackpro.com",
+    title: "Stock Track PRO | UK Fleet Management & Defect Reporting Software",
+    description:
+      "Stock Track PRO is UK fleet management software for SMEs. Track MOTs, vehicle tax, daily inspections, and defect resolution — all in one platform. Try free for 7 days.",
+    url: "https://www.stocktrackpro.co.uk",
     siteName: "Stock Track PRO",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Stock Track PRO - Professional Fleet Management System",
+        alt: "Stock Track PRO — UK fleet management, inspections, and defect reporting",
       },
     ],
     locale: "en_GB",
@@ -55,11 +59,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stock Track PRO | Professional Fleet Management System",
-    description: "Transform your fleet operations with Stock Track PRO. Vehicle inspections, defect workflow, DVLA checks, and compliance reporting for UK businesses.",
+    title: "Stock Track PRO | UK Fleet Management & Defect Reporting Software",
+    description:
+      "UK fleet management software for SMEs — MOTs, tax, inspections, defect resolution. Try free for 7 days.",
     images: ["/og-image.jpg"],
-    creator: "@stocktrackpro",
-    site: "@stocktrackpro",
   },
   robots: {
     index: true,
@@ -72,14 +75,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: "your-google-verification-code",
-    yandex: "yandex-verification-code",
-    yahoo: "yahoo-verification-code",
-    other: {
-      "msvalidate.01": "microsoft-verification-code",
-    },
-  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -88,8 +83,6 @@ export const metadata: Metadata = {
   },
   other: {
     "geo.region": "GB",
-    "geo.position": "51.509865;-0.118092", // London coordinates as default
-    "ICBM": "51.509865, -0.118092",
   },
 };
 
@@ -102,7 +95,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <head>
         {/* iOS Smart App Banner */}
-        <meta name="apple-itunes-app" content="app-id=6744621973, app-argument=https://stocktrackpro.com" />
+        <meta name="apple-itunes-app" content="app-id=6744621973, app-argument=https://www.stocktrackpro.co.uk" />
         
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -113,72 +106,15 @@ export default function RootLayout({
         <meta name="theme-color" content="#3b82f6" />
         <meta name="application-name" content="Stock Track PRO" />
         <meta name="apple-mobile-web-app-title" content="Stock Track PRO" />
-        <meta name="msapplication-tooltip" content="Professional Fleet Management System" />
+        <meta name="msapplication-tooltip" content="Stock Track PRO — UK fleet compliance software" />
         <meta name="language" content="en-GB" />
         <meta name="copyright" content={`© ${new Date().getFullYear()} Stock Track PRO Ltd`} />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
         <link rel="manifest" href="/manifest.json" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "SoftwareApplication",
-              "name": "Stock Track PRO",
-              "applicationCategory": "BusinessApplication",
-              "operatingSystem": "All",
-              "description": "Professional fleet management platform with inspections, defect workflow and compliance tracking",
-              "offers": {
-                "@type": "Offer",
-                "price": "7.99",
-                "priceCurrency": "GBP",
-                "priceValidUntil": new Date(
-                  new Date().setFullYear(new Date().getFullYear() + 1)
-                ).toISOString().split('T')[0],
-                "availability": "https://schema.org/InStock",
-                "seller": {
-                  "@type": "Organization",
-                  "name": "Stock Track PRO Ltd",
-                  "url": "https://stocktrackpro.com"
-                }
-              },
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "4.8",
-                "ratingCount": "127",
-                "bestRating": "5",
-                "worstRating": "1"
-              },
-              "provider": {
-                "@type": "Organization",
-                "name": "Stock Track PRO Ltd",
-                "url": "https://stocktrackpro.com",
-                "logo": "https://stocktrackpro.com/logo.png",
-                "address": {
-                  "@type": "PostalAddress",
-                  "addressCountry": "GB"
-                },
-                "contactPoint": {
-                  "@type": "ContactPoint",
-                  "contactType": "customer support",
-                  "email": "support@stocktrackpro.com"
-                }
-              },
-              "featureList": [
-                "Mobile-first fleet workflows",
-                "Real-time location tracking",
-                "Mobile access",
-                "Cost control",
-                "Maintenance tracking",
-                "Team management"
-              ],
-              "screenshot": "https://stocktrackpro.com/screenshot.jpg",
-              "softwareVersion": "1.0"
-            })
-          }}
-        />
+        <link rel="alternate" type="text/plain" title="LLMs" href="/llms.txt" />
+        <SiteWideJsonLd />
       </head>
       <body className={`${inter.className} antialiased bg-black min-h-screen flex flex-col`}>
         {children}

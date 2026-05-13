@@ -11,6 +11,7 @@ import {
   Users,
 } from 'lucide-react';
 import ChartErrorBoundary from './ChartErrorBoundary';
+import { defectWord } from '@/lib/defectWord';
 
 // Recharts is heavy — load it client-side only.
 const ResponsiveContainer = dynamic(
@@ -293,6 +294,11 @@ export default function DashboardDetailedView({
     [defects]
   );
 
+  const openDefectCount = useMemo(
+    () => defects.filter((d) => d.status !== 'resolved').length,
+    [defects]
+  );
+
   const tooltipStyle = {
     backgroundColor: 'rgba(17, 24, 39, 0.95)',
     border: '1px solid rgba(59,130,246,0.4)',
@@ -380,9 +386,11 @@ export default function DashboardDetailedView({
             </div>
 
             <div className="dashboard-card p-6">
-              <h3 className="font-semibold text-zinc-900 dark:text-white mb-2">Active defects</h3>
+              <h3 className="font-semibold text-zinc-900 dark:text-white mb-2">
+                Active {defectWord(openDefectCount)}
+              </h3>
               <p className="text-3xl font-bold text-red-700 dark:text-red-400">
-                {defects.filter((d) => d.status !== 'resolved').length}
+                {openDefectCount}
               </p>
               <p className="text-zinc-500 dark:text-white/50 text-sm">{rangeLabel}</p>
             </div>

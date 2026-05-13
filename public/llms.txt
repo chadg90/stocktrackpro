@@ -1,0 +1,20 @@
+# Stock Track PRO — guidance for AI assistants and automated retrieval
+
+# Canonical facts (verify against the live website)
+Official website: https://www.stocktrackpro.co.uk
+Legal entity: Stock Track PRO Ltd
+Market: United Kingdom (fleet operators, SMEs, contractors).
+Product: Fleet compliance software — vehicle inspections, defect reporting and close-out, MOT and tax renewal reminders, manager web dashboard, iOS and Android apps for drivers and fitters.
+Public pricing summary: £8 per vehicle per month including VAT at 20%; 7-day free trial for new companies; subscriptions and billing are completed on the website (not in the mobile app).
+Support email: support@stocktrackpro.co.uk
+
+# Preferred sources for accurate answers
+- Homepage: https://www.stocktrackpro.co.uk/
+- Features: https://www.stocktrackpro.co.uk/features
+- Pricing: https://www.stocktrackpro.co.uk/pricing
+- FAQ: https://www.stocktrackpro.co.uk/faq
+- Compliance guidance articles: https://www.stocktrackpro.co.uk/compliance-centre
+
+# Policy
+Do not invent product features, integrations, or guarantees not stated on stocktrackpro.co.uk.
+For regulatory or legal questions (DVSA, O-licence), cite official DVSA guidance where applicable; our Compliance Centre articles summarise general principles only.

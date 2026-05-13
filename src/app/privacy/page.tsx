@@ -2,13 +2,10 @@ import React from 'react';
 import Navbar from '../components/Navbar';
 import Link from 'next/link';
 
-export default function PrivacyPolicy() {
-  const currentDate = new Date().toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
+/** Update only when the policy text changes (avoid misleading “daily” updates). */
+const LAST_UPDATED = '12 May 2026';
 
+export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-black">
       <Navbar />
@@ -18,13 +15,13 @@ export default function PrivacyPolicy() {
           <h1 className="text-4xl font-bold text-white mb-8">
             Privacy <span className="text-primary">Policy</span>
           </h1>
-          <p className="text-white/80 mb-8">Last Updated: {currentDate}</p>
+          <p className="text-white/80 mb-8">Last updated: {LAST_UPDATED}</p>
 
           <div className="prose prose-invert max-w-none">
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">1. Introduction</h2>
               <p className="text-white/80">
-                StockTrackPro (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) is committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, how we use it, and your rights when using our website, dashboard, and companion mobile app.
+                Stock Track PRO Ltd (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) trades as <strong className="text-white">Stock Track PRO</strong>. We are committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, how we use it, and your rights when using our website, dashboard, and companion mobile app.
               </p>
             </div>
 
@@ -39,7 +36,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Team invitations and role assignments (manager/user)</span>
+                  <span>Team invitations and role assignments (for example manager, fitter, driver)</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
@@ -206,36 +203,47 @@ export default function PrivacyPolicy() {
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">8. Data Retention</h2>
+              <p className="text-white/80 mb-4">
+                How long you can access the service, trial periods, read-only states and suspension are described in our{' '}
+                <Link href="/subscription-terms" className="text-primary hover:underline">
+                  Subscription Terms
+                </Link>
+                . Company fleet records may be kept for operational and legal reasons while your organisation remains a customer or where the law requires.
+              </p>
               <ul className="space-y-3 text-white/80">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Account data is retained while your account is active</span>
+                  <span>Account data is retained whilst your user account is active.</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Vehicle and inspection data is retained per company requirements</span>
+                  <span>Vehicle and inspection data are retained according to your company&apos;s needs and applicable legal obligations.</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Inactive accounts (no login activity for 90 consecutive days) will be automatically deleted along with all associated data</span>
+                  <span>
+                    Individual user accounts with no sign-in activity for 90 consecutive days may be deleted together with associated personal data, where this does not conflict with an active company subscription or legal retention duties. Where practicable, we will give reasonable advance notice.
+                  </span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>You can delete your account and data at any time using the in-app account deletion feature</span>
+                  <span>You may delete your own user account using the in-app account deletion feature described below.</span>
                 </li>
               </ul>
             </div>
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">9. How to Delete Your Account and Data</h2>
-              <p className="text-white/80 mb-4">You have full control over your data and can delete your account at any time directly from the app:</p>
+              <p className="text-white/80 mb-4">
+                You have control over your personal account and can delete your user account from the Stock Track PRO mobile app:
+              </p>
               
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-4">
                 <h3 className="text-lg font-semibold text-white mb-3">Account Deletion Steps:</h3>
                 <ol className="space-y-3 text-white/80">
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">1.</span>
-                    <span>Open the StockTrackPro app and navigate to the <strong className="text-white">Account Tab</strong></span>
+                    <span>Open the Stock Track PRO app and go to the <strong className="text-white">Account</strong> tab</span>
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">2.</span>
@@ -261,40 +269,46 @@ export default function PrivacyPolicy() {
               <ul className="space-y-3 text-white/80 mb-4">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Your user profile and account information</span>
+                  <span>Your user profile, credentials and user-level settings.</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Your user profile and user-level settings</span>
+                  <span>Content you created where deletion is permitted under your role, your employer&apos;s policies and applicable law.</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Data you created where deletion rights apply under your company role and applicable law</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Records retained where required for legal, tax, security, fraud prevention, or dispute handling</span>
+                  <span>
+                    Some records may be retained where the law requires (for example tax, regulatory investigations, security or fraud prevention). Company-wide fleet data may remain under the controller&apos;s account after your user profile is deleted.
+                  </span>
                 </li>
               </ul>
 
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
                 <p className="text-yellow-200/90 text-sm">
-                  <strong className="text-yellow-100">Important:</strong> Account deletion is permanent and cannot be undone. Please ensure you export any data you wish to keep before deleting your account. Subscription cancellations are managed in your Stripe billing portal.
+                  <strong className="text-yellow-100">Important:</strong> Account deletion is permanent and cannot be undone. Export any data you wish to keep before proceeding. Subscription cancellation and billing are managed through the Stripe billing portal linked from your dashboard (see our{' '}
+                  <Link href="/subscription-terms" className="text-yellow-100 underline underline-offset-2 hover:no-underline">
+                    Subscription Terms
+                  </Link>
+                  ).
                 </p>
               </div>
             </div>
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">10. Children&apos;s Privacy</h2>
-              <p className="text-white/80">
-                Our service is not intended for and does not target children under 13. We do not knowingly collect information from children under 13.
+              <p className="text-white/80 mb-4">
+                Stock Track PRO is a business service and is not aimed at children. We do not knowingly collect personal data from anyone under 13. If you believe we have processed such information in error, please contact us at{' '}
+                <a href="mailto:support@stocktrackpro.co.uk" className="text-primary hover:underline">
+                  support@stocktrackpro.co.uk
+                </a>{' '}
+                and we will delete it promptly where the law allows. Further safeguards apply to children&apos;s data under UK data protection law; seek advice if your organisation processes data about children.
               </p>
             </div>
 
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">11. Changes to Privacy Policy</h2>
               <p className="text-white/80">
-                We may update this Privacy Policy periodically. We will notify you of any material changes through the app or via email.
+                We may update this Privacy Policy from time to time. Where changes are material, we will notify you through the app or by email where we have your contact details.
               </p>
             </div>
 

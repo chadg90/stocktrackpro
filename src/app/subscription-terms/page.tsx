@@ -3,13 +3,21 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 
-const LAST_UPDATED = '14 April 2026';
+const LAST_UPDATED = '12 May 2026';
 
 export const metadata: Metadata = {
-  title: 'Subscription Terms | Stock Track PRO',
+  title: 'Subscription Terms',
   description:
-    'Subscription terms for Stock Track PRO: free trial, monthly and annual billing, cancellation, data retention and grandfathered pricing.',
+    'Subscription terms for Stock Track PRO UK fleet software — 7-day trial, monthly and annual billing, cancellation, VAT, and renewal.',
   alternates: { canonical: '/subscription-terms' },
+  openGraph: {
+    title: 'Subscription Terms | Stock Track PRO',
+    description: 'Billing, trials, and cancellation terms for Stock Track PRO subscriptions.',
+    url: 'https://www.stocktrackpro.co.uk/subscription-terms',
+    siteName: 'Stock Track PRO',
+    locale: 'en_GB',
+    type: 'website',
+  },
 };
 
 export default function SubscriptionTermsPage() {

@@ -43,7 +43,7 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
             Teams that rely on Stock Track PRO
           </h2>
           <p className="text-slate-600 text-sm sm:text-[15px] leading-relaxed">
-            From groundwork to trades — UK businesses keeping fleets compliant and organised.
+            UK businesses keeping fleets compliant and organised.
           </p>
         </div>
 
@@ -83,11 +83,7 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
           ))}
         </div>
 
-        <p className="text-center text-slate-600 text-xs sm:text-sm mt-6 max-w-md mx-auto leading-relaxed">
-          Your logo could be here — we work with growing fleets and contractors across the UK.
-        </p>
-
-        <div className="text-center mt-5">
+        <div className="text-center mt-8">
           <Link
             href="/contact"
             className="inline-flex items-center justify-center rounded-lg bg-slate-900 text-white text-sm font-semibold px-5 py-2.5 hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-50"

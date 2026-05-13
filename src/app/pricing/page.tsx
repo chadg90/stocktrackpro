@@ -14,14 +14,15 @@ const MIN_VEHICLES = 5;
 const MAX_VEHICLES = 100;
 
 type BillingCycle = 'monthly' | 'yearly';
-type Tier = { label: string; users: string; colour: string };
-
-function getTier(count: number): Tier {
-  if (count <= 15) return { label: 'Starter', users: 'Up to 15 users', colour: 'text-sky-400' };
-  if (count <= 35) return { label: 'Growth', users: 'Up to 35 users', colour: 'text-indigo-400' };
-  if (count <= 75) return { label: 'Business', users: 'Up to 75 users', colour: 'text-violet-400' };
-  return { label: 'Enterprise', users: 'Unlimited users', colour: 'text-blue-400' };
-}
+const PLAN_FEATURES = [
+  'Unlimited Vehicle Inspections',
+  'Full Defect Close-out Workflow',
+  '7-Day MOT & Tax Smart Alerts',
+  'Manager Web Analytics Dashboard',
+  'iOS & Android App Access',
+  'No Setup Fees & UK Support',
+  'Full Onboarding Support',
+];
 
 export default function Pricing() {
   const [profile, setProfile] = useState<{ company_id?: string; role?: string } | null>(null);
@@ -95,19 +96,7 @@ export default function Pricing() {
     }
   };
 
-  const tier = getTier(vehicleCount);
-
-  const features = [
-    tier.users,
-    'Unlimited vehicle inspections',
-    'Defect reporting & workflow',
-    'MOT & Tax expiry reminders',
-    'Full company dashboard',
-    'Team management & invite system',
-    'Defect workflow tracking',
-    'Mobile app for iOS & Android',
-    'Priority email support',
-  ];
+  const features = PLAN_FEATURES;
 
   return (
     <div className="min-h-screen bg-black">
@@ -123,7 +112,8 @@ export default function Pricing() {
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-white/75 leading-relaxed">
-            Pay per vehicle. No tiers, no hidden fees. Scale up or down — changes take effect from your next billing cycle.
+            £8 per vehicle per month (prices include VAT at 20%). Cancel anytime on monthly billing — no minimum contract.
+            Scale vehicle count up or down from your next billing cycle.
           </p>
 
           {/* Trust strip — one-liner value anchors */}
@@ -203,11 +193,9 @@ export default function Pricing() {
 
             {/* Price display */}
             <div className="text-center mb-8 mt-2">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <span className={`text-sm font-bold px-3 py-1 rounded-full border ${tier.colour} border-current bg-current/10 transition-all duration-300`}>
-                  {tier.label}
-                </span>
-              </div>
+              <p className="text-white font-semibold mb-4 max-w-md mx-auto">
+                Every plan includes unlimited Driver and Manager accounts.
+              </p>
               <div className="flex items-end justify-center gap-1 mb-1">
                 <span className="text-5xl sm:text-6xl font-bold text-white transition-all duration-200">
                   £{billedTotal.toFixed(0)}
@@ -264,15 +252,6 @@ export default function Pricing() {
               )}
             </div>
 
-            {/* Tier steps */}
-            <div className="grid grid-cols-4 gap-1 mb-6">
-              {(['Starter','Growth','Business','Enterprise'] as const).map((t) => (
-                <div key={t} className={`rounded-lg py-1.5 px-1 text-center text-xs font-medium transition-all duration-300 ${tier.label === t ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40' : 'bg-white/5 text-white/30 border border-white/10'}`}>
-                  {t}
-                </div>
-              ))}
-            </div>
-
             {/* CTA */}
             {checkoutError && (
               <div role="alert" className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm text-center">
@@ -297,7 +276,7 @@ export default function Pricing() {
                 href={authLoading ? '#' : (profile ? '/contact' : '/onboarding')}
                 className="block w-full py-4 px-6 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base text-center shadow-lg shadow-blue-500/25 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
               >
-                {authLoading ? '…' : profile ? 'Contact us' : 'Start free trial'}
+                {authLoading ? '…' : profile ? 'Contact us' : 'Start 7-Day Free Trial'}
               </Link>
             )}
 
@@ -311,11 +290,11 @@ export default function Pricing() {
 
             {/* Features */}
             <div className="mt-8 pt-8 border-t border-white/10">
-              <p className="text-white/60 text-sm font-medium mb-4">Everything included:</p>
+              <p className="text-white/60 text-sm font-medium mb-4">Included with every subscription:</p>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
                 {features.map((f) => (
                   <li key={f} className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                    <Check className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                     <span className="text-white/75 text-sm leading-relaxed">{f}</span>
                   </li>
                 ))}

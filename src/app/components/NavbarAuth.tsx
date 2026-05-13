@@ -9,6 +9,7 @@ import { firebaseAuth } from '@/lib/firebase';
 const baseNavigation = [
   { name: 'Home', href: '/' },
   { name: 'Features', href: '/features' },
+  { name: 'Compliance Centre', href: '/compliance-centre' },
   { name: 'Pricing', href: '/pricing' },
   { name: 'FAQ', href: '/faq' },
   { name: 'Contact', href: '/contact' },
@@ -69,7 +70,7 @@ export function NavbarAuthButtons({
     return (
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
+        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
       >
         <LogIn className="h-4 w-4" aria-hidden />
         Log in
@@ -84,7 +85,7 @@ export function NavbarAuthButtons({
           onSignOut();
           onLinkClick();
         }}
-        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
+        className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-white hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
       >
         <LogOut className="h-4 w-4" aria-hidden />
         Log out
@@ -153,7 +154,8 @@ export function NavbarAuthButtonsMobile({
   );
 }
 
-const linkClassBase = 'relative px-3 py-2 rounded-lg text-sm font-medium text-white/85 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-[var(--brand-blue)] after:scale-x-0 after:transition-transform hover:after:scale-x-100';
+const linkClassBase =
+  'relative px-3 py-2 rounded-lg text-sm font-medium text-white hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-[var(--brand-blue)] after:scale-x-0 after:transition-transform hover:after:scale-x-100';
 const linkClassMobile = 'block px-4 py-3 rounded-xl text-base font-medium text-white/90 hover:text-white hover:bg-white/5 transition-colors';
 
 /** Desktop nav links + auth button. Dynamically imported so Firebase loads in separate chunk. */
@@ -180,12 +182,12 @@ export function NavbarNavContent({ onLinkClick }: { onLinkClick: () => void }) {
                 className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-white font-semibold text-sm hover:scale-[1.02] transition-all duration-200 btn-brand-blue"
                 onClick={onLinkClick}
               >
-                Start free trial
+                Start 7-Day Free Trial
               </Link>
             )}
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-black"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
               onClick={onLinkClick}
             >
               <LogIn className="h-4 w-4" aria-hidden />
@@ -246,7 +248,7 @@ export function NavbarMobileNavContent({ onLinkClick }: { onLinkClick: () => voi
           <>
             {authChecked && (
               <Link href={ONBOARDING_URL} className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-white font-semibold btn-brand-blue" onClick={onLinkClick}>
-                Start free trial
+                Start 7-Day Free Trial
               </Link>
             )}
             <Link href="/dashboard" className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl border border-white/20 text-white/90 hover:text-white hover:bg-white/5" onClick={onLinkClick}>

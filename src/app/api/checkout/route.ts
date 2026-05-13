@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getStripe, getStripePriceId, MIN_VEHICLES, type BillingCycle } from '@/lib/stripe-server';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { SITE_URL } from '@/lib/site';
 
 // Increase timeout for Vercel (max 60s on Pro, 10s on Hobby)
 export const maxDuration = 60;
@@ -34,7 +35,7 @@ function getCancelPath(): string {
 function isAllowedOrigin(request: NextRequest): boolean {
   const origin = request.headers.get('origin');
   const referer = request.headers.get('referer');
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://stocktrackpro.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || SITE_URL;
   const allowedHost = baseUrl.replace(/^https?:\/\//, '').split('/')[0];
   const allowedOrigins = [
     `https://${allowedHost}`,

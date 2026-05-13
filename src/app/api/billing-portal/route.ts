@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { createBillingPortalSession } from '@/lib/stripe-server';
+import { SITE_URL } from '@/lib/site';
 
 function getBaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL;
   if (url) return url.startsWith('http') ? url : `https://${url}`;
-  return 'https://stocktrackpro.com';
+  return SITE_URL;
 }
 
 export async function POST(request: NextRequest) {

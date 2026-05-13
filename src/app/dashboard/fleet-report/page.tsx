@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { Download, RefreshCw, FileSpreadsheet, AlertTriangle } from 'lucide-react';
 import { useFleetReport } from './FleetReportContext';
+import { defectWord } from '@/lib/defectWord';
 
 export default function FleetReportOverviewPage() {
   const {
@@ -95,7 +96,9 @@ export default function FleetReportOverviewPage() {
             className="dashboard-card p-5 col-span-2 lg:col-span-4 hover:bg-zinc-50 dark:hover:bg-white/[0.08] transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
           >
             <p className="dashboard-kpi-value text-red-700 dark:text-red-300">{outstandingDefects.length}</p>
-            <p className="dashboard-kpi-label">Outstanding defects (not resolved)</p>
+            <p className="dashboard-kpi-label">
+              Outstanding {defectWord(outstandingDefects.length)} (not resolved)
+            </p>
             <p className="text-zinc-500 dark:text-white/50 text-xs mt-1">Open in Defects &rarr;</p>
           </Link>
         </div>

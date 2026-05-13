@@ -2,12 +2,14 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Features',
-  description: 'Stock Track PRO features: fleet management, vehicle inspections, defect workflow, MOT and tax monitoring, and team management.',
+  description:
+    'Fleet inspection software UK fleets use daily: vehicle defect reporting app workflows, MOT tracking, manager dashboards, and O-licence-ready audit trails — Stock Track PRO.',
   alternates: { canonical: '/features' },
   openGraph: {
     title: 'Features | Stock Track PRO',
-    description: 'Fleet management, inspections, defect workflow, MOT and tax monitoring, and team management for trades and contractors.',
-    url: 'https://stocktrackpro.com/features',
+    description:
+      'Inspections, defects, MOT and tax alerts, and manager analytics — national UK fleet compliance software for vans and HGVs.',
+    url: 'https://www.stocktrackpro.co.uk/features',
     siteName: 'Stock Track PRO',
     locale: 'en_GB',
     type: 'website',
@@ -15,7 +17,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Features | Stock Track PRO',
-    description: 'Fleet management, inspections, defect workflow, and team management.',
+    description:
+      'Fleet inspection software UK operators rely on — defects, renewals, and audit-ready records in one platform.',
   },
 };
 

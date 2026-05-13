@@ -214,7 +214,7 @@ export default function Features() {
               href="/onboarding"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue"
             >
-              Start free trial
+              Start 7-Day Free Trial
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link

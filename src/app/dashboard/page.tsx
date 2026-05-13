@@ -1057,7 +1057,7 @@ function DashboardPageInner() {
                   </div>
                   <p className="dashboard-kpi-value">{teamCount ?? '—'}</p>
                   <p className="dashboard-kpi-label">Team members</p>
-                  <p className="text-white/40 text-xs mt-1">{userActivity.length} active</p>
+                  <p className="text-white/40 text-xs mt-1">{userActivity.length} active this month</p>
                 </div>
 
                 <div className="dashboard-card p-5">
@@ -1131,7 +1131,7 @@ function DashboardPageInner() {
                       <tr>
                         <td className="px-4 py-3 text-white">Team Members</td>
                         <td className="px-4 py-3 text-white">{teamCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-blue-300">{userActivity.length} active</td>
+                        <td className="px-4 py-3 text-blue-300">{userActivity.length} active this month</td>
                         <td className="px-4 py-3 text-cyan-400">—</td>
                       </tr>
                     </tbody>

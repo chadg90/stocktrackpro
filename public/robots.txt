@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://stocktrackpro.com/sitemap.xml
+Sitemap: https://www.stocktrackpro.co.uk/sitemap.xml
 
 # Prevent crawling of error pages
 Disallow: /404

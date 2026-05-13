@@ -18,6 +18,7 @@ import {
 } from 'recharts';
 import { Truck, Users, TrendingUp, CheckCircle } from 'lucide-react';
 import ChartErrorBoundary from './ChartErrorBoundary';
+import { defectWord } from '@/lib/defectWord';
 
 const COLORS = ['#2563eb', '#7c3aed', '#0f766e', '#ea580c', '#c026d3', '#0284c7', '#16a34a', '#475569'];
 
@@ -118,7 +119,11 @@ export default function DashboardAnalyticsCharts({
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-blue-300 text-sm">{v.count} insp</span>
-                      {v.defects > 0 && <span className="text-red-300 text-xs">{v.defects} defects</span>}
+                      {v.defects > 0 && (
+                        <span className="text-red-300 text-xs">
+                          {v.defects} {defectWord(v.defects)}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}

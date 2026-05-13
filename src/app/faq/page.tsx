@@ -5,7 +5,7 @@ export default function FAQ() {
   const faqs = [
     {
       question: "How do I get an account?",
-      answer: "New companies sign up on this website by selecting Start free trial — accounts and subscriptions can only be created on the web. You then set up your company and invite your team by email. Invited team members open their invite link to set a password, then sign in to the companion app on iOS or Android. Managers sign in to the web dashboard via Log in.",
+      answer: "New companies sign up on this website by selecting Start 7-Day Free Trial — accounts and subscriptions can only be created on the web. You then set up your company and invite your team by email. Invited team members open their invite link to set a password, then sign in to the companion app on iOS or Android. Managers sign in to the web dashboard via Log in.",
     },
     {
       question: "Do I need special hardware to use the app?",

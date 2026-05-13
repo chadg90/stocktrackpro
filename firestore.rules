@@ -31,6 +31,18 @@ service cloud.firestore {
     function isManagerOrAdmin() {
       return isAdmin() || isManager();
     }
+
+    function tokenRole() {
+      return request.auth != null && request.auth.token.role != null
+        ? request.auth.token.role
+        : null;
+    }
+
+    function tokenCompanyId() {
+      return request.auth != null && request.auth.token.companyId != null
+        ? request.auth.token.companyId
+        : null;
+    }
     
     function userCompanyId() {
       return (profileExists() && getProfile().company_id != null)
@@ -111,8 +123,10 @@ service cloud.firestore {
       // Admins can read all profiles
       // Any authenticated user can read profiles in their company
       allow read: if isSignedIn() && (
-        request.auth.uid == userId || 
-        isAdmin() || 
+        request.auth.uid == userId ||
+        tokenRole() == 'admin' ||
+        isAdmin() ||
+        (tokenCompanyId() != null && resource.data.company_id == tokenCompanyId()) ||
         resource.data.company_id == userCompanyId()
       );
       
@@ -130,7 +144,25 @@ service cloud.firestore {
         (
           request.auth.uid == userId &&
           request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['expoPushToken', 'pushTokenUpdatedAt', 'display_name', 'photo_url', 'phone', 'updated_at'])
+            .hasOnly([
+              'expoPushToken',
+              'pushTokenUpdatedAt',
+              'display_name',
+              'photo_url',
+              'phone',
+              'updated_at',
+              'firstName',
+              'lastName',
+              'name',
+              'app_platform',
+              'app_version',
+              'app_build',
+              'app_runtime_version',
+              'app_ota_update_id',
+              'app_ota_channel',
+              'app_ota_label',
+              'app_last_seen_at'
+            ])
         ) ||
         (
           request.auth.uid == userId &&
