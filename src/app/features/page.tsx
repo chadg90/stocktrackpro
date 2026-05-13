@@ -1,27 +1,10 @@
 import React from 'react';
-import type { Metadata } from 'next';
 import Navbar from '../components/Navbar';
 import Link from 'next/link';
 import { Car, Users, Wrench, Shield, Gauge, FileCheck, ArrowRight, Smartphone } from 'lucide-react';
 
 const WHATSAPP_ENQUIRY_URL =
   'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
-
-export const metadata: Metadata = {
-  title: 'Fleet Management Features',
-  description:
-    'Every feature in Stock Track PRO: fleet management, vehicle inspections, defect workflow from flagged to fixed, MOT & tax monitoring, team roles, and manager dashboard.',
-  alternates: { canonical: 'https://www.stocktrackpro.co.uk/features/' },
-  openGraph: {
-    title: 'Fleet Management Features | Stock Track PRO',
-    description:
-      'Fleet inspection software for UK operators — defects, renewals, and audit-ready records in one platform.',
-    url: 'https://www.stocktrackpro.co.uk/features/',
-    siteName: 'Stock Track PRO',
-    locale: 'en_GB',
-    type: 'website',
-  },
-};
 
 type Feature = {
   title: string;

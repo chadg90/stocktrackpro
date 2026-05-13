@@ -16,6 +16,12 @@ export const metadata: Metadata = {
     locale: 'en_GB',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Stock Track PRO | UK Fleet Compliance Software',
+    description:
+      'Stock Track PRO is UK fleet management software built for trades and contractors. Learn what we do, who we help, and how the platform works.',
+  },
 };
 
 export default function AboutLayout({ children }: { children: React.ReactNode }) {

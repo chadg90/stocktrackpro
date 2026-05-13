@@ -30,9 +30,9 @@ const Footer = () => {
             <Link href="/pricing" className="hover:text-blue-500">Pricing</Link>
             <Link href="/faq" className="hover:text-blue-500">FAQ</Link>
             <Link href="/contact" className="hover:text-blue-500">Contact</Link>
-            <Link href="https://app.stocktrackpro.co.uk" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500">
+            <Link href="/dashboard" className="hover:text-blue-500">
               Dashboard Login
-                </Link>
+            </Link>
           </div>
         </div>
 

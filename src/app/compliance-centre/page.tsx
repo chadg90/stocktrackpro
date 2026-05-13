@@ -18,6 +18,12 @@ export const metadata: Metadata = {
     locale: 'en_GB',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Compliance Centre | Stock Track PRO',
+    description:
+      'Articles on O-licence defect records, digital fleet inspections, and MOT tracking for UK operators.',
+  },
 };
 
 export default function ComplianceCentreHubPage() {

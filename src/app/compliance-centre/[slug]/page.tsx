@@ -33,6 +33,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: article.datePublished,
       modifiedTime: article.dateModified ?? article.datePublished,
     },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${article.title} | Stock Track PRO`,
+      description: article.metaDescription,
+    },
   };
 }
 
