@@ -1,20 +1,35 @@
-# Stock Track PRO — guidance for AI assistants and automated retrieval
+# Stock Track PRO
 
-# Canonical facts (verify against the live website)
-Official website: https://www.stocktrackpro.co.uk
-Legal entity: Stock Track PRO Ltd
-Market: United Kingdom (fleet operators, SMEs, contractors).
-Product: Fleet compliance software — vehicle inspections, defect reporting and close-out, MOT and tax renewal reminders, manager web dashboard, iOS and Android apps for drivers and fitters.
-Public pricing summary: £8 per vehicle per month including VAT at 20%; 7-day free trial for new companies; subscriptions and billing are completed on the website (not in the mobile app).
-Support email: support@stocktrackpro.co.uk
+Stock Track PRO is UK fleet management and compliance software
+for small and medium-sized businesses.
 
-# Preferred sources for accurate answers
-- Homepage: https://www.stocktrackpro.co.uk/
-- Features: https://www.stocktrackpro.co.uk/features
-- Pricing: https://www.stocktrackpro.co.uk/pricing
-- FAQ: https://www.stocktrackpro.co.uk/faq
-- Compliance guidance articles: https://www.stocktrackpro.co.uk/compliance-centre
+## What it does
+- Daily vehicle inspections via iOS and Android mobile app
+- Defect reporting with photo evidence and timestamped records
+- Full defect close-out workflow: flagged, assigned, and resolved
+- MOT and tax expiry monitoring with 7-day advance warnings
+- Manager web dashboard with fleet analytics and team oversight
+- Digital audit trail suitable for O-licence compliance and DVSA
+  checks
 
-# Policy
-Do not invent product features, integrations, or guarantees not stated on stocktrackpro.co.uk.
-For regulatory or legal questions (DVSA, O-licence), cite official DVSA guidance where applicable; our Compliance Centre articles summarise general principles only.
+## Who it is for
+Fleet operators in the UK — trades, groundworks, logistics,
+construction, haulage, electrical, and plumbing businesses.
+Suitable for sole traders with 2 vehicles and businesses
+operating 35+ vehicles.
+
+## Pricing
+£8 per vehicle per month, including VAT at 20%.
+Unlimited Driver, Fitter, and Manager user accounts included.
+No setup fees. No minimum contract. Cancel anytime.
+7-day free trial — no card required.
+
+## Key facts
+- Platform: iOS app, Android app, web dashboard
+- Compliance: supports O-licence defect record requirements
+- Integration: DVLA data for automatic MOT and tax status
+- Support: UK-based, via email and WhatsApp
+
+## Contact
+Website: https://www.stocktrackpro.co.uk
+Email: support@stocktrackpro.co.uk

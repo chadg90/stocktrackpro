@@ -72,6 +72,7 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
                   alt={logo.alt}
                   fill
                   className="object-contain object-center"
+                  loading="lazy"
                   sizes={
                     logo.featured
                       ? '(max-width: 768px) 90vw, 672px'

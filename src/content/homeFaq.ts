@@ -15,7 +15,7 @@ export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
       'Unlimited. Every plan includes unlimited Driver, Fitter, and Manager accounts at no extra cost.',
   },
   {
-    question: 'What vehicles does it support?',
+    question: 'What vehicles does Stock Track PRO support?',
     answer: 'Any vehicle in your fleet — vans, HGVs, plant equipment, and cars.',
   },
   {
@@ -27,5 +27,10 @@ export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
     question: 'Is there a long-term contract?',
     answer:
       'No. Cancel anytime with no penalties. Pay monthly, per vehicle, only for what you use.',
+  },
+  {
+    question: 'How much does Stock Track PRO cost?',
+    answer:
+      '£8 per vehicle per month, including VAT at 20%. No setup fees and no minimum contract.',
   },
 ];

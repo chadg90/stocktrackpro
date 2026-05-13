@@ -8,10 +8,19 @@ const WHATSAPP_ENQUIRY_URL =
   'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
 
 export const metadata: Metadata = {
-  title: 'Features | Stock Track PRO',
+  title: 'Fleet Management Features',
   description:
     'Every feature in Stock Track PRO: fleet management, vehicle inspections, defect workflow from flagged to fixed, MOT & tax monitoring, team roles, and manager dashboard.',
-  alternates: { canonical: '/features' },
+  alternates: { canonical: 'https://www.stocktrackpro.co.uk/features/' },
+  openGraph: {
+    title: 'Fleet Management Features | Stock Track PRO',
+    description:
+      'Fleet inspection software for UK operators — defects, renewals, and audit-ready records in one platform.',
+    url: 'https://www.stocktrackpro.co.uk/features/',
+    siteName: 'Stock Track PRO',
+    locale: 'en_GB',
+    type: 'website',
+  },
 };
 
 type Feature = {
@@ -63,7 +72,7 @@ const features: Feature[] = [
       'Managers get notified immediately when a defect is raised',
     ],
     useCase:
-      'When a problem arises, you have a documented record that the vehicle was checked and by whom — useful for insurance, clients, and compliance.',
+      'When a problem arises, you have a documented record that the vehicle was checked and by whom — useful for insurance, clients, compliance, and moving beyond paper inspection sheets.',
   },
   {
     title: 'Defect workflow: flagged to fixed',
@@ -188,6 +197,26 @@ export default function Features() {
                       <p className="text-sm text-white/55 italic border-l-2 border-blue-500/40 pl-4">
                         {feature.useCase}
                       </p>
+                      {feature.title === 'Vehicle inspections' && (
+                        <p className="mt-4 text-sm">
+                          <Link
+                            href="/compliance-centre/paper-vs-digital-inspection-sheets"
+                            className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+                          >
+                            Read why UK fleets are moving from paper to digital inspection sheets
+                          </Link>
+                        </p>
+                      )}
+                      {feature.title === 'MOT and tax monitoring' && (
+                        <p className="mt-4 text-sm">
+                          <Link
+                            href="/compliance-centre/mot-expiry-tracking-for-fleets"
+                            className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+                          >
+                            Learn how MOT expiry tracking helps fleets stay ahead of renewals
+                          </Link>
+                        </p>
+                      )}
                     </div>
                   </div>
                 </article>
@@ -206,7 +235,7 @@ export default function Features() {
           </h3>
           <p className="text-white/70 max-w-lg mx-auto mb-8">
             Every feature on this page is included in a single subscription.
-            Monthly (£8 per vehicle) or annual (£84 per vehicle, save ~12%).
+            Monthly (£8 per vehicle per month) or annual (£84 per vehicle per year, save ~12%).
             No long-term contract.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

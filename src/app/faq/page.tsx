@@ -1,8 +1,11 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
+import { HomeFaqJsonLd } from '@/components/HomeFaqJsonLd';
+import { HOME_FAQ_ITEMS } from '@/content/homeFaq';
 
 export default function FAQ() {
   const faqs = [
+    ...HOME_FAQ_ITEMS,
     {
       question: "How do I get an account?",
       answer: "New companies sign up on this website by selecting Start 7-Day Free Trial — accounts and subscriptions can only be created on the web. You then set up your company and invite your team by email. Invited team members open their invite link to set a password, then sign in to the companion app on iOS or Android. Managers sign in to the web dashboard via Log in.",
@@ -43,6 +46,7 @@ export default function FAQ() {
 
   return (
     <div className="min-h-screen bg-black">
+      <HomeFaqJsonLd />
       <Navbar />
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="max-w-4xl mx-auto">

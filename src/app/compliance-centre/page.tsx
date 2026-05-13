@@ -9,6 +9,15 @@ export const metadata: Metadata = {
   description:
     'Articles on O-licence defect records, digital fleet inspections, and MOT tracking for UK operators.',
   alternates: { canonical: '/compliance-centre' },
+  openGraph: {
+    title: 'Compliance Centre | Stock Track PRO',
+    description:
+      'Articles on O-licence defect records, digital fleet inspections, and MOT tracking for UK operators.',
+    url: 'https://www.stocktrackpro.co.uk/compliance-centre/',
+    siteName: 'Stock Track PRO',
+    locale: 'en_GB',
+    type: 'website',
+  },
 };
 
 export default function ComplianceCentreHubPage() {

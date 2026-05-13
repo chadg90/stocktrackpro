@@ -28,7 +28,9 @@ const WHATSAPP_ENQUIRY_URL =
   'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
 
 export const metadata: Metadata = {
-  title: 'Stock Track PRO | UK Fleet Management & Defect Reporting Software',
+  title: {
+    absolute: 'Stock Track PRO | UK Fleet Management & Defect Reporting Software',
+  },
   description:
     'Stock Track PRO is UK fleet management software for SMEs. Track MOTs, vehicle tax, daily inspections, and defect resolution — all in one platform. Try free for 7 days.',
   alternates: { canonical: '/' },
@@ -80,9 +82,26 @@ const DEFECT_STEPS = [
   {
     n: 4,
     title: 'AUDIT',
-    body:
-      'Every inspection, defect, and repair is stored in your permanent digital audit trail — ready for your O-licence check at any time.',
+    body: (
+      <>
+        Every inspection, defect, and repair is stored in your permanent digital{' '}
+        <Link href="/compliance-centre/o-licence-defect-records" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+          audit trail
+        </Link>{' '}
+        — ready for your O-licence check at any time.
+      </>
+    ),
   },
+];
+
+const QUICK_FACTS = [
+  ['Platform', 'iOS app, Android app, and web dashboard'],
+  ['Price', '£8 per vehicle per month, including VAT at 20%'],
+  ['Free trial', '7 days — no card required'],
+  ['Users included', 'Unlimited drivers, fitters, and managers'],
+  ['Compliance', 'Supports O-licence defect record requirements'],
+  ['Fleet size', 'Suitable for 2 to 100+ vehicles'],
+  ['Support', 'UK-based via email and WhatsApp'],
 ];
 
 export default function Home() {
@@ -113,7 +132,11 @@ export default function Home() {
             <p className="text-sm text-white/45 max-w-2xl leading-relaxed mb-10">
               Stock Track PRO brings together fleet inspection software UK operators rely on, vehicle defect reporting app
               workflows, and MOT tracking — without spreadsheet chaos. Whether you run vans or a mixed fleet, it is built as
-              O-licence compliance software that keeps evidence organised for DVSA scrutiny.
+              {' '}
+              <Link href="/compliance-centre/o-licence-defect-records" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
+                O-licence
+              </Link>{' '}
+              compliance software that keeps evidence organised for DVSA scrutiny.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
@@ -148,15 +171,39 @@ export default function Home() {
             <Image
               src="/website-image-stp.png"
               alt="Stock Track PRO app on phone in the field — sign in to manage your fleet"
-              fill
+              width={1200}
+              height={1600}
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover object-right lg:object-center"
-              priority
+              className="absolute inset-0 h-full w-full object-cover object-right lg:object-center"
+              loading="eager"
+              fetchPriority="high"
             />
             <div
               className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent lg:bg-gradient-to-r from-black/80 via-black/20 to-transparent"
               aria-hidden
             />
+          </div>
+        </section>
+
+        {/* Quick facts */}
+        <section className="py-12 sm:py-16 border-t border-white/10 bg-black">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+              <p className="text-[var(--brand-blue)] font-medium text-sm uppercase tracking-[0.2em] mb-3">
+                Quick Facts
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
+                Stock Track PRO at a glance
+              </h2>
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
+                {QUICK_FACTS.map(([term, detail]) => (
+                  <div key={term} className="border-t border-white/10 pt-4">
+                    <dt className="text-white font-semibold">{term}</dt>
+                    <dd className="text-white/65 text-sm mt-1 leading-relaxed">{detail}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
         </section>
 

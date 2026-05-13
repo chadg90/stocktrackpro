@@ -194,7 +194,7 @@ export default function Pricing() {
             {/* Price display */}
             <div className="text-center mb-8 mt-2">
               <p className="text-white font-semibold mb-4 max-w-md mx-auto">
-                Every plan includes unlimited Driver and Manager accounts.
+                Every plan includes unlimited Driver, Fitter, and Manager accounts.
               </p>
               <div className="flex items-end justify-center gap-1 mb-1">
                 <span className="text-5xl sm:text-6xl font-bold text-white transition-all duration-200">

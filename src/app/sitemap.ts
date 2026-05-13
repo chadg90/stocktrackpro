@@ -5,10 +5,12 @@ export const dynamic = 'force-static'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_URL
+  const lastModified = new Date('2026-05-13T00:00:00.000Z')
 
   const routes = [
     '',
     '/features',
+    '/about',
     '/pricing',
     '/faq',
     '/contact',
@@ -22,10 +24,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/cookies',
   ]
 
-  return routes.map(route => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: route === '' ? 1 : 0.8,
-  }))
+  return routes.map((route) => {
+    const isArticle = route.startsWith('/compliance-centre/')
+    return {
+      url: `${baseUrl}${route}`,
+      lastModified,
+      changeFrequency: 'weekly',
+      priority: route === '' ? 1 : isArticle ? 0.8 : 0.7,
+    }
+  })
 }

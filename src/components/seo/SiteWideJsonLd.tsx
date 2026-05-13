@@ -17,14 +17,17 @@ export default function SiteWideJsonLd() {
       url: `${SITE_URL}/logo.png`,
     },
     email: 'support@stocktrackpro.co.uk',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: 'support@stocktrackpro.co.uk',
+      availableLanguage: 'English',
+    },
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'GB',
     },
-    areaServed: {
-      '@type': 'Country',
-      name: 'United Kingdom',
-    },
+    areaServed: 'GB',
   };
 
   if (sameAs.length > 0) {
