@@ -204,7 +204,7 @@ export default function PrivacyPolicy() {
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">8. Data Retention</h2>
               <p className="text-white/80 mb-4">
-                How long you can access the service, trial periods, read-only states and suspension are described in our{' '}
+                How long you can access the service, trial periods, billing changes and suspension are described in our{' '}
                 <Link href="/subscription-terms" className="text-primary hover:underline">
                   Subscription Terms
                 </Link>

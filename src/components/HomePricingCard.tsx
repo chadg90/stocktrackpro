@@ -33,11 +33,11 @@ export default function HomePricingCard() {
             </p>
             <p className="text-white/55 text-sm mt-3">All prices include VAT at 20%.</p>
             <p className="text-white/55 text-sm">Annual billing is available at £84 per vehicle per year.</p>
-            <p className="text-white/55 text-sm">Cancel anytime. No minimum contract.</p>
+            <p className="text-white/55 text-sm">Minimum 5 vehicles. Monthly plans can be cancelled anytime.</p>
           </div>
 
           <p className="text-center font-semibold text-white mb-6">
-            Every plan includes unlimited Driver, Fitter, and Manager accounts.
+            Team user allowance scales with subscribed fleet size, with manager access included.
           </p>
 
           <ul className="space-y-3 mb-10">

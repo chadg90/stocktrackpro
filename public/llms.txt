@@ -9,24 +9,27 @@ for small and medium-sized businesses.
 - Full defect close-out workflow: flagged, assigned, and resolved
 - MOT and tax expiry monitoring with 7-day advance warnings
 - Manager web dashboard with fleet analytics and team oversight
-- Digital audit trail suitable for O-licence compliance and DVSA
-  checks
+- Timestamped digital records that support O-licence record keeping
+  and DVSA checks
 
 ## Who it is for
 Fleet operators in the UK — trades, groundworks, logistics,
 construction, haulage, electrical, and plumbing businesses.
-Suitable for sole traders with 2 vehicles and businesses
-operating 35+ vehicles.
+Suitable for sole traders and businesses operating 5+ vehicles
+(the minimum paid subscription quantity is 5 vehicles).
 
 ## Pricing
 £8 per vehicle per month, including VAT at 20%.
-Unlimited Driver, Fitter, and Manager user accounts included.
-No setup fees. No minimum contract. Cancel anytime.
+Team user allowance scales with subscribed fleet size: up to 15 users
+on Starter, 35 on Growth, 75 on Business, and unlimited on Enterprise.
+No setup fees. Monthly plans can be cancelled anytime. Annual plans
+are paid upfront for 12 months and renewal can be cancelled before
+the next annual charge.
 7-day free trial — no card required.
 
 ## Key facts
 - Platform: iOS app, Android app, web dashboard
-- Compliance: supports O-licence defect record requirements
+- Compliance: supports O-licence defect record keeping
 - Integration: DVLA data for automatic MOT and tax status
 - Support: UK-based, via email and WhatsApp
 

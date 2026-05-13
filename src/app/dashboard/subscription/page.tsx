@@ -254,6 +254,9 @@ export default function SubscriptionPage() {
 
   const canManage = profile?.role === 'manager' || profile?.role === 'admin';
   const subscriptionStatus = company?.subscription_status;
+  const hasStripeManagedSubscription =
+    company?.subscription_type === 'stripe' &&
+    (subscriptionStatus === 'active' || subscriptionStatus === 'trial');
   const tier = getTier(vehicleCount);
   const effectiveTier = company?.legacy
     ? { label: 'Legacy Plan', users: 'As agreed', colour: 'text-amber-700 dark:text-amber-300' }
@@ -289,7 +292,7 @@ export default function SubscriptionPage() {
 
       <div className="border-b border-zinc-200 dark:border-white/10 pb-6">
         <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Subscription Management</h1>
-        <p className="text-zinc-600 dark:text-white/75">Per-vehicle billing via Stripe. Adjust your fleet size and manage billing here.</p>
+        <p className="text-zinc-600 dark:text-white/75">Per-vehicle billing via Stripe. Managers can open the billing portal or contact support for plan changes.</p>
       </div>
 
       {company?.legacy && (
@@ -387,11 +390,11 @@ export default function SubscriptionPage() {
         </div>
       </div>
 
-      {canManage && !company?.legacy && (
+      {canManage && !company?.legacy && !hasStripeManagedSubscription && (
         <div className="dashboard-card p-8">
-          <h2 className="text-2xl font-semibold text-white mb-2">Update Vehicle Count or Billing Cycle</h2>
+          <h2 className="text-2xl font-semibold text-white mb-2">Set Vehicle Count and Billing Cycle</h2>
           <p className="text-white/75 mb-6">
-            £{PRICE_PER_VEHICLE_MONTHLY}/vehicle monthly or £{PRICE_PER_VEHICLE_YEARLY}/vehicle yearly (save ~12%). Minimum {MIN_VEHICLES} vehicles. Changes apply from your next billing cycle.
+            £{PRICE_PER_VEHICLE_MONTHLY}/vehicle monthly or £{PRICE_PER_VEHICLE_YEARLY}/vehicle yearly (save ~12%). Minimum {MIN_VEHICLES} vehicles. Existing Stripe subscriptions should be managed through the billing portal or support.
           </p>
 
           {checkoutError && (
@@ -489,6 +492,15 @@ export default function SubscriptionPage() {
                 : `Continue to Checkout — ${formatCurrency(billedTotal)}${billingCycle === 'yearly' ? '/year' : '/month'}`}
             </button>
           </div>
+        </div>
+      )}
+
+      {canManage && !company?.legacy && hasStripeManagedSubscription && (
+        <div className="dashboard-card p-8">
+          <h2 className="text-2xl font-semibold text-white mb-2">Plan Changes</h2>
+          <p className="text-white/75">
+            Your company already has a Stripe website subscription. Use the billing portal above for payment and cancellation controls, or contact support if you need to change vehicle quantity or billing cycle.
+          </p>
         </div>
       )}
 

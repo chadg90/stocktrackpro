@@ -53,7 +53,7 @@ function KeyTakeaways({ children }: { children: React.ReactNode }) {
 function ArticleCta() {
   return (
     <p className="not-prose rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-white/85">
-      Stock Track PRO automates this process for UK fleets.{' '}
+      Stock Track PRO helps automate this process for UK fleets.{' '}
       <Link href="https://www.stocktrackpro.co.uk/onboarding/" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
         Try free for 7 days — no card required.
       </Link>
@@ -113,7 +113,7 @@ function OLicenceDefectRecordsArticle() {
         A digital defect record can contain the same legally relevant information as paper: driver name, date, vehicle registration, defect details, review status, repair notes and sign-off. The advantage is that the record is created in a structured format and stored centrally. Timestamps are generated automatically, photos can be attached at the point of inspection, and managers can see new defects without waiting for paper to move around the business.
       </p>
       <p>
-        Stock Track PRO is a concrete example. Drivers complete inspections in the mobile app, defects are submitted with timestamped records and photo evidence, and fitters can manage the issue through a close-out workflow. Managers can then review the full history for each vehicle, including who reported the defect, what action was taken and when the issue was resolved.
+        Stock Track PRO is a concrete example. Drivers complete inspections in the mobile app, defects are submitted with timestamped records and photo evidence, and fitters can manage the issue through a close-out workflow. Managers can then review the available history for each vehicle, including who reported the defect, its workflow status and when the issue was resolved.
       </p>
 
       <h2>Keep records factual and consistent</h2>
@@ -162,7 +162,7 @@ function PaperVsDigitalArticle() {
 
       <h2>What digital inspection software captures</h2>
       <p>
-        Digital vehicle inspection software can capture structured data that paper cannot manage well: GPS timestamps where enabled, named user attribution, photo evidence, consistent checklist responses and live notification to managers or fitters. Location capture must be used carefully and transparently, but timestamped digital evidence is already a major improvement over handwritten sheets.
+        Digital vehicle inspection software can capture structured data that paper cannot manage well: server timestamps, named user attribution, photo evidence, consistent checklist responses and live notification to managers or fitters. Timestamped digital evidence is already a major improvement over handwritten sheets.
       </p>
       <p>
         Stock Track PRO requires a 6-photo walkaround covering the front, rear, driver side, passenger side, interior and odometer. Each submission is timestamped and tied to a named user. If a defect is reported, managers and fitters can see the issue quickly instead of waiting for paper to reach the office.
@@ -173,7 +173,7 @@ function PaperVsDigitalArticle() {
         In an insurance claim, employment dispute, customer complaint or court case, the quality of your inspection evidence matters. If you cannot show that a vehicle was checked, that a defect was raised, or that action was taken, it becomes harder to prove that your business operated responsibly. A paper form that is missing, unsigned or completed late may be challenged.
       </p>
       <p>
-        A digital record is not automatically &quot;better&quot; just because it is digital. It must still be accurate, retained properly and used consistently. The advantage is that a well-designed digital system creates a court-admissible audit trail more reliably because events are recorded in sequence, linked to users and stored centrally.
+        A digital record is not automatically &quot;better&quot; just because it is digital. It must still be accurate, retained properly and used consistently. The advantage is that a well-designed digital system creates stronger evidence because events are recorded in sequence, linked to users and stored centrally.
       </p>
 
       <h2>How a digital audit trail works</h2>

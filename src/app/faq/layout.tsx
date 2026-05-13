@@ -3,12 +3,12 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'FAQ',
   description:
-    'Common questions about Stock Track PRO — O-licence records, unlimited users, UK-wide coverage, vehicles supported, and contracts.',
+    'Common questions about Stock Track PRO — O-licence records, user allowances, UK-wide coverage, vehicles supported, and contracts.',
   alternates: { canonical: '/faq' },
   openGraph: {
     title: 'FAQ | Stock Track PRO',
     description:
-      'Answers on O-licence compliance software use, users, fleet types, UK coverage, and cancellation.',
+      'Answers on O-licence compliance software use, user allowances, fleet types, UK coverage, and cancellation.',
     url: 'https://www.stocktrackpro.co.uk/faq',
     siteName: 'Stock Track PRO',
     locale: 'en_GB',

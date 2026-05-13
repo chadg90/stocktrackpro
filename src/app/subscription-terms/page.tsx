@@ -74,15 +74,15 @@ export default function SubscriptionTermsPage() {
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
                 New companies receive a <span className="text-white">7-day free trial</span> of the
-                full product. No payment card is required to start the trial.
+                available product features. No payment card is required to start the trial.
               </li>
               <li>
                 The trial ends automatically after 7 days. To continue using the service, a manager
                 must set up a paid subscription from the dashboard.
               </li>
               <li>
-                If no subscription is set up by the end of the trial, the account will be placed
-                into a read-only state and eventually suspended (see section 6).
+                If no subscription is set up by the end of the trial, we may contact you, restrict
+                access to paid features, or suspend access in line with the product controls then in use.
               </li>
               <li>
                 The trial is intended for evaluation. We reserve the right to refuse, shorten or end
@@ -99,16 +99,17 @@ export default function SubscriptionTermsPage() {
               </li>
               <li>Subscriptions are billed by Stripe using the payment method you provide at checkout.</li>
               <li>
-                You can switch between monthly and annual billing from the dashboard. A change from
-                monthly to annual takes effect at the next renewal.
+                Managers can use the dashboard to open the billing portal. Changes to billing cycle
+                or subscribed vehicle quantity may need to be completed through the billing portal or
+                by contacting support, and usually take effect from the next billing cycle.
               </li>
             </ul>
 
             <h2 className="text-2xl font-bold text-white mt-10 mb-4">4. Vehicle Quantity Changes</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
-                You can increase or decrease your subscribed vehicle quantity from the dashboard at
-                any time.
+                You can request an increase or decrease to your subscribed vehicle quantity through
+                the billing portal or by contacting support.
               </li>
               <li>
                 Quantity changes take effect at your next billing cycle. Your current paid period is

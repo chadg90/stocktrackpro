@@ -112,15 +112,15 @@ export default function Pricing() {
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-white/75 leading-relaxed">
-            £8 per vehicle per month (prices include VAT at 20%). Cancel anytime on monthly billing — no minimum contract.
-            Scale vehicle count up or down from your next billing cycle.
+            £8 per vehicle per month (prices include VAT at 20%). Monthly billing can be cancelled anytime.
+            Minimum 5 vehicles. Annual billing is £84 per vehicle per year, paid upfront.
           </p>
 
           {/* Trust strip — one-liner value anchors */}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/70">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-blue-400" aria-hidden />
-              No long-term contract
+              Monthly: no long-term contract
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Truck className="h-4 w-4 text-emerald-400" aria-hidden />
@@ -133,7 +133,7 @@ export default function Pricing() {
           </div>
 
           <p className="text-sm text-white/45 mt-3">
-            Already subscribed? Managers can manage billing from the dashboard subscription page.
+            Already subscribed? Managers can open the billing portal from the dashboard subscription page.
           </p>
         </div>
 
@@ -194,7 +194,7 @@ export default function Pricing() {
             {/* Price display */}
             <div className="text-center mb-8 mt-2">
               <p className="text-white font-semibold mb-4 max-w-md mx-auto">
-                Every plan includes unlimited Driver, Fitter, and Manager accounts.
+                Team user allowance scales with subscribed fleet size, with manager access included.
               </p>
               <div className="flex items-end justify-center gap-1 mb-1">
                 <span className="text-5xl sm:text-6xl font-bold text-white transition-all duration-200">
@@ -314,7 +314,7 @@ export default function Pricing() {
             <ul className="space-y-2 text-sm text-white/70">
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Billed monthly — £{PRICE_PER_VEHICLE_MONTHLY} per vehicle, or annually — £{PRICE_PER_VEHICLE_YEARLY} per vehicle (save ~12%)</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Minimum {MIN_VEHICLES} vehicles (£{MIN_VEHICLES * PRICE_PER_VEHICLE_MONTHLY}/month or £{MIN_VEHICLES * PRICE_PER_VEHICLE_YEARLY}/year)</span></li>
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Vehicle count changes take effect from your next billing cycle</span></li>
+              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Vehicle count changes for active subscriptions are managed through the billing portal or support</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>New companies receive a 7-day free trial</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span><strong className="text-white/90">Monthly:</strong> cancel anytime — no long-term contract</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span><strong className="text-white/90">Annual:</strong> 12-month term paid upfront — cancel renewal anytime; unused months are not refunded</span></li>

@@ -12,7 +12,7 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     slug: 'o-licence-defect-records',
     title: 'What counts as a valid defect record for your O-licence?',
     metaDescription:
-      'DVSA guidance explained — what your defect records must include to satisfy O-licence requirements and avoid prohibition notices.',
+      'DVSA guidance explained — what your defect records should include to support O-licence compliance and reduce prohibition risk.',
     datePublished: '2026-04-15T09:00:00+01:00',
     dateModified: '2026-05-13T09:00:00+01:00',
   },
@@ -20,7 +20,7 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     slug: 'paper-vs-digital-inspection-sheets',
     title: 'Paper vs Digital: Why fleet managers are ditching inspection sheets',
     metaDescription:
-      'How digital vehicle inspection software reduces admin, prevents missed defects, and creates a court-admissible audit trail for UK fleet operators.',
+      'How digital vehicle inspection software reduces admin, prevents missed defects, and creates stronger evidence for UK fleet operators.',
     datePublished: '2026-05-01T09:00:00+01:00',
     dateModified: '2026-05-13T09:00:00+01:00',
   },

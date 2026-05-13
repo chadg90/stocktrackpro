@@ -486,7 +486,7 @@ export default function OnboardingPage() {
                           {TRIAL_DAYS}-day free trial — no card required
                         </p>
                         <p className="text-white/60 text-xs leading-relaxed">
-                          Explore the full product with your real fleet and team.
+                          Explore the available product features with your real fleet and team.
                           When you&apos;re ready, subscribe from the dashboard: £8 per vehicle per
                           month, or £84 per vehicle per year (save ~12%).
                           Minimum 5 vehicles. Cancel anytime on monthly plans.

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Fleet Management Features',
   description:
-    'Fleet inspection software UK fleets use daily: vehicle defect reporting app workflows, MOT tracking, manager dashboards, and O-licence-ready audit trails — Stock Track PRO.',
+    'Fleet inspection software UK fleets use daily: vehicle defect reporting app workflows, MOT tracking, manager dashboards, and records that support O-licence compliance — Stock Track PRO.',
   alternates: { canonical: 'https://www.stocktrackpro.co.uk/features/' },
   openGraph: {
     title: 'Fleet Management Features | Stock Track PRO',

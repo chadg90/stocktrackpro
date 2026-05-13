@@ -72,7 +72,7 @@ const features: Feature[] = [
       'Full history of past defects per vehicle, inspector and fitter',
     ],
     useCase:
-      'A driver flags a brake issue at 7am. The vehicle shows as in maintenance, the fitter sees it on their phone, marks it Waiting for parts, and resolves the job once fitted — the vehicle returns to active automatically, with a complete audit trail.',
+      'A driver flags a brake issue at 7am. The vehicle shows as in maintenance, the fitter sees it on their phone, marks it Waiting for parts, and resolves the job once fitted — the vehicle returns to active automatically, with a timestamped activity trail.',
   },
   {
     title: 'MOT and tax monitoring',
@@ -111,7 +111,7 @@ const features: Feature[] = [
       'At-a-glance metrics for vehicles, inspections, defects and team',
       'Defect notifications with full context',
       'Reports and exports for insurance or audit requests',
-      'Manage vehicle count and billing cycle from one place',
+      'Open billing controls and contact support for plan changes',
     ],
     useCase:
       'You start the day, open the dashboard, and know exactly what needs attention — no chasing, no phone calls.',

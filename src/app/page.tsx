@@ -84,11 +84,11 @@ const DEFECT_STEPS = [
     title: 'AUDIT',
     body: (
       <>
-        Every inspection, defect, and repair is stored in your permanent digital{' '}
+        Every inspection, defect, and repair is recorded in a timestamped digital{' '}
         <Link href="/compliance-centre/o-licence-defect-records" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
           audit trail
         </Link>{' '}
-        — ready for your O-licence check at any time.
+        — built to support O-licence record keeping.
       </>
     ),
   },
@@ -99,8 +99,8 @@ const QUICK_FACTS = [
   ['Price', '£8 per vehicle per month, including VAT at 20%'],
   ['Free trial', '7 days — no card required'],
   ['Users included', 'Unlimited drivers, fitters, and managers'],
-  ['Compliance', 'Supports O-licence defect record requirements'],
-  ['Fleet size', 'Suitable for 2 to 100+ vehicles'],
+  ['Compliance', 'Supports O-licence defect record keeping'],
+  ['Fleet size', 'Suitable for 5 to 100+ vehicles'],
   ['Support', 'UK-based via email and WhatsApp'],
 ];
 
@@ -136,7 +136,7 @@ export default function Home() {
               <Link href="/compliance-centre/o-licence-defect-records" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
                 O-licence
               </Link>{' '}
-              compliance software that keeps evidence organised for DVSA scrutiny.
+              compliance software that helps keep evidence organised for DVSA scrutiny.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
@@ -305,13 +305,13 @@ export default function Home() {
                   icon: Wrench,
                   title: 'Vehicle inspections',
                   description:
-                    'Capture required photos, checklist items, and defects to keep vehicles compliant and audit-ready.',
+                    'Capture required photos, checklist items, and defects to support compliance checks.',
                 },
                 {
                   icon: ClipboardList,
                   title: 'Defect reporting',
                   description:
-                    'Flag defects, track repairs, and close jobs out with a clear trail for your O-licence records.',
+                    'Flag defects, track repairs, and close jobs out with a clear trail that supports your O-licence records.',
                 },
               ].map((feature, index) => (
                 <div
@@ -351,7 +351,7 @@ export default function Home() {
             <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 'Reduce vehicle downtime through faster defect reporting.',
-                'Stay compliant with full inspection audit trails.',
+                'Support compliance with timestamped inspection records.',
                 'See fleet and team activity in one manager dashboard.',
                 'Keep MOT and tax visibility front and centre across the fleet.',
               ].map((benefit, index) => (

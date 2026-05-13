@@ -10,7 +10,7 @@ export function HomeJsonLd() {
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'iOS, Android, Web',
     description:
-      'UK fleet management software for inspections, defect reporting, MOT tracking, and O-licence compliance.',
+      'UK fleet management software for inspections, defect reporting, MOT tracking, and O-licence record keeping.',
     url: SITE_URL,
     screenshot: `${SITE_URL}/website-image-stp.png`,
     offers: {
@@ -21,6 +21,11 @@ export function HomeJsonLd() {
       priceValidUntil,
       availability: 'https://schema.org/InStock',
       seller: { '@id': ORGANIZATION_ID },
+      eligibleQuantity: {
+        '@type': 'QuantitativeValue',
+        minValue: 5,
+        unitText: 'vehicles',
+      },
       priceSpecification: {
         '@type': 'UnitPriceSpecification',
         price: '8.00',

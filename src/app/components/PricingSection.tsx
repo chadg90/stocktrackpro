@@ -158,7 +158,7 @@ export default function PricingSection() {
           {billingCycle === 'yearly' ? (
             <> &bull; 12-month term, paid upfront</>
           ) : (
-            <> &bull; Cancel anytime</>
+            <> &bull; Cancel monthly billing anytime</>
           )}
         </p>
       </div>

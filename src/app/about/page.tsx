@@ -13,7 +13,7 @@ export default function AboutPage() {
           UK fleet compliance software for trades and contractors
         </h1>
         <p className="text-white/75 text-lg leading-relaxed mb-10">
-          Stock Track PRO is UK fleet management and fleet compliance software for small and medium-sized businesses. It helps teams record daily vehicle inspections, report defects with photo evidence, monitor MOT and tax dates, and keep a clear digital audit trail for operational and O-licence compliance.
+          Stock Track PRO is UK fleet management and fleet compliance software for small and medium-sized businesses. It helps teams record daily vehicle inspections, report defects with photo evidence, monitor MOT and tax dates, and keep timestamped digital records that support operational and O-licence compliance.
         </p>
 
         <div className="grid gap-6">

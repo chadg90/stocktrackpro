@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
-    '£8 per vehicle per month (VAT included). Unlimited driver and manager accounts, full defects workflow, MOT tracking — start a 7-day free trial on the web.',
+    '£8 per vehicle per month (VAT included), with a 5-vehicle minimum. Scaled team allowances, defect workflow, MOT tracking — start a 7-day free trial on the web.',
   alternates: { canonical: '/pricing' },
   openGraph: {
     title: 'Pricing | Stock Track PRO',
