@@ -277,7 +277,7 @@ function DashboardPageInner() {
       }
       const data = snap.data() as Profile;
       if (data.role !== 'manager' && data.role !== 'admin') {
-        throw new Error('Access restricted. Only managers can access the dashboard.');
+        throw new Error('Access restricted. Only managers and authorised staff can access the dashboard.');
       }
       setProfile(data);
       return data;
@@ -639,40 +639,45 @@ function DashboardPageInner() {
 
   // Time-based Analytics
   const inspectionsOverTime = useMemo(() => {
-    const dateMap: Record<string, number> = {};
+    const dateMap: Record<string, { count: number; timestamp: number; label: string }> = {};
     inspections.forEach(insp => {
       if (!insp.inspected_at) return;
       const date = insp.inspected_at && typeof insp.inspected_at === 'object' && 'toDate' in insp.inspected_at
         ? insp.inspected_at.toDate()
         : new Date(insp.inspected_at as string);
-      const dateKey = format(date, 'MMM dd');
-      dateMap[dateKey] = (dateMap[dateKey] || 0) + 1;
+      const isoKey = format(date, 'yyyy-MM-dd');
+      if (!dateMap[isoKey]) dateMap[isoKey] = { count: 0, timestamp: date.getTime(), label: format(date, 'MMM dd') };
+      dateMap[isoKey].count++;
     });
     return Object.entries(dateMap)
-      .map(([date, count]) => ({ date, count }))
-      .slice(-14);
+      .map(([, { count, timestamp, label }]) => ({ date: label, count, timestamp }))
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .slice(-14)
+      .map(({ date, count }) => ({ date, count }));
   }, [inspections]);
 
   const defectsTrend = useMemo(() => {
-    const dateMap: Record<string, { reported: number; resolved: number }> = {};
+    const dateMap: Record<string, { reported: number; resolved: number; timestamp: number; label: string }> = {};
     defects.forEach(d => {
       if (!d.reported_at) return;
       const date = d.reported_at && typeof d.reported_at === 'object' && 'toDate' in d.reported_at
         ? d.reported_at.toDate()
         : new Date(d.reported_at as string);
-      const dateKey = format(date, 'MMM dd');
-      if (!dateMap[dateKey]) dateMap[dateKey] = { reported: 0, resolved: 0 };
-      dateMap[dateKey].reported++;
-      if (d.status === 'resolved') dateMap[dateKey].resolved++;
+      const isoKey = format(date, 'yyyy-MM-dd');
+      if (!dateMap[isoKey]) dateMap[isoKey] = { reported: 0, resolved: 0, timestamp: date.getTime(), label: format(date, 'MMM dd') };
+      dateMap[isoKey].reported++;
+      if (d.status === 'resolved') dateMap[isoKey].resolved++;
     });
     return Object.entries(dateMap)
-      .map(([date, data]) => ({ date, ...data }))
-      .slice(-14);
+      .map(([, { reported, resolved, timestamp, label }]) => ({ date: label, reported, resolved, timestamp }))
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .slice(-14)
+      .map(({ date, reported, resolved }) => ({ date, reported, resolved }));
   }, [defects]);
 
   const defectsBySeverity = useMemo(() => {
     const severityMap: Record<string, number> = {};
-    defects.forEach(d => {
+    defects.filter(d => d.status !== 'resolved').forEach(d => {
       const severity = d.severity || 'low';
       severityMap[severity] = (severityMap[severity] || 0) + 1;
     });
@@ -1057,7 +1062,7 @@ function DashboardPageInner() {
                   </div>
                   <p className="dashboard-kpi-value">{teamCount ?? '—'}</p>
                   <p className="dashboard-kpi-label">Team members</p>
-                  <p className="text-white/40 text-xs mt-1">{userActivity.length} active this month</p>
+                  <p className="text-white/40 text-xs mt-1">{userActivity.length} active in period</p>
                 </div>
 
                 <div className="dashboard-card p-5">
@@ -1131,7 +1136,7 @@ function DashboardPageInner() {
                       <tr>
                         <td className="px-4 py-3 text-white">Team Members</td>
                         <td className="px-4 py-3 text-white">{teamCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-blue-300">{userActivity.length} active this month</td>
+                        <td className="px-4 py-3 text-blue-300">{userActivity.length} active in period</td>
                         <td className="px-4 py-3 text-cyan-400">—</td>
                       </tr>
                     </tbody>

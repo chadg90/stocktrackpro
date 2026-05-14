@@ -134,32 +134,35 @@ export default function DashboardDetailedView({
     const days = Math.min(rangeSpanDays, 180);
     const dateMap: Record<
       string,
-      { inspections: number; defects: number; actions: number }
+      { label: string; inspections: number; defects: number; actions: number }
     > = {};
     const endDate = new Date();
     const startDate = subDays(endDate, days - 1);
     eachDayOfInterval({ start: startDate, end: endDate }).forEach((date) => {
-      dateMap[format(date, 'MMM dd')] = { inspections: 0, defects: 0, actions: 0 };
+      const isoKey = format(date, 'yyyy-MM-dd');
+      dateMap[isoKey] = { label: format(date, 'MMM dd'), inspections: 0, defects: 0, actions: 0 };
     });
     inspections.forEach((i) => {
       const d = getDateValue(i.inspected_at);
       if (!d) return;
-      const k = format(d, 'MMM dd');
+      const k = format(d, 'yyyy-MM-dd');
       if (dateMap[k]) dateMap[k].inspections++;
     });
     defects.forEach((x) => {
       const d = getDateValue(x.reported_at);
       if (!d) return;
-      const k = format(d, 'MMM dd');
+      const k = format(d, 'yyyy-MM-dd');
       if (dateMap[k]) dateMap[k].defects++;
     });
     historyItems.forEach((h) => {
       const d = getDateValue(h.timestamp);
       if (!d) return;
-      const k = format(d, 'MMM dd');
+      const k = format(d, 'yyyy-MM-dd');
       if (dateMap[k]) dateMap[k].actions++;
     });
-    return Object.entries(dateMap).map(([date, data]) => ({ date, ...data }));
+    return Object.entries(dateMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, { label, ...data }]) => ({ date: label, ...data }));
   }, [inspections, defects, historyItems, rangeSpanDays]);
 
   const fleetHealthScore = useMemo(() => {
@@ -258,29 +261,13 @@ export default function DashboardDetailedView({
       .slice(0, 10);
   }, [users, inspections, historyItems]);
 
-  const assetUtilizationByType = useMemo(() => {
-    const typeMap: Record<string, { total: number; active: number }> = {};
-    assets.forEach((a) => {
-      const type = a.type || 'Unknown';
-      if (!typeMap[type]) typeMap[type] = { total: 0, active: 0 };
-      typeMap[type].total++;
-      if (a.status === 'active' || a.status === 'checked_out') typeMap[type].active++;
-    });
-    return Object.entries(typeMap).map(([name, data]) => ({
-      name,
-      total: data.total,
-      active: data.active,
-      rate: data.total > 0 ? Math.round((data.active / data.total) * 100) : 0,
-    }));
-  }, [assets]);
-
   const defectsBySeverity = useMemo(
     () =>
       [
-        { name: 'Critical', value: defects.filter((d) => d.severity === 'critical').length, color: SEVERITY_COLORS.critical },
-        { name: 'High', value: defects.filter((d) => d.severity === 'high').length, color: SEVERITY_COLORS.high },
-        { name: 'Medium', value: defects.filter((d) => d.severity === 'medium').length, color: SEVERITY_COLORS.medium },
-        { name: 'Low', value: defects.filter((d) => d.severity === 'low' || !d.severity).length, color: SEVERITY_COLORS.low },
+        { name: 'Critical', value: defects.filter((d) => d.severity === 'critical' && d.status !== 'resolved').length, color: SEVERITY_COLORS.critical },
+        { name: 'High', value: defects.filter((d) => d.severity === 'high' && d.status !== 'resolved').length, color: SEVERITY_COLORS.high },
+        { name: 'Medium', value: defects.filter((d) => d.severity === 'medium' && d.status !== 'resolved').length, color: SEVERITY_COLORS.medium },
+        { name: 'Low', value: defects.filter((d) => (d.severity === 'low' || !d.severity) && d.status !== 'resolved').length, color: SEVERITY_COLORS.low },
       ].filter((d) => d.value > 0),
     [defects]
   );
@@ -356,7 +343,12 @@ export default function DashboardDetailedView({
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
             <div className="dashboard-card p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-zinc-900 dark:text-white">Fleet health</h3>
+                <div>
+                  <h3 className="font-semibold text-zinc-900 dark:text-white">Fleet health</h3>
+                  <p className="text-xs text-zinc-500 dark:text-white/40 mt-0.5">
+                    Based on open defects, critical issues, and active vehicle ratio
+                  </p>
+                </div>
                 <div className={`text-2xl font-bold ${scoreText(fleetHealthScore)}`}>
                   {fleetHealthScore}%
                 </div>
@@ -373,6 +365,9 @@ export default function DashboardDetailedView({
                   style={{ width: `${fleetHealthScore}%` }}
                 />
               </div>
+              <p className="text-xs text-zinc-400 dark:text-white/30 mt-3">
+                80–100 = Good &nbsp;·&nbsp; 60–79 = Needs attention &nbsp;·&nbsp; Below 60 = Action required
+              </p>
             </div>
 
             <div className="dashboard-card p-6">
@@ -529,7 +524,7 @@ export default function DashboardDetailedView({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="dashboard-card p-6">
               <h3 className="font-semibold text-zinc-900 dark:text-white mb-4">
-                Defects by severity
+                Open defects by severity
               </h3>
               {defectsBySeverity.length > 0 ? (
                 <ChartErrorBoundary>

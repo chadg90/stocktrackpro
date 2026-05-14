@@ -61,18 +61,18 @@ const features: Feature[] = [
     title: 'Defect workflow: flagged to fixed',
     icon: Shield,
     summary:
-      'Defects do not get stuck in a spreadsheet. The moment a driver raises one, the vehicle moves into maintenance, your fitter sees it in their My Jobs list, and everyone can track progress through to resolution — scheduled, waiting for parts, or completed.',
+      'Defects do not get stuck in a spreadsheet. The moment a driver raises one, the vehicle moves into maintenance, your fitter (assigned the manager role) sees it in their My Jobs list, and everyone can track progress through to resolution — scheduled, waiting for parts, or completed.',
     bullets: [
       'Severity levels and mandatory descriptions at the point of reporting',
       'Vehicle fleet status updates automatically when a defect is raised',
-      'Fitter My Jobs screen groups open defects by vehicle and priority',
+      'My Jobs screen (available to the manager role) groups open defects by vehicle and priority',
       'Each defect tracked through Open → Scheduled → Waiting for parts → Completed',
       'Reporter name and contact number surfaced so fitters can clarify quickly',
       'One-tap resolve returns a vehicle to active — blocked automatically if any defect is still open',
-      'Full history of past defects per vehicle, inspector and fitter',
+      'Full history of past defects per vehicle, inspector, and manager/fitter',
     ],
     useCase:
-      'A driver flags a brake issue at 7am. The vehicle shows as in maintenance, the fitter sees it on their phone, marks it Waiting for parts, and resolves the job once fitted — the vehicle returns to active automatically, with a timestamped activity trail.',
+      'A driver flags a brake issue at 7am. The vehicle shows as in maintenance, the fitter (using the manager role) sees it on their phone, marks it Waiting for parts, and resolves the job once fitted — the vehicle returns to active automatically, with a timestamped activity trail.',
   },
   {
     title: 'MOT and tax monitoring',

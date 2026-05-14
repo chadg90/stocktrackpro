@@ -36,9 +36,9 @@ export async function POST(request: NextRequest) {
     const companyId = profile?.company_id;
     const role = profile?.role;
 
-    if (!companyId || !role || !['manager', 'admin'].includes(role)) {
+    if (!companyId || role !== 'admin') {
       return NextResponse.json(
-        { error: 'Only managers and admins can update subscription status' },
+        { error: 'Only admins can update subscription status' },
         { status: 403 }
       );
     }

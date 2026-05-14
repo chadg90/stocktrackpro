@@ -17,11 +17,55 @@
       ]
     },
     {
+      "collectionGroup": "vehicle_inspections",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "company_id", "order": "ASCENDING" },
+        { "fieldPath": "inspected_by", "order": "ASCENDING" },
+        { "fieldPath": "inspected_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vehicle_inspections",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "company_id", "order": "ASCENDING" },
+        { "fieldPath": "vehicle_id", "order": "ASCENDING" },
+        { "fieldPath": "inspected_at", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "vehicle_defects",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "company_id", "order": "ASCENDING" },
         { "fieldPath": "reported_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vehicle_defects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "company_id", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "reported_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vehicle_defects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "vehicle_id", "order": "ASCENDING" },
+        { "fieldPath": "company_id", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vehicles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "company_id", "order": "ASCENDING" },
+        { "fieldPath": "assigned_to", "order": "ASCENDING" }
       ]
     }
   ],

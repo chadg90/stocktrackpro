@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     const vehicleCount = Number(vehicle_count);
     if (!vehicleCount || vehicleCount < MIN_VEHICLES || vehicleCount > 500 || !Number.isInteger(vehicleCount)) {
       return NextResponse.json(
-        { error: `vehicle_count must be a whole number between ${MIN_VEHICLES} and 500` },
+        { error: `vehicle_count must be a whole number between ${MIN_VEHICLES} and 500. For fleets over 100 vehicles, please contact support.` },
         { status: 400 }
       );
     }
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     const profile = profileSnap.data();
     const profileCompanyId = profile?.company_id;
     const role = profile?.role;
-    console.log('[Checkout] Profile loaded:', { company_id: profileCompanyId, role });
+    console.log('[Checkout] Profile loaded');
     
     const allowedRoles = ['manager', 'admin'];
     if (!profileCompanyId || profileCompanyId.trim() !== companyId.trim()) {
@@ -188,11 +188,6 @@ export async function POST(request: NextRequest) {
       mode: isLiveMode ? 'LIVE' : 'TEST',
       vehicleCount,
       billingCycle: cycle,
-      priceId,
-      baseUrl,
-      successUrl,
-      cancelUrl,
-      companyId: trimmedCompanyId,
     });
 
     const companySnap = await db.collection('companies').doc(trimmedCompanyId).get();
@@ -202,7 +197,6 @@ export async function POST(request: NextRequest) {
       (companyData?.subscription_status === 'trial' || companyData?.subscription_status == null);
 
     console.log('[Checkout] Company subscription status:', {
-      companyId: trimmedCompanyId,
       subscription_status: companyData?.subscription_status,
       isNewCompany,
     });
@@ -227,7 +221,6 @@ export async function POST(request: NextRequest) {
     try {
       session = await stripe.checkout.sessions.create({
         mode: 'subscription',
-        payment_method_types: ['card'],
         line_items: [{ price: priceId, quantity: vehicleCount }],
         success_url: successUrl,
         cancel_url: cancelUrl,

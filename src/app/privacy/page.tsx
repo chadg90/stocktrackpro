@@ -36,7 +36,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Team invitations and role assignments (for example manager, fitter, driver)</span>
+                  <span>Team invitations and role assignments (manager or user)</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
@@ -130,6 +130,10 @@ export default function PrivacyPolicy() {
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>We regularly review and update our security practices</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>Platform access: a small number of authorised Stock Track PRO staff hold elevated platform-level access to customer data solely for the purposes of technical support, security monitoring, and service maintenance. This access is restricted, logged, and subject to internal security controls.</span>
                 </li>
               </ul>
             </div>

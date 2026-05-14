@@ -11,7 +11,7 @@ export default function CookiePolicy() {
           <h1 className="text-4xl font-bold text-white mb-2">
             Cookie <span className="text-primary">Policy</span>
           </h1>
-          <p className="text-white/80 mb-8">Last Updated: 11 December 2025</p>
+          <p className="text-white/80 mb-8">Last Updated: 12 May 2026</p>
 
           <div className="space-y-8">
             <div className="bg-black border border-primary/20 rounded-2xl p-8">

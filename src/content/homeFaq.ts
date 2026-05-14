@@ -12,7 +12,7 @@ export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   {
     question: 'How many users can I add?',
     answer:
-      'User allowance scales with your subscribed fleet size: up to 15 users on Starter, 35 on Growth, 75 on Business, and unlimited on Enterprise.',
+      'There is no separate user fee. Your user allowance scales automatically with your subscribed vehicle count — the more vehicles you manage, the more team members you can add.',
   },
   {
     question: 'What vehicles does Stock Track PRO support?',

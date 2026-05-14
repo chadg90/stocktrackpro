@@ -251,7 +251,7 @@ export default function DashboardAnalyticsCharts({
         </div>
 
         <div className="mt-6 dashboard-card p-6">
-          <h3 className="text-white font-semibold mb-4">Defects by Severity</h3>
+          <h3 className="text-white font-semibold mb-4">Open Defects by Severity</h3>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {defectsBySeverity.length > 0 ? (
               defectsBySeverity.map((d) => (

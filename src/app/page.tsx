@@ -71,13 +71,13 @@ const DEFECT_STEPS = [
     n: 2,
     title: 'ALERT',
     body:
-      'Managers and fitters receive immediate push notifications the moment a defect is raised, plus automatic 7-day warnings before any MOT or tax expiry.',
+      'Managers and fitters (assigned the manager role) receive immediate push notifications the moment a defect is raised, plus automatic 7-day warnings before any MOT or tax expiry.',
   },
   {
     n: 3,
     title: 'RESOLVE',
     body:
-      'Fitters see the defect in their My Jobs list the moment it is reported. Once repaired, they close it out directly in the app.',
+      'Fitters (assigned the manager role) see the defect in their My Jobs list the moment it is reported. Once repaired, they close it out directly in the app.',
   },
   {
     n: 4,
@@ -98,7 +98,7 @@ const QUICK_FACTS = [
   ['Platform', 'iOS app, Android app, and web dashboard'],
   ['Price', '£8 per vehicle per month, including VAT at 20%'],
   ['Free trial', '7 days — no card required'],
-  ['Users included', 'Unlimited drivers, fitters, and managers'],
+  ['Users included', 'Unlimited users — drivers (user role) and managers/fitters (manager role)'],
   ['Compliance', 'Supports O-licence defect record keeping'],
   ['Fleet size', 'Suitable for 5 to 100+ vehicles'],
   ['Support', 'UK-based via email and WhatsApp'],
@@ -127,7 +127,7 @@ export default function Home() {
               One platform to manage your entire fleet — inspections, MOTs, tax, and defects.
             </p>
             <p className="text-base sm:text-lg text-white/55 max-w-2xl leading-relaxed mb-10">
-              Web dashboard for managers. Mobile app for drivers and fitters.
+              Web dashboard for managers. Mobile app for drivers and fitters (manager role).
             </p>
             <p className="text-sm text-white/45 max-w-2xl leading-relaxed mb-10">
               Stock Track PRO brings together fleet inspection software UK operators rely on, vehicle defect reporting app
@@ -294,12 +294,12 @@ export default function Home() {
                   icon: Smartphone,
                   title: 'Mobile-first operations',
                   description:
-                    'Drivers and fitters complete inspections, raise defects, and update job progress from the app.',
+                    'Drivers (user role) and fitters (manager role) complete inspections, raise defects, and update job progress from the app.',
                 },
                 {
                   icon: Users,
                   title: 'Team & roles',
-                  description: 'Managers oversee the company and team; drivers and fitters work from the same live data.',
+                  description: 'Managers oversee the company and team; drivers (user role) and fitters (manager role) work from the same live data.',
                 },
                 {
                   icon: Wrench,

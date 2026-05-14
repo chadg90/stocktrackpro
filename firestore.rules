@@ -31,18 +31,6 @@ service cloud.firestore {
     function isManagerOrAdmin() {
       return isAdmin() || isManager();
     }
-
-    function tokenRole() {
-      return request.auth != null && request.auth.token.role != null
-        ? request.auth.token.role
-        : null;
-    }
-
-    function tokenCompanyId() {
-      return request.auth != null && request.auth.token.companyId != null
-        ? request.auth.token.companyId
-        : null;
-    }
     
     function userCompanyId() {
       return (profileExists() && getProfile().company_id != null)
@@ -82,107 +70,77 @@ service cloud.firestore {
         tokenSubscriptionActive();
     }
 
-    // Legacy: profile document + company subscription (extra rule reads). Kept for hybrid rollout.
-    function legacyTenantOk(resourceCompanyId) {
-      return isSignedIn() &&
-        userCompanyId() == resourceCompanyId &&
-        isCompanyActive();
-    }
-
-    // Prefer claims; fall back to legacy so stale tokens do not lock users out after backfill + refresh.
-    function hybridTenantOk(resourceCompanyId) {
-      return tokenTenantOk(resourceCompanyId) || legacyTenantOk(resourceCompanyId);
-    }
-
+    // Step 5.3: token-only for vehicles + vehicle_inspections (no extra get() in rules on those reads).
+    // Rollback (git): re-add legacyTenantOk + "return tokenTenantOk(x) || legacyTenantOk(x)" if needed.
+    // Admins still reach all docs via GLOBAL ADMIN OVERRIDE match /{path=**} below.
     function vehicleInspectionTenantOk(resourceCompanyId) {
-      return hybridTenantOk(resourceCompanyId);
-    }
-
-    // Single get(companies/{id}) for vehicle create quota. Requires vehicle_slot_count / vehicle_slot_limit
-    // (maintained by Cloud Functions + optional backfill). If either field missing, allow (backward compatible).
-    function companyVehicleCreateAllowed(companyId) {
-      return exists(/databases/$(database)/documents/companies/$(companyId)) &&
-        (
-          get(/databases/$(database)/documents/companies/$(companyId)).data.legacy == true ||
-          !get(/databases/$(database)/documents/companies/$(companyId)).data.keys()
-            .hasAll(['vehicle_slot_count', 'vehicle_slot_limit']) ||
-          (
-            get(/databases/$(database)/documents/companies/$(companyId)).data.vehicle_slot_count is int &&
-            get(/databases/$(database)/documents/companies/$(companyId)).data.vehicle_slot_limit is int &&
-            get(/databases/$(database)/documents/companies/$(companyId)).data.vehicle_slot_count <
-              get(/databases/$(database)/documents/companies/$(companyId)).data.vehicle_slot_limit
-          )
-        );
+      return tokenTenantOk(resourceCompanyId);
     }
     
     // ============================================
     // PROFILES
     // ============================================
+    // Users cannot grant themselves a higher role or join a company by editing
+    // profile: role/company are set at invite accept (callable) or by admin.
+    function profileSelfUpdateAllowed(userId) {
+      return request.auth.uid == userId &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.company_id == resource.data.company_id &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'expoPushToken',
+            'pushTokenUpdatedAt',
+            'display_name',
+            'photo_url',
+            'phone',
+            'updated_at',
+            'firstName',
+            'lastName',
+            'name',
+            'app_platform',
+            'app_version',
+            'app_build',
+            'app_runtime_version',
+            'app_ota_label',
+            'app_ota_update_id',
+            'app_ota_channel',
+            'app_last_seen_at'
+          ]);
+    }
+
+    function profileManagerUpdateOk() {
+      return isManager() &&
+        userCompanyId() == resource.data.company_id &&
+        request.resource.data.company_id == resource.data.company_id &&
+        (request.resource.data.role == 'admin' ? isAdmin() : true);
+    }
+
     match /profiles/{userId} {
       // Users can read their own profile
       // Admins can read all profiles
       // Any authenticated user can read profiles in their company
       allow read: if isSignedIn() && (
-        request.auth.uid == userId ||
-        tokenRole() == 'admin' ||
-        isAdmin() ||
-        (tokenCompanyId() != null && resource.data.company_id == tokenCompanyId()) ||
+        request.auth.uid == userId || 
+        isAdmin() || 
         resource.data.company_id == userCompanyId()
       );
       
-      // Allow users to create their own profile during signup
-      // OR allow admins to create any profile
+      // Self-serve create: unprivileged profile only; companies come from web/admin + invites.
+      // Admins can create any profile.
       allow create: if isSignedIn() && (
-        (request.auth.uid == userId) ||
+        (
+          request.auth.uid == userId &&
+          (!('role' in request.resource.data) || request.resource.data.role == 'user') &&
+          (!('company_id' in request.resource.data) || request.resource.data.company_id == null)
+        ) ||
         isAdmin()
       );
       
-      // Users: non-sensitive fields only. company_id only on first bind (join company). role/company_id not self-editable after bind.
-      // Admins / managers: unchanged broader updates.
+      // Users cannot change their own role or company_id; managers cannot promote to admin.
       allow update: if isSignedIn() && (
         isAdmin() ||
-        (
-          request.auth.uid == userId &&
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly([
-              'expoPushToken',
-              'pushTokenUpdatedAt',
-              'display_name',
-              'photo_url',
-              'phone',
-              'updated_at',
-              'firstName',
-              'lastName',
-              'name',
-              'app_platform',
-              'app_version',
-              'app_build',
-              'app_runtime_version',
-              'app_ota_update_id',
-              'app_ota_channel',
-              'app_ota_label',
-              'app_last_seen_at'
-            ])
-        ) ||
-        (
-          request.auth.uid == userId &&
-          (
-            resource.data.company_id == null ||
-            !('company_id' in resource.data)
-          ) &&
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['company_id', 'updated_at', 'display_name', 'role']) &&
-          request.resource.data.role == 'user' &&
-          (
-            !('role' in resource.data) ||
-            resource.data.role == null ||
-            resource.data.role == 'user'
-          )
-        ) ||
-        (
-          isManager() && userCompanyId() == resource.data.company_id &&
-          request.resource.data.company_id == resource.data.company_id
-        )
+        profileSelfUpdateAllowed(userId) ||
+        profileManagerUpdateOk()
       );
       
       // Only admins can delete profiles
@@ -190,36 +148,10 @@ service cloud.firestore {
     }
 
     // ============================================
-    // ACCESS CODES
+    // ACCESS CODES (deprecated — use email invites; collection may remain for data migration)
     // ============================================
     match /access_codes/{codeId} {
-      // Anyone can read access codes (needed for verification during signup before auth)
-      allow read: if true;
-      
-      // Only managers and admins can create access codes for their company
-      allow create: if isSignedIn() && (
-        (isManager() && request.resource.data.company_id == userCompanyId()) ||
-        isAdmin()
-      );
-      
-      // Managers/admins can update codes in their company
-      // Any authenticated user can mark an unused code as used during signup
-      allow update: if isSignedIn() && (
-        (
-          (isManager() || isAdmin()) &&
-          resource.data.company_id == userCompanyId()
-        ) ||
-        (
-          // User marking code as used during signup (no profile exists yet)
-          request.resource.data.used == true &&
-          !resource.data.used &&
-          request.resource.data.used_by == request.auth.uid &&
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['used', 'used_at', 'used_by', 'usedAt', 'usedBy', 'updated_at'])
-        )
-      );
-      
-      allow delete: if isSignedIn() && (isManager() || isAdmin()) && resource.data.company_id == userCompanyId();
+      allow read, write: if false;
     }
 
     // ============================================
@@ -228,15 +160,19 @@ service cloud.firestore {
     match /companies/{companyId} {
       // Users in the company can read their company
       // Admins can read any company
-      // Users can read companies they created (needed for trial check during signup before profile exists)
+      // Creator can read a company (legacy / tools that still set created_by)
       allow read: if isSignedIn() && (
         userCompanyId() == companyId || 
         isAdmin() ||
         resource.data.created_by == request.auth.uid
       );
       
-      // Allow authenticated users to create companies (during signup)
-      allow create: if isSignedIn();
+      // Web onboarding creates a company with created_by = uid; mobile self-serve company signup
+      // is removed in the app. Admins can create for support flows.
+      allow create: if isSignedIn() && (
+        isAdmin() ||
+        request.resource.data.created_by == request.auth.uid
+      );
       
       // Only managers and admins can update companies
       allow update: if isSignedIn() && (isAdmin() || (isManager() && userCompanyId() == companyId));
@@ -249,33 +185,35 @@ service cloud.firestore {
     // TOOLS
     // ============================================
     match /tools/{toolId} {
-      allow read: if isSignedIn() && hybridTenantOk(resource.data.company_id);
-      allow create: if isSignedIn() && hybridTenantOk(request.resource.data.company_id);
+      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
+      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
       allow update: if isSignedIn() &&
-        hybridTenantOk(resource.data.company_id) &&
-        request.resource.data.company_id == resource.data.company_id;
-      allow delete: if isSignedIn() && hybridTenantOk(resource.data.company_id);
+        userCompanyId() == request.resource.data.company_id &&
+        request.resource.data.company_id == resource.data.company_id &&
+        isCompanyActive();
+      allow delete: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
     }
 
     // ============================================
     // LOCATIONS
     // ============================================
     match /locations/{locationId} {
-      allow read: if isSignedIn() && hybridTenantOk(resource.data.company_id);
+      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
       allow create: if isSignedIn() && (
-        (isManager() && hybridTenantOk(request.resource.data.company_id)) ||
+        (isManager() && userCompanyId() == request.resource.data.company_id && isCompanyActive()) ||
         isAdmin()
       );
       allow update: if isSignedIn() && (
         (
           isManager() &&
-          hybridTenantOk(resource.data.company_id) &&
-          request.resource.data.company_id == resource.data.company_id
+          userCompanyId() == request.resource.data.company_id &&
+          request.resource.data.company_id == resource.data.company_id &&
+          isCompanyActive()
         ) ||
         isAdmin()
       );
       allow delete: if isSignedIn() && (
-        (isManager() && hybridTenantOk(resource.data.company_id)) ||
+        (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
         isAdmin()
       );
     }
@@ -284,8 +222,8 @@ service cloud.firestore {
     // TOOL HISTORY
     // ============================================
     match /tool_history/{historyId} {
-      allow read: if isSignedIn() && hybridTenantOk(resource.data.company_id);
-      allow create: if isSignedIn() && hybridTenantOk(request.resource.data.company_id);
+      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
+      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
       // History is immutable - only admins can modify/delete
       allow update, delete: if isAdmin();
     }
@@ -295,9 +233,7 @@ service cloud.firestore {
     // ============================================
     match /vehicles/{vehicleId} {
       allow read: if isSignedIn() && vehicleInspectionTenantOk(resource.data.company_id);
-      allow create: if isSignedIn() &&
-        vehicleInspectionTenantOk(request.resource.data.company_id) &&
-        companyVehicleCreateAllowed(request.resource.data.company_id);
+      allow create: if isSignedIn() && vehicleInspectionTenantOk(request.resource.data.company_id);
       allow update: if isSignedIn() &&
         request.resource.data.company_id == resource.data.company_id &&
         vehicleInspectionTenantOk(resource.data.company_id);
@@ -332,18 +268,19 @@ service cloud.firestore {
     // VEHICLE DEFECTS
     // ============================================
     match /vehicle_defects/{defectId} {
-      allow read: if isSignedIn() && hybridTenantOk(resource.data.company_id);
-      allow create: if isSignedIn() && hybridTenantOk(request.resource.data.company_id);
+      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
+      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
       allow update: if isSignedIn() && (
         (
           isManager() &&
-          hybridTenantOk(resource.data.company_id) &&
-          request.resource.data.company_id == resource.data.company_id
+          userCompanyId() == resource.data.company_id &&
+          request.resource.data.company_id == resource.data.company_id &&
+          isCompanyActive()
         ) ||
         isAdmin()
       );
       allow delete: if isSignedIn() && (
-        (isManager() && hybridTenantOk(resource.data.company_id)) ||
+        (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
         isAdmin()
       );
     }
@@ -352,18 +289,19 @@ service cloud.firestore {
     // VEHICLE DAMAGE REPORTS
     // ============================================
     match /vehicle_damage_reports/{reportId} {
-      allow read: if isSignedIn() && hybridTenantOk(resource.data.company_id);
-      allow create: if isSignedIn() && hybridTenantOk(request.resource.data.company_id);
+      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
+      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
       allow update: if isSignedIn() && (
         (
           isManager() &&
-          hybridTenantOk(resource.data.company_id) &&
-          request.resource.data.company_id == resource.data.company_id
+          userCompanyId() == resource.data.company_id &&
+          request.resource.data.company_id == resource.data.company_id &&
+          isCompanyActive()
         ) ||
         isAdmin()
       );
       allow delete: if isSignedIn() && (
-        (isManager() && hybridTenantOk(resource.data.company_id)) ||
+        (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
         isAdmin()
       );
     }
@@ -371,8 +309,10 @@ service cloud.firestore {
     // ============================================
     // PROMO CODES
     // ============================================
+    // List collection = enumerate all codes; only admins. getDoc by id = redeem (signed-in only).
     match /promoCodes/{codeId} {
-      allow read: if isSignedIn();
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
       allow create: if isSignedIn() && isAdmin();
       allow update: if isSignedIn() && (
         isAdmin() ||
@@ -429,6 +369,9 @@ service cloud.firestore {
       allow update, delete: if isSignedIn() && isAdmin();
     }
 
+    // Invites: email match uses auth token email. Some providers omit email in the
+    // token; invite rows should still be readable for company/manager. Prefer storing
+    // normalised email on the invite; Cloud Functions use Admin SDK to grant access.
     // ============================================
     // INVITES
     // ============================================
@@ -436,7 +379,7 @@ service cloud.firestore {
       allow read: if isSignedIn() && (
         isAdmin() ||
         resource.data.companyId == userCompanyId() ||
-        resource.data.email == request.auth.token.email
+        (request.auth.token.email != null && resource.data.email == request.auth.token.email)
       );
       allow create: if isSignedIn() && isManagerOrAdmin() &&
         request.resource.data.companyId == userCompanyId();
@@ -470,10 +413,21 @@ service cloud.firestore {
     }
 
     // ============================================
-    // GLOBAL ADMIN OVERRIDE
+    // ADMIN REPORT EVENTS (platform audit log)
+    // ============================================
+    match /admin_report_events/{eventId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ============================================
+    // GLOBAL ADMIN OVERRIDE (read-only catch-all)
+    // Allows platform admins to read any unlisted collection for support.
+    // Write access for unlisted collections is intentionally NOT granted here;
+    // each collection should have its own explicit write rule above.
+    // SECURITY: Keep admin accounts to a minimum and enforce MFA.
     // ============================================
     match /{path=**} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin();
     }
   }
 }

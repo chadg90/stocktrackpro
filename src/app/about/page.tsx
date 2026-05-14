@@ -37,7 +37,7 @@ export default function AboutPage() {
               Managers use the web dashboard to add vehicles, review inspections, manage defects, monitor MOT and tax status, invite team members, and view fleet analytics.
             </p>
             <p className="text-white/70 leading-relaxed">
-              Drivers and fitters use the iOS and Android mobile app to complete daily inspections, submit photo-evidenced defect reports, receive job updates, and close repairs out when work is complete.
+              Drivers (user role) and fitters (manager role) use the iOS and Android mobile app to complete daily inspections, submit photo-evidenced defect reports, receive job updates, and close repairs out when work is complete.
             </p>
           </section>
 

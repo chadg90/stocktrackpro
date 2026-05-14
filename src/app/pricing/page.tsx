@@ -185,7 +185,7 @@ export default function Pricing() {
                         : 'bg-emerald-500/20 text-emerald-300'
                     }`}
                   >
-                    Save 12%
+                    Save 12.5%
                   </span>
                 </button>
               </div>
@@ -312,7 +312,7 @@ export default function Pricing() {
               Subscription Terms
             </h3>
             <ul className="space-y-2 text-sm text-white/70">
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Billed monthly — £{PRICE_PER_VEHICLE_MONTHLY} per vehicle, or annually — £{PRICE_PER_VEHICLE_YEARLY} per vehicle (save ~12%)</span></li>
+              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Billed monthly — £{PRICE_PER_VEHICLE_MONTHLY} per vehicle, or annually — £{PRICE_PER_VEHICLE_YEARLY} per vehicle (save ~12.5%)</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Minimum {MIN_VEHICLES} vehicles (£{MIN_VEHICLES * PRICE_PER_VEHICLE_MONTHLY}/month or £{MIN_VEHICLES * PRICE_PER_VEHICLE_YEARLY}/year)</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Vehicle count changes for active subscriptions are managed through the billing portal or support</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>New companies receive a 7-day free trial</span></li>

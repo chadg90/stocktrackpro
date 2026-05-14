@@ -45,9 +45,9 @@ export default function Terms() {
               <li>Vehicle inspections with photo documentation</li>
               <li>Defect reporting, notifications and repair workflows for fleet compliance</li>
               <li>MOT and tax renewal reminders where configured</li>
-              <li>Mobile app access for drivers, fitters and field staff</li>
+              <li>Mobile app access for drivers, fitters, and field staff</li>
               <li>Audit trails and history for compliance records</li>
-              <li>Role-based access (for example managers, fitters and drivers)</li>
+              <li>Role-based access (manager or user — fitters are assigned the manager role)</li>
             </ul>
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">3. User Accounts and Security</h2>
