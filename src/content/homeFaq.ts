@@ -16,7 +16,7 @@ export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   },
   {
     question: 'What vehicles does Stock Track PRO support?',
-    answer: 'Any vehicle in your fleet — vans, HGVs, plant equipment, and cars.',
+    answer: 'Any vehicle in your fleet — vans, HGVs, plant vehicles, and cars.',
   },
   {
     question: 'Does it work across the whole of the UK?',

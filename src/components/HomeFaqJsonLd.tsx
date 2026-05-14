@@ -1,10 +1,14 @@
-import { HOME_FAQ_ITEMS } from '@/content/homeFaq';
+import { HOME_FAQ_ITEMS, type HomeFaqItem } from '@/content/homeFaq';
 
-export function HomeFaqJsonLd() {
+interface HomeFaqJsonLdProps {
+  items?: HomeFaqItem[];
+}
+
+export function HomeFaqJsonLd({ items }: HomeFaqJsonLdProps = {}) {
   const faqPage = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: HOME_FAQ_ITEMS.map((item) => ({
+    mainEntity: (items ?? HOME_FAQ_ITEMS).map((item) => ({
       '@type': 'Question',
       name: item.question,
       acceptedAnswer: {

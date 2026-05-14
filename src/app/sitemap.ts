@@ -5,7 +5,7 @@ export const dynamic = 'force-static'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_URL
-  const lastModified = new Date('2026-05-13T00:00:00.000Z')
+  const lastModified = new Date()
 
   const routes = [
     '',

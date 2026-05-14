@@ -46,7 +46,7 @@ export default function FAQ() {
 
   return (
     <div className="min-h-screen bg-black">
-      <HomeFaqJsonLd />
+      <HomeFaqJsonLd items={faqs} />
       <Navbar />
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="max-w-4xl mx-auto">

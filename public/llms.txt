@@ -11,12 +11,20 @@ for small and medium-sized businesses.
 - Manager web dashboard with fleet analytics and team oversight
 - Timestamped digital records that support O-licence record keeping
   and DVSA checks
+- Role-based team management (drivers, managers, admins)
+
+## What it does NOT do
+Stock Track PRO is a vehicle fleet management platform only.
+It does not track tools, hand tools, equipment inventory, or
+non-vehicle assets. It is focused exclusively on vehicles,
+vehicle inspections, defect management, and fleet compliance.
 
 ## Who it is for
 Fleet operators in the UK — trades, groundworks, logistics,
 construction, haulage, electrical, and plumbing businesses.
 Suitable for sole traders and businesses operating 5+ vehicles
 (the minimum paid subscription quantity is 5 vehicles).
+Works for vans, HGVs, plant vehicles, and cars.
 
 ## Pricing
 £8 per vehicle per month, including VAT at 20%.
@@ -32,6 +40,7 @@ the next annual charge.
 - Compliance: supports O-licence defect record keeping
 - Integration: DVLA data for automatic MOT and tax status
 - Support: UK-based, via email and WhatsApp
+- Data retention: 15 months for DVSA audit compliance
 
 ## Contact
 Website: https://www.stocktrackpro.co.uk
