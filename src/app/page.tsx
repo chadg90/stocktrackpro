@@ -121,7 +121,7 @@ export default function Home() {
               UK fleet compliance platform
             </p>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight text-white mb-6 leading-[1.08]">
-              Professional Fleet Compliance &amp; Defect Resolution.
+              Fleet Management, Compliance &amp; Defect Resolution.
             </h1>
             <p className="text-lg sm:text-xl text-white/85 max-w-2xl leading-relaxed mb-2">
               One platform to manage your entire fleet — inspections, MOTs, tax, and defects.

@@ -16,11 +16,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.stocktrackpro.co.uk'),
   title: {
-    default: "Stock Track PRO | UK Fleet Management & Defect Reporting Software",
+    default: "Stock Track PRO | UK Fleet Management Software",
     template: "%s | Stock Track PRO",
   },
   description:
-    "Stock Track PRO is UK fleet management software for SMEs. Track MOTs, vehicle tax, daily inspections, and defect resolution — all in one platform. Try free for 7 days.",
+    "UK fleet management software for SMEs. Track MOTs, vehicle tax, daily inspections and defect resolution in one platform. Free 7-day trial.",
   keywords:
     "fleet inspection software UK, vehicle defect reporting app, O-licence compliance software, MOT tracking software for fleets, fleet management app for vans, DVLA fleet checks, fleet compliance UK",
   authors: [{ name: "Stock Track PRO" }],
@@ -39,9 +39,9 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "Stock Track PRO | UK Fleet Management & Defect Reporting Software",
+    title: "Stock Track PRO | UK Fleet Management Software",
     description:
-      "Stock Track PRO is UK fleet management software for SMEs. Track MOTs, vehicle tax, daily inspections, and defect resolution — all in one platform. Try free for 7 days.",
+      "UK fleet management software for SMEs. Track MOTs, vehicle tax, daily inspections and defect resolution in one platform. Free 7-day trial.",
     url: "https://www.stocktrackpro.co.uk",
     siteName: "Stock Track PRO",
     images: [
@@ -57,9 +57,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stock Track PRO | UK Fleet Management & Defect Reporting Software",
+    title: "Stock Track PRO | UK Fleet Management Software",
     description:
-      "UK fleet management software for SMEs — MOTs, tax, inspections, defect resolution. Try free for 7 days.",
+      "UK fleet management software for SMEs — MOTs, tax, inspections, defect resolution. Free 7-day trial.",
     images: ["/og-image.jpg"],
   },
   robots: {
@@ -90,7 +90,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en-GB" className="scroll-smooth">
       <head>
         {/* iOS Smart App Banner */}
         <meta name="apple-itunes-app" content="app-id=6744621973, app-argument=https://www.stocktrackpro.co.uk" />
