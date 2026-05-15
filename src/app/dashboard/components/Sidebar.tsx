@@ -23,6 +23,10 @@ import {
   LifeBuoy,
   ShieldCheck,
   BarChart3,
+  HardHat,
+  BookOpen,
+  Package,
+  Puzzle,
 } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -36,6 +40,8 @@ type NavigationItem = {
   icon: React.ComponentType<{ className?: string }>;
   managerOnly?: boolean;
   adminOnly?: boolean;
+  plantOnly?: boolean;        // hidden unless user has plant access
+  plantManagerOnly?: boolean; // hidden unless user is manager/admin with plant access
 };
 
 type NavigationGroup = {
@@ -82,6 +88,20 @@ const navigationGroups: NavigationGroup[] = [
     ]
   },
   {
+    label: 'Plant & Machinery',
+    items: [
+      { name: 'Machine Register', href: '/dashboard/machines', icon: HardHat, plantOnly: true },
+      { name: 'Inspection Reports', href: '/dashboard/plant-reports', icon: BookOpen, plantOnly: true },
+      { name: 'Parts Library', href: '/dashboard/machines/parts-library', icon: Package, plantManagerOnly: true },
+    ]
+  },
+  {
+    label: 'Add-ons',
+    items: [
+      { name: 'Add-ons', href: '/dashboard/add-ons', icon: Puzzle, managerOnly: true },
+    ]
+  },
+  {
     label: 'Settings',
     items: [
       { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCard, managerOnly: true },
@@ -103,9 +123,13 @@ const navigationGroups: NavigationGroup[] = [
   },
 ];
 
+import { PLANT_MODULE_DEV_MODE } from '@/lib/plantModeDev';
+
 export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [canAccessPlant, setCanAccessPlant] = useState(false);
+  const [companyHasPlant, setCompanyHasPlant] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -116,7 +140,22 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
         const snap = await getDoc(profileRef);
         if (snap.exists()) {
-          setUserRole(snap.data().role || null);
+          const profile = snap.data();
+          const role = profile.role || null;
+          setUserRole(role);
+
+          // Plant access: managers/admins always get access; others need explicit flag
+          const isManagerOrAdmin = role === 'admin' || role === 'manager';
+          setCanAccessPlant(isManagerOrAdmin || !!profile.can_access_plant_module);
+
+          // Check if company has plant module (skip in dev mode)
+          if (PLANT_MODULE_DEV_MODE) {
+            setCompanyHasPlant(true);
+          } else if (profile.company_id) {
+            const orgRef = doc(firebaseDb, 'organisations', profile.company_id);
+            const orgSnap = await getDoc(orgRef);
+            setCompanyHasPlant(orgSnap.exists() && !!orgSnap.data()?.has_plant_module);
+          }
         }
       }
     });
@@ -202,12 +241,13 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
       <div className="flex-1 overflow-y-auto py-3 px-2 min-h-0">
         <nav className="space-y-4">
           {navigationGroups.map((group) => {
-            // Filter items based on role
+            // Filter items based on role and plant access
             const visibleItems = group.items.filter(item => {
-              // Admin-only items: only show to admins
               if (item.adminOnly && userRole !== 'admin') return false;
-              // Manager-only items: show to managers AND admins (admins have higher privileges)
               if (item.managerOnly && userRole !== 'manager' && userRole !== 'admin') return false;
+              // Plant items require both company module active AND user access
+              if (item.plantOnly && !(companyHasPlant && canAccessPlant)) return false;
+              if (item.plantManagerOnly && !(companyHasPlant && (userRole === 'admin' || userRole === 'manager'))) return false;
               return true;
             });
 

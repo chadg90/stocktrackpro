@@ -322,11 +322,15 @@ export default function Pricing() {
             </ul>
           </div>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-2">
             <p className="text-sm text-white/50">
               New to Stock Track PRO?{' '}
               <Link href="/contact" className="text-blue-500 hover:underline">Get in touch</Link>
               {' '}and we&apos;ll help you get set up.
+            </p>
+            <p className="text-sm text-white/40">
+              Need plant and machinery compliance?{' '}
+              <Link href="/add-ons" className="text-blue-400 hover:underline">View the Plant &amp; Machinery add-on →</Link>
             </p>
           </div>
         </div>

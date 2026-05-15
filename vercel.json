@@ -8,6 +8,15 @@
     },
     "src/app/api/billing-portal/route.ts": {
       "maxDuration": 30
+    },
+    "src/app/api/cron/plant-alerts/route.ts": {
+      "maxDuration": 60
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/plant-alerts",
+      "schedule": "0 8 * * *"
+    }
+  ]
 }

@@ -216,6 +216,68 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      // ============================================
+      // PLANT & MACHINERY MODULE EVENTS
+      // ============================================
+
+      case 'checkout.session.completed': {
+        // Already handled above for core subscription — check if this is a plant add-on
+        const session = event.data.object as Stripe.Checkout.Session;
+        const checkoutType = session.metadata?.checkout_type;
+        if (checkoutType !== 'plant_module_addon') break; // handled in core case above
+
+        const companyId = session.metadata?.company_id;
+        if (!companyId) break;
+
+        await db.collection('organisations').doc(companyId).set(
+          {
+            has_plant_module: true,
+            plant_module_status: 'active',
+            plant_module_activated_at: new Date().toISOString(),
+            plant_stripe_subscription_id: session.subscription ?? null,
+            updated_at: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+        console.log('Plant module activated for company', companyId, '(checkout.session.completed plant_module_addon)');
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        // Handles both core subscription and plant add-on payment failures
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionId = invoice.subscription as string | null;
+        if (!subscriptionId) break;
+
+        const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
+        const companyId = subscription.metadata?.company_id;
+        const subscriptionType = subscription.metadata?.subscription_type;
+        if (!companyId) break;
+
+        if (subscriptionType === 'plant_module_addon') {
+          // Suspend plant module on payment failure
+          await db.collection('organisations').doc(companyId).set(
+            {
+              plant_module_status: 'inactive',
+              updated_at: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+          console.log('Plant module suspended for company', companyId, '(invoice.payment_failed)');
+        } else {
+          // Core subscription payment failed — set to inactive
+          await db.collection('companies').doc(companyId).set(
+            {
+              subscription_status: 'inactive',
+              updated_at: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+          console.log('Set company', companyId, 'subscription to inactive (invoice.payment_failed)');
+        }
+        break;
+      }
+
       default:
         break;
     }
