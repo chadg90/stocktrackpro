@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   collection,
   query,
@@ -16,8 +16,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Trash2, Search, Mail, User as UserIcon, Pencil, ShieldOff, Link2, Check as CheckIcon, HardHat, CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import { PLANT_MODULE_DEV_MODE } from '@/lib/plantModeDev';
+import { Trash2, Search, Mail, User as UserIcon, Pencil, ShieldOff, Link2, Check as CheckIcon } from 'lucide-react';
 import Modal from '../components/Modal';
 import { EmptyStateTableRow } from '../components/EmptyState';
 import TableSkeleton from '../components/TableSkeleton';
@@ -56,124 +55,6 @@ type Invite = {
   emailSent?: boolean;
 };
 
-// ============================================
-// Plant Module Control Centre
-// ============================================
-
-function PlantModuleControlCentre({ team }: { team: Profile[] }) {
-  const [idToken, setIdToken] = useState<string | null>(null);
-  const [plantEnabled, setPlantEnabled] = useState(false);
-  const [saving, setSaving] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!firebaseAuth) return;
-    const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
-      if (user) setIdToken(await user.getIdToken());
-    });
-    return () => unsub();
-  }, []);
-
-  // Determine current plant access per user
-  const [plantAccess, setPlantAccess] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    if (!firebaseDb) return;
-    const map: Record<string, boolean> = {};
-    team.forEach((m) => {
-      map[m.id] = !!(m as unknown as Record<string, unknown>).can_access_plant_module;
-    });
-    setPlantAccess(map);
-  }, [team]);
-
-  useEffect(() => {
-    if (!idToken) return;
-    fetch('/api/billing/plant-module', { headers: { Authorization: `Bearer ${idToken}` } })
-      .then((r) => r.json())
-      .then((d) => setPlantEnabled(PLANT_MODULE_DEV_MODE || d.has_plant_module))
-      .catch(() => {});
-  }, [idToken]);
-
-  const toggleAccess = useCallback(async (uid: string, grant: boolean) => {
-    if (!idToken) return;
-    setSaving(uid);
-    try {
-      await fetch(`/api/team/users/${uid}/plant-access`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ can_access_plant_module: grant, plant_role: grant ? 'inspector' : undefined }),
-      });
-      setPlantAccess((prev) => ({ ...prev, [uid]: grant }));
-    } finally {
-      setSaving(null);
-    }
-  }, [idToken]);
-
-  if (!plantEnabled) return null;
-
-  const regularUsers = team.filter((m) => m.role === 'user');
-
-  return (
-    <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden mb-8">
-      <div className="px-6 py-4 border-b border-blue-500/20 bg-white/5 flex items-center gap-3">
-        <HardHat className="h-5 w-5 text-blue-400" />
-        <div>
-          <h2 className="text-white font-semibold">Plant &amp; Machinery — Access Control</h2>
-          <p className="text-white/60 text-sm mt-0.5">
-            Grant team members access to submit plant inspections in the app.
-            Managers and admins always have access.
-            {PLANT_MODULE_DEV_MODE && <span className="ml-1 text-yellow-400">(DEV MODE)</span>}
-          </p>
-        </div>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-white/10 text-white/50 text-xs uppercase">
-            <tr>
-              <th className="px-6 py-3 font-medium">Name</th>
-              <th className="px-6 py-3 font-medium">Role</th>
-              <th className="px-6 py-3 font-medium">Plant Access</th>
-              <th className="px-6 py-3 font-medium text-right">Toggle</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/5">
-            {regularUsers.length === 0 ? (
-              <tr><td colSpan={4} className="px-6 py-6 text-center text-white/40">No user-role team members.</td></tr>
-            ) : regularUsers.map((member) => {
-              const hasAccess = plantAccess[member.id] ?? false;
-              const isSaving = saving === member.id;
-              return (
-                <tr key={member.id} className="hover:bg-white/3 transition-colors">
-                  <td className="px-6 py-3 text-white">{[member.first_name, member.last_name].filter(Boolean).join(' ') || member.display_name || member.displayName || member.email || member.id}</td>
-                  <td className="px-6 py-3 text-white/60">{member.role}</td>
-                  <td className="px-6 py-3">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border ${hasAccess ? 'bg-green-500/15 text-green-400 border-green-500/30' : 'bg-white/10 text-white/40 border-white/20'}`}>
-                      {hasAccess ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                      {hasAccess ? 'Granted' : 'No access'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-right">
-                    <button
-                      onClick={() => toggleAccess(member.id, !hasAccess)}
-                      disabled={isSaving}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 ${
-                        hasAccess
-                          ? 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      {isSaving && <Loader2 className="h-3 w-3 animate-spin" />}
-                      {hasAccess ? 'Revoke' : 'Grant Access'}
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
 
 export default function TeamPage() {
   const [team, setTeam] = useState<Profile[]>([]);
@@ -847,11 +728,6 @@ export default function TeamPage() {
             </table>
           </div>
         </div>
-      )}
-
-      {/* Plant Module Control Centre */}
-      {(isAdmin || isManager) && (
-        <PlantModuleControlCentre team={team} />
       )}
 
       {/* Edit User Modal */}

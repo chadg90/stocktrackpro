@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import { Check, ShieldCheck, Truck, Clock } from 'lucide-react';
 import Link from 'next/link';
+import PlantPricingCard from '../components/PlantPricingCard';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -137,12 +138,13 @@ export default function Pricing() {
           </p>
         </div>
 
-        <div className="max-w-2xl mx-auto">
-          {/* Pricing Card */}
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 items-start mb-8">
+          {/* Fleet pricing */}
           <div className="relative bg-black/80 backdrop-blur-sm rounded-3xl p-8 sm:p-10 border border-blue-500 shadow-2xl shadow-blue-500/20 ring-2 ring-blue-500/20">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2">
               <span className="bg-blue-500 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">
-                One plan — all features included
+                Fleet — all features included
               </span>
             </div>
 
@@ -305,6 +307,14 @@ export default function Pricing() {
             </div>
           </div>
 
+          <PlantPricingCard
+            showCheckout
+            canSubscribe={canSubscribe}
+            companyId={profile?.company_id}
+            getIdToken={authUser ? () => authUser.getIdToken() : undefined}
+          />
+          </div>
+
           {/* Subscription Terms */}
           <div className="mt-8 bg-black/60 border border-blue-500/30 rounded-2xl p-6 text-left backdrop-blur-sm">
             <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
@@ -322,15 +332,11 @@ export default function Pricing() {
             </ul>
           </div>
 
-          <div className="mt-6 text-center space-y-2">
+          <div className="mt-6 text-center">
             <p className="text-sm text-white/50">
               New to Stock Track PRO?{' '}
               <Link href="/contact" className="text-blue-500 hover:underline">Get in touch</Link>
               {' '}and we&apos;ll help you get set up.
-            </p>
-            <p className="text-sm text-white/40">
-              Need plant and machinery compliance?{' '}
-              <Link href="/add-ons" className="text-blue-400 hover:underline">View the Plant &amp; Machinery add-on →</Link>
             </p>
           </div>
         </div>

@@ -30,6 +30,22 @@ export const MIN_VEHICLES = 5;
 export const PRICE_PER_VEHICLE = 8; // GBP, monthly
 export const PRICE_PER_VEHICLE_YEARLY = 84; // GBP per vehicle per year (~£7/mo, save ~12.5%)
 
+export const MIN_PLANT_MACHINES = 3;
+export const PRICE_PER_PLANT_MACHINE = 12; // GBP, monthly
+export const PRICE_PER_PLANT_MACHINE_YEARLY = 120; // GBP per machine per year (2 months free)
+
+export type PlantBillingCycle = 'monthly' | 'yearly';
+
+export function getStripePlantPriceId(cycle: PlantBillingCycle = 'monthly'): string {
+  const envVar =
+    cycle === 'yearly' ? 'STRIPE_PRICE_PLANT_PER_MACHINE_YEARLY' : 'STRIPE_PRICE_PLANT_PER_MACHINE';
+  const priceId = process.env[envVar];
+  if (!priceId) {
+    throw new Error(`Missing env: ${envVar}`);
+  }
+  return priceId;
+}
+
 /** Create a Stripe Customer Portal session for managing subscription. Requires company to have stripe_customer_id. */
 export async function createBillingPortalSession(
   customerId: string,

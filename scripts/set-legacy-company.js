@@ -2,7 +2,8 @@
 
 /**
  * Flag a company as "legacy" so it is excluded from all plan limits and from
- * public per-vehicle pricing. Useful for grandfathering early customers.
+ * public per-vehicle pricing. Legacy companies also get Plant & Machinery at no
+ * extra charge (no plant Stripe add-on). Useful for grandfathering early customers.
  *
  * Usage:
  *   node scripts/set-legacy-company.js <companyId> [--unset]

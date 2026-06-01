@@ -1,357 +1,390 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { firebaseAuth } from '@/lib/firebase';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  BookOpen,
-  Search,
-  Filter,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Loader2,
-  ChevronRight,
-  Edit,
-} from 'lucide-react';
-import type { PlantInspection, InspectionType, InspectionOutcome } from '@/types/plant';
+  collection,
+  query,
+  where,
+  getDocs,
+  getDoc,
+  doc,
+  orderBy,
+  Timestamp,
+} from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { httpsCallable } from 'firebase/functions';
+import { firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
+import { FileText, Search, Download, Lock, RefreshCw } from 'lucide-react';
+import { EmptyStateTableRow } from '../components/EmptyState';
+import TableSkeleton from '../components/TableSkeleton';
+import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
+import { useDebounce } from '@/hooks/useDebounce';
+import { companyHasPlantModuleAccess } from '@/lib/plant/access';
+import { getImageUrlFromApp } from '@/lib/getImageUrl';
 
-const OUTCOME_STYLES: Record<InspectionOutcome, string> = {
-  pass: 'bg-green-500/15 text-green-400 border-green-500/30',
-  fail: 'bg-red-500/15 text-red-400 border-red-500/30',
-  advisory: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+type PlantInspection = {
+  id: string;
+  company_id: string;
+  machine_id: string;
+  reference_number?: string | null;
+  inspection_date?: string;
+  inspection_time?: string;
+  snapshot_plant_number?: string;
+  snapshot_make?: string;
+  snapshot_model?: string;
+  inspector_name?: string;
+  includes_loler?: boolean;
+  includes_service?: boolean;
+  includes_hire_check?: boolean;
+  defects_immediate_danger?: boolean;
+  total_cost?: number | null;
+  locked?: boolean;
+  submitted_at?: Timestamp | { seconds: number };
+  pdf_loler_url?: string | null;
+  pdf_puwer_url?: string | null;
+  pdf_service_url?: string | null;
+  pdf_hire_check_url?: string | null;
+  pdf_loler_path?: string | null;
+  pdf_puwer_path?: string | null;
+  pdf_service_path?: string | null;
+  pdf_hire_check_path?: string | null;
+  pdf_generation_started?: boolean;
+  pdf_generated_at?: Timestamp | { seconds: number };
+  pdf_generation_error?: string | null;
 };
 
-const INSPECTION_TYPES: { value: InspectionType | ''; label: string }[] = [
-  { value: '', label: 'All Types' },
-  { value: 'LOLER', label: 'LOLER' },
-  { value: 'PUWER', label: 'PUWER' },
-  { value: 'service', label: 'Service' },
-  { value: 'hire_check', label: 'Hire Check' },
-];
+type Profile = { company_id?: string; role?: string };
 
-const OUTCOMES: { value: InspectionOutcome | ''; label: string }[] = [
-  { value: '', label: 'All Outcomes' },
-  { value: 'pass', label: 'Pass' },
-  { value: 'fail', label: 'Fail' },
-  { value: 'advisory', label: 'Advisory' },
-];
+function formatSubmittedAt(value: PlantInspection['submitted_at']): string {
+  if (!value) return '—';
+  if (value instanceof Timestamp) {
+    return value.toDate().toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
+  }
+  if (typeof value === 'object' && 'seconds' in value) {
+    return new Date(value.seconds * 1000).toLocaleString('en-GB', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
+  }
+  return '—';
+}
 
-export default function PlantReportsPage() {
-  const [inspections, setInspections] = useState<PlantInspection[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [idToken, setIdToken] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState<InspectionType | ''>('');
-  const [outcomeFilter, setOutcomeFilter] = useState<InspectionOutcome | ''>('');
-  const [selectedInspection, setSelectedInspection] = useState<PlantInspection | null>(null);
+function reportBadges(row: PlantInspection): string[] {
+  const tags: string[] = [];
+  if (row.includes_loler) tags.push('LOLER');
+  tags.push('PUWER');
+  if (row.includes_service) tags.push('Service');
+  if (row.includes_hire_check) tags.push('Hire');
+  return tags;
+}
 
-  // Amendment modal
-  const [amendTarget, setAmendTarget] = useState<{ inspection: PlantInspection; field: string } | null>(null);
-  const [amendValue, setAmendValue] = useState('');
-  const [amendReason, setAmendReason] = useState('');
-  const [amendLoading, setAmendLoading] = useState(false);
-  const [amendError, setAmendError] = useState('');
+function PdfLink({
+  label,
+  url,
+  path,
+}: {
+  label: string;
+  url?: string | null;
+  path?: string | null;
+}) {
+  const [href, setHref] = useState<string | null>(url || null);
+  const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    if (!firebaseAuth) return;
+    setHref(url || null);
+  }, [url]);
+
+  useEffect(() => {
+    if (href || !path) return;
+    let cancelled = false;
+    setPending(true);
+    getImageUrlFromApp(path)
+      .then((resolved) => {
+        if (!cancelled && resolved) setHref(resolved);
+      })
+      .finally(() => {
+        if (!cancelled) setPending(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [path, href]);
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 text-xs"
+      >
+        <Download className="h-3 w-3" />
+        {label}
+      </a>
+    );
+  }
+  return (
+    <span className="text-white/30 text-xs" title={pending ? 'Loading PDF…' : 'PDF not generated yet'}>
+      {pending ? `${label}…` : label}
+    </span>
+  );
+}
+
+export default function PlantReportsPage() {
+  const [rows, setRows] = useState<PlantInspection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [hasPlantModule, setHasPlantModule] = useState<boolean | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 300);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+
+  const isManager = profile?.role === 'manager' || profile?.role === 'admin';
+
+  const handleRetryPdfs = async (inspectionId: string) => {
+    if (!firebaseFunctions) {
+      alert('Functions are not available. Refresh the page and try again.');
+      return;
+    }
+    setRetryingId(inspectionId);
+    try {
+      const retry = httpsCallable<{ inspectionId: string }, { success: boolean }>(
+        firebaseFunctions,
+        'retryPlantInspectionPdfs'
+      );
+      await retry({ inspectionId });
+      if (profile?.company_id) await fetchInspections(profile.company_id);
+    } catch (e: unknown) {
+      const msg =
+        e && typeof e === 'object' && 'message' in e
+          ? String((e as { message: string }).message)
+          : 'Could not generate PDFs';
+      alert(msg);
+    } finally {
+      setRetryingId(null);
+    }
+  };
+
+  const needsPdfRetry = (row: PlantInspection) =>
+    !!row.pdf_generation_error ||
+    (row.locked &&
+      !row.pdf_puwer_path &&
+      !row.pdf_generation_started);
+
+  useEffect(() => {
+    if (!firebaseAuth || !firebaseDb) return;
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
-      if (user) setIdToken(await user.getIdToken());
+      if (!user || !firebaseDb) {
+        setLoading(false);
+        return;
+      }
+      const snap = await getDoc(doc(firebaseDb, 'profiles', user.uid));
+      if (!snap.exists()) {
+        setLoading(false);
+        return;
+      }
+      const data = snap.data() as Profile;
+      setProfile(data);
+      if (data.company_id) {
+        const companySnap = await getDoc(doc(firebaseDb, 'companies', data.company_id));
+        setHasPlantModule(
+          companySnap.exists() && companyHasPlantModuleAccess(companySnap.data())
+        );
+        await fetchInspections(data.company_id);
+      } else {
+        setLoading(false);
+      }
     });
     return () => unsub();
   }, []);
 
-  const fetchInspections = useCallback(async () => {
-    if (!idToken) return;
+  const fetchInspections = async (companyId: string) => {
+    if (!firebaseDb) return;
     setLoading(true);
     try {
-      const params = new URLSearchParams({ limit: '50' });
-      if (typeFilter) params.set('type', typeFilter);
-      if (outcomeFilter) params.set('outcome', outcomeFilter);
-      const res = await fetch(`/api/plant-inspections?${params}`, {
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
-      if (res.ok) setInspections((await res.json()).inspections ?? []);
+      const q = query(
+        collection(firebaseDb, 'plant_inspections'),
+        where('company_id', '==', companyId),
+        orderBy('submitted_at', 'desc')
+      );
+      const snap = await getDocs(q);
+      setRows(
+        snap.docs.map((d) => ({ id: d.id, ...d.data() } as PlantInspection))
+      );
+    } catch (e) {
+      console.error('Error loading plant inspections:', e);
     } finally {
       setLoading(false);
     }
-  }, [idToken, typeFilter, outcomeFilter]);
+  };
 
-  useEffect(() => { fetchInspections(); }, [fetchInspections]);
+  const filtered = useMemo(() => {
+    const q = debouncedSearch.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) => {
+      const ref = (r.reference_number || '').toLowerCase();
+      const plant = (r.snapshot_plant_number || '').toLowerCase();
+      const inspector = (r.inspector_name || '').toLowerCase();
+      const makeModel = `${r.snapshot_make || ''} ${r.snapshot_model || ''}`.toLowerCase();
+      return ref.includes(q) || plant.includes(q) || inspector.includes(q) || makeModel.includes(q);
+    });
+  }, [rows, debouncedSearch]);
 
-  const filteredInspections = inspections.filter((i) => {
-    if (!search) return true;
-    const s = search.toLowerCase();
+  useEffect(() => setCurrentPage(1), [debouncedSearch]);
+
+  const paginated = useMemo(
+    () => filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filtered, currentPage]
+  );
+
+  if (!isManager) {
     return (
-      i.machine_name?.toLowerCase().includes(s) ||
-      i.machine_asset_number?.toLowerCase().includes(s) ||
-      i.reference_number?.toLowerCase().includes(s) ||
-      i.inspector_name?.toLowerCase().includes(s)
+      <div className="p-8 text-white/70">
+        Plant reports are available to managers and admins only.
+      </div>
     );
-  });
-
-  async function handleAmend(e: React.FormEvent) {
-    e.preventDefault();
-    if (!amendTarget || !idToken) return;
-    setAmendError('');
-    setAmendLoading(true);
-    try {
-      const res = await fetch(`/api/plant-inspections/${amendTarget.inspection.id}/amend`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ field: amendTarget.field, new_value: amendValue, reason: amendReason }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setAmendError(data.error ?? 'Amendment failed'); return; }
-      setAmendTarget(null);
-      setAmendValue('');
-      setAmendReason('');
-      await fetchInspections();
-    } finally {
-      setAmendLoading(false);
-    }
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <BookOpen className="h-7 w-7 text-blue-400" />
-          Plant Inspection Reports
-        </h1>
-        <p className="text-sm text-white/50 mt-1">LOLER, PUWER and service inspection records</p>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
-          <input
-            type="text"
-            placeholder="Search by machine, ref number, inspector..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-          />
-        </div>
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value as InspectionType | '')}
-          className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-        >
-          {INSPECTION_TYPES.map((t) => <option key={t.value} value={t.value} className="bg-gray-900">{t.label}</option>)}
-        </select>
-        <select
-          value={outcomeFilter}
-          onChange={(e) => setOutcomeFilter(e.target.value as InspectionOutcome | '')}
-          className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-        >
-          {OUTCOMES.map((o) => <option key={o.value} value={o.value} className="bg-gray-900">{o.label}</option>)}
-        </select>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white/3 border border-white/10 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 bg-white/5">
-                <th className="px-4 py-3 text-left text-xs font-medium text-white/50 uppercase tracking-wider">Reference</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white/50 uppercase tracking-wider">Machine</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white/50 uppercase tracking-wider hidden md:table-cell">Type</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white/50 uppercase tracking-wider hidden lg:table-cell">Inspector</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white/50 uppercase tracking-wider hidden sm:table-cell">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white/50 uppercase tracking-wider">Outcome</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-white/50 uppercase tracking-wider">Details</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {loading ? (
-                <tr><td colSpan={7} className="px-4 py-8 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-white/40" /></td></tr>
-              ) : filteredInspections.length === 0 ? (
-                <tr><td colSpan={7} className="px-4 py-12 text-center text-white/40">
-                  <BookOpen className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                  <p>No inspection reports found.</p>
-                </td></tr>
-              ) : filteredInspections.map((insp) => (
-                <tr key={insp.id} className="hover:bg-white/3 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-blue-400">{insp.reference_number}</td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-white">{insp.machine_name}</div>
-                    <div className="text-xs text-white/40">{insp.machine_asset_number}</div>
-                  </td>
-                  <td className="px-4 py-3 hidden md:table-cell">
-                    <span className="px-2 py-0.5 text-xs rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30">
-                      {insp.inspection_type}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-white/60 hidden lg:table-cell text-xs">{insp.inspector_name}</td>
-                  <td className="px-4 py-3 text-white/60 hidden sm:table-cell text-xs">
-                    {insp.inspected_at ? new Date(insp.inspected_at as string).toLocaleDateString('en-GB') : '—'}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full border ${OUTCOME_STYLES[insp.outcome]}`}>
-                      {insp.outcome === 'pass' && <CheckCircle className="h-3 w-3" />}
-                      {insp.outcome === 'fail' && <XCircle className="h-3 w-3" />}
-                      {insp.outcome === 'advisory' && <AlertCircle className="h-3 w-3" />}
-                      {insp.outcome}
-                    </span>
-                    {insp.defects?.length > 0 && (
-                      <span className="ml-1 text-xs text-orange-400">{insp.defects.length} defect{insp.defects.length !== 1 ? 's' : ''}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => setSelectedInspection(insp)}
-                      className="p-1.5 text-white/40 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Detail Modal */}
-      {selectedInspection && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-white/10 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
-              <div>
-                <h2 className="text-lg font-semibold text-white">{selectedInspection.reference_number}</h2>
-                <p className="text-sm text-white/50">{selectedInspection.machine_name} — {selectedInspection.machine_asset_number}</p>
-              </div>
-              <button onClick={() => setSelectedInspection(null)} className="text-white/40 hover:text-white">
-                <XCircle className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><span className="text-white/40">Type</span><p className="text-white font-medium">{selectedInspection.inspection_type}</p></div>
-                <div><span className="text-white/40">Outcome</span>
-                  <p className={`font-medium ${selectedInspection.outcome === 'pass' ? 'text-green-400' : selectedInspection.outcome === 'fail' ? 'text-red-400' : 'text-yellow-400'}`}>
-                    {selectedInspection.outcome}
-                  </p>
-                </div>
-                <div><span className="text-white/40">Inspector</span><p className="text-white">{selectedInspection.inspector_name}</p></div>
-                <div><span className="text-white/40">Date</span>
-                  <p className="text-white">{selectedInspection.inspected_at ? new Date(selectedInspection.inspected_at as string).toLocaleDateString('en-GB') : '—'}</p>
-                </div>
-                <div><span className="text-white/40">Qualification</span><p className="text-white">{selectedInspection.inspector_qualification ?? '—'}</p></div>
-                <div><span className="text-white/40">Next Due</span>
-                  <p className="text-white">{selectedInspection.next_inspection_due ? new Date(selectedInspection.next_inspection_due as string).toLocaleDateString('en-GB') : '—'}</p>
-                </div>
-              </div>
-
-              {selectedInspection.notes && (
-                <div>
-                  <p className="text-xs text-white/40 mb-1">Notes</p>
-                  <p className="text-sm text-white/80 bg-white/5 rounded-lg p-3">{selectedInspection.notes}</p>
-                </div>
-              )}
-
-              {selectedInspection.defects?.length > 0 && (
-                <div>
-                  <p className="text-xs text-white/40 mb-2">Defects ({selectedInspection.defects.length})</p>
-                  <div className="space-y-2">
-                    {selectedInspection.defects.map((d, i) => (
-                      <div key={i} className="bg-white/5 rounded-lg p-3 text-sm">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs px-2 py-0.5 rounded-full border ${d.severity === 'immediate' ? 'bg-red-500/15 text-red-400 border-red-500/30' : d.severity === 'monitor' ? 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30' : 'bg-white/10 text-white/50 border-white/20'}`}>
-                            {d.severity}
-                          </span>
-                          <span className="text-white font-medium">{d.part_name}</span>
-                        </div>
-                        <p className="text-white/60">{d.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedInspection.amendments?.length > 0 && (
-                <div>
-                  <p className="text-xs text-white/40 mb-2">Amendment Log ({selectedInspection.amendments.length})</p>
-                  <div className="space-y-2">
-                    {selectedInspection.amendments.map((a, i) => (
-                      <div key={i} className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3 text-xs text-white/70">
-                        <span className="font-medium text-yellow-400">{a.field}</span> changed by {a.amended_by} — {a.reason}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <button
-                onClick={() => { setAmendTarget({ inspection: selectedInspection, field: 'notes' }); setSelectedInspection(null); }}
-                className="inline-flex items-center gap-2 px-3 py-2 bg-white/5 border border-white/10 text-white/60 text-sm rounded-lg hover:bg-white/10 transition-colors"
-              >
-                <Edit className="h-4 w-4" />
-                Amend Record
-              </button>
-            </div>
-          </div>
+    <div>
+      {hasPlantModule === false && (
+        <div className="mb-6 p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-100 text-sm">
+          <strong>Plant module not active</strong> on your company yet.
         </div>
       )}
 
-      {/* Amendment Modal */}
-      {amendTarget && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-yellow-500/30 rounded-xl w-full max-w-md">
-            <div className="p-5 border-b border-white/10">
-              <h2 className="text-lg font-semibold text-white">Amend Inspection Record</h2>
-              <p className="text-xs text-white/40 mt-1">All amendments are logged with full audit trail</p>
-            </div>
-            <form onSubmit={handleAmend} className="p-5 space-y-4">
-              {amendError && <p className="text-sm text-red-400">{amendError}</p>}
-              <div>
-                <label className="block text-xs text-white/60 mb-1">Field to Amend</label>
-                <select
-                  value={amendTarget.field}
-                  onChange={(e) => setAmendTarget({ ...amendTarget, field: e.target.value })}
-                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
-                >
-                  {['outcome', 'notes', 'next_inspection_due', 'inspector_qualification'].map(f => (
-                    <option key={f} value={f} className="bg-gray-900">{f}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-white/60 mb-1">New Value</label>
-                <input
-                  required
-                  value={amendValue}
-                  onChange={(e) => setAmendValue(e.target.value)}
-                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-white/60 mb-1">Reason for Amendment *</label>
-                <textarea
-                  required
-                  rows={2}
-                  value={amendReason}
-                  onChange={(e) => setAmendReason(e.target.value)}
-                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 resize-none"
-                />
-              </div>
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setAmendTarget(null)}
-                  className="flex-1 px-4 py-2 bg-white/5 border border-white/10 text-white/70 text-sm rounded-lg hover:bg-white/10 transition-colors">
-                  Cancel
-                </button>
-                <button type="submit" disabled={amendLoading}
-                  className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                  {amendLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Save Amendment
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+          <FileText className="h-8 w-8 text-amber-400" />
+          Plant reports
+        </h1>
+        <p className="text-white/70 text-sm mt-1">
+          Submitted inspections from the mobile app. Records are locked after submit.
+        </p>
+      </div>
+
+      <div className="relative mb-4 max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
+        <input
+          type="search"
+          placeholder="Search ref, plant no, inspector…"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full bg-black border border-amber-500/30 rounded-lg pl-10 pr-3 py-2 text-white focus:border-amber-500 outline-none"
+        />
+      </div>
+
+      <div className="rounded-xl border border-amber-500/20 overflow-hidden">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-amber-500/10 text-amber-100/90 uppercase text-xs">
+            <tr>
+              <th className="px-4 py-3">Reference</th>
+              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Machine</th>
+              <th className="px-4 py-3">Inspector</th>
+              <th className="px-4 py-3">Reports</th>
+              <th className="px-4 py-3">Cost</th>
+              <th className="px-4 py-3">PDFs</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {loading ? (
+              <TableSkeleton cols={7} rows={5} />
+            ) : paginated.length === 0 ? (
+              <EmptyStateTableRow
+                colSpan={7}
+                message="No inspections yet. Inspectors submit from the app (machine card or machine detail)."
+              />
+            ) : (
+              paginated.map((row) => (
+                <tr key={row.id} className="hover:bg-white/5 text-white/90">
+                  <td className="px-4 py-3 font-mono text-xs">
+                    <div className="flex items-center gap-1.5">
+                      {row.locked && <Lock className="h-3 w-3 text-amber-400/80 shrink-0" aria-label="Locked record" />}
+                      {row.reference_number || 'Pending ref'}
+                    </div>
+                    {row.defects_immediate_danger && (
+                      <span className="text-red-400 text-xs">Immediate danger</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div>{row.inspection_date || '—'}</div>
+                    <div className="text-white/50 text-xs">{row.inspection_time || formatSubmittedAt(row.submitted_at)}</div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="font-medium">{row.snapshot_plant_number || '—'}</div>
+                    <div className="text-white/50 text-xs">
+                      {[row.snapshot_make, row.snapshot_model].filter(Boolean).join(' ')}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">{row.inspector_name || '—'}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {reportBadges(row).map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-1.5 py-0.5 rounded bg-white/10 text-xs text-white/80"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    {row.total_cost != null ? `£${Number(row.total_cost).toFixed(2)}` : '—'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-1">
+                      {row.includes_loler && (
+                        <PdfLink label="LOLER" url={row.pdf_loler_url} path={row.pdf_loler_path} />
+                      )}
+                      <PdfLink label="PUWER" url={row.pdf_puwer_url} path={row.pdf_puwer_path} />
+                      {row.includes_service && (
+                        <PdfLink label="Service" url={row.pdf_service_url} path={row.pdf_service_path} />
+                      )}
+                      {row.includes_hire_check && (
+                        <PdfLink label="Hire" url={row.pdf_hire_check_url} path={row.pdf_hire_check_path} />
+                      )}
+                      {needsPdfRetry(row) && (
+                        <div className="flex flex-col gap-1 mt-1">
+                          {row.pdf_generation_error && (
+                            <span
+                              className="text-red-600 dark:text-red-400 text-xs leading-snug"
+                              title={row.pdf_generation_error}
+                            >
+                              PDF failed — redeploy functions, then retry
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            disabled={retryingId === row.id}
+                            onClick={() => handleRetryPdfs(row.id)}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 hover:text-amber-900 disabled:opacity-50 dark:text-amber-400 dark:hover:text-amber-300"
+                          >
+                            <RefreshCw
+                              className={`h-3 w-3 ${retryingId === row.id ? 'animate-spin' : ''}`}
+                            />
+                            {retryingId === row.id ? 'Generating…' : 'Generate PDFs'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {!loading && filtered.length > PAGE_SIZE && (
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filtered.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setCurrentPage}
+        />
       )}
     </div>
   );

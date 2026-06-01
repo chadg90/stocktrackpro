@@ -129,14 +129,31 @@ In `.env.local` set:
 
 ---
 
+## Step 7b: Plant & Machinery Stripe prices (required on Vercel for Plant checkout)
+
+In `.env.local` (and on Vercel), add:
+
+- **STRIPE_PRICE_PLANT_PER_MACHINE** — monthly £12 per machine (Price ID from product **Plant & Machinery Module**)
+- **STRIPE_PRICE_PLANT_PER_MACHINE_YEARLY** — yearly £120 per machine
+
+Example IDs from `.env.local.example` (use **live** `price_...` values in Vercel Production if you use `sk_live_`):
+
+```
+STRIPE_PRICE_PLANT_PER_MACHINE=price_1TXlTbHbmFLRZL4BP0KUdoUc
+STRIPE_PRICE_PLANT_PER_MACHINE_YEARLY=price_1TXlTcHbmFLRZL4BmoM1aLut
+```
+
+---
+
 ## Step 8: When you deploy (e.g. Vercel)
 
 The live site doesn’t use `.env.local` from your computer. You type the same stuff into your host:
 
 1. In Vercel: open your project → **Settings** → **Environment Variables**.
-2. Add **every** variable from `.env.local` (same name, same value).
+2. Add **every** variable from `.env.local` (same name, same value), including the two Plant price IDs above.
 3. For **FIREBASE_SERVICE_ACCOUNT_JSON**, paste the whole JSON again.
-4. Save and **redeploy** the site so it picks up the new variables.
+4. Set scope to **Production** (and Preview if you test Plant checkout there).
+5. Save and **redeploy** the site so it picks up the new variables.
 
 ---
 

@@ -18,11 +18,21 @@ Compare these values with what you have in Vercel. Make sure each variable has t
 - `STRIPE_SECRET_KEY` = `sk_live_...` (from your `.env.local`)
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` = `pk_live_...` (from your `.env.local`)
 - `STRIPE_WEBHOOK_SECRET` = `whsec_...` (from your `.env.local`)
-- `STRIPE_PRICE_STARTER` = `price_...` (from your `.env.local`)
-- `STRIPE_PRICE_TEAM` = `price_...` (from your `.env.local`)
-- `STRIPE_PRICE_BUSINESS` = `price_...` (from your `.env.local`)
-- `STRIPE_PRICE_ENTERPRISE` = `price_...` (from your `.env.local`)
+- `STRIPE_PRICE_PER_VEHICLE` = `price_...` (monthly per vehicle)
+- `STRIPE_PRICE_PER_VEHICLE_YEARLY` = `price_...` (yearly per vehicle)
+- **`STRIPE_PRICE_PLANT_PER_MACHINE`** = Plant monthly (£12/machine) — **required for Plant checkout**
+- **`STRIPE_PRICE_PLANT_PER_MACHINE_YEARLY`** = Plant annual (£120/machine) — **required for Plant checkout**
+- `STRIPE_PORTAL_CONFIGURATION_ID` = optional
 - `NEXT_PUBLIC_APP_URL` = `https://www.stocktrackpro.co.uk` (your production URL)
+
+### Plant price IDs (from `.env.local.example` — use **live** IDs in Production if `STRIPE_SECRET_KEY` is `sk_live_`)
+
+| Variable | Example value (match your Stripe mode) |
+|----------|----------------------------------------|
+| `STRIPE_PRICE_PLANT_PER_MACHINE` | `price_1TXlTbHbmFLRZL4BP0KUdoUc` |
+| `STRIPE_PRICE_PLANT_PER_MACHINE_YEARLY` | `price_1TXlTcHbmFLRZL4BmoM1aLut` |
+
+Product in Stripe: **Plant & Machinery Module** (`prod_UWoyF3TdWqK9SR`). If Production uses live keys, copy the **live** price IDs from Stripe Dashboard → Products → Plant & Machinery Module → Prices (not test IDs unless Preview uses test mode).
 
 ## Next Steps
 
