@@ -2,13 +2,9 @@ import Link from 'next/link';
 import { Check } from 'lucide-react';
 
 const FEATURES = [
-  'Unlimited Vehicle Inspections',
-  'Full Defect Close-out Workflow',
-  '7-Day MOT & Tax Smart Alerts',
-  'Manager Web Analytics Dashboard',
-  'iOS & Android App Access',
-  'No Setup Fees & UK Support',
-  'Full Onboarding Support',
+  'All fleet features on every plan',
+  'Unlimited team members (scales with vehicles)',
+  'iOS, Android, and web dashboard',
 ];
 
 export default function HomePricingCard() {
@@ -21,7 +17,7 @@ export default function HomePricingCard() {
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">Simple fleet pricing</h2>
           <p className="text-white/55 text-sm max-w-md mx-auto">
-            National UK fleet compliance software — one flat rate, full feature set.
+            7-day free trial — no card required.
           </p>
         </div>
 
@@ -36,11 +32,7 @@ export default function HomePricingCard() {
             <p className="text-white/55 text-sm">Minimum 5 vehicles. Monthly plans can be cancelled anytime.</p>
           </div>
 
-          <p className="text-center font-semibold text-white mb-6">
-            Team user allowance scales with subscribed fleet size, with manager access included.
-          </p>
-
-          <ul className="space-y-3 mb-10">
+          <ul className="space-y-3 mb-6">
             {FEATURES.map((item) => (
               <li key={item} className="flex items-start gap-3 text-white/85 text-sm">
                 <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" aria-hidden />
@@ -55,6 +47,11 @@ export default function HomePricingCard() {
           >
             Start 7-Day Free Trial
           </Link>
+          <p className="text-center mt-4 text-white/50 text-sm">
+            <Link href="/pricing" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+              Full pricing — including Plant &amp; Machinery
+            </Link>
+          </p>
         </div>
       </div>
     </section>

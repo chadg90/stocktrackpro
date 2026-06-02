@@ -8,13 +8,10 @@ import HomeFaqSection from '@/components/HomeFaqSection';
 import { HomeJsonLd } from '@/components/HomeJsonLd';
 import { HomeFaqJsonLd } from '@/components/HomeFaqJsonLd';
 import {
-  Wrench,
   Map,
   Smartphone,
-  Users,
   ClipboardList,
   ArrowRight,
-  Check,
   Zap,
   Droplets,
   Truck,
@@ -64,44 +61,62 @@ const DEFECT_STEPS = [
   {
     n: 1,
     title: 'REPORT',
-    body:
-      'Drivers perform daily inspections via the mobile app. Defects are flagged instantly with photo evidence and a timestamp.',
+    body: 'Drivers complete daily inspections in the app — photos, checklist, and defects captured with a timestamp.',
   },
   {
     n: 2,
     title: 'ALERT',
-    body:
-      'Managers and fitters (assigned the manager role) receive immediate push notifications the moment a defect is raised, plus automatic 7-day warnings before any MOT or tax expiry.',
+    body: 'Managers get a push notification the moment a defect is raised, so nothing sits unnoticed.',
   },
   {
     n: 3,
     title: 'RESOLVE',
-    body:
-      'Fitters (assigned the manager role) see the defect in their My Jobs list the moment it is reported. Once repaired, they close it out directly in the app.',
+    body: 'Fitters work from My Jobs, update status, and close the job in the app when the vehicle is ready.',
   },
   {
     n: 4,
     title: 'AUDIT',
     body: (
       <>
-        Every inspection, defect, and repair is recorded in a timestamped digital{' '}
+        The full history stays in one digital{' '}
         <Link href="/compliance-centre/o-licence-defect-records" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
           audit trail
         </Link>{' '}
-        — built to support O-licence record keeping.
+        for O-licence record keeping.
       </>
     ),
   },
 ];
 
 const QUICK_FACTS = [
-  ['Platform', 'iOS app, Android app, and web dashboard'],
-  ['Price', '£8 per vehicle per month, including VAT at 20%'],
-  ['Free trial', '7 days — no card required'],
-  ['Users included', 'Unlimited users — drivers (user role) and managers/fitters (manager role)'],
-  ['Compliance', 'Supports O-licence defect record keeping'],
-  ['Fleet size', 'Suitable for 5 to 100+ vehicles'],
-  ['Support', 'UK-based via email and WhatsApp'],
+  ['Platform', 'iOS and Android app, plus web dashboard'],
+  ['Who uses what', 'Drivers (user role); managers and fitters (manager role)'],
+  ['Fleet size', 'Built for 5 to 100+ vehicles'],
+  ['Support', 'UK-based — email and WhatsApp'],
+];
+
+const INCLUDED = [
+  {
+    icon: Smartphone,
+    title: 'Inspections in the field',
+    description: 'Structured daily checks with required photos — no skipped steps.',
+  },
+  {
+    icon: ClipboardList,
+    title: 'Defects to close-out',
+    description: 'Report → notify → repair → resolve, with My Jobs for open work.',
+  },
+  {
+    icon: Map,
+    title: 'Fleet & renewals',
+    description: 'Vehicles, mileage, MOT and tax in one manager dashboard.',
+  },
+  {
+    icon: HardHat,
+    title: 'Plant & Machinery',
+    description: 'Optional add-on for LOLER and site plant — see pricing.',
+    href: '/pricing',
+  },
 ];
 
 export default function Home() {
@@ -123,20 +138,8 @@ export default function Home() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight text-white mb-6 leading-[1.08]">
               Fleet Management, Compliance &amp; Defect Resolution.
             </h1>
-            <p className="text-lg sm:text-xl text-white/85 max-w-2xl leading-relaxed mb-2">
-              One platform to manage your entire fleet — inspections, MOTs, tax, and defects.
-            </p>
-            <p className="text-base sm:text-lg text-white/55 max-w-2xl leading-relaxed mb-10">
-              Web dashboard for managers. Mobile app for drivers and fitters (manager role).
-            </p>
-            <p className="text-sm text-white/45 max-w-2xl leading-relaxed mb-10">
-              Stock Track PRO brings together fleet inspection software UK operators rely on, vehicle defect reporting app
-              workflows, and MOT tracking — without spreadsheet chaos. Whether you run vans or a mixed fleet, it is built as
-              {' '}
-              <Link href="/compliance-centre/o-licence-defect-records" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
-                O-licence
-              </Link>{' '}
-              compliance software that helps keep evidence organised for DVSA scrutiny.
+            <p className="text-lg sm:text-xl text-white/80 max-w-2xl leading-relaxed mb-10">
+              Daily inspections, defect close-out, and MOT visibility — mobile app for the field, web dashboard for managers.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
@@ -156,14 +159,13 @@ export default function Home() {
               </Link>
             </p>
             <p className="mt-6 text-sm text-white/50">
-              7 days free &bull; no card required &bull;{' '}
               <a
                 href={WHATSAPP_ENQUIRY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white/70 hover:text-white underline underline-offset-2"
               >
-                or talk to us on WhatsApp
+                Questions? Message us on WhatsApp
               </a>
             </p>
           </div>
@@ -243,10 +245,10 @@ export default function Home() {
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="text-center max-w-3xl mx-auto mb-14">
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                Don&apos;t Just Find Defects — Resolve Them
+                From defect report to sign-off
               </h2>
               <p className="text-white/60 text-lg leading-relaxed">
-                A complete digital workflow from first report to final sign-off.
+                Fitters and managers share the manager role for My Jobs and alerts; drivers report from the app.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -265,104 +267,50 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Capabilities */}
+        {/* What's included */}
         <section className="py-20 sm:py-28 border-t border-white/10">
-          <div className="container mx-auto px-4">
-            <p className="text-center text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">Capabilities</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 text-center max-w-2xl mx-auto">
-              Work smarter. Stay organised. Reduce loss and downtime.
+          <div className="container mx-auto px-4 max-w-5xl">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 text-center">
+              What&apos;s included
             </h2>
-            <p className="text-white/55 text-center max-w-xl mx-auto mb-16">
-              Everything you need to run inspections, defects, and renewal visibility in one national UK fleet compliance
-              platform.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {[
-                {
-                  icon: Smartphone,
-                  title: 'Mobile fleet workflows',
-                  description:
-                    'Use the app to complete inspections, update defects, and track progress in the field — vehicle defect reporting app workflows managers can trust.',
-                },
-                {
-                  icon: Map,
-                  title: 'Fleet visibility',
-                  description:
-                    'Monitor vehicles, inspections, mileage, and service dates across every site — MOT tracking software for fleets without spreadsheet risk.',
-                },
-                {
-                  icon: Smartphone,
-                  title: 'Mobile-first operations',
-                  description:
-                    'Drivers (user role) and fitters (manager role) complete inspections, raise defects, and update job progress from the app.',
-                },
-                {
-                  icon: Users,
-                  title: 'Team & roles',
-                  description: 'Managers oversee the company and team; drivers (user role) and fitters (manager role) work from the same live data.',
-                },
-                {
-                  icon: Wrench,
-                  title: 'Vehicle inspections',
-                  description:
-                    'Capture required photos, checklist items, and defects to support compliance checks.',
-                },
-                {
-                  icon: ClipboardList,
-                  title: 'Defect reporting',
-                  description:
-                    'Flag defects, track repairs, and close jobs out with a clear trail that supports your O-licence records.',
-                },
-              ].map((feature, index) => (
-                <div
-                  key={index}
-                  className="group relative p-7 sm:p-8 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-blue-500/30 hover:bg-white/[0.04] transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/5"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-5 text-blue-500 group-hover:bg-blue-500/20 transition-colors">
-                    <feature.icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
-                  <p className="text-white/60 text-sm leading-relaxed">{feature.description}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-12 flex justify-center">
-              <Link
-                href="/features"
-                className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-400 transition-colors font-medium text-sm"
-              >
-                Explore every feature in detail
-                <ArrowRight className="w-4 h-4" />
+            <p className="text-white/55 text-center mb-12 max-w-lg mx-auto text-sm">
+              One fleet subscription — full detail on the{' '}
+              <Link href="/features" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+                features page
               </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Outcomes */}
-        <section className="py-20 sm:py-28 bg-white/[0.02] border-t border-white/10">
-          <div className="container mx-auto px-4">
-            <p className="text-center text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">Outcomes</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 text-center max-w-2xl mx-auto">
-              Safer vehicles. Less downtime. A clearer picture.
-            </h2>
-            <p className="text-white/55 text-center max-w-xl mx-auto mb-14">
-              What fleets gain when inspections, defects, and MOT and tax visibility live in one place.
+              .
             </p>
-            <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                'Reduce vehicle downtime through faster defect reporting.',
-                'Support compliance with timestamped inspection records.',
-                'See fleet and team activity in one manager dashboard.',
-                'Keep MOT and tax visibility front and centre across the fleet.',
-              ].map((benefit, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-black/40 hover:border-blue-500/20 transition-colors"
-                >
-                  <Check className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                  <p className="text-white/90 text-sm sm:text-base">{benefit}</p>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {INCLUDED.map((item) => {
+                const Icon = item.icon;
+                const inner = (
+                  <>
+                    <div className="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-1">{item.title}</h3>
+                      <p className="text-white/60 text-sm leading-relaxed">{item.description}</p>
+                    </div>
+                  </>
+                );
+                return 'href' in item && item.href ? (
+                  <Link
+                    key={item.title}
+                    href={item.href}
+                    className="flex gap-4 p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-blue-500/30 transition-colors"
+                  >
+                    {inner}
+                  </Link>
+                ) : (
+                  <div
+                    key={item.title}
+                    className="flex gap-4 p-6 rounded-2xl border border-white/10 bg-white/[0.02]"
+                  >
+                    {inner}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -380,7 +328,7 @@ export default function Home() {
               Start managing your fleet today
             </h2>
             <p className="text-white/70 max-w-xl mx-auto mb-10 text-lg">
-              Set up your company, invite your team, and run inspections with a 7-day free trial — no card required.
+              Set up your company and invite your team in minutes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

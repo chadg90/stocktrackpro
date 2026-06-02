@@ -3,34 +3,21 @@ export type HomeFaqItem = {
   answer: string;
 };
 
+/** Short set for the homepage — pricing and full list live on /pricing and /faq. */
 export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   {
     question: 'Is Stock Track PRO suitable for O-licence holders?',
     answer:
-      'Yes. Stock Track PRO supports O-licence record keeping by timestamping inspections, defect reports and repair close-out activity in one digital workflow.',
+      'Yes. Timestamped inspections, defect reports, and repair close-out sit in one workflow — see our Compliance Centre for guidance on defect records.',
   },
   {
     question: 'How many users can I add?',
     answer:
-      'There is no separate user fee. Your user allowance scales automatically with your subscribed vehicle count — the more vehicles you manage, the more team members you can add.',
-  },
-  {
-    question: 'What vehicles does Stock Track PRO support?',
-    answer: 'Any vehicle in your fleet — vans, HGVs, plant vehicles, and cars.',
-  },
-  {
-    question: 'Does it work across the whole of the UK?',
-    answer:
-      'Yes. Stock Track PRO is used by fleet operators nationwide, from sole traders with a handful of vans to businesses running 35+ vehicles.',
+      'No separate user fee. Your allowance scales with subscribed vehicle count.',
   },
   {
     question: 'Is there a long-term contract?',
     answer:
-      'Monthly plans can be cancelled anytime with no long-term contract. Annual plans are paid upfront for 12 months; you can cancel renewal, but unused months are not refunded.',
-  },
-  {
-    question: 'How much does Stock Track PRO cost?',
-    answer:
-      '£8 per vehicle per month, including VAT at 20%, with a minimum subscription of 5 vehicles. Annual billing is £84 per vehicle per year. Optional Plant & Machinery is £12 per machine per month (minimum 3 machines), billed separately.',
+      'Monthly plans cancel anytime. Annual plans are paid upfront for 12 months; you can stop renewal, but unused months are not refunded.',
   },
 ];
