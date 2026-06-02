@@ -20,7 +20,19 @@ export default function FAQ() {
     },
     {
       question: "Can I use this for fleet only?",
-      answer: "Yes. Stock Track PRO is now focused on fleet management. Vehicle inspections, defect workflow, MOT and tax tracking, and team management are included.",
+      answer: "Yes. Your core subscription covers fleet management only — vehicle inspections, defect workflow, MOT and tax tracking, and team management. Plant & Machinery is an optional add-on if you also maintain lifting equipment and site plant.",
+    },
+    {
+      question: "What is the Plant & Machinery add-on?",
+      answer: "An optional module for LOLER thorough examinations, service inspections, and pre-hire / off-hire checks. Managers use the mobile app and web dashboard to register machines, submit inspections, and download PDF reports. Examination due reminders are sent to managers by push notification.",
+    },
+    {
+      question: "How much does Plant & Machinery cost?",
+      answer: "£12 per machine per month (including VAT), with a minimum of 3 machines. Annual billing is £120 per machine per year. It is a separate subscription from your fleet vehicle plan and can be set up from the Pricing page or your dashboard.",
+    },
+    {
+      question: "Who can use Plant & Machinery in the app?",
+      answer: "Users with the manager role. There is no separate plant role — fitters and managers assigned the manager role can run inspections and view plant reports on the web dashboard.",
     },
     {
       question: "Does this work on Android and iOS?",

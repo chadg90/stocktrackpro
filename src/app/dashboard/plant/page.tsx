@@ -23,6 +23,7 @@ import TableSkeleton from '../components/TableSkeleton';
 import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import { useDebounce } from '@/hooks/useDebounce';
 import { companyHasPlantModuleAccess } from '@/lib/plant/access';
+import { assertCanAddPlantMachine, getPlantMachineSeatLimit } from '@/lib/plant/machine-seats';
 
 function computeNextDueFromLast(lastIso: string | null | undefined, intervalMonths: number): string | null {
   if (!lastIso?.trim() || !intervalMonths) return null;
@@ -92,6 +93,7 @@ export default function PlantMachinesPage() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [hasPlantModule, setHasPlantModule] = useState<boolean | null>(null);
+  const [companyPlant, setCompanyPlant] = useState<Record<string, unknown> | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [currentPage, setCurrentPage] = useState(1);
@@ -119,9 +121,9 @@ export default function PlantMachinesPage() {
       setProfile(data);
       if (data.company_id) {
         const companySnap = await getDoc(doc(firebaseDb, 'companies', data.company_id));
-        setHasPlantModule(
-          companySnap.exists() && companyHasPlantModuleAccess(companySnap.data())
-        );
+        const companyData = companySnap.exists() ? companySnap.data() : null;
+        setCompanyPlant(companyData);
+        setHasPlantModule(!!companyData && companyHasPlantModuleAccess(companyData));
         await fetchMachines(data.company_id);
       } else {
         setLoading(false);
@@ -169,7 +171,7 @@ export default function PlantMachinesPage() {
       date_of_manufacture: data.date_of_manufacture || null,
       equipment_description: data.equipment_description?.trim() || null,
       usual_location: data.usual_location?.trim() || null,
-      safe_working_load: (data.safe_working_load || '').trim(),
+      safe_working_load: (data.safe_working_load || '').trim() || null,
       lifts_persons: lifts,
       examination_interval_months: interval,
       examination_scheme: !!data.examination_scheme,
@@ -182,11 +184,18 @@ export default function PlantMachinesPage() {
     };
   };
 
+  const activeMachineCount = useMemo(
+    () => machines.filter((m) => m.is_active !== false).length,
+    [machines]
+  );
+  const machineSeatLimit = getPlantMachineSeatLimit(companyPlant);
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseDb || !profile?.company_id || !firebaseAuth?.currentUser) return;
     setProcessing(true);
     try {
+      assertCanAddPlantMachine(companyPlant, activeMachineCount);
       await addDoc(collection(firebaseDb, 'plant_machines'), {
         ...buildPayload(form, profile.company_id, firebaseAuth.currentUser.uid),
         created_at: serverTimestamp(),
@@ -197,7 +206,7 @@ export default function PlantMachinesPage() {
       fetchMachines(profile.company_id);
     } catch (err) {
       console.error(err);
-      alert('Could not add machine. Check that Plant module is enabled on your company.');
+      alert(err instanceof Error ? err.message : 'Could not add machine. Check that Plant module is enabled on your company.');
     } finally {
       setProcessing(false);
     }
@@ -277,8 +286,8 @@ export default function PlantMachinesPage() {
         </div>
       </div>
       <div>
-        <label className="block text-sm text-zinc-600 dark:text-white/70 mb-1">Safe Working Load *</label>
-        <input className={inputClass} required placeholder="e.g. 2500kg" value={form.safe_working_load || ''} onChange={(e) => setForm({ ...form, safe_working_load: e.target.value })} />
+        <label className="block text-sm text-zinc-600 dark:text-white/70 mb-1">Safe working load (if applicable)</label>
+        <input className={inputClass} placeholder="Optional — e.g. 2500kg, 3.2 tonnes" value={form.safe_working_load || ''} onChange={(e) => setForm({ ...form, safe_working_load: e.target.value })} />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -329,6 +338,11 @@ export default function PlantMachinesPage() {
           </h1>
           <p className="text-zinc-600 dark:text-white/70 text-sm mt-1">
             Register machines here — they sync to the mobile app for inspectors.
+            {machineSeatLimit != null && (
+              <span className="block mt-1 text-amber-800 dark:text-amber-200/90">
+                Subscription: {activeMachineCount} of {machineSeatLimit} machines registered.
+              </span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -348,8 +362,9 @@ export default function PlantMachinesPage() {
           {isManager && (
             <button
               type="button"
+              disabled={machineSeatLimit != null && activeMachineCount >= machineSeatLimit}
               onClick={() => { setForm(emptyForm()); setIsAddOpen(true); }}
-              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-lg font-semibold transition-colors"
+              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="h-5 w-5" />
               Add Machine
@@ -397,7 +412,7 @@ export default function PlantMachinesPage() {
                         <p className="text-zinc-500 dark:text-white/50 text-sm">{m.make} {m.model}</p>
                       </td>
                       <td className="px-6 py-4 text-zinc-700 dark:text-white/80 font-mono text-sm">{m.serial_number}</td>
-                      <td className="px-6 py-4 text-zinc-700 dark:text-white/80 text-sm">{m.safe_working_load}</td>
+                      <td className="px-6 py-4 text-zinc-700 dark:text-white/80 text-sm">{m.safe_working_load || '—'}</td>
                       <td className="px-6 py-4 text-zinc-600 dark:text-white/70 text-sm">{m.next_examination_due || '—'}</td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium border ${badge.className}`}>

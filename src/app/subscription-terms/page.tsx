@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 
-const LAST_UPDATED = '12 May 2026';
+const LAST_UPDATED = '2 June 2026';
 
 export const metadata: Metadata = {
   title: 'Subscription Terms',
@@ -67,6 +67,39 @@ export default function SubscriptionTermsPage() {
               <li>
                 Your subscribed vehicle count controls the total number of vehicles your company can
                 manage at any one time in the platform.
+              </li>
+            </ul>
+
+            <h2 className="text-2xl font-bold text-white mt-10 mb-4">1a. Plant &amp; Machinery add-on (optional)</h2>
+            <p className="text-zinc-300 mb-4">
+              Plant &amp; Machinery is a separate subscription from your fleet vehicle plan. It is billed per active
+              machine seat and managed through the same Stripe billing portal as your main subscription.
+            </p>
+            <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
+              <li>
+                Monthly billing: <span className="text-white">&pound;12 per machine per month</span>.
+              </li>
+              <li>
+                Annual billing: <span className="text-white">&pound;120 per machine per year</span> (paid in advance).
+              </li>
+              <li>Minimum quantity is 3 machines.</li>
+              <li>Displayed pricing is in GBP and includes UK VAT at 20%.</li>
+              <li>
+                Your subscribed machine quantity controls how many active plant machines your company can register at
+                any one time (shown as &quot;X of Y machines on subscription&quot; in the app and web dashboard).
+              </li>
+              <li>
+                The 7-day fleet trial does not automatically include Plant &amp; Machinery. Subscribe to the add-on
+                from the Pricing page or your dashboard when you are ready.
+              </li>
+              <li>
+                Some early (&quot;legacy&quot;) customers have Plant &amp; Machinery included without a separate
+                add-on; agreed legacy terms continue to apply until varied in writing.
+              </li>
+              <li>
+                Cancellation, renewal, failed payments, and quantity changes for the plant add-on follow the same
+                principles as your fleet subscription (Sections 3–6 below), applied to the plant subscription line in
+                Stripe.
               </li>
             </ul>
 
@@ -159,8 +192,8 @@ export default function SubscriptionTermsPage() {
             <h2 className="text-2xl font-bold text-white mt-10 mb-4">7. Data Retention After Cancellation</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
-                After cancellation, your company data (vehicles, inspections, defects, and team
-                profiles) remains in our systems for a reasonable period so that you can
+                After cancellation, your company data (vehicles, inspections, defects, plant machinery records where
+                applicable, and team profiles) remains in our systems for a reasonable period so that you can
                 reactivate your subscription and recover your data if needed.
               </li>
               <li>

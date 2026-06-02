@@ -20,6 +20,11 @@ import TableSkeleton from '../components/TableSkeleton';
 import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import { useDebounce } from '@/hooks/useDebounce';
 import { companyHasPlantModuleAccess } from '@/lib/plant/access';
+import {
+  getPlantPdfRetryBlockReason,
+  PLANT_PDF_RETRY_MAX,
+  plantPdfRetriesRemaining,
+} from '@/lib/plant/pdf-retry-limits';
 import { getImageUrlFromApp } from '@/lib/getImageUrl';
 
 type PlantInspection = {
@@ -51,6 +56,8 @@ type PlantInspection = {
   pdf_generation_started?: boolean;
   pdf_generated_at?: Timestamp | { seconds: number };
   pdf_generation_error?: string | null;
+  pdf_retry_count?: number;
+  pdf_last_retry_at?: Timestamp | { seconds: number };
 };
 
 type Profile = { company_id?: string; role?: string };
@@ -156,10 +163,8 @@ export default function PlantReportsPage() {
       await retry({ inspectionId });
       if (profile?.company_id) await fetchInspections(profile.company_id);
     } catch (e: unknown) {
-      const msg =
-        e && typeof e === 'object' && 'message' in e
-          ? String((e as { message: string }).message)
-          : 'Could not generate PDFs';
+      const err = e as { message?: string; code?: string };
+      const msg = err?.message || 'Could not generate PDFs';
       alert(msg);
     } finally {
       setRetryingId(null);
@@ -346,29 +351,44 @@ export default function PlantReportsPage() {
                       {row.includes_hire_check && (
                         <PdfLink label="Hire" url={row.pdf_hire_check_url} path={row.pdf_hire_check_path} />
                       )}
-                      {needsPdfRetry(row) && (
-                        <div className="flex flex-col gap-1 mt-1">
-                          {row.pdf_generation_error && (
-                            <span
-                              className="text-red-600 dark:text-red-400 text-xs leading-snug"
-                              title={row.pdf_generation_error}
-                            >
-                              PDF failed — redeploy functions, then retry
+                      {needsPdfRetry(row) && (() => {
+                        const retryBlock = getPlantPdfRetryBlockReason(row);
+                        const remaining = plantPdfRetriesRemaining(row);
+                        return (
+                          <div className="flex flex-col gap-1 mt-1">
+                            {row.pdf_generation_error && (
+                              <span
+                                className="text-red-600 dark:text-red-400 text-xs leading-snug"
+                                title={row.pdf_generation_error}
+                              >
+                                PDF failed — retry when allowed below
+                              </span>
+                            )}
+                            <span className="text-zinc-500 dark:text-white/50 text-xs">
+                              Retries: {Number(row.pdf_retry_count ?? 0)}/{PLANT_PDF_RETRY_MAX}
+                              {remaining > 0 ? ` · ${remaining} left` : ''}
+                              {' · '}1/hour cooldown
                             </span>
-                          )}
-                          <button
-                            type="button"
-                            disabled={retryingId === row.id}
-                            onClick={() => handleRetryPdfs(row.id)}
-                            className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 hover:text-amber-900 disabled:opacity-50 dark:text-amber-400 dark:hover:text-amber-300"
-                          >
-                            <RefreshCw
-                              className={`h-3 w-3 ${retryingId === row.id ? 'animate-spin' : ''}`}
-                            />
-                            {retryingId === row.id ? 'Generating…' : 'Generate PDFs'}
-                          </button>
-                        </div>
-                      )}
+                            {retryBlock && (
+                              <span className="text-amber-800 dark:text-amber-300/90 text-xs">
+                                {retryBlock}
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              disabled={retryingId === row.id || !!retryBlock}
+                              title={retryBlock ?? undefined}
+                              onClick={() => handleRetryPdfs(row.id)}
+                              className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 hover:text-amber-900 disabled:opacity-50 dark:text-amber-400 dark:hover:text-amber-300"
+                            >
+                              <RefreshCw
+                                className={`h-3 w-3 ${retryingId === row.id ? 'animate-spin' : ''}`}
+                              />
+                              {retryingId === row.id ? 'Generating…' : 'Generate PDFs'}
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </td>
                 </tr>

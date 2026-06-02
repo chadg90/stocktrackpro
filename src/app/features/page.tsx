@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Link from 'next/link';
-import { Car, Users, Wrench, Shield, Gauge, FileCheck, ArrowRight, Smartphone } from 'lucide-react';
+import { Car, Users, Wrench, Shield, Gauge, FileCheck, ArrowRight, Smartphone, HardHat } from 'lucide-react';
 
 const WHATSAPP_ENQUIRY_URL =
   'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
@@ -116,6 +116,22 @@ const features: Feature[] = [
     useCase:
       'You start the day, open the dashboard, and know exactly what needs attention — no chasing, no phone calls.',
   },
+  {
+    title: 'Plant & Machinery (optional add-on)',
+    icon: HardHat,
+    summary:
+      'For teams that maintain lifting equipment and site plant. Managers run LOLER thorough examinations, service inspections, and pre-hire checks in the mobile app, with PDF reports and a web dashboard for records and retries.',
+    bullets: [
+      'Register machines with examination due dates and usual locations',
+      'LOLER thorough examination, service, and pre-hire / off-hire inspection flows',
+      'PDF certificates stored with LOLER-compliant retention (2 years minimum for LOLER records)',
+      'Managers receive push reminders when an examination is due within 7 days or overdue',
+      'Machine seats tied to your plant subscription quantity (from £12 per machine per month)',
+      'Plant reports on the web dashboard with secure PDF download and limited manual retry',
+    ],
+    useCase:
+      'A fitter completes a thorough examination on site, submits from the app, and the LOLER PDF is available to managers on the web — with examination due dates monitored automatically.',
+  },
 ];
 
 export default function Features() {
@@ -136,9 +152,9 @@ export default function Features() {
               Everything a fleet manager actually needs
             </h1>
             <p className="text-lg text-white/75 leading-relaxed">
-              No bloat. No upsells to other products. One subscription covers
-              fleet management, inspections, defect workflow, and compliance
-              across iOS, Android, and the web dashboard.
+              No bloat. One fleet subscription covers inspections, defect workflow, MOT monitoring, and team
+              management across iOS, Android, and the web dashboard. Add Plant &amp; Machinery when you need LOLER
+              and site plant records.
             </p>
           </div>
         </div>
@@ -217,9 +233,9 @@ export default function Features() {
             See how it fits your business
           </h3>
           <p className="text-white/70 max-w-lg mx-auto mb-8">
-            Every feature on this page is included in a single subscription.
-            Monthly (£8 per vehicle per month) or annual (£84 per vehicle per year, save ~12%).
-            No long-term contract.
+            Fleet features are included in your vehicle subscription (£8 per vehicle per month, or £84 per vehicle per
+            year). Plant &amp; Machinery is optional from £12 per machine per month — see pricing for details. No
+            long-term contract on monthly plans.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

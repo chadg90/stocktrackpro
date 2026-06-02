@@ -7,12 +7,12 @@ import { COMPLIANCE_ARTICLES } from '@/content/complianceArticles';
 export const metadata: Metadata = {
   title: 'Compliance Centre',
   description:
-    'Articles on O-licence defect records, digital fleet inspections, and MOT tracking for UK operators.',
+    'Articles on O-licence defect records, digital fleet inspections, MOT tracking, and plant machinery compliance for UK operators.',
   alternates: { canonical: '/compliance-centre' },
   openGraph: {
     title: 'Compliance Centre | Stock Track PRO',
     description:
-      'Articles on O-licence defect records, digital fleet inspections, and MOT tracking for UK operators.',
+      'Articles on O-licence defect records, digital fleet inspections, MOT tracking, and plant machinery compliance for UK operators.',
     url: 'https://www.stocktrackpro.co.uk/compliance-centre/',
     siteName: 'Stock Track PRO',
     locale: 'en_GB',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Compliance Centre | Stock Track PRO',
     description:
-      'Articles on O-licence defect records, digital fleet inspections, and MOT tracking for UK operators.',
+      'Articles on O-licence defect records, digital fleet inspections, MOT tracking, and plant machinery compliance for UK operators.',
   },
 };
 
@@ -39,8 +39,13 @@ export default function ComplianceCentreHubPage() {
           Fleet compliance guidance for UK operators
         </h1>
         <p className="text-white/70 text-lg leading-relaxed mb-12">
-          Practical articles on defect records, moving from paper to digital inspections, and staying ahead of MOT and
-          tax renewals — written for fleets that take O-licence compliance seriously.
+          Practical articles on defect records, moving from paper to digital inspections, staying ahead of MOT and tax
+          renewals, and keeping plant machinery examination records in order — written for fleets that take compliance
+          seriously.
+        </p>
+        <p className="text-white/55 text-sm leading-relaxed mb-12 -mt-8">
+          Use Stock Track PRO&apos;s optional Plant &amp; Machinery module for LOLER thorough examination PDFs, service
+          records, and manager alerts when examinations are due.
         </p>
         <ul className="space-y-6">
           {COMPLIANCE_ARTICLES.map((article) => (

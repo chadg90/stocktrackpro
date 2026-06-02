@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar';
 import Link from 'next/link';
 
 /** Update only when the policy text changes (avoid misleading “daily” updates). */
-const LAST_UPDATED = '12 May 2026';
+const LAST_UPDATED = '2 June 2026';
 
 export default function PrivacyPolicy() {
   return (
@@ -42,6 +42,13 @@ export default function PrivacyPolicy() {
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Company, vehicle, inspection, and defect reporting data</span>
                 </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>
+                    Optional Plant &amp; Machinery data: machine registers, thorough examination and service
+                    inspection records, inspector details, photos, and generated PDF reports
+                  </span>
+                </li>
               </ul>
 
               <h3 className="text-xl font-semibold text-white mb-3">2.2 Automatically Collected Information</h3>
@@ -69,11 +76,18 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Vehicle inspection photos are stored securely in our cloud system</span>
+                  <span>Plant &amp; Machinery inspection photos where your company uses that module</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Push notification tokens to deliver operational alerts (for example, defect notifications)</span>
+                  <span>Inspection photos and PDF reports are stored securely in our cloud system</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>
+                    Push notification tokens to deliver operational alerts (for example, defect notifications and,
+                    for managers, plant examination due reminders)
+                  </span>
                 </li>
               </ul>
             </div>
@@ -90,7 +104,10 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Firestore: Storing and managing vehicle fleet data, user profiles, and company data</span>
+                  <span>
+                    Firestore: Storing and managing vehicle fleet data, optional plant machinery records, user
+                    profiles, and company data
+                  </span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
@@ -103,7 +120,10 @@ export default function PrivacyPolicy() {
               <ul className="space-y-3 text-white/80">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Stripe for subscription checkout, billing portal, payment processing, and webhook events</span>
+                  <span>
+                    Stripe for fleet and Plant &amp; Machinery subscription checkout, billing portal, payment
+                    processing, and webhook events
+                  </span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
@@ -222,6 +242,15 @@ export default function PrivacyPolicy() {
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Vehicle and inspection data are retained according to your company&apos;s needs and applicable legal obligations.</span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
+                  <span>
+                    Where your company uses Plant &amp; Machinery, LOLER-related records are kept for at least two
+                    years; service and hire-only records for at least fifteen months; machines that lift persons or
+                    require a lifetime examination scheme may be retained indefinitely whilst the machine remains on
+                    your register.
+                  </span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>

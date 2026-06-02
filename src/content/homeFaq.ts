@@ -31,6 +31,6 @@ export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   {
     question: 'How much does Stock Track PRO cost?',
     answer:
-      '£8 per vehicle per month, including VAT at 20%, with a minimum subscription of 5 vehicles. Annual billing is £84 per vehicle per year.',
+      '£8 per vehicle per month, including VAT at 20%, with a minimum subscription of 5 vehicles. Annual billing is £84 per vehicle per year. Optional Plant & Machinery is £12 per machine per month (minimum 3 machines), billed separately.',
   },
 ];

@@ -17,7 +17,7 @@ export type PlantMachineInput = {
   date_of_manufacture?: string | null;
   equipment_description?: string | null;
   usual_location?: string | null;
-  safe_working_load: string;
+  safe_working_load?: string | null;
   lifts_persons?: boolean;
   examination_interval_months?: number;
   examination_scheme?: boolean;
@@ -41,7 +41,7 @@ function buildPayload(data: PlantMachineInput, companyId: string, userId: string
     date_of_manufacture: data.date_of_manufacture || null,
     equipment_description: data.equipment_description?.trim() || null,
     usual_location: data.usual_location?.trim() || null,
-    safe_working_load: data.safe_working_load.trim(),
+    safe_working_load: (data.safe_working_load || '').trim() || null,
     lifts_persons: liftsPersons,
     examination_interval_months: interval,
     examination_scheme: !!data.examination_scheme,
