@@ -751,31 +751,117 @@ export function buildUserVehicleGapRows(
   });
 }
 
-export function buildComplianceExportSheets(
+export type WhoCheckedExportReport = {
+  periodLabel: string;
+  periodStart: string;
+  periodEnd: string;
+  generatedAt: string;
+  checksDone: {
+    staff: string;
+    email: string;
+    role: string;
+    vehiclesChecked: string;
+    totalChecks: number;
+  }[];
+  notChecked: {
+    staff: string;
+    email: string;
+    role: string;
+    issue: string;
+    vehicles: string;
+  }[];
+};
+
+/** Boss-friendly export: one row per staff member (checks done) and meaningful gaps only (no N×M matrix). */
+export function buildWhoCheckedExportReport(
   users: FleetUser[],
   vehicles: FleetVehicle[],
   inspections: FleetInspection[],
   period: CompliancePeriodPreset,
   monthValue?: string,
   now = new Date()
-): { name: string; data: Record<string, string | number>[] }[] {
+): WhoCheckedExportReport {
   const bounds = getCompliancePeriodBounds(period, monthValue, now);
   const periodInspections = filterInspectionsInWeek(inspections, bounds.start, bounds.end);
+  const staff = getFleetStaff(users);
+  const fleet = getActiveFleetVehicles(vehicles);
+  const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
+  const vehicleMap = Object.fromEntries(vehicles.map((v) => [v.id, v]));
 
-  const checksDone = buildStaffVehicleCheckRows(users, vehicles, periodInspections).map((row) => ({
-    User: row.User,
-    Vehicle: row.Registration,
-  }));
+  const fleetRegistrations = fleet
+    .map((v) => v.registration || v.id)
+    .sort((a, b) => a.localeCompare(b));
+  const allFleetVehiclesLabel = fleetRegistrations.join(', ');
 
-  const notChecked = buildUserVehicleGapRows(users, vehicles, periodInspections).map((row) => ({
-    User: row.User,
-    Vehicle: row.Registration,
-  }));
+  const byUser: Record<string, { regs: Set<string>; totalChecks: number }> = {};
+  const usersWithChecks = new Set<string>();
+  const vehiclesInspected = new Set<string>();
 
-  return [
-    { name: 'Checks done', data: checksDone },
-    { name: 'Not checked', data: notChecked },
-  ];
+  for (const i of periodInspections) {
+    const uid = i.inspected_by;
+    const vid = i.vehicle_id;
+    if (vid) vehiclesInspected.add(vid);
+    if (!uid || !vid) continue;
+    usersWithChecks.add(uid);
+    if (!byUser[uid]) byUser[uid] = { regs: new Set(), totalChecks: 0 };
+    byUser[uid].totalChecks += 1;
+    const reg = vehicleMap[vid]?.registration || vid;
+    byUser[uid].regs.add(reg);
+  }
+
+  const checksDone = Object.entries(byUser)
+    .map(([uid, data]) => {
+      const u = userMap[uid];
+      return {
+        staff: getUserLabel(u, uid),
+        email: u?.email || '—',
+        role: u?.role || '—',
+        vehiclesChecked: [...data.regs].sort((a, b) => a.localeCompare(b)).join(', '),
+        totalChecks: data.totalChecks,
+      };
+    })
+    .sort((a, b) => a.staff.localeCompare(b.staff));
+
+  const notChecked: WhoCheckedExportReport['notChecked'] = [];
+
+  for (const u of staff) {
+    if (usersWithChecks.has(u.id)) continue;
+    notChecked.push({
+      staff: getUserLabel(u, u.id),
+      email: u.email || '—',
+      role: u.role || '—',
+      issue: 'No checks in period',
+      vehicles: allFleetVehiclesLabel || '—',
+    });
+  }
+
+  for (const v of fleet) {
+    if (vehiclesInspected.has(v.id)) continue;
+    const makeModel = [v.make, v.model].filter(Boolean).join(' ').trim();
+    const reg = v.registration || v.id;
+    notChecked.push({
+      staff: '—',
+      email: '—',
+      role: '—',
+      issue: 'Vehicle not inspected in period',
+      vehicles: makeModel ? `${reg} (${makeModel})` : reg,
+    });
+  }
+
+  notChecked.sort((a, b) => {
+    if (a.issue !== b.issue) return a.issue.localeCompare(b.issue);
+    if (a.staff !== b.staff) return a.staff.localeCompare(b.staff);
+    return a.vehicles.localeCompare(b.vehicles);
+  });
+
+  return {
+    periodLabel: formatCompliancePeriodRange(bounds, period),
+    periodStart: format(bounds.start, 'yyyy-MM-dd'),
+    periodEnd: format(bounds.end, 'yyyy-MM-dd'),
+    generatedAt: format(now, 'yyyy-MM-dd HH:mm'),
+    checksDone,
+    notChecked,
+  };
 }
 
 export function buildVehicleWeekCompliance(

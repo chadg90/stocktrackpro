@@ -6,18 +6,18 @@ import { Download } from 'lucide-react';
 import { useFleetReport } from '../FleetReportContext';
 import FleetReportPeriodControls from '../FleetReportPeriodControls';
 import {
-  buildComplianceExportSheets,
   buildStaffVehicleCheckRows,
   buildUserCompliance,
   buildUserVehicleGapRows,
   buildVehicleWeekCompliance,
+  buildWhoCheckedExportReport,
   compliancePeriodStatusLabels,
   filterInspectionsInWeek,
   formatCompliancePeriodRange,
   getCompliancePeriodBounds,
   type CompliancePeriodPreset,
 } from '@/lib/fleetReportLogic';
-import { exportMultipleSheetsToExcel } from '@/lib/exportUtils';
+import { exportWhoCheckedReport } from '@/lib/exportUtils';
 
 type GapFilter = 'all' | 'inactive_users' | 'unchecked_vehicles';
 
@@ -77,14 +77,14 @@ export default function FleetReportCompliancePage() {
   const handleExport = () => {
     setExporting(true);
     try {
-      const sheets = buildComplianceExportSheets(users, vehicles, inspections, period, monthValue);
+      const report = buildWhoCheckedExportReport(users, vehicles, inspections, period, monthValue);
       const slug =
         period === 'month'
           ? monthValue
           : period === 'last_30_days'
             ? 'last-30-days'
             : format(periodBounds.start, 'yyyy-MM-dd');
-      exportMultipleSheetsToExcel(sheets, `stp-who-checked-${slug}`);
+      exportWhoCheckedReport(report, `stp-who-checked-${slug}`);
     } finally {
       setExporting(false);
     }
@@ -96,7 +96,8 @@ export default function FleetReportCompliancePage() {
         <p className="text-zinc-600 dark:text-white/65 text-sm max-w-3xl leading-relaxed">
           See which staff submitted vehicle inspections in {periodDescription}, which vehicles were checked,
           and where gaps remain. <strong className="text-zinc-900 dark:text-white">Export Excel</strong> downloads
-          two sheets only: who checked which vehicles, and who did not.
+          a summary for your manager — one row per staff member who checked, plus staff
+          with no checks and vehicles not inspected.
         </p>
 
         <div className="flex flex-col gap-3 shrink-0 items-stretch sm:items-end">
