@@ -121,6 +121,57 @@ body {
     @apply text-zinc-500;
   }
 
+  /* Compliance Centre article typography */
+  .compliance-article {
+    @apply max-w-3xl;
+  }
+
+  .compliance-article > p {
+    @apply mb-5 text-base sm:text-[17px] leading-[1.75] text-white/75;
+  }
+
+  .compliance-article > p:first-of-type {
+    @apply mb-8 border-b border-white/10 pb-8 text-lg sm:text-xl leading-relaxed text-white/90;
+  }
+
+  .compliance-article > h2 {
+    @apply mb-4 mt-12 scroll-mt-28 text-xl font-semibold tracking-tight text-white sm:text-2xl;
+  }
+
+  .compliance-article > ul {
+    @apply my-6 space-y-2.5 rounded-xl border border-white/10 bg-white/[0.03] p-5 sm:p-6;
+  }
+
+  .compliance-article > ul > li {
+    @apply relative pl-5 text-base leading-relaxed text-white/80;
+  }
+
+  .compliance-article > ul > li::before {
+    content: '';
+    @apply absolute left-0 top-[0.6em] h-1.5 w-1.5 rounded-full bg-blue-500;
+  }
+
+  .compliance-disclaimer {
+    @apply mb-8 mt-10 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm italic leading-relaxed text-white/50;
+  }
+
+  .compliance-article > p.compliance-disclaimer {
+    @apply mb-8 text-sm;
+  }
+
+  .compliance-article > p.compliance-disclaimer:first-of-type {
+    @apply border-0 pb-0 text-sm;
+  }
+
+  .compliance-takeaway-list > li {
+    @apply relative pl-5 text-base leading-relaxed text-white/85;
+  }
+
+  .compliance-takeaway-list > li::before {
+    content: '';
+    @apply absolute left-0 top-[0.55em] h-1.5 w-1.5 rounded-full bg-blue-400;
+  }
+
   .theme-light .dashboard-card .text-white\/50 {
     @apply text-zinc-500;
   }

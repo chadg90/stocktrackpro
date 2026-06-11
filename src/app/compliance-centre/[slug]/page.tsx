@@ -3,7 +3,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Navbar from '@/app/components/Navbar';
 import ArticleBottomCta from '@/components/ArticleBottomCta';
+import ComplianceArticleContent from '@/components/ComplianceArticleContent';
 import { ComplianceArticleJsonLd } from '@/components/seo/ComplianceArticleJsonLd';
+import { format } from 'date-fns';
 import {
   COMPLIANCE_ARTICLES,
   complianceArticleBySlug,
@@ -44,27 +46,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function KeyTakeaways({ children }: { children: React.ReactNode }) {
   return (
-    <div className="not-prose rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6">
-      <h2 className="text-xl font-semibold text-white mb-4">Key Takeaways</h2>
-      <ul className="space-y-2 text-white/80 text-base">{children}</ul>
+    <div className="mt-12 rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6 sm:p-8">
+      <h2 className="mb-5 text-xl font-semibold text-white">Key takeaways</h2>
+      <ul className="compliance-takeaway-list space-y-3">{children}</ul>
     </div>
   );
 }
 
 function ArticleCta() {
   return (
-    <p className="not-prose rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-white/85">
-      Stock Track PRO helps automate this process for UK fleets.{' '}
-      <Link href="https://www.stocktrackpro.co.uk/onboarding/" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
-        Try free for 7 days — no card required.
-      </Link>
-    </p>
+    <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-7">
+      <p className="text-base leading-relaxed text-white/85">
+        <span className="font-medium text-white">Stock Track PRO</span> helps automate this process for UK fleets.{' '}
+        <Link href="/onboarding" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
+          Try free for 7 days — no card required.
+        </Link>
+      </p>
+    </div>
   );
 }
 
 function OLicenceDefectRecordsArticle() {
   return (
-    <div className="prose prose-invert prose-lg max-w-none text-white/80">
+    <ComplianceArticleContent>
       <p>
         A valid defect record is evidence that a vehicle fault was reported, assessed and dealt with through a controlled maintenance process. For an operator licence holder, that record matters because the Driver and Vehicle Standards Agency (DVSA) expects operators to show that vehicles are checked before use, defects are recorded clearly, and safety-related faults are repaired before a vehicle is allowed back into service.
       </p>
@@ -81,8 +85,16 @@ function OLicenceDefectRecordsArticle() {
       <p>
         DVSA guidance expects operators to keep defect reports that clearly identify the driver, the date of the check, the vehicle registration, the defect description and the action taken. Where a defect is found, the record should show who reviewed it and who signed it off as resolved or safe for continued operation. The responsible person may be a transport manager, fleet manager, mechanic, fitter or another competent person authorised by the operator.
       </p>
+      <p>A useful defect record should answer five questions without needing a phone call:</p>
+      <ul>
+        <li>Which vehicle was involved?</li>
+        <li>Who reported the issue?</li>
+        <li>When was it reported?</li>
+        <li>What was the issue?</li>
+        <li>What happened next?</li>
+      </ul>
       <p>
-        A useful defect record should answer five questions without needing a phone call: which vehicle was involved, who reported the issue, when it was reported, what the issue was, and what happened next. If the answer is hidden in a WhatsApp message, scribbled on a paper sheet or known only by one driver, it is weak evidence.
+        If the answer is hidden in a WhatsApp message, scribbled on a paper sheet or known only by one driver, it is weak evidence.
       </p>
 
       <h2>Minor defects and notifiable defects</h2>
@@ -122,7 +134,7 @@ function OLicenceDefectRecordsArticle() {
         A good defect record should avoid vague language. &quot;Problem with van&quot; is not enough. &quot;Nearside rear tyre below safe tread depth, vehicle removed from use, replacement fitted by fitter and signed off before return to service&quot; is much stronger. The same principle applies whether you use paper or software: the record should allow someone outside the business to understand the decision made at the time.
       </p>
 
-      <p className="text-white/55 text-sm italic">
+      <p className="compliance-disclaimer">
         This article summarises general principles and is not legal advice. Always check current DVSA, Traffic Commissioner and government guidance for your own operation.
       </p>
 
@@ -134,13 +146,13 @@ function OLicenceDefectRecordsArticle() {
         <li>Digital records provide faster reporting, photo evidence and clearer accountability.</li>
       </KeyTakeaways>
       <ArticleCta />
-    </div>
+    </ComplianceArticleContent>
   );
 }
 
 function PaperVsDigitalArticle() {
   return (
-    <div className="prose prose-invert prose-lg max-w-none text-white/80">
+    <ComplianceArticleContent>
       <p>
         Paper inspection sheets have been used by UK fleets for decades, but they are increasingly out of step with how modern operators work. Fleet managers need fast defect reporting, named accountability, photo evidence and searchable records. A paper sheet can capture a tick-box check, but it struggles to prove what happened, when it happened and who saw it in time to act.
       </p>
@@ -206,13 +218,13 @@ function PaperVsDigitalArticle() {
         <li>Digital workflows can save drivers and managers meaningful admin time each week.</li>
       </KeyTakeaways>
       <ArticleCta />
-    </div>
+    </ComplianceArticleContent>
   );
 }
 
 function MotExpiryTrackingArticle() {
   return (
-    <div className="prose prose-invert prose-lg max-w-none text-white/80">
+    <ComplianceArticleContent>
       <p>
         MOT expiry tracking is one of the simplest fleet compliance tasks to understand and one of the easiest to get wrong at scale. A single missed MOT can take a vehicle off the road, create customer disruption and expose the operator to enforcement action. When a business runs multiple vans, HGVs, plant vehicles or mixed fleet assets, relying on memory or a spreadsheet becomes a risk.
       </p>
@@ -278,13 +290,13 @@ function MotExpiryTrackingArticle() {
         <li>Stock Track PRO shows MOT and tax status on every vehicle card and sends automatic alerts before expiry.</li>
       </KeyTakeaways>
       <ArticleCta />
-    </div>
+    </ComplianceArticleContent>
   );
 }
 
 function PreUseChecksArticle() {
   return (
-    <div className="prose prose-invert prose-lg max-w-none text-white/80">
+    <ComplianceArticleContent>
       <p>
         A pre-use check is the inspection a driver completes before operating a company vehicle. For UK fleet
         operators, it is one of the most practical ways to show that vehicles are checked for obvious defects before
@@ -338,7 +350,7 @@ function PreUseChecksArticle() {
         take over. Consistency matters more than the exact label on the form.
       </p>
 
-      <p className="text-white/55 text-sm italic">
+      <p className="compliance-disclaimer">
         This article summarises general principles and is not legal advice. Follow current DVSA, Traffic Commissioner,
         and employer guidance for your operation.
       </p>
@@ -350,13 +362,13 @@ function PreUseChecksArticle() {
         <li>Digital checks improve speed, photo evidence, and manager visibility.</li>
       </KeyTakeaways>
       <ArticleCta />
-    </div>
+    </ComplianceArticleContent>
   );
 }
 
 function DigitalDefectRecordsDvsaArticle() {
   return (
-    <div className="prose prose-invert prose-lg max-w-none text-white/80">
+    <ComplianceArticleContent>
       <p>
         When DVSA examines an operator&apos;s maintenance system, they are not only looking at whether a single vehicle
         was roadworthy on one day. They want evidence of a working process: checks are completed, defects are reported,
@@ -408,7 +420,7 @@ function DigitalDefectRecordsDvsaArticle() {
         requested.
       </p>
 
-      <p className="text-white/55 text-sm italic">
+      <p className="compliance-disclaimer">
         This article summarises general principles and is not legal advice. Always check current DVSA and Traffic
         Commissioner guidance for your operation.
       </p>
@@ -420,7 +432,7 @@ function DigitalDefectRecordsDvsaArticle() {
         <li>Software helps when it is used honestly as part of daily fleet routine.</li>
       </KeyTakeaways>
       <ArticleCta />
-    </div>
+    </ComplianceArticleContent>
   );
 }
 
@@ -460,7 +472,14 @@ export default async function ComplianceArticlePage({ params }: Props) {
                 Compliance Centre
               </Link>
             </p>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-8">{article.title}</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">{article.title}</h1>
+            <p className="mb-10 text-sm text-white/45">
+              Published{' '}
+              {format(new Date(article.datePublished), 'd MMMM yyyy')}
+              {article.dateModified && article.dateModified !== article.datePublished
+                ? ` · Updated ${format(new Date(article.dateModified), 'd MMMM yyyy')}`
+                : ''}
+            </p>
             <ArticleBody article={article} />
             <ArticleBottomCta />
           </article>

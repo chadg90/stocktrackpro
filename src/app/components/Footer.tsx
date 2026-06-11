@@ -18,8 +18,7 @@ const Footer = () => {
               Email: <Link href="mailto:support@stocktrackpro.co.uk" className="hover:text-blue-500">support@stocktrackpro.co.uk</Link>
             </p>
             <p className="text-white/55 text-xs mt-3 max-w-md leading-relaxed">
-              Stock Track PRO Ltd · UK fleet compliance software · £8 per vehicle per month including VAT · 7-day free trial ·
-              UK-based support via email and WhatsApp
+              Stock Track PRO Ltd · UK fleet compliance software · Support via email and WhatsApp
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-white/90">
