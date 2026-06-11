@@ -120,7 +120,7 @@ export default function FleetReportOverviewPage() {
           </li>
           <li>
             <strong className="text-zinc-900 dark:text-white">Who checked</strong> — field users (user/manager roles) with inspection
-            counts this week; vehicles and whether they were inspected.
+            counts for this week, the last 30 days, or a chosen month; vehicles and whether they were inspected.
           </li>
         </ul>
       </div>

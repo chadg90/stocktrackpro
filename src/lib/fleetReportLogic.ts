@@ -1,10 +1,14 @@
 import {
   addDays,
   differenceInCalendarDays,
+  endOfDay,
+  endOfMonth,
   endOfWeek,
   format,
   startOfDay,
+  startOfMonth,
   startOfWeek,
+  subDays,
   subWeeks,
 } from 'date-fns';
 import type { Timestamp } from 'firebase/firestore';
@@ -87,6 +91,71 @@ export function getCurrentWeekBounds(now = new Date()): { start: Date; end: Date
   const start = startOfWeek(now, { weekStartsOn: 1 });
   const end = endOfWeek(now, { weekStartsOn: 1 });
   return { start, end };
+}
+
+/** Rolling 30 calendar days including today */
+export function getLast30DaysBounds(now = new Date()): { start: Date; end: Date } {
+  return {
+    start: startOfDay(subDays(now, 29)),
+    end: endOfDay(now),
+  };
+}
+
+/** Calendar month (month is 1–12) */
+export function getMonthBounds(year: number, month: number): { start: Date; end: Date } {
+  const start = startOfMonth(new Date(year, month - 1, 1));
+  return { start, end: endOfMonth(start) };
+}
+
+export type CompliancePeriodPreset = 'week' | 'last_30_days' | 'month';
+
+export function getCompliancePeriodBounds(
+  preset: CompliancePeriodPreset,
+  monthValue?: string,
+  now = new Date()
+): { start: Date; end: Date } {
+  if (preset === 'last_30_days') return getLast30DaysBounds(now);
+  if (preset === 'month') {
+    const [y, m] = (monthValue || format(now, 'yyyy-MM')).split('-').map(Number);
+    if (y && m >= 1 && m <= 12) return getMonthBounds(y, m);
+    return getMonthBounds(now.getFullYear(), now.getMonth() + 1);
+  }
+  return getCurrentWeekBounds(now);
+}
+
+export function formatCompliancePeriodRange(bounds: { start: Date; end: Date }, preset: CompliancePeriodPreset): string {
+  if (preset === 'month') return format(bounds.start, 'MMMM yyyy');
+  return `${format(bounds.start, 'd MMM')} – ${format(bounds.end, 'd MMM yyyy')}`;
+}
+
+export function compliancePeriodStatusLabels(preset: CompliancePeriodPreset): {
+  checked: string;
+  notChecked: string;
+  inspected: string;
+  notInspected: string;
+} {
+  if (preset === 'last_30_days') {
+    return {
+      checked: 'Checked',
+      notChecked: 'No inspection in last 30 days',
+      inspected: 'Yes',
+      notInspected: 'No',
+    };
+  }
+  if (preset === 'month') {
+    return {
+      checked: 'Checked',
+      notChecked: 'No inspection this month',
+      inspected: 'Yes',
+      notInspected: 'No',
+    };
+  }
+  return {
+    checked: 'Checked',
+    notChecked: 'No inspection this week',
+    inspected: 'Yes',
+    notInspected: 'No',
+  };
 }
 
 export type MileageRow = {
