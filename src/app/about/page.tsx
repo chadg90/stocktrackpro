@@ -10,62 +10,88 @@ export default function AboutPage() {
           About Stock Track PRO
         </p>
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">
-          UK fleet compliance software for trades and contractors
+          Built for UK fleet operators who are tired of spreadsheets
         </h1>
+        <p className="text-white/80 text-lg leading-relaxed mb-6">
+          Stock Track PRO was built because the tools available to small fleet operators were either overpriced
+          enterprise software or a combination of spreadsheets and WhatsApp messages that let things fall through the
+          cracks.
+        </p>
         <p className="text-white/75 text-lg leading-relaxed mb-10">
-          Stock Track PRO is UK fleet management and fleet compliance software for small and medium-sized businesses. It helps teams record daily vehicle inspections, report defects with photo evidence, monitor MOT and tax dates, and keep timestamped digital records that support operational and O-licence compliance.
+          We built one platform that does what fleet managers actually need — inspections, defect close-out, and MOT
+          visibility — without the complexity or the cost.
         </p>
 
         <div className="grid gap-6">
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold mb-3">Why Stock Track PRO exists</h2>
+            <p className="text-white/70 leading-relaxed mb-4">
+              Paper sheets get lost. Group chats bury urgent defects. MOT dates live in someone&apos;s memory until
+              they are not. Managers end up chasing drivers and fitters instead of running the business.
+            </p>
+            <p className="text-white/70 leading-relaxed">
+              Stock Track PRO keeps daily checks, defect workflow, and renewal visibility in one place — mobile app for
+              the field, web dashboard for managers — so records are timestamped and searchable when you need them.
+            </p>
+          </section>
+
+          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">Who it is built for</h2>
             <p className="text-white/70 leading-relaxed">
-              Stock Track PRO is built for fleet operators across the United Kingdom, including trades, groundworks, logistics, construction, haulage, electrical, plumbing and contractor businesses. It works for sole traders with a small number of vehicles and for growing teams managing larger mixed fleets.
+              UK trades, groundworks, logistics, construction, haulage, and contractor businesses — from sole traders with
+              a handful of vans to teams managing larger mixed fleets. Optional Plant &amp; Machinery covers LOLER and
+              site plant when you need it.
             </p>
           </section>
 
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold mb-3">The problem it solves</h2>
-            <p className="text-white/70 leading-relaxed">
-              Paper inspection sheets, spreadsheets and message threads make it easy for defects to be missed, delayed or hard to prove later. Stock Track PRO keeps inspections, defect reports, repair progress and renewal reminders in one system so managers can see what needs attention before it becomes downtime, a compliance issue or a customer problem.
-            </p>
-          </section>
-
-          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold mb-3">How it works</h2>
+            <h2 className="text-2xl font-semibold mb-3">How teams use it</h2>
             <p className="text-white/70 leading-relaxed mb-4">
-              Managers use the web dashboard to add vehicles, review inspections, manage defects, monitor MOT and tax status, invite team members, and view fleet analytics.
+              Managers use the web dashboard to add vehicles, review inspections, manage defects, monitor MOT and tax
+              status, invite team members, and handle billing.
             </p>
             <p className="text-white/70 leading-relaxed">
-              Drivers (user role) and fitters (manager role) use the iOS and Android mobile app to complete daily inspections, submit photo-evidenced defect reports, receive job updates, and close repairs out when work is complete.
+              Drivers (user role) and fitters (manager role) use the iOS and Android app for daily inspections,
+              photo-evidenced defect reports, My Jobs, and close-out when work is complete.
             </p>
           </section>
 
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold mb-3">Pricing and support</h2>
+            <h2 className="text-2xl font-semibold mb-3">In the field</h2>
             <p className="text-white/70 leading-relaxed mb-4">
-              Stock Track PRO costs £8 per vehicle per month, including VAT at 20%, with a 7-day free trial and no card required.
+              See how a groundworks contractor uses Stock Track PRO across multiple sites.
             </p>
-            <p className="text-white/70 leading-relaxed">
-              Support is UK-based via email and WhatsApp, so operators can get practical help from people who understand UK fleet workflows.
-            </p>
+            <Link
+              href="/customers/newstreet"
+              className="text-blue-400 hover:text-blue-300 text-sm font-medium underline underline-offset-4"
+            >
+              Newstreet Groundworks case study →
+            </Link>
           </section>
 
           <section className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold mb-3">Contact</h2>
+            <h2 className="text-2xl font-semibold mb-3">Pricing and support</h2>
             <p className="text-white/75 leading-relaxed mb-5">
-              Questions about Stock Track PRO, pricing or setup can be sent to{' '}
-              <a href="mailto:support@stocktrackpro.co.uk" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
-                support@stocktrackpro.co.uk
-              </a>
-              .
+              Fleet pricing, the 7-day free trial, and optional Plant &amp; Machinery are on our{' '}
+              <Link href="/pricing" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
+                pricing page
+              </Link>
+              . Support is UK-based via email and WhatsApp.
             </p>
-            <Link
-              href="/onboarding"
-              className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white btn-brand-blue"
-            >
-              Try free for 7 days
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                href="/onboarding"
+                className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white btn-brand-blue"
+              >
+                Try free for 7 days
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-medium border border-white/20 hover:bg-white/5"
+              >
+                Contact us
+              </Link>
+            </div>
           </section>
         </div>
       </main>

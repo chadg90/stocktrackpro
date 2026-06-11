@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Navbar from '@/app/components/Navbar';
+import ArticleBottomCta from '@/components/ArticleBottomCta';
 import { ComplianceArticleJsonLd } from '@/components/seo/ComplianceArticleJsonLd';
 import {
   COMPLIANCE_ARTICLES,
@@ -281,6 +282,148 @@ function MotExpiryTrackingArticle() {
   );
 }
 
+function PreUseChecksArticle() {
+  return (
+    <div className="prose prose-invert prose-lg max-w-none text-white/80">
+      <p>
+        A pre-use check is the inspection a driver completes before operating a company vehicle. For UK fleet
+        operators, it is one of the most practical ways to show that vehicles are checked for obvious defects before
+        they go on the road. The check does not replace scheduled maintenance or an MOT, but it creates a daily record
+        that a responsible person looked at the vehicle at the point of use.
+      </p>
+
+      <h2>What should a driver check?</h2>
+      <p>
+        Guidance varies by vehicle type and operator policy, but a sensible pre-use check usually covers visibility,
+        lights, tyres, brakes, steering, mirrors, windscreen condition, fluid leaks, and load security where relevant.
+        Drivers should also confirm the vehicle is roadworthy for the journey — not just that it starts.
+      </p>
+      <p>
+        The check should be completed before the vehicle is used for work, not at the end of the day when problems may
+        already have caused damage or delay. If a defect is found, the driver should report it and the vehicle should
+        not be used until a competent person has assessed it.
+      </p>
+
+      <h2>Who is responsible?</h2>
+      <p>
+        The driver completing the check is responsible for carrying it out honestly. The operator is responsible for
+        having a system that ensures checks happen, defects are recorded, and unsafe vehicles are not knowingly kept in
+        service. Transport managers, fleet managers, and site supervisors often oversee whether the process is working
+        in practice.
+      </p>
+
+      <h2>What records should you keep?</h2>
+      <p>
+        A useful record identifies the driver, date and time, vehicle registration, checklist responses, and any defects
+        reported. Photos help where there is damage, tyre wear, or a lighting fault. If the record only says
+        &quot;all OK&quot; with no name and no timestamp, it is weak evidence when something goes wrong later.
+      </p>
+
+      <h2>Paper vs digital pre-use checks</h2>
+      <p>
+        Paper booklets can work for very small fleets if they are completed, collected, and stored properly. The
+        weakness is delay: a defect noted on paper may not reach a manager until hours or days later. Digital pre-use
+        checks can timestamp submissions, attach photos, notify managers immediately, and store records centrally for
+        retrieval during an audit or insurance enquiry.
+      </p>
+      <p>
+        Stock Track PRO uses a structured mobile inspection flow with required photos and checklist items, so drivers
+        cannot skip steps and managers see new defects without waiting for paperwork.
+      </p>
+
+      <h2>How often should checks happen?</h2>
+      <p>
+        Many operators require a check at the start of each working day or before each shift when the vehicle is used.
+        If a vehicle is shared between drivers, each user should understand whether a fresh check is required when they
+        take over. Consistency matters more than the exact label on the form.
+      </p>
+
+      <p className="text-white/55 text-sm italic">
+        This article summarises general principles and is not legal advice. Follow current DVSA, Traffic Commissioner,
+        and employer guidance for your operation.
+      </p>
+
+      <KeyTakeaways>
+        <li>Pre-use checks should happen before the vehicle is used for work, not after.</li>
+        <li>Records should identify the driver, vehicle, time, and any defects reported.</li>
+        <li>Operators need a system to act on defects — not just collect forms.</li>
+        <li>Digital checks improve speed, photo evidence, and manager visibility.</li>
+      </KeyTakeaways>
+      <ArticleCta />
+    </div>
+  );
+}
+
+function DigitalDefectRecordsDvsaArticle() {
+  return (
+    <div className="prose prose-invert prose-lg max-w-none text-white/80">
+      <p>
+        When DVSA examines an operator&apos;s maintenance system, they are not only looking at whether a single vehicle
+        was roadworthy on one day. They want evidence of a working process: checks are completed, defects are reported,
+        repairs are recorded, and unsafe vehicles are taken out of use until resolved. Digital defect records can
+        support that story — but only if they are accurate, consistent, and used as part of a real workflow.
+      </p>
+
+      <h2>What makes a defect record credible?</h2>
+      <p>
+        A credible record answers basic questions without guesswork: which vehicle, who reported the issue, when it was
+        reported, what the defect was, who reviewed it, what action was taken, and when the vehicle returned to
+        service. Vague notes such as &quot;brake noise&quot; without context are easier to challenge than a clear
+        description with supporting photos and a repair trail.
+      </p>
+
+      <h2>How digital records differ from paper</h2>
+      <p>
+        Paper can meet the requirement in theory, but it often fails in practice through lost sheets, late submission,
+        illegible handwriting, and missing signatures. Digital systems generate timestamps automatically, tie records to
+        named users, attach photos at the point of reporting, and route defects to managers or fitters without relying
+        on someone physically handing over a form.
+      </p>
+      <p>
+        That does not make digital records automatically acceptable. Inspectors can still ask whether drivers were
+        trained, whether managers acted on alerts, and whether the system was used consistently across the fleet.
+      </p>
+
+      <h2>Roadside checks and follow-up investigations</h2>
+      <p>
+        At the roadside, an examiner may find a defect that should have been visible during a recent check. If your
+        records show no defect and no inspection around that period, you may be asked how your maintenance system works.
+        If your records show a defect was reported, the vehicle was marked out of use, and repair was signed off before
+        return to service, that is a much stronger position.
+      </p>
+
+      <h2>What operators should avoid</h2>
+      <p>
+        Backdating checks, completing forms in bulk at the end of the week, or closing defects without evidence of repair
+        undermines both paper and digital systems. Inspectors are interested in patterns. If every vehicle shows
+        &quot;no defects&quot; every day while serious faults appear at roadside stops, the record-keeping system will
+        be questioned.
+      </p>
+
+      <h2>Using software as part of compliance culture</h2>
+      <p>
+        Stock Track PRO supports defect reporting with timestamped submissions, photo evidence, workflow status from
+        open to resolved, and manager visibility on the web dashboard. The software does not replace operator
+        responsibility, but it makes good practice easier to follow and easier to demonstrate when evidence is
+        requested.
+      </p>
+
+      <p className="text-white/55 text-sm italic">
+        This article summarises general principles and is not legal advice. Always check current DVSA and Traffic
+        Commissioner guidance for your operation.
+      </p>
+
+      <KeyTakeaways>
+        <li>DVSA looks for a working maintenance process, not isolated forms.</li>
+        <li>Digital records need timestamps, named users, and clear defect close-out.</li>
+        <li>Weak or inconsistent records are a liability at roadside checks and audits.</li>
+        <li>Software helps when it is used honestly as part of daily fleet routine.</li>
+      </KeyTakeaways>
+      <ArticleCta />
+    </div>
+  );
+}
+
 function ArticleBody({ article }: { article: ComplianceArticle }) {
   switch (article.slug) {
     case 'o-licence-defect-records':
@@ -289,6 +432,10 @@ function ArticleBody({ article }: { article: ComplianceArticle }) {
       return <PaperVsDigitalArticle />;
     case 'mot-expiry-tracking-for-fleets':
       return <MotExpiryTrackingArticle />;
+    case 'pre-use-checks-company-vehicles':
+      return <PreUseChecksArticle />;
+    case 'digital-defect-records-dvsa-scrutiny':
+      return <DigitalDefectRecordsDvsaArticle />;
     default:
       return null;
   }
@@ -315,6 +462,7 @@ export default async function ComplianceArticlePage({ params }: Props) {
             </p>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-8">{article.title}</h1>
             <ArticleBody article={article} />
+            <ArticleBottomCta />
           </article>
           <aside className="lg:sticky lg:top-28 h-fit space-y-6">
             <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-6">

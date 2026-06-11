@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Check } from 'lucide-react';
+import { PRICING_ROI_SHORT } from '@/content/pricingCopy';
 
 const FEATURES = [
   'All fleet features on every plan',
@@ -18,6 +19,9 @@ export default function HomePricingCard() {
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">Simple fleet pricing</h2>
           <p className="text-white/55 text-sm max-w-md mx-auto">
             7-day free trial — no card required.
+          </p>
+          <p className="text-white/50 text-sm max-w-md mx-auto mt-4 leading-relaxed">
+            {PRICING_ROI_SHORT}
           </p>
         </div>
 

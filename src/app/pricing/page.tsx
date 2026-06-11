@@ -5,6 +5,9 @@ import Navbar from '../components/Navbar';
 import { Check, ShieldCheck, Truck, Clock } from 'lucide-react';
 import Link from 'next/link';
 import PlantPricingCard from '../components/PlantPricingCard';
+import TestimonialQuote from '@/components/TestimonialQuote';
+import { PRICING_ROI_PARAGRAPH } from '@/content/pricingCopy';
+import { getFeaturedTestimonial } from '@/content/testimonials';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -98,6 +101,7 @@ export default function Pricing() {
   };
 
   const features = PLAN_FEATURES;
+  const featuredTestimonial = getFeaturedTestimonial();
 
   return (
     <div className="min-h-screen bg-black">
@@ -139,6 +143,16 @@ export default function Pricing() {
         </div>
 
         <div className="max-w-6xl mx-auto">
+          <p className="text-white/70 text-sm sm:text-base leading-relaxed text-center max-w-2xl mx-auto mb-10 px-2">
+            {PRICING_ROI_PARAGRAPH}
+          </p>
+
+          {featuredTestimonial && (
+            <div className="max-w-2xl mx-auto mb-10">
+              <TestimonialQuote testimonial={featuredTestimonial} />
+            </div>
+          )}
+
           <div className="grid lg:grid-cols-2 gap-8 items-start mb-8">
           {/* Fleet pricing */}
           <div className="relative bg-black/80 backdrop-blur-sm rounded-3xl p-8 sm:p-10 border border-blue-500 shadow-2xl shadow-blue-500/20 ring-2 ring-blue-500/20">

@@ -2,11 +2,13 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Navbar from './components/Navbar';
-import { CompaniesShowcaseStrip, type ShowcaseLogo } from '@/components/CompaniesShowcaseStrip';
+import CustomerStoryCallout from '@/components/CustomerStoryCallout';
 import HomePricingCard from '@/components/HomePricingCard';
 import HomeFaqSection from '@/components/HomeFaqSection';
+import TestimonialQuote from '@/components/TestimonialQuote';
 import { HomeJsonLd } from '@/components/HomeJsonLd';
 import { HomeFaqJsonLd } from '@/components/HomeFaqJsonLd';
+import { getFeaturedTestimonial } from '@/content/testimonials';
 import {
   Map,
   Smartphone,
@@ -15,6 +17,7 @@ import {
   Zap,
   Droplets,
   Truck,
+  Wrench,
   LandPlot,
   Container,
   HardHat,
@@ -47,15 +50,6 @@ export const metadata: Metadata = {
       'UK fleet management software for SMEs — MOTs, tax, inspections, defect resolution. Try free for 7 days.',
   },
 };
-
-/** Logos in “Companies which use us” — set `featured: true` for a larger mark in the row. */
-const SHOWCASE_LOGOS: ShowcaseLogo[] = [
-  {
-    src: '/clients/newstreet-groundwork.png',
-    alt: 'Newstreet Groundwork Services logo',
-    featured: true,
-  },
-];
 
 const DEFECT_STEPS = [
   {
@@ -114,12 +108,13 @@ const INCLUDED = [
   {
     icon: HardHat,
     title: 'Plant & Machinery',
-    description: 'Optional add-on for LOLER and site plant — see pricing.',
+    description: 'LOLER PDFs, examination due reminders, and plant reports — optional add-on.',
     href: '/pricing',
   },
 ];
 
 export default function Home() {
+  const featuredTestimonial = getFeaturedTestimonial();
   return (
     <>
       <HomeJsonLd />
@@ -238,7 +233,7 @@ export default function Home() {
           </div>
         </section>
 
-        <CompaniesShowcaseStrip logos={SHOWCASE_LOGOS} className="border-t-0" />
+        <CustomerStoryCallout />
 
         {/* Defect resolution loop */}
         <section id="defect-workflow" className="py-20 sm:py-28 border-t border-white/10">
@@ -314,6 +309,14 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {featuredTestimonial && (
+          <section className="py-16 sm:py-20 border-t border-white/10 bg-white/[0.02]">
+            <div className="container mx-auto px-4 max-w-3xl">
+              <TestimonialQuote testimonial={featuredTestimonial} />
+            </div>
+          </section>
+        )}
 
         <HomePricingCard />
 

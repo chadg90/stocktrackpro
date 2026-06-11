@@ -47,6 +47,18 @@ export default function FAQ() {
       answer: "Yes. Cancel from Manage Billing in the web dashboard. Monthly plans can be cancelled anytime and access continues until the end of the current billing month. Annual plans are a 12-month term paid upfront at a discount — you can cancel the renewal at any time (so you won\u2019t be charged again), but unused months within the paid year are not refunded.",
     },
     {
+      question: "Will my drivers actually use it?",
+      answer: "The app is built for quick daily checks on a phone they already carry — structured steps, required photos, and no paper to hand in. Most teams start with one vehicle and a short walkthrough; managers see submissions in the dashboard straight away. If adoption is a concern, we can help with a simple rollout plan via email or WhatsApp.",
+    },
+    {
+      question: "What happens to my data if I cancel?",
+      answer: "After cancellation, your company data remains for a reasonable period so you can reactivate if needed. You can request permanent deletion by emailing support@stocktrackpro.co.uk. See our Subscription Terms and Privacy Policy for retention details.",
+    },
+    {
+      question: "How long does setup take?",
+      answer: "Most managers add vehicles and invite their first drivers within an hour. New companies get a 7-day free trial on the web — no card required — so you can test the full workflow before subscribing.",
+    },
+    {
       question: "Is my data secure?",
       answer: "Data is stored in Firebase (Google Cloud) with encryption. Access is role-based: staff see only what they need; managers use the dashboard with company-scoped data.",
     },

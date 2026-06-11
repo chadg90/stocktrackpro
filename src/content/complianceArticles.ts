@@ -32,6 +32,20 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     datePublished: '2026-05-12T09:00:00+01:00',
     dateModified: '2026-05-13T09:00:00+01:00',
   },
+  {
+    slug: 'pre-use-checks-company-vehicles',
+    title: 'Pre-use checks: what drivers must do before operating a company vehicle',
+    metaDescription:
+      'What UK fleet drivers should check before using a company vehicle, how operators should record it, and why pre-use checks support DVSA compliance.',
+    datePublished: '2026-06-02T09:00:00+01:00',
+  },
+  {
+    slug: 'digital-defect-records-dvsa-scrutiny',
+    title: 'How digital defect records hold up under DVSA scrutiny',
+    metaDescription:
+      'What DVSA and Traffic Commissioners look for in defect records, and how digital systems can provide clearer evidence than paper.',
+    datePublished: '2026-06-02T09:00:00+01:00',
+  },
 ];
 
 export function complianceArticleBySlug(slug: string): ComplianceArticle | undefined {
