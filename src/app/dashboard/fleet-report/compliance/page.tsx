@@ -95,9 +95,8 @@ export default function FleetReportCompliancePage() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <p className="text-zinc-600 dark:text-white/65 text-sm max-w-3xl leading-relaxed">
           See which staff submitted vehicle inspections in {periodDescription}, which vehicles were checked,
-          and where gaps remain. Use <strong className="text-zinc-900 dark:text-white">Export Excel</strong>{' '}
-          to send a full breakdown to a manager — includes user summary, vehicle summary, checks by staff &amp;
-          vehicle, and missing checks.
+          and where gaps remain. <strong className="text-zinc-900 dark:text-white">Export Excel</strong> downloads
+          two sheets only: who checked which vehicles, and who did not.
         </p>
 
         <div className="flex flex-col gap-3 shrink-0 items-stretch sm:items-end">

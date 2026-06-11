@@ -761,68 +761,20 @@ export function buildComplianceExportSheets(
 ): { name: string; data: Record<string, string | number>[] }[] {
   const bounds = getCompliancePeriodBounds(period, monthValue, now);
   const periodInspections = filterInspectionsInWeek(inspections, bounds.start, bounds.end);
-  const statusLabels = compliancePeriodStatusLabels(period);
-  const periodLabel = formatCompliancePeriodRange(bounds, period);
-  const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
-  const vehicleMap = Object.fromEntries(vehicles.map((v) => [v.id, v]));
 
-  const userRows = buildUserCompliance(users, periodInspections).map((u) => ({
-    User: u.User,
-    Email: u.Email,
-    Role: u.Role,
-    'Inspections in period': u['Inspections This Week'],
-    Status: u['Inspections This Week'] > 0 ? statusLabels.checked : statusLabels.notChecked,
+  const checksDone = buildStaffVehicleCheckRows(users, vehicles, periodInspections).map((row) => ({
+    User: row.User,
+    Vehicle: row.Registration,
   }));
 
-  const vehicleRows = buildVehicleWeekCompliance(vehicles, periodInspections, users).map((v) => ({
-    Registration: v.Registration,
-    'Make / Model': v['Make / Model'],
-    Inspected: v['Inspected This Week'] === 'Yes' ? statusLabels.inspected : statusLabels.notInspected,
-    'Last inspection': v['Last Inspection'],
-    'Last inspector': v['Inspector (last in week)'],
+  const notChecked = buildUserVehicleGapRows(users, vehicles, periodInspections).map((row) => ({
+    User: row.User,
+    Vehicle: row.Registration,
   }));
-
-  const checkRows = buildStaffVehicleCheckRows(users, vehicles, periodInspections);
-  const gapRows = buildUserVehicleGapRows(users, vehicles, periodInspections);
-
-  const detailRows = periodInspections
-    .slice()
-    .sort((a, b) => (toJsDate(b.inspected_at)?.getTime() ?? 0) - (toJsDate(a.inspected_at)?.getTime() ?? 0))
-    .map((i) => ({
-      'Inspected at': formatFleetDate(i.inspected_at),
-      Registration: vehicleMap[i.vehicle_id || '']?.registration || i.vehicle_id || '—',
-      Inspector: getUserLabel(userMap[i.inspected_by || ''], i.inspected_by || ''),
-      'Inspector email': userMap[i.inspected_by || '']?.email || '—',
-      Mileage: i.mileage ?? '—',
-      'Has defect': i.has_defect ? 'Yes' : 'No',
-    }));
-
-  const summary = [
-    { Field: 'Report generated', Value: format(now, 'yyyy-MM-dd HH:mm') },
-    { Field: 'Period', Value: periodLabel },
-    { Field: 'Period start', Value: format(bounds.start, 'yyyy-MM-dd') },
-    { Field: 'Period end', Value: format(bounds.end, 'yyyy-MM-dd') },
-    { Field: 'Staff (user/manager)', Value: getFleetStaff(users).length },
-    { Field: 'Active vehicles', Value: getActiveFleetVehicles(vehicles).length },
-    { Field: 'Inspections in period', Value: periodInspections.length },
-    {
-      Field: 'Staff with no checks',
-      Value: userRows.filter((r) => r['Inspections in period'] === 0).length,
-    },
-    {
-      Field: 'Vehicles not inspected',
-      Value: vehicleRows.filter((r) => r.Inspected === statusLabels.notInspected).length,
-    },
-    { Field: 'Staff-vehicle gaps', Value: gapRows.length },
-  ];
 
   return [
-    { name: 'Summary', data: summary },
-    { name: 'Users summary', data: userRows },
-    { name: 'Vehicles summary', data: vehicleRows },
-    { name: 'Checks by staff vehicle', data: checkRows as unknown as Record<string, string | number>[] },
-    { name: 'Missing checks', data: gapRows as unknown as Record<string, string | number>[] },
-    { name: 'All inspections', data: detailRows },
+    { name: 'Checks done', data: checksDone },
+    { name: 'Not checked', data: notChecked },
   ];
 }
 
