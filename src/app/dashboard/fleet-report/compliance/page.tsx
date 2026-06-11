@@ -10,14 +10,13 @@ import {
   buildUserCompliance,
   buildUserVehicleGapRows,
   buildVehicleWeekCompliance,
-  buildWhoCheckedExportReport,
   compliancePeriodStatusLabels,
   filterInspectionsInWeek,
   formatCompliancePeriodRange,
   getCompliancePeriodBounds,
   type CompliancePeriodPreset,
 } from '@/lib/fleetReportLogic';
-import { exportWhoCheckedReport } from '@/lib/exportUtils';
+import { exportMultipleSheetsToExcel } from '@/lib/exportUtils';
 
 type GapFilter = 'all' | 'inactive_users' | 'unchecked_vehicles';
 
@@ -77,14 +76,39 @@ export default function FleetReportCompliancePage() {
   const handleExport = () => {
     setExporting(true);
     try {
-      const report = buildWhoCheckedExportReport(users, vehicles, inspections, period, monthValue);
       const slug =
         period === 'month'
           ? monthValue
           : period === 'last_30_days'
             ? 'last-30-days'
             : format(periodBounds.start, 'yyyy-MM-dd');
-      exportWhoCheckedReport(report, `stp-who-checked-${slug}`);
+      exportMultipleSheetsToExcel(
+        [
+          {
+            name: 'Users',
+            data: userCompliance.map((u) => ({
+              User: u.User,
+              Email: u.Email,
+              Role: u.Role,
+              Inspections: u['Inspections This Week'],
+              Status:
+                u['Inspections This Week'] > 0 ? statusLabels.checked : statusLabels.notChecked,
+            })),
+          },
+          {
+            name: 'Vehicles',
+            data: vehicleRows.map((v) => ({
+              Registration: v.Registration,
+              'Make / model': v['Make / Model'],
+              Inspected:
+                v['Inspected This Week'] === 'Yes' ? statusLabels.inspected : statusLabels.notInspected,
+              'Last inspection': v['Last Inspection'],
+              Inspector: v['Inspector (last in week)'],
+            })),
+          },
+        ],
+        `stp-who-checked-${slug}`
+      );
     } finally {
       setExporting(false);
     }
@@ -96,8 +120,7 @@ export default function FleetReportCompliancePage() {
         <p className="text-zinc-600 dark:text-white/65 text-sm max-w-3xl leading-relaxed">
           See which staff submitted vehicle inspections in {periodDescription}, which vehicles were checked,
           and where gaps remain. <strong className="text-zinc-900 dark:text-white">Export Excel</strong> downloads
-          a summary for your manager — one row per staff member who checked, plus staff
-          with no checks and vehicles not inspected.
+          the same Users and Vehicles tables shown below ({periodRangeLabel}).
         </p>
 
         <div className="flex flex-col gap-3 shrink-0 items-stretch sm:items-end">

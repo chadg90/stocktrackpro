@@ -5,7 +5,6 @@
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { WhoCheckedExportReport } from '@/lib/fleetReportLogic';
 
 /**
  * Converts an array of objects to CSV format
@@ -127,69 +126,6 @@ export function exportMultipleSheetsToExcel(
     XLSX.utils.book_append_sheet(wb, ws, 'Info');
   }
   
-  XLSX.writeFile(wb, `${filename}.xlsx`);
-}
-
-function columnWidthsForRows(rows: (string | number)[][], headerRowIndex: number): { wch: number }[] {
-  if (rows.length === 0) return [];
-  const colCount = Math.max(...rows.map((r) => r.length));
-  return Array.from({ length: colCount }, (_, col) => {
-    const maxLen = rows.reduce((max, row, rowIdx) => {
-      if (rowIdx < headerRowIndex) return max;
-      const cell = row[col];
-      const len = cell == null ? 0 : String(cell).length;
-      return Math.max(max, len);
-    }, 0);
-    return { wch: Math.min(Math.max(maxLen + 2, 12), 72) };
-  });
-}
-
-function buildWhoCheckedSheet(
-  title: string,
-  report: WhoCheckedExportReport,
-  headers: string[],
-  dataRows: (string | number)[][]
-): XLSX.WorkSheet {
-  const rows: (string | number)[][] = [
-    ['Stock Track PRO — Who checked report'],
-    [title],
-    ['Period', report.periodLabel],
-    ['From', report.periodStart],
-    ['To', report.periodEnd],
-    ['Generated', report.generatedAt],
-    [],
-    headers,
-    ...dataRows,
-  ];
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  const headerRowIndex = 7;
-  ws['!cols'] = columnWidthsForRows(rows, headerRowIndex);
-  ws['!freeze'] = { xSplit: 0, ySplit: headerRowIndex + 1, topLeftCell: 'A9', activePane: 'bottomLeft', state: 'frozen' };
-  return ws;
-}
-
-/** Professional two-sheet export for Fleet report → Who checked. */
-export function exportWhoCheckedReport(report: WhoCheckedExportReport, filename: string): void {
-  const wb = XLSX.utils.book_new();
-
-  const checksSheet = buildWhoCheckedSheet(
-    'Checks completed',
-    report,
-    ['Staff member', 'Email', 'Role', 'Vehicles checked', 'Total checks'],
-    report.checksDone.map((r) => [r.staff, r.email, r.role, r.vehiclesChecked, r.totalChecks])
-  );
-  XLSX.utils.book_append_sheet(wb, checksSheet, 'Checks completed');
-
-  const gapsSheet = buildWhoCheckedSheet(
-    'Not checked',
-    report,
-    ['Staff member', 'Email', 'Role', 'Issue', 'Vehicles'],
-    report.notChecked.length > 0
-      ? report.notChecked.map((r) => [r.staff, r.email, r.role, r.issue, r.vehicles])
-      : [['—', '—', '—', 'No gaps in this period', '—']]
-  );
-  XLSX.utils.book_append_sheet(wb, gapsSheet, 'Not checked');
-
   XLSX.writeFile(wb, `${filename}.xlsx`);
 }
 
