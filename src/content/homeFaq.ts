@@ -13,7 +13,7 @@ export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   {
     question: 'How many users can I add?',
     answer:
-      'No separate user fee. Your allowance scales with subscribed vehicle count.',
+      'Unlimited team members on every plan — drivers, managers, and fitters. No per-user fee.',
   },
   {
     question: 'Is there a long-term contract?',

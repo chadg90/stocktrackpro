@@ -12,10 +12,10 @@ const MAX_VEHICLES = 100;
 type BillingCycle = 'monthly' | 'yearly';
 type Tier = { label: string; users: string };
 function getTier(count: number): Tier {
-  if (count <= 15) return { label: 'Starter', users: 'Up to 15 users' };
-  if (count <= 35) return { label: 'Growth', users: 'Up to 35 users' };
-  if (count <= 75) return { label: 'Business', users: 'Up to 75 users' };
-  return { label: 'Enterprise', users: 'Unlimited users' };
+  if (count <= 15) return { label: 'Starter', users: 'Unlimited team members' };
+  if (count <= 35) return { label: 'Growth', users: 'Unlimited team members' };
+  if (count <= 75) return { label: 'Business', users: 'Unlimited team members' };
+  return { label: 'Enterprise', users: 'Unlimited team members' };
 }
 
 export default function PricingSection() {

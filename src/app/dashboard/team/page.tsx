@@ -22,6 +22,7 @@ import { EmptyStateTableRow } from '../components/EmptyState';
 import TableSkeleton from '../components/TableSkeleton';
 import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import { useDebounce } from '@/hooks/useDebounce';
+import { checkCanAddUser } from '@/lib/subscriptionLimits';
 
 type Profile = {
   id: string; // uid
@@ -343,6 +344,25 @@ export default function TeamPage() {
     }
     setBulkProcessing(true);
     setBulkResult(null);
+
+    const limitCheck = await checkCanAddUser(firebaseDb, currentUserProfile.company_id);
+    if (!limitCheck.allowed) {
+      alert(limitCheck.message || 'Team member limit reached.');
+      setBulkProcessing(false);
+      return;
+    }
+    if (
+      limitCheck.limit != null &&
+      limitCheck.current + parsedBulkEmails.length > limitCheck.limit
+    ) {
+      const remaining = Math.max(0, limitCheck.limit - limitCheck.current);
+      alert(
+        `Cannot invite ${parsedBulkEmails.length} people — only ${remaining} team member slot${remaining === 1 ? '' : 's'} remaining. Contact support if you need more.`
+      );
+      setBulkProcessing(false);
+      return;
+    }
+
     const sent: string[] = [];
     const failed: string[] = [];
     const expiresAt = new Date();
@@ -388,6 +408,12 @@ export default function TeamPage() {
 
     setInviteProcessing(true);
     try {
+      const limitCheck = await checkCanAddUser(firebaseDb, currentUserProfile.company_id);
+      if (!limitCheck.allowed) {
+        alert(limitCheck.message || 'Team member limit reached.');
+        return;
+      }
+
       const email = inviteEmail.trim().toLowerCase();
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);

@@ -4,7 +4,7 @@ import { PRICING_ROI_SHORT } from '@/content/pricingCopy';
 
 const FEATURES = [
   'All fleet features on every plan',
-  'Unlimited team members (scales with vehicles)',
+  'Unlimited team members — no per-user fee',
   'iOS, Android, and web dashboard',
 ];
 

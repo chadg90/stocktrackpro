@@ -28,8 +28,8 @@ Works for vans, HGVs, plant vehicles, and cars.
 
 ## Pricing
 £8 per vehicle per month, including VAT at 20%.
-Team user allowance scales with subscribed fleet size: up to 15 users
-on Starter, 35 on Growth, 75 on Business, and unlimited on Enterprise.
+Unlimited team members on every plan (no per-user fee). Managers and
+drivers included.
 No setup fees. Monthly plans can be cancelled anytime. Annual plans
 are paid upfront for 12 months and renewal can be cancelled before
 the next annual charge.

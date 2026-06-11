@@ -210,7 +210,7 @@ export default function Pricing() {
             {/* Price display */}
             <div className="text-center mb-8 mt-2">
               <p className="text-white font-semibold mb-4 max-w-md mx-auto">
-                Team user allowance scales with subscribed fleet size, with manager access included.
+                Unlimited team members — no per-user fee. Manager access included.
               </p>
               <div className="flex items-end justify-center gap-1 mb-1">
                 <span className="text-5xl sm:text-6xl font-bold text-white transition-all duration-200">

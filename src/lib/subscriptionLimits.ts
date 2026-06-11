@@ -13,17 +13,22 @@ import {
   doc,
   getDoc,
   getCountFromServer,
+  getDocs,
   query,
   where,
   type Firestore,
 } from 'firebase/firestore';
 
-// Tier thresholds — must match the pricing page
+/** Marketing: unlimited team members (no per-user fee). Hard cap per company for abuse prevention. */
+export const MAX_TEAM_USERS_PER_COMPANY = 200;
+export const MAX_TEAM_USERS_LEGACY = 500;
+
+// Asset tier thresholds by subscribed vehicle count
 const TIERS = [
-  { maxVehicles: 15,  users: 15,        assets: 1_000   },
-  { maxVehicles: 35,  users: 35,        assets: 5_000   },
-  { maxVehicles: 75,  users: 75,        assets: 20_000  },
-  { maxVehicles: Infinity, users: null, assets: null    }, // Enterprise — unlimited
+  { maxVehicles: 15, assets: 1_000 },
+  { maxVehicles: 35, assets: 5_000 },
+  { maxVehicles: 75, assets: 20_000 },
+  { maxVehicles: Infinity, assets: null },
 ] as const;
 
 /** Backward-compat mapping for companies still on the old tier strings. */
@@ -48,11 +53,11 @@ type CompanyDoc = {
   subscription_status?: string;
 };
 
-function deriveLimits(subscribedVehicles: number): { users: number | null; assets: number | null; vehicles: number } {
+function deriveLimits(subscribedVehicles: number): { users: number; assets: number | null; vehicles: number } {
   const tier = TIERS.find((t) => subscribedVehicles <= t.maxVehicles) ?? TIERS[TIERS.length - 1];
   return {
     vehicles: subscribedVehicles,
-    users: tier.users ?? null,
+    users: MAX_TEAM_USERS_PER_COMPANY,
     assets: tier.assets ?? null,
   };
 }
@@ -69,8 +74,9 @@ async function getCount(db: Firestore, collectionName: string, companyId: string
 }
 
 function getLimitsFromCompany(company: CompanyDoc): { users: number | null; assets: number | null; vehicles: number | null } {
-  // Legacy companies are unlimited across the board
-  if (company.legacy) return { users: null, assets: null, vehicles: null };
+  if (company.legacy) {
+    return { users: MAX_TEAM_USERS_LEGACY, assets: null, vehicles: null };
+  }
 
   // New per-vehicle model
   if (company.subscribed_vehicles && company.subscribed_vehicles > 0) {
@@ -84,7 +90,30 @@ function getLimitsFromCompany(company: CompanyDoc): { users: number | null; asse
   }
 
   // No active subscription — allow minimal usage (5 vehicles, 500 assets, 5 users)
-  return { users: 5, assets: 500, vehicles: 5 };
+  return { users: 15, assets: 500, vehicles: 5 };
+}
+
+function inviteExpiryMs(value: unknown): number | null {
+  if (!value) return null;
+  if (typeof value === 'object' && value !== null && 'toDate' in value && typeof (value as { toDate: () => Date }).toDate === 'function') {
+    return (value as { toDate: () => Date }).toDate().getTime();
+  }
+  if (value instanceof Date) return value.getTime();
+  return null;
+}
+
+async function getActivePendingInviteCount(db: Firestore, companyId: string): Promise<number> {
+  const q = query(
+    collection(db, 'invites'),
+    where('companyId', '==', companyId),
+    where('status', '==', 'pending')
+  );
+  const snap = await getDocs(q);
+  const now = Date.now();
+  return snap.docs.filter((d) => {
+    const exp = inviteExpiryMs(d.data().expiresAt);
+    return exp === null || exp > now;
+  }).length;
 }
 
 /** Check if the company can add one more vehicle. */
@@ -121,14 +150,20 @@ export async function checkCanAddAsset(db: Firestore, companyId: string): Promis
 export async function checkCanAddUser(db: Firestore, companyId: string): Promise<LimitCheckResult> {
   const company = await getCompanyDoc(db, companyId);
   const limits = getLimitsFromCompany(company);
-  const current = await getCount(db, 'profiles', companyId);
+  const [profileCount, pendingInvites] = await Promise.all([
+    getCount(db, 'profiles', companyId),
+    getActivePendingInviteCount(db, companyId),
+  ]);
+  const current = profileCount + pendingInvites;
   const limit = limits.users;
   const allowed = limit === null || current < limit;
   return {
     allowed,
     current,
     limit,
-    message: allowed ? undefined : `User limit reached (${current}/${limit}). To invite more team members, update your subscription on the billing page.`,
+    message: allowed
+      ? undefined
+      : `Team member limit reached (${current}/${limit}). Contact support if you need a higher allowance.`,
   };
 }
 

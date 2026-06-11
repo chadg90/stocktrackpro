@@ -35,12 +35,12 @@ type Tier = { label: string; users: string; colour: string };
 
 function getTier(count: number): Tier {
   if (count <= 15)
-    return { label: 'Starter', users: 'Up to 15 users', colour: 'text-sky-800 dark:text-sky-400' };
+    return { label: 'Starter', users: 'Unlimited team members', colour: 'text-sky-800 dark:text-sky-400' };
   if (count <= 35)
-    return { label: 'Growth', users: 'Up to 35 users', colour: 'text-indigo-800 dark:text-indigo-400' };
+    return { label: 'Growth', users: 'Unlimited team members', colour: 'text-indigo-800 dark:text-indigo-400' };
   if (count <= 75)
-    return { label: 'Business', users: 'Up to 75 users', colour: 'text-violet-800 dark:text-violet-400' };
-  return { label: 'Enterprise', users: 'Unlimited users', colour: 'text-blue-800 dark:text-blue-400' };
+    return { label: 'Business', users: 'Unlimited team members', colour: 'text-violet-800 dark:text-violet-400' };
+  return { label: 'Enterprise', users: 'Unlimited team members', colour: 'text-blue-800 dark:text-blue-400' };
 }
 
 const formatCurrency = (value: number) => `£${value.toFixed(2)}`;
