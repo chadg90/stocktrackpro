@@ -635,6 +635,197 @@ export type VehicleWeekRow = {
   'Inspector (last in week)': string;
 };
 
+export function getActiveFleetVehicles(vehicles: FleetVehicle[]): FleetVehicle[] {
+  return vehicles.filter((v) => {
+    const s = (v.status || 'active').toLowerCase();
+    return s !== 'archived' && s !== 'sold';
+  });
+}
+
+export function getFleetStaff(users: FleetUser[]): FleetUser[] {
+  return users.filter((u) => u.role === 'user' || u.role === 'manager');
+}
+
+export type StaffVehicleCheckRow = {
+  User: string;
+  Email: string;
+  Registration: string;
+  'Make / Model': string;
+  'Check count': number;
+  'Last checked': string;
+};
+
+/** Each staff member × vehicle combination that was checked in the period. */
+export function buildStaffVehicleCheckRows(
+  users: FleetUser[],
+  vehicles: FleetVehicle[],
+  periodInspections: FleetInspection[]
+): StaffVehicleCheckRow[] {
+  const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
+  const vehicleMap = Object.fromEntries(vehicles.map((v) => [v.id, v]));
+
+  const agg: Record<string, { count: number; lastAt: Date | null; userId: string; vehicleId: string }> = {};
+
+  for (const i of periodInspections) {
+    const uid = i.inspected_by;
+    const vid = i.vehicle_id;
+    if (!uid || !vid) continue;
+    const key = `${uid}:${vid}`;
+    const at = toJsDate(i.inspected_at);
+    if (!agg[key]) {
+      agg[key] = { count: 0, lastAt: null, userId: uid, vehicleId: vid };
+    }
+    agg[key].count += 1;
+    if (at && (!agg[key].lastAt || at > agg[key].lastAt)) {
+      agg[key].lastAt = at;
+    }
+  }
+
+  return Object.values(agg)
+    .map((a) => {
+      const u = userMap[a.userId];
+      const v = vehicleMap[a.vehicleId];
+      return {
+        User: getUserLabel(u, a.userId),
+        Email: u?.email || '—',
+        Registration: v?.registration || a.vehicleId,
+        'Make / Model': [v?.make, v?.model].filter(Boolean).join(' ') || '—',
+        'Check count': a.count,
+        'Last checked': a.lastAt ? format(a.lastAt, 'yyyy-MM-dd HH:mm') : '—',
+      };
+    })
+    .sort((a, b) => a.User.localeCompare(b.User) || a.Registration.localeCompare(b.Registration));
+}
+
+export type UserVehicleGapRow = {
+  User: string;
+  Email: string;
+  Role: string;
+  Registration: string;
+  'Make / Model': string;
+  'User did any check': string;
+  'Vehicle inspected by anyone': string;
+};
+
+/** Staff × vehicle pairs with no inspection by that user in the period. */
+export function buildUserVehicleGapRows(
+  users: FleetUser[],
+  vehicles: FleetVehicle[],
+  periodInspections: FleetInspection[]
+): UserVehicleGapRow[] {
+  const staff = getFleetStaff(users);
+  const fleet = getActiveFleetVehicles(vehicles);
+
+  const userChecked = new Set<string>();
+  const vehicleChecked = new Set<string>();
+  const pairChecked = new Set<string>();
+
+  for (const i of periodInspections) {
+    if (i.inspected_by) userChecked.add(i.inspected_by);
+    if (i.vehicle_id) vehicleChecked.add(i.vehicle_id);
+    if (i.inspected_by && i.vehicle_id) {
+      pairChecked.add(`${i.inspected_by}:${i.vehicle_id}`);
+    }
+  }
+
+  const rows: UserVehicleGapRow[] = [];
+  for (const u of staff) {
+    const userDidAny = userChecked.has(u.id);
+    for (const v of fleet) {
+      if (pairChecked.has(`${u.id}:${v.id}`)) continue;
+      rows.push({
+        User: getUserLabel(u, u.id),
+        Email: u.email || '—',
+        Role: u.role || '—',
+        Registration: v.registration || v.id,
+        'Make / Model': [v.make, v.model].filter(Boolean).join(' ') || '—',
+        'User did any check': userDidAny ? 'Yes' : 'No',
+        'Vehicle inspected by anyone': vehicleChecked.has(v.id) ? 'Yes' : 'No',
+      });
+    }
+  }
+
+  return rows.sort((a, b) => {
+    if (a.User !== b.User) return a.User.localeCompare(b.User);
+    return a.Registration.localeCompare(b.Registration);
+  });
+}
+
+export function buildComplianceExportSheets(
+  users: FleetUser[],
+  vehicles: FleetVehicle[],
+  inspections: FleetInspection[],
+  period: CompliancePeriodPreset,
+  monthValue?: string,
+  now = new Date()
+): { name: string; data: Record<string, string | number>[] }[] {
+  const bounds = getCompliancePeriodBounds(period, monthValue, now);
+  const periodInspections = filterInspectionsInWeek(inspections, bounds.start, bounds.end);
+  const statusLabels = compliancePeriodStatusLabels(period);
+  const periodLabel = formatCompliancePeriodRange(bounds, period);
+  const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
+  const vehicleMap = Object.fromEntries(vehicles.map((v) => [v.id, v]));
+
+  const userRows = buildUserCompliance(users, periodInspections).map((u) => ({
+    User: u.User,
+    Email: u.Email,
+    Role: u.Role,
+    'Inspections in period': u['Inspections This Week'],
+    Status: u['Inspections This Week'] > 0 ? statusLabels.checked : statusLabels.notChecked,
+  }));
+
+  const vehicleRows = buildVehicleWeekCompliance(vehicles, periodInspections, users).map((v) => ({
+    Registration: v.Registration,
+    'Make / Model': v['Make / Model'],
+    Inspected: v['Inspected This Week'] === 'Yes' ? statusLabels.inspected : statusLabels.notInspected,
+    'Last inspection': v['Last Inspection'],
+    'Last inspector': v['Inspector (last in week)'],
+  }));
+
+  const checkRows = buildStaffVehicleCheckRows(users, vehicles, periodInspections);
+  const gapRows = buildUserVehicleGapRows(users, vehicles, periodInspections);
+
+  const detailRows = periodInspections
+    .slice()
+    .sort((a, b) => (toJsDate(b.inspected_at)?.getTime() ?? 0) - (toJsDate(a.inspected_at)?.getTime() ?? 0))
+    .map((i) => ({
+      'Inspected at': formatFleetDate(i.inspected_at),
+      Registration: vehicleMap[i.vehicle_id || '']?.registration || i.vehicle_id || '—',
+      Inspector: getUserLabel(userMap[i.inspected_by || ''], i.inspected_by || ''),
+      'Inspector email': userMap[i.inspected_by || '']?.email || '—',
+      Mileage: i.mileage ?? '—',
+      'Has defect': i.has_defect ? 'Yes' : 'No',
+    }));
+
+  const summary = [
+    { Field: 'Report generated', Value: format(now, 'yyyy-MM-dd HH:mm') },
+    { Field: 'Period', Value: periodLabel },
+    { Field: 'Period start', Value: format(bounds.start, 'yyyy-MM-dd') },
+    { Field: 'Period end', Value: format(bounds.end, 'yyyy-MM-dd') },
+    { Field: 'Staff (user/manager)', Value: getFleetStaff(users).length },
+    { Field: 'Active vehicles', Value: getActiveFleetVehicles(vehicles).length },
+    { Field: 'Inspections in period', Value: periodInspections.length },
+    {
+      Field: 'Staff with no checks',
+      Value: userRows.filter((r) => r['Inspections in period'] === 0).length,
+    },
+    {
+      Field: 'Vehicles not inspected',
+      Value: vehicleRows.filter((r) => r.Inspected === statusLabels.notInspected).length,
+    },
+    { Field: 'Staff-vehicle gaps', Value: gapRows.length },
+  ];
+
+  return [
+    { name: 'Summary', data: summary },
+    { name: 'Users summary', data: userRows },
+    { name: 'Vehicles summary', data: vehicleRows },
+    { name: 'Checks by staff vehicle', data: checkRows as unknown as Record<string, string | number>[] },
+    { name: 'Missing checks', data: gapRows as unknown as Record<string, string | number>[] },
+    { name: 'All inspections', data: detailRows },
+  ];
+}
+
 export function buildVehicleWeekCompliance(
   vehicles: FleetVehicle[],
   weekInspections: FleetInspection[],
