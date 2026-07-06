@@ -24,7 +24,7 @@ export default function FAQ() {
     },
     {
       question: "What is the Plant & Machinery add-on?",
-      answer: "An optional module for LOLER thorough examinations, service inspections, and pre-hire / off-hire checks. Managers use the mobile app and web dashboard to register machines, submit inspections, and download PDF reports. Examination due reminders are sent to managers by push notification.",
+      answer: "An optional module for LOLER thorough examinations, service inspections, and pre-hire / off-hire checks. Fitters complete the forms needed for that visit in one inspection entry — each form generates its own PDF. Managers use the mobile app and web dashboard to register machines, submit inspections, and download reports. Examination due reminders are sent to managers by push notification.",
     },
     {
       question: "How much does Plant & Machinery cost?",

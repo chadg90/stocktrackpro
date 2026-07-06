@@ -21,8 +21,8 @@ export default function ComplianceCentreHubPage() {
           seriously.
         </p>
         <p className="text-white/55 text-sm leading-relaxed mb-12 -mt-8">
-          Use Stock Track PRO&apos;s optional Plant &amp; Machinery module for LOLER thorough examination PDFs, service
-          records, and manager alerts when examinations are due.
+          Use Stock Track PRO&apos;s optional Plant &amp; Machinery module to complete LOLER, service, pre-hire/off-hire,
+          and PUWER forms in one inspection entry — with separate PDFs, examination due reminders, and manager alerts.
         </p>
         <ul className="space-y-6">
           {COMPLIANCE_ARTICLES.map((article) => (

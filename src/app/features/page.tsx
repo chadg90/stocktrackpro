@@ -120,17 +120,17 @@ const features: Feature[] = [
     title: 'Plant & Machinery (optional add-on)',
     icon: HardHat,
     summary:
-      'For teams that maintain lifting equipment and site plant. Managers run LOLER thorough examinations, service inspections, and pre-hire checks in the mobile app, with PDF reports and a web dashboard for records and retries.',
+      'For teams that maintain lifting equipment and site plant. Fitters complete LOLER, service, pre-hire/off-hire, and PUWER forms in one inspection entry — each with its own PDF — with a web dashboard for records and retries.',
     bullets: [
       'Register machines with examination due dates and usual locations',
-      'LOLER thorough examination, service, and pre-hire / off-hire inspection flows',
-      'PDF certificates stored with LOLER-compliant retention (2 years minimum for LOLER records)',
+      'One inspection entry — combine LOLER, service, pre-hire/off-hire, and PUWER forms as needed',
+      'Separate PDF per form type, with LOLER-compliant retention (2 years minimum for LOLER records)',
       'Managers receive push reminders when an examination is due within 7 days or overdue',
       'Machine seats tied to your plant subscription quantity (from £12 per machine per month)',
       'Plant reports on the web dashboard with secure PDF download and limited manual retry',
     ],
     useCase:
-      'A fitter completes a thorough examination on site, submits from the app, and the LOLER PDF is available to managers on the web — with examination due dates monitored automatically.',
+      'A fitter completes a LOLER examination and service inspection in one visit, submits once from the app, and separate PDFs are available to managers on the web — with examination due dates monitored automatically.',
   },
 ];
 

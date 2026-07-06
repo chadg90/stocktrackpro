@@ -48,6 +48,27 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     datePublished: '2026-06-02T09:00:00+01:00',
     dateModified: '2026-07-06T09:00:00+01:00',
   },
+  {
+    slug: 'loler-thorough-examination-records',
+    title: 'LOLER thorough examination records: what UK operators must keep',
+    metaDescription:
+      'What LOLER requires for lifting equipment on site — thorough examination intervals, competent persons, reports, and how long records must be kept.',
+    datePublished: '2026-07-06T09:00:00+01:00',
+  },
+  {
+    slug: 'plant-machinery-service-vs-loler-examination',
+    title: 'Plant service inspections vs LOLER thorough examinations',
+    metaDescription:
+      'The difference between routine plant maintenance, pre-use checks, and statutory LOLER thorough examinations — and why conflating them creates compliance risk.',
+    datePublished: '2026-07-06T09:00:00+01:00',
+  },
+  {
+    slug: 'plant-examination-due-date-tracking',
+    title: 'Tracking plant examination due dates before certificates lapse',
+    metaDescription:
+      'How UK site managers avoid overdue LOLER examinations — due date registers, manager alerts, and keeping thorough examination PDFs accessible for audits.',
+    datePublished: '2026-07-06T09:00:00+01:00',
+  },
 ];
 
 export function complianceArticleBySlug(slug: string): ComplianceArticle | undefined {

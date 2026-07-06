@@ -16,10 +16,11 @@ Support email: support@stocktrackpro.co.uk
 - Manager web dashboard for fleet oversight and team management
 - Timestamped digital records for DVSA roadside checks and audits
 - Role-based access for drivers, managers, and fitters
+- Optional Plant & Machinery: LOLER, service, hire check & PUWER forms in one inspection entry — separate PDF per form, examination due reminders
 
 ## What it does NOT do
 
-Stock Track PRO is a vehicle fleet management platform. It does not track hand tools, equipment inventory, or non-vehicle assets. It is focused on commercial vans, vehicle inspections, defect management, and fleet compliance.
+The core fleet platform is for commercial vans, vehicle inspections, defect management, and fleet compliance. It does not track hand tools or general equipment inventory. Site lifting plant is covered by the optional Plant & Machinery add-on, not the base vehicle plan.
 
 ## Who it is for
 
@@ -28,6 +29,7 @@ UK van fleet operators — trades, groundworks, logistics, construction, electri
 ## Pricing
 
 - £8 per vehicle per month, including VAT at 20%
+- Plant & Machinery add-on: from £12 per machine per month (separate subscription)
 - Unlimited team members on every plan (no per-user fee)
 - 7-day free trial — no card required
 - Monthly plans can be cancelled anytime
@@ -49,10 +51,13 @@ UK van fleet operators — trades, groundworks, logistics, construction, electri
 - MOT expiry tracking: https://www.stocktrackpro.co.uk/compliance-centre/mot-expiry-tracking-for-fleets/
 - Pre-use checks for company vans: https://www.stocktrackpro.co.uk/compliance-centre/pre-use-checks-company-vehicles/
 - Digital defect records under DVSA scrutiny: https://www.stocktrackpro.co.uk/compliance-centre/digital-defect-records-dvsa-scrutiny/
+- LOLER thorough examination records: https://www.stocktrackpro.co.uk/compliance-centre/loler-thorough-examination-records/
+- Plant service vs LOLER examination: https://www.stocktrackpro.co.uk/compliance-centre/plant-machinery-service-vs-loler-examination/
+- Plant examination due date tracking: https://www.stocktrackpro.co.uk/compliance-centre/plant-examination-due-date-tracking/
 
 ## Optional add-on
 
-Plant & Machinery module: LOLER thorough examination PDFs, service inspections, and examination due reminders. Separate subscription from the core van fleet plan.
+Plant & Machinery module: complete LOLER, service, pre-hire/off-hire, and PUWER forms in one inspection entry — each with its own PDF, plus examination due reminders. Separate subscription from the core van fleet plan.
 
 ## Platform and support
 

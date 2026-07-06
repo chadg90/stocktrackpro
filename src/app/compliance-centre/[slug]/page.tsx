@@ -508,6 +508,345 @@ function DigitalDefectRecordsDvsaArticle() {
   );
 }
 
+function PlantArticleCta() {
+  return (
+    <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-7">
+      <p className="text-base leading-relaxed text-white/85">
+        Stock Track PRO&apos;s optional{' '}
+        <span className="font-medium text-white">Plant &amp; Machinery</span> module lets fitters complete multiple
+        forms in one inspection entry — LOLER, service, pre-hire/off-hire, and PUWER — each with its own PDF report and
+        manager alerts when examinations are due.{' '}
+        <Link href="/pricing" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
+          See plant pricing
+        </Link>{' '}
+        or{' '}
+        <Link href="/onboarding" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
+          start your 7-day fleet trial
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
+
+function LolerThoroughExaminationRecordsArticle() {
+  return (
+    <ComplianceArticleContent>
+      <p>
+        If your business uses lifting equipment on site — excavators with lifting accessories, telehandlers, MEWPs,
+        hoists, or slings and shackles — the{' '}
+        <a
+          href="https://www.hse.gov.uk/work-equipment/loler/the-law.htm"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Lifting Operations and Lifting Equipment Regulations 1998 (LOLER)
+        </a>{' '}
+        apply. A thorough examination is a statutory inspection by a competent person. The report is your evidence that
+        the equipment was examined and whether it is safe to continue in use.
+      </p>
+
+      <h2>What a thorough examination is — and what it is not</h2>
+      <p>
+        HSE defines a thorough examination as a detailed visual examination and functional checks carried out by a
+        competent person. It is separate from routine maintenance, operator pre-use checks, or a general service. Those
+        activities matter for safety, but they do not replace the statutory LOLER examination or the report that must
+        follow it.
+      </p>
+      <p>
+        According to{' '}
+        <a
+          href="https://www.hse.gov.uk/work-equipment/loler/examination-of-lifting-equipment.htm"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          HSE guidance on examination of lifting equipment
+        </a>
+        , equipment must be thoroughly examined before first use, after installation or assembly at a new site, and
+        then at regular intervals. For equipment used for lifting persons, the maximum interval is normally six months.
+        For other lifting equipment, the maximum is normally twelve months, unless a written examination scheme specifies
+        a different interval.
+      </p>
+
+      <h2>What the report of thorough examination must contain</h2>
+      <p>
+        HSE guidance on{' '}
+        <a
+          href="https://www.hse.gov.uk/work-equipment/loler/report-thorough-examination-lifting-equipment.htm"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          reports of thorough examination
+        </a>{' '}
+        sets out what the competent person must record. The report should identify the equipment, state the date of
+        examination, give the date of the next thorough examination, and list any defects or matters that could become
+        dangerous. If a defect poses an immediate risk, the report must be sent to the relevant enforcing authority as
+        well as the person using the equipment.
+      </p>
+      <p>
+        For site managers, the practical point is simple: you need the current report available when asked — during an
+        HSE visit, a client audit, or an insurance review — and you need to know when the next examination is due before
+        the certificate lapses.
+      </p>
+
+      <h2>How long LOLER records should be kept</h2>
+      <p>
+        HSE states that reports of thorough examination must be kept until the next report is issued for that equipment.
+        For lifting accessories, reports should be kept for at least two years. Many operators keep records longer because
+        audits, disputes, and insurance claims can reference equipment history well after the next examination is
+        completed.
+      </p>
+      <p>
+        Paper certificates stored in site cabins are vulnerable to the same problems as paper vehicle inspection sheets:
+        lost files, water damage, and no central copy when a manager is off site. A digital register with downloadable
+        PDF reports makes it easier to retrieve the right certificate quickly.
+      </p>
+
+      <h2>Who is responsible on site</h2>
+      <p>
+        LOLER places duties on employers and people who control lifting equipment. That usually means the business
+        operating the plant, not only the hire company or the examiner. If you hire equipment, you still need to satisfy
+        yourself that thorough examinations are in date and that defects are acted on before use continues.
+      </p>
+      <p>
+        Pre-hire and off-hire checks are useful operational controls, especially when equipment moves between sites, but
+        they complement — rather than replace — the statutory examination record.
+      </p>
+
+      <h2>How Stock Track PRO supports LOLER records</h2>
+      <p>
+        The optional Plant &amp; Machinery module lets managers register machines with examination due dates and usual
+        locations. On site, a fitter or manager starts one inspection entry and can complete the forms needed for that
+        visit — including LOLER thorough examination, service inspection, pre-hire or off-hire checks, and PUWER — in a
+        single submission. Each selected form generates its own PDF, stored against the same inspection reference on the
+        web dashboard. Records are retained for at least two years to support LOLER compliance. Managers receive push
+        reminders when an examination is due within seven days or overdue.
+      </p>
+
+      <p className="compliance-disclaimer">
+        This article summarises general principles and is not legal advice. Always refer to current{' '}
+        <a
+          href="https://www.hse.gov.uk/work-equipment/loler/"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          HSE LOLER guidance
+        </a>{' '}
+        for your equipment and operation.
+      </p>
+
+      <KeyTakeaways>
+        <li>LOLER thorough examinations are statutory — not the same as a routine service or pre-use check.</li>
+        <li>Intervals are typically six months for equipment lifting persons and twelve months for other lifting equipment.</li>
+        <li>Reports must identify defects, state the next due date, and be kept until superseded.</li>
+        <li>Site managers need current PDF reports and a clear view of upcoming due dates.</li>
+      </KeyTakeaways>
+      <PlantArticleCta />
+    </ComplianceArticleContent>
+  );
+}
+
+function PlantMachineryServiceVsLolerArticle() {
+  return (
+    <ComplianceArticleContent>
+      <p>
+        Groundworks, construction, and trades businesses often run a mix of owned and hired plant. Daily operations
+        depend on service schedules, fitter visits, and quick pre-start checks. LOLER adds a separate layer: a statutory
+        thorough examination with a formal report. Treating a service invoice or a tick-sheet as your LOLER evidence is
+        a common — and risky — mistake.
+      </p>
+
+      <h2>Routine service and maintenance</h2>
+      <p>
+        Manufacturers and hire companies set service intervals for filters, fluids, wear parts, and general mechanical
+        condition. That work keeps plant reliable and is part of good asset management. HSE expects lifting equipment to
+        be maintained, but maintenance records alone do not prove that a competent person has completed a thorough
+        examination under LOLER.
+      </p>
+      <p>
+        A service may identify faults, but unless it is carried out as a thorough examination by a competent person and
+        documented in a LOLER report, it does not reset your statutory examination cycle or replace the certificate you
+        may be asked to produce.
+      </p>
+
+      <h2>Pre-use and pre-hire checks</h2>
+      <p>
+        Operators and site supervisors should check plant before use — controls, leaks, pins, hoses, stabilisers, and
+        anything visibly unsafe. Pre-hire and off-hire inspections are especially valuable when equipment arrives from a
+        hire company or moves between jobs. These checks reduce the chance that obviously dangerous plant is used.
+      </p>
+      <p>
+        Again, HSE is clear that pre-use checks are not a substitute for thorough examination. They are part of the
+        overall safety system. Your LOLER report is the document that confirms the equipment was examined within the
+        required interval and whether it is safe to continue in use.
+      </p>
+
+      <h2>LOLER thorough examination</h2>
+      <p>
+        The thorough examination is carried out by a competent person — often a specialist examiner — who assesses the
+        equipment against LOLER requirements. The output is a report of thorough examination, not a generic job sheet.
+        That report drives your next due date and may trigger immediate action if a serious defect is found.
+      </p>
+      <p>
+        For equipment used to lift persons, such as some MEWPs and man-riding attachments, the examination interval is
+        typically six months. For much other lifting equipment, twelve months is the usual maximum unless your
+        examination scheme states otherwise. See{' '}
+        <a
+          href="https://www.hse.gov.uk/work-equipment/loler/examination-of-lifting-equipment.htm"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          HSE guidance on examination intervals
+        </a>{' '}
+        for detail.
+      </p>
+
+      <h2>Why conflating them creates compliance risk</h2>
+      <p>
+        If a machine has been serviced recently but the LOLER certificate expired last month, the plant may still be
+        non-compliant. If an examiner raised a defect and the report was filed in a van glove box while the machine
+        stayed on hire, you may not have a defensible process. Auditors and clients increasingly ask for the actual LOLER
+        PDF, not assurances that &quot;the fitter looked at it last week.&quot;
+      </p>
+      <p>
+        Strong operators keep three threads visible: service history, daily or pre-hire checks, and the current thorough
+        examination report with its next due date. Software helps when each type of record is stored against the same
+        machine register instead of scattered across email, paper, and different spreadsheets.
+      </p>
+
+      <h2>How Stock Track PRO keeps each record type distinct in one visit</h2>
+      <p>
+        The Plant &amp; Machinery module is built for real site work: one inspection entry, multiple forms. A fitter can
+        complete a LOLER thorough examination, a service inspection, and a pre-hire or off-hire check in the same
+        submission when all three are needed — without starting separate jobs or re-entering machine details each time.
+        PUWER documentation is included on every inspection. Each form type still produces its own PDF on the web
+        dashboard, so a service record never substitutes for a LOLER certificate, but the paperwork burden on site is
+        much lower.
+      </p>
+
+      <p className="compliance-disclaimer">
+        This article summarises general principles and is not legal advice. Check current{' '}
+        <a
+          href="https://www.hse.gov.uk/work-equipment/loler/"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          HSE LOLER guidance
+        </a>{' '}
+        and your examination scheme for each asset type.
+      </p>
+
+      <KeyTakeaways>
+        <li>Service maintenance, pre-use checks, and LOLER thorough examinations serve different purposes.</li>
+        <li>Only a competent person&apos;s thorough examination produces the statutory LOLER report.</li>
+        <li>Expired LOLER certificates are a compliance gap even if the machine was recently serviced.</li>
+        <li>One site visit can cover multiple forms — each must still produce the correct PDF evidence.</li>
+      </KeyTakeaways>
+      <PlantArticleCta />
+    </ComplianceArticleContent>
+  );
+}
+
+function PlantExaminationDueDateTrackingArticle() {
+  return (
+    <ComplianceArticleContent>
+      <p>
+        LOLER compliance is not only about passing today&apos;s examination. It is about knowing when the next one is
+        due — and making sure no machine slips through the gap between certificates. On busy sites, due dates live in
+        diaries, whiteboards, and the memory of whoever last spoke to the examiner. That works until a hire extension,
+        a new project, or a staff change leaves a machine running with an expired report.
+      </p>
+
+      <h2>What happens when an examination lapses</h2>
+      <p>
+        Using lifting equipment without a valid thorough examination can expose your business to enforcement action
+        under LOLER. HSE can inspect lifting equipment and ask to see reports of thorough examination. If the certificate
+        is out of date, you may need to take equipment out of use until it is examined — with the same downtime and
+        commercial disruption that missed MOTs cause on vans.
+      </p>
+      <p>
+        Client contracts and principal contractor rules increasingly require proof of current LOLER before plant is
+        accepted on site. An expired certificate can block mobilisation even where the equipment appears mechanically
+        sound.
+      </p>
+
+      <h2>Building a due date register</h2>
+      <p>
+        At minimum, every lifting asset needs a machine identifier, the date of the last thorough examination, the next
+        due date, and a link to the current PDF report. For hired plant, record the hire reference and confirm who holds
+        the certificate — your business or the hire company.
+      </p>
+      <p>
+        Spreadsheets can work for a handful of machines if one person updates them reliably. The failure mode is
+        familiar: a certificate arrives by email, the due date is typed incorrectly, or the machine is duplicated under
+        a new plant number when it moves site. By the time someone notices, the examination window has passed.
+      </p>
+
+      <h2>Why advance reminders matter</h2>
+      <p>
+        Examiners need lead time to attend site. Projects need time to swap or stand down plant. A reminder on the due
+        date itself is often too late. Many operators use a seven-day warning — the same practical window Stock Track PRO
+        uses for MOT renewals on vans — so managers can book the examiner before the certificate expires.
+      </p>
+      <p>
+        Reminders should reach people who can act. If only one supervisor receives alerts and they are on leave, the
+        system still fails. Push notifications to managers, plus a visible due date on the machine register, reduce
+        that single-point-of-failure risk.
+      </p>
+
+      <h2>Keeping PDF reports accessible</h2>
+      <p>
+        HSE guidance requires reports to be available to the person using the equipment and to enforcing authorities when
+        requested. Storing PDFs only on one phone or in a shared drive with unclear folder names makes retrieval slow
+        during an audit. Central storage against each machine — with secure download from the web dashboard — means any
+        authorised manager can produce the certificate without calling the yard.
+      </p>
+      <p>
+        LOLER-related records should be retained for at least two years for accessories, and until the next report for
+        other equipment. Digital retention with timestamps supports that requirement more reliably than paper files in
+        multiple site cabins.
+      </p>
+
+      <h2>How Stock Track PRO tracks examination due dates</h2>
+      <p>
+        When you register a machine in the Plant &amp; Machinery module, you set examination due dates and whether the
+        asset lifts persons (affecting the six-month LOLER interval). After forms are submitted from one inspection
+        entry, each PDF — LOLER, service, hire check, or PUWER — is stored against that inspection on the web dashboard.
+        Managers receive push notifications when an examination is due within seven days or overdue. Because multiple
+        forms can be completed in a single visit, fitters are less likely to skip the LOLER paperwork when they are
+        already on site for a service or hire check.
+      </p>
+
+      <p className="compliance-disclaimer">
+        This article summarises general principles and is not legal advice. Refer to{' '}
+        <a
+          href="https://www.hse.gov.uk/work-equipment/loler/report-thorough-examination-lifting-equipment.htm"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          HSE guidance on reports of thorough examination
+        </a>{' '}
+        for your operation.
+      </p>
+
+      <KeyTakeaways>
+        <li>Every lifting asset needs a current LOLER report and a known next due date.</li>
+        <li>Expired certificates can stop plant working on site and attract HSE scrutiny.</li>
+        <li>Seven-day advance reminders give time to book examiners before lapse.</li>
+        <li>Central PDF storage beats scattered email and paper when audits happen.</li>
+      </KeyTakeaways>
+      <PlantArticleCta />
+    </ComplianceArticleContent>
+  );
+}
+
 function ArticleBody({ article }: { article: ComplianceArticle }) {
   switch (article.slug) {
     case 'van-fleet-defect-records':
@@ -520,6 +859,12 @@ function ArticleBody({ article }: { article: ComplianceArticle }) {
       return <PreUseChecksArticle />;
     case 'digital-defect-records-dvsa-scrutiny':
       return <DigitalDefectRecordsDvsaArticle />;
+    case 'loler-thorough-examination-records':
+      return <LolerThoroughExaminationRecordsArticle />;
+    case 'plant-machinery-service-vs-loler-examination':
+      return <PlantMachineryServiceVsLolerArticle />;
+    case 'plant-examination-due-date-tracking':
+      return <PlantExaminationDueDateTrackingArticle />;
     default:
       return null;
   }

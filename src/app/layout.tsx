@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   description: SITE_SHORT_DESCRIPTION,
   keywords:
-    "fleet inspection software UK, vehicle defect reporting app, van fleet compliance software, MOT tracking software for fleets, fleet management app for vans, DVLA fleet checks, fleet compliance UK",
+    "fleet inspection software UK, vehicle defect reporting app, van fleet compliance software, MOT tracking software for fleets, fleet management app for vans, DVLA fleet checks, fleet compliance UK, LOLER records software, plant machinery inspection app",
   authors: [{ name: "Stock Track PRO" }],
   generator: "Next.js",
   applicationName: "Stock Track PRO",

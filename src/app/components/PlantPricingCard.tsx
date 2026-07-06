@@ -13,9 +13,8 @@ import {
 type BillingCycle = 'monthly' | 'yearly';
 
 const PLANT_FEATURES = [
-  'LOLER thorough examination certificates',
-  'Service & costed inspection reports',
-  'Pre-hire & off-hire check sheets',
+  'LOLER, service, hire check & PUWER in one inspection entry',
+  'Separate PDF per form type',
   '2-year LOLER-compliant record storage',
   'Mobile app for fitters in the field',
   'Manager web dashboard',

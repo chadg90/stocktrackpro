@@ -75,7 +75,8 @@ export default function Contact() {
               Get in <span className="text-blue-500">touch</span>
             </h1>
             <p className="text-lg text-white/75 leading-relaxed">
-              Have questions about Stock Track PRO? We&apos;re here to help with fleet setup, inspections, defects, and billing.
+              Have questions about Stock Track PRO? We&apos;re here to help with fleet setup, inspections, defects, the
+              Plant &amp; Machinery add-on, and billing.
             </p>
           </div>
         </div>

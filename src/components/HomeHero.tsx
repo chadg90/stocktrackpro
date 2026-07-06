@@ -124,6 +124,7 @@ export default function HomeHero() {
         </h1>
         <p className="text-[0.95rem] sm:text-lg md:text-xl text-white/80 max-w-md sm:max-w-2xl leading-relaxed mb-7 sm:mb-10">
           Daily inspections, defect close-out, and MOT visibility — mobile app for the field, web dashboard for managers.
+          Optional Plant &amp; Machinery add-on for LOLER, service, and hire-check records on site.
         </p>
         <div className="flex w-full max-w-sm sm:max-w-none flex-col sm:flex-row gap-3 sm:gap-4 lg:w-auto">
           <Link

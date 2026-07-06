@@ -57,6 +57,26 @@ export default function AboutPage() {
           </section>
 
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold mb-3">Plant &amp; Machinery (optional)</h2>
+            <p className="text-white/70 leading-relaxed mb-4">
+              Many of our customers run vans and site plant. The optional Plant &amp; Machinery module is a separate
+              subscription for lifting equipment — excavators, telehandlers, MEWPs, hoists, and hired plant with LOLER
+              requirements.
+            </p>
+            <p className="text-white/70 leading-relaxed mb-4">
+              Fitters complete the forms needed for that visit in one inspection entry: LOLER thorough examination,
+              service inspection, pre-hire or off-hire checks, and PUWER. Each form generates its own PDF, stored on the
+              web dashboard with examination due reminders for managers.
+            </p>
+            <Link
+              href="/compliance-centre"
+              className="text-blue-400 hover:text-blue-300 text-sm font-medium underline underline-offset-4"
+            >
+              Plant &amp; LOLER compliance articles →
+            </Link>
+          </section>
+
+          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">In the field</h2>
             <p className="text-white/70 leading-relaxed mb-4">
               See how a groundworks contractor uses Stock Track PRO across multiple sites.

@@ -120,6 +120,9 @@ export default function Pricing() {
             £8 per vehicle per month (prices include VAT at 20%). Monthly billing can be cancelled anytime.
             Minimum 5 vehicles. Annual billing is £84 per vehicle per year, paid upfront.
           </p>
+          <p className="text-base text-white/55 leading-relaxed mt-4 max-w-2xl mx-auto">
+            Need LOLER and site plant records too? The optional Plant &amp; Machinery add-on is priced per machine below.
+          </p>
 
           {/* Trust strip — one-liner value anchors */}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/70">

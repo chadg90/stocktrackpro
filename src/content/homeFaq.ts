@@ -20,4 +20,9 @@ export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
     answer:
       'Monthly plans cancel anytime. Annual plans are paid upfront for 12 months; you can stop renewal, but unused months are not refunded.',
   },
+  {
+    question: 'Do you support plant and LOLER records?',
+    answer:
+      'Yes — as an optional Plant & Machinery add-on (separate from the fleet plan). Fitters complete LOLER, service, pre-hire/off-hire, and PUWER forms in one inspection entry, with a PDF per form and manager alerts when examinations are due. See pricing for plant rates.',
+  },
 ];

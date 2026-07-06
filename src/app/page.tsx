@@ -92,6 +92,7 @@ const QUICK_FACTS = [
   ['Platform', 'iOS and Android app, plus web dashboard'],
   ['Who uses what', 'Drivers (user role); managers and fitters (manager role)'],
   ['Fleet size', 'Built for 5 to 100+ vehicles'],
+  ['Plant add-on', 'Optional — LOLER, service, hire check & PUWER forms in one inspection entry'],
   ['Support', 'UK-based — email and WhatsApp'],
 ];
 
@@ -114,7 +115,8 @@ const INCLUDED = [
   {
     icon: HardHat,
     title: 'Plant & Machinery',
-    description: 'LOLER PDFs, examination due reminders, and plant reports — optional add-on.',
+    description:
+      'Optional add-on — complete LOLER, service, pre-hire/off-hire, and PUWER in one visit. Separate PDFs, examination due reminders, and plant reports on the web dashboard.',
     href: '/pricing',
   },
 ];
@@ -176,7 +178,8 @@ export default function Home() {
             </div>
             <p className="text-center text-white/65 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
               UK teams who want clearer vehicle compliance and fewer breakdown surprises — from sole traders to national
-              contractors using a fleet management app for commercial vans and light fleets alike.
+              contractors. Core platform for commercial vans; optional Plant &amp; Machinery for site lifting equipment
+              and LOLER records.
             </p>
           </div>
         </section>
@@ -217,7 +220,7 @@ export default function Home() {
               What&apos;s included
             </h2>
             <p className="text-white/55 text-center mb-12 max-w-lg mx-auto text-sm">
-              One fleet subscription — full detail on the{' '}
+              One fleet subscription for vans — plus optional Plant &amp; Machinery for site plant. Full detail on the{' '}
               <Link href="/features" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
                 features page
               </Link>
@@ -279,7 +282,8 @@ export default function Home() {
               Start managing your fleet today
             </h2>
             <p className="text-white/70 max-w-xl mx-auto mb-10 text-lg">
-              Set up your company and invite your team in minutes.
+              Set up your company and invite your team in minutes. Add Plant &amp; Machinery later if you also run lifting
+              equipment on site.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md sm:max-w-none mx-auto">
               <Link

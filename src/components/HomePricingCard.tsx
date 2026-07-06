@@ -6,6 +6,7 @@ const FEATURES = [
   'All fleet features on every plan',
   'Unlimited team members — no per-user fee',
   'iOS, Android, and web dashboard',
+  'Optional Plant & Machinery — from £12 per machine per month',
 ];
 
 export default function HomePricingCard() {
