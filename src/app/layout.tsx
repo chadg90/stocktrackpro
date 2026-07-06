@@ -4,7 +4,7 @@ import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
 import SiteWideJsonLd from "@/components/seo/SiteWideJsonLd";
-import { SITE_SHORT_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
+import { SITE_META_DESCRIPTION, SITE_SHORT_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,12 +18,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.stocktrackpro.co.uk'),
   title: {
-    default: "Stock Track PRO | UK Van Fleet Management Software",
+    default: "Stock Track PRO | UK Van Fleet & DVSA Compliance Software",
     template: "%s | Stock Track PRO",
   },
-  description: SITE_SHORT_DESCRIPTION,
-  keywords:
-    "fleet inspection software UK, vehicle defect reporting app, van fleet compliance software, MOT tracking software for fleets, fleet management app for vans, DVLA fleet checks, fleet compliance UK, LOLER records software, plant machinery inspection app",
+  description: SITE_META_DESCRIPTION,
   authors: [{ name: "Stock Track PRO" }],
   generator: "Next.js",
   applicationName: "Stock Track PRO",
@@ -40,8 +38,8 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "Stock Track PRO | UK Van Fleet Management Software",
-    description: SITE_SHORT_DESCRIPTION,
+    title: "Stock Track PRO | UK Van Fleet & DVSA Compliance Software",
+    description: SITE_META_DESCRIPTION,
     url: "https://www.stocktrackpro.co.uk",
     siteName: "Stock Track PRO",
     images: [
@@ -49,7 +47,7 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Stock Track PRO — UK fleet management, inspections, and defect reporting",
+        alt: "Stock Track PRO — UK van fleet DVSA walkaround checks and defect reporting",
       },
     ],
     locale: "en_GB",
@@ -57,7 +55,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stock Track PRO | UK Van Fleet Management Software",
+    title: "Stock Track PRO | UK Van Fleet & DVSA Compliance Software",
     description: SITE_TAGLINE,
     images: ["/og-image.jpg"],
   },

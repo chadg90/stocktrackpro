@@ -9,7 +9,7 @@ import TestimonialQuote from '@/components/TestimonialQuote';
 import { HomeJsonLd } from '@/components/HomeJsonLd';
 import { HomeFaqJsonLd } from '@/components/HomeFaqJsonLd';
 import { getFeaturedTestimonial } from '@/content/testimonials';
-import { SITE_SHORT_DESCRIPTION } from '@/content/siteSeo';
+import { SITE_META_DESCRIPTION } from '@/content/siteSeo';
 import {
   Map,
   Smartphone,
@@ -31,11 +31,11 @@ export const metadata: Metadata = {
   title: {
     absolute: 'Stock Track PRO | UK Van Fleet Management & Defect Reporting Software',
   },
-  description: SITE_SHORT_DESCRIPTION,
+  description: SITE_META_DESCRIPTION,
   alternates: { canonical: '/' },
   openGraph: {
     title: 'Stock Track PRO | UK Van Fleet Management & Defect Reporting Software',
-    description: SITE_SHORT_DESCRIPTION,
+    description: SITE_META_DESCRIPTION,
     url: 'https://www.stocktrackpro.co.uk',
     siteName: 'Stock Track PRO',
     images: [
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Stock Track PRO | UK Van Fleet Management & Defect Reporting Software',
-    description: SITE_SHORT_DESCRIPTION,
+    description: SITE_META_DESCRIPTION,
     images: ['/og-image.jpg'],
   },
 };
@@ -61,7 +61,7 @@ const DEFECT_STEPS = [
   {
     n: 1,
     title: 'REPORT',
-    body: 'Drivers complete daily inspections in the app — photos, checklist, and defects captured with a timestamp.',
+    body: 'Drivers complete DVSA daily walkaround checks in the app — photos, checklist, and defects captured with a timestamp.',
   },
   {
     n: 2,
@@ -90,6 +90,7 @@ const DEFECT_STEPS = [
 
 const QUICK_FACTS = [
   ['Platform', 'iOS and Android app, plus web dashboard'],
+  ['Product focus', 'Van fleet DVSA compliance — not warehouse or inventory stock tracking'],
   ['Who uses what', 'Drivers (user role); managers and fitters (manager role)'],
   ['Fleet size', 'Built for 5 to 100+ vehicles'],
   ['Plant add-on', 'Optional — LOLER, service, hire check & PUWER forms in one inspection entry'],
@@ -177,9 +178,9 @@ export default function Home() {
               ))}
             </div>
             <p className="text-center text-white/65 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-              UK teams who want clearer vehicle compliance and fewer breakdown surprises — from sole traders to national
-              contractors. Core platform for commercial vans; optional Plant &amp; Machinery for site lifting equipment
-              and LOLER records.
+              UK transport and trades teams who need DVSA roadworthiness records, driver pre-use walkaround checks, and
+              van fleet risk management — from sole traders to national contractors. Optional Plant &amp; Machinery for
+              site LOLER records.
             </p>
           </div>
         </section>

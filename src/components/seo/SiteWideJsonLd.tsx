@@ -1,4 +1,4 @@
-import { SITE_KNOWS_ABOUT, SITE_SHORT_DESCRIPTION, SITE_TAGLINE } from '@/content/siteSeo';
+import { SITE_KNOWS_ABOUT, SITE_SHORT_DESCRIPTION, SITE_TAGLINE, SITE_BRAND_DISAMBIGUATION } from '@/content/siteSeo';
 import { getOrganizationSameAs, ORGANIZATION_ID, SITE_URL, WEBSITE_ID } from '@/lib/site';
 
 /**
@@ -11,9 +11,12 @@ export default function SiteWideJsonLd() {
     '@type': 'Organization',
     '@id': ORGANIZATION_ID,
     name: 'Stock Track PRO Ltd',
-    alternateName: ['Stock Track PRO', 'Stock Track PRO fleet software'],
+    alternateName: [
+      'Stock Track PRO van fleet software',
+      'Stock Track PRO DVSA compliance software',
+    ],
     url: SITE_URL,
-    description: SITE_SHORT_DESCRIPTION,
+    description: `${SITE_SHORT_DESCRIPTION} ${SITE_BRAND_DISAMBIGUATION}`,
     knowsAbout: SITE_KNOWS_ABOUT,
     logo: {
       '@type': 'ImageObject',
@@ -49,6 +52,7 @@ export default function SiteWideJsonLd() {
         '@type': 'WebSite',
         '@id': WEBSITE_ID,
         name: 'Stock Track PRO',
+        alternateName: 'Stock Track PRO — UK van fleet compliance (not inventory software)',
         url: SITE_URL,
         description: SITE_TAGLINE,
         inLanguage: 'en-GB',
