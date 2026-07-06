@@ -29,12 +29,12 @@ const WHATSAPP_ENQUIRY_URL =
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Stock Track PRO | UK Van Fleet Management & Defect Reporting Software',
+    absolute: 'Stock Track PRO | UK Van Fleet & DVSA Compliance Software',
   },
   description: SITE_META_DESCRIPTION,
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Stock Track PRO | UK Van Fleet Management & Defect Reporting Software',
+    title: 'Stock Track PRO | UK Van Fleet & DVSA Compliance Software',
     description: SITE_META_DESCRIPTION,
     url: 'https://www.stocktrackpro.co.uk',
     siteName: 'Stock Track PRO',
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Stock Track PRO | UK Van Fleet Management & Defect Reporting Software',
+    title: 'Stock Track PRO | UK Van Fleet & DVSA Compliance Software',
     description: SITE_META_DESCRIPTION,
     images: ['/og-image.jpg'],
   },

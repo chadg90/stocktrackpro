@@ -101,7 +101,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#3b82f6" />
         <meta name="application-name" content="Stock Track PRO" />
         <meta name="apple-mobile-web-app-title" content="Stock Track PRO" />
-        <meta name="msapplication-tooltip" content="Stock Track PRO — UK fleet compliance software" />
+        <meta name="msapplication-tooltip" content="Stock Track PRO — UK van fleet DVSA compliance (not inventory software)" />
         <meta name="language" content="en-GB" />
         <meta name="copyright" content={`© ${new Date().getFullYear()} Stock Track PRO Ltd`} />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />

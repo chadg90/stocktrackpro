@@ -18,8 +18,9 @@ export default function AboutPage() {
           cracks.
         </p>
         <p className="text-white/75 text-lg leading-relaxed mb-10">
-          We built one platform that does what fleet managers actually need — inspections, defect close-out, and MOT
-          visibility — without the complexity or the cost.
+          We built one platform that does what fleet managers actually need — DVSA walkaround checks, defect close-out,
+          and MOT visibility — without the complexity or the cost. This is van fleet compliance software, not warehouse
+          inventory or stock control.
         </p>
 
         <div className="grid gap-6">

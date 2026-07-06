@@ -152,9 +152,9 @@ export default function Features() {
               Everything a fleet manager actually needs
             </h1>
             <p className="text-lg text-white/75 leading-relaxed">
-              No bloat. One fleet subscription covers inspections, defect workflow, MOT monitoring, and team
-              management across iOS, Android, and the web dashboard. Add Plant &amp; Machinery when you need LOLER
-              and site plant records.
+              No bloat. One fleet subscription covers DVSA walkaround inspections, defect workflow, MOT monitoring, and team
+              management across iOS, Android, and the web dashboard. Not warehouse stock tracking — van fleet compliance
+              for UK operators. Add Plant &amp; Machinery when you need LOLER and site plant records.
             </p>
           </div>
         </div>

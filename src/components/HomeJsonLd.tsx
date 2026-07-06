@@ -19,6 +19,10 @@ export function HomeJsonLd() {
         alternateName: 'Stock Track PRO van fleet compliance software',
         applicationCategory: 'BusinessApplication',
         applicationSubCategory: 'Van fleet management and DVSA compliance software',
+        audience: {
+          '@type': 'BusinessAudience',
+          audienceType: 'UK commercial van fleet operators and transport managers',
+        },
         operatingSystem: 'iOS, Android, Web',
         description: SITE_SHORT_DESCRIPTION,
         featureList: SOFTWARE_FEATURE_LIST,
