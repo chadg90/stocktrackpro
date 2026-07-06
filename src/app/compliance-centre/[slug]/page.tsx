@@ -66,26 +66,80 @@ function ArticleCta() {
   );
 }
 
-function OLicenceDefectRecordsArticle() {
+function VanFleetDefectRecordsArticle() {
   return (
     <ComplianceArticleContent>
       <p>
-        A valid defect record is evidence that a vehicle fault was reported, assessed and dealt with through a controlled maintenance process. For an operator licence holder, that record matters because the Driver and Vehicle Standards Agency (DVSA) expects operators to show that vehicles are checked before use, defects are recorded clearly, and safety-related faults are repaired before a vehicle is allowed back into service.
+        If you run commercial vans, you are responsible for making sure each vehicle is safe before it is used.
+        Government guidance on{' '}
+        <a
+          href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          van daily walkaround checks
+        </a>{' '}
+        makes that duty clear. A defect record is your evidence that faults were spotted, reported, assessed and dealt
+        with before the van went back on the road.
       </p>
 
-      <h2>What is an O-licence?</h2>
+      <h2>Why defect records matter for van fleets</h2>
       <p>
-        An operator licence, often called an O-licence, is the authorisation needed by many businesses that operate goods vehicles or passenger vehicles commercially in Great Britain. Goods vehicle operator licensing commonly applies when vehicles or vehicle-and-trailer combinations exceed the relevant weight threshold, and PSV licensing applies to many passenger transport operations. The exact licence type depends on the vehicle, use case and operating model, so operators should check current government and Traffic Commissioner guidance for their own fleet.
+        The police and DVSA can stop vans at the roadside and inspect them. If a vehicle is dangerous, DVSA can stop
+        you using it until the problem is fixed. You may also be fined, prosecuted, or given penalty points on your
+        licence. Government guidance states you can receive three penalty points for each tyre that is not safe and
+        legal, and that using a van in a dangerous condition can lead to an unlimited fine and a prison sentence.
       </p>
       <p>
-        Holding an O-licence is not just an administrative formality. It comes with undertakings around roadworthiness, maintenance systems, driver checks and record keeping. If your fleet is inspected, stopped at the roadside or audited after an incident, you need to demonstrate that you had a working system in place before the issue occurred.
+        DVSA can ask to see a record of your walkaround check during a roadside stop. If a serious defect is found and
+        your records do not show that checks are happening, the enforcement outcome is likely to be worse than if you
+        can demonstrate a clear process.
       </p>
 
-      <h2>What must a defect record include?</h2>
+      <h2>What enforcement can look like in practice</h2>
       <p>
-        DVSA guidance expects operators to keep defect reports that clearly identify the driver, the date of the check, the vehicle registration, the defect description and the action taken. Where a defect is found, the record should show who reviewed it and who signed it off as resolved or safe for continued operation. The responsible person may be a transport manager, fleet manager, mechanic, fitter or another competent person authorised by the operator.
+        According to{' '}
+        <a
+          href="https://www.gov.uk/roadside-vehicle-checks-for-commercial-drivers/roadside-prohibitions"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          GOV.UK guidance on roadside prohibitions
+        </a>
+        , officers may issue:
       </p>
-      <p>A useful defect record should answer five questions without needing a phone call:</p>
+      <ul>
+        <li>
+          <strong>Immediate prohibition</strong> — the vehicle cannot be driven until the defect is repaired.
+        </li>
+        <li>
+          <strong>Delayed prohibition</strong> — you may have up to 10 days to fix the issue, depending on severity.
+        </li>
+        <li>
+          <strong>Fixed penalties</strong> — graduated fines, commonly between £50 and £300 for roadworthiness-related
+          offences, with more serious cases referred for prosecution.
+        </li>
+      </ul>
+      <p>
+        DVSA publishes{' '}
+        <a
+          href="https://www.gov.uk/government/statistical-data-sets/vehicle-enforcement-data-for-great-britain"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          vehicle enforcement data for Great Britain
+        </a>
+        , including the most common prohibition defects found at roadside checks. Tyres, brakes, steering and lighting
+        feature repeatedly — the same items drivers should be checking before each journey.
+      </p>
+
+      <h2>What should a defect record include?</h2>
+      <p>
+        A useful record should answer five questions without needing a phone call:
+      </p>
       <ul>
         <li>Which vehicle was involved?</li>
         <li>Who reported the issue?</li>
@@ -94,56 +148,54 @@ function OLicenceDefectRecordsArticle() {
         <li>What happened next?</li>
       </ul>
       <p>
-        If the answer is hidden in a WhatsApp message, scribbled on a paper sheet or known only by one driver, it is weak evidence.
+        Government walkaround guidance expects defects found during checks — or during the journey — to be recorded and
+        reported. Dangerous defects must be fixed before the journey continues. The responsible person may be a fleet
+        manager, mechanic, fitter or another competent person authorised by the business.
       </p>
 
-      <h2>Minor defects and notifiable defects</h2>
+      <h2>Why an app beats paper for van fleets</h2>
       <p>
-        Not every defect has the same risk. A minor defect may be something that should be monitored or scheduled but does not make the vehicle unsafe for immediate use. A notifiable or safety-critical defect is different: brakes, steering, tyres, lights, load security, mirrors, windscreen visibility and similar items can create immediate road safety risks. When a safety-critical defect is found, the vehicle should not be used until a competent person has assessed and resolved the issue.
+        Paper booklets can work for a very small fleet if they are completed, collected and stored properly. In practice,
+        forms go missing, handwriting is unclear, photos are absent, and managers only learn about defects hours or days
+        later. That delay is risky when DVSA stops a vehicle and asks what your maintenance system looks like.
       </p>
       <p>
-        The record should make that decision visible. If a driver notes a tyre problem, for example, the defect record should not stop at &quot;tyre issue&quot;. It should explain the condition, identify the vehicle, record supporting evidence where available, and show whether the vehicle was taken out of use, repaired, monitored or signed off.
-      </p>
-
-      <h2>What happens during a DVSA roadside check or operator audit?</h2>
-      <p>
-        During a roadside check, DVSA examiners may inspect the vehicle and review whether obvious defects should have been picked up before the journey. If a serious defect is found, the vehicle can receive a prohibition notice, which may prevent it from being driven until the issue is fixed. The examiner may also consider whether the operator&apos;s maintenance system is effective.
+        A van inspection app creates timestamped records tied to a named driver, attaches photos at the point of
+        reporting, and notifies managers or fitters immediately. That is not just convenience — it is stronger evidence
+        that your business checked vehicles before use and acted on faults promptly.
       </p>
       <p>
-        During an operator audit or compliance investigation, the focus is broader. Inspectors may ask for inspection sheets, defect reports, repair records and evidence that faults were closed out. They are looking for a pattern: do drivers check vehicles consistently, do managers see defects quickly, are repairs recorded, and can the operator prove that unsafe vehicles were not knowingly kept on the road?
-      </p>
-
-      <h2>Why paper defect records fail</h2>
-      <p>
-        Paper records can meet the basic requirement if they are completed properly, stored securely and retrieved quickly. In practice, they often fail because forms are lost, handwriting is illegible, photos are missing, timestamps are unclear and accountability is weak. A driver may hand a sheet to the wrong person. A fitter may fix a defect but forget to sign the form. A manager may only discover the issue days later when the paperwork is collected.
-      </p>
-      <p>
-        Paper also makes trend analysis difficult. If the same vehicle repeatedly has tyre, brake or lighting problems, a digital dashboard can surface that pattern. A filing cabinet usually cannot. That matters because DVSA and Traffic Commissioners are interested in systems, not just single events.
-      </p>
-
-      <h2>How digital records satisfy the same requirements</h2>
-      <p>
-        A digital defect record can contain the same legally relevant information as paper: driver name, date, vehicle registration, defect details, review status, repair notes and sign-off. The advantage is that the record is created in a structured format and stored centrally. Timestamps are generated automatically, photos can be attached at the point of inspection, and managers can see new defects without waiting for paper to move around the business.
-      </p>
-      <p>
-        Stock Track PRO is a concrete example. Drivers complete inspections in the mobile app, defects are submitted with timestamped records and photo evidence, and fitters can manage the issue through a close-out workflow. Managers can then review the available history for each vehicle, including who reported the defect, its workflow status and when the issue was resolved.
+        Stock Track PRO is built for this workflow: drivers complete structured inspections in the mobile app, defects
+        are raised with photo evidence, and fitters close jobs through a clear status trail managers can review later.
       </p>
 
       <h2>Keep records factual and consistent</h2>
       <p>
-        A good defect record should avoid vague language. &quot;Problem with van&quot; is not enough. &quot;Nearside rear tyre below safe tread depth, vehicle removed from use, replacement fitted by fitter and signed off before return to service&quot; is much stronger. The same principle applies whether you use paper or software: the record should allow someone outside the business to understand the decision made at the time.
+        A good defect record avoids vague language. &quot;Problem with van&quot; is not enough. &quot;Nearside rear tyre
+        below safe tread depth, vehicle removed from use, replacement fitted by fitter and signed off before return to
+        service&quot; is much stronger. The same principle applies whether you use paper or software: someone outside
+        your business should be able to understand the decision made at the time.
       </p>
 
       <p className="compliance-disclaimer">
-        This article summarises general principles and is not legal advice. Always check current DVSA, Traffic Commissioner and government guidance for your own operation.
+        This article summarises general principles and is not legal advice. Always check current{' '}
+        <a
+          href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          GOV.UK van walkaround guidance
+        </a>{' '}
+        and DVSA enforcement publications for your own operation.
       </p>
 
       <KeyTakeaways>
-        <li>A valid defect record should identify the driver, date, vehicle registration, defect description and sign-off.</li>
-        <li>Safety-critical defects should be assessed before a vehicle is returned to service.</li>
-        <li>DVSA checks look for evidence of a working maintenance system, not just isolated forms.</li>
-        <li>Paper can work, but lost forms, unclear handwriting and missing timestamps weaken evidence.</li>
-        <li>Digital records provide faster reporting, photo evidence and clearer accountability.</li>
+        <li>Van operators are responsible for ensuring vehicles are safe before use.</li>
+        <li>DVSA can issue prohibitions, fines and penalty points where defects are found at roadside checks.</li>
+        <li>Defect records should identify the driver, vehicle, time, fault and close-out action.</li>
+        <li>Digital records with timestamps and photos are stronger evidence than lost or late paper forms.</li>
+        <li>Consistent daily checks reduce downtime, enforcement risk and repeat defects across the fleet.</li>
       </KeyTakeaways>
       <ArticleCta />
     </ComplianceArticleContent>
@@ -181,12 +233,25 @@ function PaperVsDigitalArticle() {
         Stock Track PRO requires a 6-photo walkaround covering the front, rear, driver side, passenger side, interior and odometer. Each submission is timestamped and tied to a named user. If a defect is reported, managers and fitters can see the issue quickly instead of waiting for paper to reach the office.
       </p>
 
-      <h2>The legal risk of incomplete paper records</h2>
+      <h2>The enforcement risk of incomplete records</h2>
       <p>
-        In an insurance claim, employment dispute, customer complaint or court case, the quality of your inspection evidence matters. If you cannot show that a vehicle was checked, that a defect was raised, or that action was taken, it becomes harder to prove that your business operated responsibly. A paper form that is missing, unsigned or completed late may be challenged.
+        GOV.UK guidance on{' '}
+        <a
+          href="https://www.gov.uk/roadside-vehicle-checks-for-commercial-drivers"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          roadside vehicle checks
+        </a>{' '}
+        states that police and DVSA can issue fines where offences are found, with amounts varying by seriousness.
+        Prohibition notices can immobilise a van until defects are repaired. If your inspection records are missing,
+        unsigned or completed after the event, it is harder to show that your business operated responsibly.
       </p>
       <p>
-        A digital record is not automatically &quot;better&quot; just because it is digital. It must still be accurate, retained properly and used consistently. The advantage is that a well-designed digital system creates stronger evidence because events are recorded in sequence, linked to users and stored centrally.
+        In an insurance claim, employment dispute, customer complaint or court case, the quality of your inspection
+        evidence matters. A digital record is not automatically acceptable, but a well-used system creates stronger
+        evidence because events are recorded in sequence, linked to users and stored centrally.
       </p>
 
       <h2>How a digital audit trail works</h2>
@@ -226,7 +291,7 @@ function MotExpiryTrackingArticle() {
   return (
     <ComplianceArticleContent>
       <p>
-        MOT expiry tracking is one of the simplest fleet compliance tasks to understand and one of the easiest to get wrong at scale. A single missed MOT can take a vehicle off the road, create customer disruption and expose the operator to enforcement action. When a business runs multiple vans, HGVs, plant vehicles or mixed fleet assets, relying on memory or a spreadsheet becomes a risk.
+        MOT expiry tracking is one of the simplest fleet compliance tasks to understand and one of the easiest to get wrong at scale. A single missed MOT can take a vehicle off the road, create customer disruption and expose the business to enforcement action. When a company runs multiple vans, plant vehicles or mixed light-commercial assets, relying on memory or a spreadsheet becomes a risk.
       </p>
 
       <h2>Why expired MOTs are high risk</h2>
@@ -234,7 +299,7 @@ function MotExpiryTrackingArticle() {
         In the UK, driving a vehicle without a valid MOT can lead to a fine of up to £1,000. If the vehicle is also in a dangerous condition, the consequences can be more serious. An expired MOT may also affect insurance, especially if a vehicle involved in an incident was not legally roadworthy or should not have been used.
       </p>
       <p>
-        For commercial operators, the risk goes beyond the single vehicle. A roadside stop, customer complaint or collision can trigger wider scrutiny of maintenance systems. If an operator cannot show that renewals are monitored and vehicles are kept roadworthy, DVSA or the Traffic Commissioner may ask harder questions about the business&apos;s compliance culture.
+        For commercial van operators, the risk goes beyond the single vehicle. A roadside stop, customer complaint or collision can trigger wider scrutiny of maintenance records. If a fleet manager cannot show that renewals are monitored and vehicles are kept roadworthy, DVSA may ask harder questions about the business&apos;s compliance culture.
       </p>
 
       <h2>Potential prohibition notices and downtime</h2>
@@ -279,7 +344,7 @@ function MotExpiryTrackingArticle() {
         The best systems combine automation with routine. Managers should still review upcoming renewals weekly, confirm bookings, and check that failed MOTs or advisory items are followed up. Software reduces missed dates, but accountability remains with the operator.
       </p>
       <p>
-        For O-licence holders and other commercial fleets, this routine is part of the wider maintenance system. MOT tracking, daily inspections and defect close-out should support each other. If a vehicle fails an MOT because of a defect that should have been picked up earlier, the issue is not just the missed test; it is the process that allowed the fault to continue.
+        For commercial van fleets, this routine is part of the wider maintenance system. MOT tracking, daily inspections and defect close-out should support each other. If a vehicle fails an MOT because of a defect that should have been picked up earlier, the issue is not just the missed test; it is the process that allowed the fault to continue.
       </p>
 
       <KeyTakeaways>
@@ -351,8 +416,7 @@ function PreUseChecksArticle() {
       </p>
 
       <p className="compliance-disclaimer">
-        This article summarises general principles and is not legal advice. Follow current DVSA, Traffic Commissioner,
-        and employer guidance for your operation.
+        This article summarises general principles and is not legal advice. Follow current DVSA and employer guidance for your operation.
       </p>
 
       <KeyTakeaways>
@@ -421,8 +485,16 @@ function DigitalDefectRecordsDvsaArticle() {
       </p>
 
       <p className="compliance-disclaimer">
-        This article summarises general principles and is not legal advice. Always check current DVSA and Traffic
-        Commissioner guidance for your operation.
+        This article summarises general principles and is not legal advice. Always check current{' '}
+        <a
+          href="https://www.gov.uk/roadside-vehicle-checks-for-commercial-drivers"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          GOV.UK roadside check guidance
+        </a>{' '}
+        for your operation.
       </p>
 
       <KeyTakeaways>
@@ -438,8 +510,8 @@ function DigitalDefectRecordsDvsaArticle() {
 
 function ArticleBody({ article }: { article: ComplianceArticle }) {
   switch (article.slug) {
-    case 'o-licence-defect-records':
-      return <OLicenceDefectRecordsArticle />;
+    case 'van-fleet-defect-records':
+      return <VanFleetDefectRecordsArticle />;
     case 'paper-vs-digital-inspection-sheets':
       return <PaperVsDigitalArticle />;
     case 'mot-expiry-tracking-for-fleets':

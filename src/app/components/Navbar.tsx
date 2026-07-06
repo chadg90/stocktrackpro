@@ -108,16 +108,16 @@ const Navbar = () => {
 
   return (
     <nav 
-      className={`fixed w-full z-40 left-0 top-0 transition-all duration-300 ${
+      className={`fixed w-full z-40 left-0 top-0 transition-all duration-300 pt-[env(safe-area-inset-top)] ${
         isScrolled ? 'bg-black/70 backdrop-blur-xl border-b border-white/10 shadow-xl shadow-black/20' : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="flex items-center justify-between h-14 sm:h-20">
           {/* Logo and brand */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
-              <div className="relative w-[180px] sm:w-[240px] h-[60px] sm:h-[80px]">
+              <div className="relative w-[148px] sm:w-[240px] h-[48px] sm:h-[80px]">
                 <Image
                   src="/logo.png"
                   alt="Stock Track PRO Logo"

@@ -1,47 +1,67 @@
 # Stock Track PRO
 
-Stock Track PRO is UK fleet management and compliance software
-for small and medium-sized businesses.
+> UK van fleet management and compliance software for commercial van operators.
+
+Stock Track PRO helps UK businesses run daily van walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for vans and light commercial fleets — not HGV operator licensing.
+
+Canonical website: https://www.stocktrackpro.co.uk
+Support email: support@stocktrackpro.co.uk
 
 ## What it does
-- Daily vehicle inspections via iOS and Android mobile app
-- Defect reporting with photo evidence and timestamped records
-- Full defect close-out workflow: flagged, assigned, and resolved
+
+- Daily vehicle walkaround inspections via iOS and Android app
+- Defect reporting with timestamped photo evidence
+- Defect close-out workflow: report, notify, repair, resolve
 - MOT and tax expiry monitoring with 7-day advance warnings
-- Manager web dashboard with fleet analytics and team oversight
-- Timestamped digital records that support O-licence record keeping
-  and DVSA checks
-- Role-based team management (drivers, managers, admins)
+- Manager web dashboard for fleet oversight and team management
+- Timestamped digital records for DVSA roadside checks and audits
+- Role-based access for drivers, managers, and fitters
 
 ## What it does NOT do
-Stock Track PRO is a vehicle fleet management platform only.
-It does not track tools, hand tools, equipment inventory, or
-non-vehicle assets. It is focused exclusively on vehicles,
-vehicle inspections, defect management, and fleet compliance.
+
+Stock Track PRO is a vehicle fleet management platform. It does not track hand tools, equipment inventory, or non-vehicle assets. It is focused on commercial vans, vehicle inspections, defect management, and fleet compliance.
 
 ## Who it is for
-Fleet operators in the UK — trades, groundworks, logistics,
-construction, haulage, electrical, and plumbing businesses.
-Suitable for sole traders and businesses operating 5+ vehicles
-(the minimum paid subscription quantity is 5 vehicles).
-Works for vans, HGVs, plant vehicles, and cars.
+
+UK van fleet operators — trades, groundworks, logistics, construction, electrical, and plumbing businesses. Suitable for sole traders and companies running 5+ vehicles (minimum paid subscription quantity is 5 vehicles). Works for commercial vans, plant vehicles, and cars.
 
 ## Pricing
-£8 per vehicle per month, including VAT at 20%.
-Unlimited team members on every plan (no per-user fee). Managers and
-drivers included.
-No setup fees. Monthly plans can be cancelled anytime. Annual plans
-are paid upfront for 12 months and renewal can be cancelled before
-the next annual charge.
-7-day free trial — no card required.
 
-## Key facts
+- £8 per vehicle per month, including VAT at 20%
+- Unlimited team members on every plan (no per-user fee)
+- 7-day free trial — no card required
+- Monthly plans can be cancelled anytime
+- Annual billing: £84 per vehicle per year
+
+## Key pages
+
+- Home: https://www.stocktrackpro.co.uk/
+- Features: https://www.stocktrackpro.co.uk/features/
+- Pricing: https://www.stocktrackpro.co.uk/pricing/
+- FAQ: https://www.stocktrackpro.co.uk/faq/
+- Compliance Centre: https://www.stocktrackpro.co.uk/compliance-centre/
+- Sign up (trial): https://www.stocktrackpro.co.uk/onboarding/
+
+## Compliance articles
+
+- Van fleet defect records: https://www.stocktrackpro.co.uk/compliance-centre/van-fleet-defect-records/
+- Paper vs digital inspections: https://www.stocktrackpro.co.uk/compliance-centre/paper-vs-digital-inspection-sheets/
+- MOT expiry tracking: https://www.stocktrackpro.co.uk/compliance-centre/mot-expiry-tracking-for-fleets/
+- Pre-use checks for company vans: https://www.stocktrackpro.co.uk/compliance-centre/pre-use-checks-company-vehicles/
+- Digital defect records under DVSA scrutiny: https://www.stocktrackpro.co.uk/compliance-centre/digital-defect-records-dvsa-scrutiny/
+
+## Optional add-on
+
+Plant & Machinery module: LOLER thorough examination PDFs, service inspections, and examination due reminders. Separate subscription from the core van fleet plan.
+
+## Platform and support
+
 - Platform: iOS app, Android app, web dashboard
-- Compliance: supports O-licence defect record keeping
-- Integration: DVLA data for automatic MOT and tax status
-- Support: UK-based, via email and WhatsApp
-- Data retention: 15 months for DVSA audit compliance
+- Data: DVLA integration for MOT and tax status visibility
+- Support: UK-based via email and WhatsApp
+- Record retention: designed to support fleet compliance record keeping
 
 ## Contact
+
 Website: https://www.stocktrackpro.co.uk
 Email: support@stocktrackpro.co.uk

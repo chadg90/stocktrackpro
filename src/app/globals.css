@@ -27,6 +27,11 @@ body {
   background: rgb(var(--background));
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
+}
+
 @layer base {
   body {
     @apply bg-black text-white antialiased;

@@ -10,13 +10,13 @@ const FEATURES = [
 
 export default function HomePricingCard() {
   return (
-    <section id="pricing" className="py-20 sm:py-28 border-t border-white/10 bg-white/[0.02]">
-      <div className="container mx-auto px-4 max-w-lg">
-        <div className="text-center mb-10">
+    <section id="pricing" className="py-14 sm:py-28 border-t border-white/10 bg-white/[0.02]">
+      <div className="container mx-auto px-5 sm:px-4 max-w-lg">
+        <div className="text-center mb-8 sm:mb-10">
           <p className="text-[var(--brand-blue)] font-medium text-sm uppercase tracking-[0.2em] mb-3">
             Pricing
           </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">Simple fleet pricing</h2>
+          <h2 className="text-2xl sm:text-4xl font-bold text-white mb-2">Simple fleet pricing</h2>
           <p className="text-white/55 text-sm max-w-md mx-auto">
             7-day free trial — no card required.
           </p>

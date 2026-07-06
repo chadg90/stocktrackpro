@@ -3,9 +3,9 @@ import { HOME_FAQ_ITEMS } from '@/content/homeFaq';
 
 export default function HomeFaqSection() {
   return (
-    <section className="py-20 sm:py-28 border-t border-white/10" aria-labelledby="faq-heading">
-      <div className="container mx-auto px-4 max-w-3xl">
-        <h2 id="faq-heading" className="text-3xl sm:text-4xl font-bold text-white text-center mb-10">
+    <section className="py-14 sm:py-28 border-t border-white/10" aria-labelledby="faq-heading">
+      <div className="container mx-auto px-5 sm:px-4 max-w-3xl">
+        <h2 id="faq-heading" className="text-2xl sm:text-4xl font-bold text-white text-center mb-8 sm:mb-10">
           Common questions
         </h2>
         <div className="space-y-3">

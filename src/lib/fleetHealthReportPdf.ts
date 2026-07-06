@@ -200,7 +200,7 @@ export function exportFleetHealthReportPDF(input: {
 
   doc.setFontSize(8);
   const coverDisclaimer = doc.splitTextToSize(
-    'This report is produced from records held in Stock Track PRO. It is intended as management and supporting evidence for operator compliance (e.g. maintenance systems, defect monitoring, and DVSA / traffic commissioner enquiries). It does not replace statutory records, a valid MOT certificate, or a DVSA vehicle inspection outcome.',
+    'This report is produced from records held in Stock Track PRO. It is intended as management and supporting evidence for fleet compliance (e.g. maintenance systems, defect monitoring, and DVSA enquiries). It does not replace statutory records, a valid MOT certificate, or a DVSA vehicle inspection outcome.',
     pageW - margin * 2
   );
   doc.text(coverDisclaimer, margin, y);

@@ -4,6 +4,7 @@ import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
 import SiteWideJsonLd from "@/components/seo/SiteWideJsonLd";
+import { SITE_SHORT_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,18 +12,18 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#3b82f6",
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.stocktrackpro.co.uk'),
   title: {
-    default: "Stock Track PRO | UK Fleet Management Software",
+    default: "Stock Track PRO | UK Van Fleet Management Software",
     template: "%s | Stock Track PRO",
   },
-  description:
-    "UK fleet management software for SMEs. Track MOTs, vehicle tax, daily inspections and defect resolution in one platform. Free 7-day trial.",
+  description: SITE_SHORT_DESCRIPTION,
   keywords:
-    "fleet inspection software UK, vehicle defect reporting app, O-licence compliance software, MOT tracking software for fleets, fleet management app for vans, DVLA fleet checks, fleet compliance UK",
+    "fleet inspection software UK, vehicle defect reporting app, van fleet compliance software, MOT tracking software for fleets, fleet management app for vans, DVLA fleet checks, fleet compliance UK",
   authors: [{ name: "Stock Track PRO" }],
   generator: "Next.js",
   applicationName: "Stock Track PRO",
@@ -39,9 +40,8 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "Stock Track PRO | UK Fleet Management Software",
-    description:
-      "UK fleet management software for SMEs. Track MOTs, vehicle tax, daily inspections and defect resolution in one platform. Free 7-day trial.",
+    title: "Stock Track PRO | UK Van Fleet Management Software",
+    description: SITE_SHORT_DESCRIPTION,
     url: "https://www.stocktrackpro.co.uk",
     siteName: "Stock Track PRO",
     images: [
@@ -57,9 +57,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stock Track PRO | UK Fleet Management Software",
-    description:
-      "UK fleet management software for SMEs — MOTs, tax, inspections, defect resolution. Free 7-day trial.",
+    title: "Stock Track PRO | UK Van Fleet Management Software",
+    description: SITE_TAGLINE,
     images: ["/og-image.jpg"],
   },
   robots: {

@@ -18,7 +18,7 @@ export default function CustomerStoryCallout() {
                 src="/clients/newstreet-groundwork.png"
                 alt="Newstreet Groundwork Services"
                 fill
-                className="object-contain object-left"
+                className="object-contain object-center sm:object-left"
                 sizes="(max-width: 640px) 224px, 256px"
               />
             </div>

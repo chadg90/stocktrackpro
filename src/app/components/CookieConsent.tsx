@@ -27,9 +27,9 @@ export default function CookieConsent() {
   if (!showConsent) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-primary/20 p-4 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-primary/20 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] z-50">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="text-white/80 text-sm">
+        <div className="text-white/80 text-sm text-center sm:text-left">
           <p>
             We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.{' '}
             <Link href="/cookies" className="text-primary hover:text-primary-light underline">
@@ -37,16 +37,16 @@ export default function CookieConsent() {
             </Link>
           </p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex w-full sm:w-auto gap-3 sm:gap-4">
           <button
             onClick={handleDecline}
-            className="px-4 py-2 text-sm text-white/80 hover:text-white transition-colors"
+            className="flex-1 sm:flex-none px-4 py-3 min-h-[44px] text-sm text-white/80 hover:text-white transition-colors"
           >
             Decline
           </button>
           <button
             onClick={handleAccept}
-            className="px-4 py-2 text-sm bg-primary hover:bg-primary-light text-white rounded-lg transition-colors"
+            className="flex-1 sm:flex-none px-4 py-3 min-h-[44px] text-sm bg-primary hover:bg-primary-light text-white rounded-lg transition-colors"
           >
             Accept All Cookies
           </button>

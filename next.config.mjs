@@ -27,6 +27,20 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/compliance-centre/o-licence-defect-records/',
+        destination: '/compliance-centre/van-fleet-defect-records/',
+        permanent: true,
+      },
+      {
+        source: '/compliance-centre/o-licence-defect-records',
+        destination: '/compliance-centre/van-fleet-defect-records/',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

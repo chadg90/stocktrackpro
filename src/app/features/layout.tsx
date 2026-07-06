@@ -1,16 +1,18 @@
 import type { Metadata } from 'next';
+import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
 
 export const metadata: Metadata = {
   title: 'Fleet Management Features',
   description:
-    'Fleet inspection software UK fleets use daily: vehicle defect reporting app workflows, MOT tracking, manager dashboards, and records that support O-licence compliance — Stock Track PRO.',
-  alternates: { canonical: 'https://www.stocktrackpro.co.uk/features/' },
+    'Van fleet inspection software UK operators use daily: walkaround checks, vehicle defect reporting, MOT tracking, manager dashboards, and DVSA-ready records — Stock Track PRO.',
+  alternates: { canonical: '/features' },
   openGraph: {
     title: 'Fleet Management Features | Stock Track PRO',
     description:
-      'Inspections, defects, MOT and tax alerts, and manager analytics — national UK fleet compliance software for vans and HGVs.',
+      'Daily van inspections, defects, MOT and tax alerts, and manager analytics — UK fleet compliance software for commercial vans.',
     url: 'https://www.stocktrackpro.co.uk/features/',
     siteName: 'Stock Track PRO',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Stock Track PRO features' }],
     locale: 'en_GB',
     type: 'website',
   },
@@ -18,7 +20,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Fleet Management Features | Stock Track PRO',
     description:
-      'Fleet inspection software UK operators rely on — defects, renewals, and audit-ready records in one platform.',
+      'Van fleet inspection software UK operators rely on — defects, renewals, and audit-ready records in one platform.',
+    images: ['/og-image.jpg'],
   },
 };
 
@@ -27,5 +30,14 @@ export default function FeaturesLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <MarketingWebPageJsonLd
+        path="/features"
+        title="Fleet Management Features"
+        description="Van fleet inspection software for daily walkaround checks, defect reporting, MOT tracking, and manager dashboards."
+      />
+      {children}
+    </>
+  );
 }

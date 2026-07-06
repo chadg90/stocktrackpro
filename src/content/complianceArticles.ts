@@ -9,42 +9,44 @@ export type ComplianceArticle = {
 
 export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
   {
-    slug: 'o-licence-defect-records',
-    title: 'What counts as a valid defect record for your O-licence?',
+    slug: 'van-fleet-defect-records',
+    title: 'Van fleet defect records: what DVSA expects you to keep',
     metaDescription:
-      'DVSA guidance explained — what your defect records should include to support O-licence compliance and reduce prohibition risk.',
+      'What UK van fleet operators should record when drivers report defects — walkaround checks, timestamps, photos, and close-out evidence to reduce prohibition and fine risk.',
     datePublished: '2026-04-15T09:00:00+01:00',
-    dateModified: '2026-05-13T09:00:00+01:00',
+    dateModified: '2026-07-06T09:00:00+01:00',
   },
   {
     slug: 'paper-vs-digital-inspection-sheets',
-    title: 'Paper vs Digital: Why fleet managers are ditching inspection sheets',
+    title: 'Paper vs digital: why fleet managers are ditching inspection sheets',
     metaDescription:
-      'How digital vehicle inspection software reduces admin, prevents missed defects, and creates stronger evidence for UK fleet operators.',
+      'How digital van inspection software reduces admin, prevents missed defects, and creates stronger evidence when DVSA stops a vehicle at the roadside.',
     datePublished: '2026-05-01T09:00:00+01:00',
-    dateModified: '2026-05-13T09:00:00+01:00',
+    dateModified: '2026-07-06T09:00:00+01:00',
   },
   {
     slug: 'mot-expiry-tracking-for-fleets',
     title: 'MOT expiry tracking for fleets — how to stay ahead of renewals',
     metaDescription:
-      'Managing MOT and tax renewals across a large fleet is high-risk without a system. Here is how smart fleet managers automate the process.',
+      'Managing MOT and tax renewals across a van fleet is high-risk without a system. Here is how fleet managers automate reminders and avoid enforcement.',
     datePublished: '2026-05-12T09:00:00+01:00',
-    dateModified: '2026-05-13T09:00:00+01:00',
+    dateModified: '2026-07-06T09:00:00+01:00',
   },
   {
     slug: 'pre-use-checks-company-vehicles',
-    title: 'Pre-use checks: what drivers must do before operating a company vehicle',
+    title: 'Pre-use checks: what drivers must do before operating a company van',
     metaDescription:
-      'What UK fleet drivers should check before using a company vehicle, how operators should record it, and why pre-use checks support DVSA compliance.',
+      'What UK van drivers should check before using a company vehicle, how fleet managers should record it, and why pre-use checks matter at DVSA roadside stops.',
     datePublished: '2026-06-02T09:00:00+01:00',
+    dateModified: '2026-07-06T09:00:00+01:00',
   },
   {
     slug: 'digital-defect-records-dvsa-scrutiny',
     title: 'How digital defect records hold up under DVSA scrutiny',
     metaDescription:
-      'What DVSA and Traffic Commissioners look for in defect records, and how digital systems can provide clearer evidence than paper.',
+      'What DVSA looks for in van fleet defect records at roadside checks, and how digital systems provide clearer evidence than paper.',
     datePublished: '2026-06-02T09:00:00+01:00',
+    dateModified: '2026-07-06T09:00:00+01:00',
   },
 ];
 

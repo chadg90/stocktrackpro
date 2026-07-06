@@ -9,6 +9,7 @@ import TestimonialQuote from '@/components/TestimonialQuote';
 import { HomeJsonLd } from '@/components/HomeJsonLd';
 import { HomeFaqJsonLd } from '@/components/HomeFaqJsonLd';
 import { getFeaturedTestimonial } from '@/content/testimonials';
+import { SITE_SHORT_DESCRIPTION } from '@/content/siteSeo';
 import {
   Map,
   Smartphone,
@@ -28,25 +29,31 @@ const WHATSAPP_ENQUIRY_URL =
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Stock Track PRO | UK Fleet Management & Defect Reporting Software',
+    absolute: 'Stock Track PRO | UK Van Fleet Management & Defect Reporting Software',
   },
-  description:
-    'Stock Track PRO is UK fleet management software for SMEs. Track MOTs, vehicle tax, daily inspections, and defect resolution — all in one platform. Try free for 7 days.',
+  description: SITE_SHORT_DESCRIPTION,
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Stock Track PRO | UK Fleet Management & Defect Reporting Software',
-    description:
-      'UK fleet management software — MOTs, tax, inspections, defect resolution. Try free for 7 days.',
+    title: 'Stock Track PRO | UK Van Fleet Management & Defect Reporting Software',
+    description: SITE_SHORT_DESCRIPTION,
     url: 'https://www.stocktrackpro.co.uk',
     siteName: 'Stock Track PRO',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Stock Track PRO — UK van fleet management, inspections, and defect reporting',
+      },
+    ],
     locale: 'en_GB',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Stock Track PRO | UK Fleet Management & Defect Reporting Software',
-    description:
-      'UK fleet management software for SMEs — MOTs, tax, inspections, defect resolution. Try free for 7 days.',
+    title: 'Stock Track PRO | UK Van Fleet Management & Defect Reporting Software',
+    description: SITE_SHORT_DESCRIPTION,
+    images: ['/og-image.jpg'],
   },
 };
 
@@ -72,10 +79,10 @@ const DEFECT_STEPS = [
     body: (
       <>
         The full history stays in one digital{' '}
-        <Link href="/compliance-centre/o-licence-defect-records" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+        <Link href="/compliance-centre/van-fleet-defect-records" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
           audit trail
         </Link>{' '}
-        for O-licence record keeping.
+        for fleet compliance record keeping.
       </>
     ),
   },
@@ -124,7 +131,7 @@ export default function Home() {
         <HomeHero />
 
         {/* Quick facts */}
-        <section className="py-12 sm:py-16 border-t border-white/10 bg-black">
+        <section className="py-10 sm:py-16 border-t border-white/10 bg-black">
           <div className="container mx-auto px-4 max-w-5xl">
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
               <p className="text-[var(--brand-blue)] font-medium text-sm uppercase tracking-[0.2em] mb-3">
@@ -146,12 +153,12 @@ export default function Home() {
         </section>
 
         {/* Sectors */}
-        <section className="py-12 sm:py-16 border-y border-white/10 bg-white/[0.02]">
+        <section className="py-10 sm:py-16 border-y border-white/10 bg-white/[0.02]">
           <div className="container mx-auto px-4 max-w-4xl">
-            <p className="text-center text-white/45 text-[11px] font-semibold uppercase tracking-[0.22em] mb-5">
+            <p className="text-center text-white/45 text-[11px] font-semibold uppercase tracking-[0.22em] mb-4 sm:mb-5">
               Built for
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-10 mb-5">
+            <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-10 mb-4 sm:mb-5">
               {[
                 { icon: Zap, label: 'Electrical' },
                 { icon: Droplets, label: 'Plumbing' },
@@ -169,7 +176,7 @@ export default function Home() {
             </div>
             <p className="text-center text-white/65 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
               UK teams who want clearer vehicle compliance and fewer breakdown surprises — from sole traders to national
-              contractors using a fleet management app for vans and HGVs alike.
+              contractors using a fleet management app for commercial vans and light fleets alike.
             </p>
           </div>
         </section>
@@ -177,13 +184,13 @@ export default function Home() {
         <CustomerStoryCallout />
 
         {/* Defect resolution loop */}
-        <section id="defect-workflow" className="py-20 sm:py-28 border-t border-white/10">
+        <section id="defect-workflow" className="py-14 sm:py-28 border-t border-white/10">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="text-center max-w-3xl mx-auto mb-14">
-              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+              <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">
                 From defect report to sign-off
               </h2>
-              <p className="text-white/60 text-lg leading-relaxed">
+              <p className="text-white/60 text-base sm:text-lg leading-relaxed px-1">
                 Fitters and managers share the manager role for My Jobs and alerts; drivers report from the app.
               </p>
             </div>
@@ -204,9 +211,9 @@ export default function Home() {
         </section>
 
         {/* What's included */}
-        <section className="py-20 sm:py-28 border-t border-white/10">
+        <section className="py-14 sm:py-28 border-t border-white/10">
           <div className="container mx-auto px-4 max-w-5xl">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3 text-center">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3 text-center">
               What&apos;s included
             </h2>
             <p className="text-white/55 text-center mb-12 max-w-lg mx-auto text-sm">
@@ -264,26 +271,26 @@ export default function Home() {
         <HomeFaqSection />
 
         {/* Final CTA */}
-        <section className="relative py-24 sm:py-32 overflow-hidden border-t border-white/10">
+        <section className="relative py-16 sm:py-32 overflow-hidden border-t border-white/10">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_100%,rgba(59,130,246,0.12),transparent_70%)]" />
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--brand-blue)]/40 to-transparent" />
-          <div className="container relative mx-auto px-4 text-center">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 max-w-3xl mx-auto leading-tight">
+          <div className="container relative mx-auto px-5 sm:px-4 text-center">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-5 max-w-3xl mx-auto leading-tight">
               Start managing your fleet today
             </h2>
             <p className="text-white/70 max-w-xl mx-auto mb-10 text-lg">
               Set up your company and invite your team in minutes.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md sm:max-w-none mx-auto">
               <Link
                 href="/onboarding"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black"
+                className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-4 min-h-[48px] rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black"
               >
                 Start 7-Day Free Trial
               </Link>
               <Link
                 href="/pricing"
-                className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
+                className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-4 min-h-[48px] rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
               >
                 View pricing
               </Link>

@@ -1,30 +1,7 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import ComplianceCentreHubJsonLd from '@/components/seo/ComplianceCentreHubJsonLd';
 import { COMPLIANCE_ARTICLES } from '@/content/complianceArticles';
-
-export const metadata: Metadata = {
-  title: 'Compliance Centre',
-  description:
-    'Articles on O-licence defect records, digital fleet inspections, MOT tracking, and plant machinery compliance for UK operators.',
-  alternates: { canonical: '/compliance-centre' },
-  openGraph: {
-    title: 'Compliance Centre | Stock Track PRO',
-    description:
-      'Articles on O-licence defect records, digital fleet inspections, MOT tracking, and plant machinery compliance for UK operators.',
-    url: 'https://www.stocktrackpro.co.uk/compliance-centre/',
-    siteName: 'Stock Track PRO',
-    locale: 'en_GB',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Compliance Centre | Stock Track PRO',
-    description:
-      'Articles on O-licence defect records, digital fleet inspections, MOT tracking, and plant machinery compliance for UK operators.',
-  },
-};
 
 export default function ComplianceCentreHubPage() {
   return (

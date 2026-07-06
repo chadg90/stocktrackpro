@@ -17,13 +17,21 @@ export function ComplianceArticleJsonLd({ article }: Props) {
     description: article.metaDescription,
     datePublished: article.datePublished,
     dateModified: article.dateModified ?? article.datePublished,
+    inLanguage: 'en-GB',
+    image: [`${SITE_URL}/og-image.jpg`],
     author: {
       '@type': 'Organization',
       '@id': ORGANIZATION_ID,
+      name: 'Stock Track PRO Ltd',
     },
     publisher: {
       '@type': 'Organization',
       '@id': ORGANIZATION_ID,
+      name: 'Stock Track PRO Ltd',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/logo.png`,
+      },
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
@@ -35,6 +43,11 @@ export function ComplianceArticleJsonLd({ article }: Props) {
       name: 'Stock Track PRO',
       url: SITE_URL,
     },
+    about: [
+      'Van fleet compliance',
+      'DVSA vehicle checks',
+      'Vehicle defect records',
+    ],
   };
 
   const breadcrumbLd = {

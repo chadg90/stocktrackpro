@@ -320,7 +320,7 @@ export function exportMultipleSheetsToPDF(
       doc.setFontSize(8);
       doc.setTextColor(60, 60, 60);
       const coverNote = doc.splitTextToSize(
-        'Formal data extract from Stock Track PRO for retention, audit, and supporting evidence (e.g. operator licence / DVSA enquiries). Contents reflect system records at generation time.',
+        'Formal data extract from Stock Track PRO for retention, audit, and supporting evidence (e.g. DVSA enquiries or insurance claims). Contents reflect system records at generation time.',
         doc.internal.pageSize.getWidth() - margin * 2
       );
       doc.text(coverNote, margin, y);

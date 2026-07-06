@@ -6,9 +6,9 @@ export type HomeFaqItem = {
 /** Short set for the homepage — pricing and full list live on /pricing and /faq. */
 export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   {
-    question: 'Is Stock Track PRO suitable for O-licence holders?',
+    question: 'Is Stock Track PRO suitable for van fleets?',
     answer:
-      'Yes. Timestamped inspections, defect reports, and repair close-out sit in one workflow — see our Compliance Centre for guidance on defect records.',
+      'Yes. Stock Track PRO is built for commercial van and light fleet operators — daily inspections, defect reports, MOT tracking, and repair close-out in one workflow. See our Compliance Centre for guidance on defect records.',
   },
   {
     question: 'How many users can I add?',

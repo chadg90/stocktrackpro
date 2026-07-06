@@ -1,46 +1,67 @@
-import { ORGANIZATION_ID, SITE_URL } from '@/lib/site';
+import {
+  HOME_HERO_POSTER_SRC,
+  HOME_HERO_VIDEO_DESCRIPTION,
+  HOME_HERO_VIDEO_SRC,
+} from '@/content/homeHero';
+import { SITE_SHORT_DESCRIPTION, SOFTWARE_FEATURE_LIST } from '@/content/siteSeo';
+import { ORGANIZATION_ID, SITE_URL, WEBSITE_ID } from '@/lib/site';
 
 const priceValidUntil = `${new Date().getFullYear() + 1}-12-31`;
 
 export function HomeJsonLd() {
-  const softwareApplication = {
+  const graph = {
     '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'Stock Track PRO',
-    applicationCategory: 'BusinessApplication',
-    operatingSystem: 'iOS, Android, Web',
-    description:
-      'UK fleet management software for inspections, defect reporting, MOT tracking, and O-licence record keeping.',
-    url: SITE_URL,
-    screenshot: `${SITE_URL}/website-image-stp.png`,
-    offers: {
-      '@type': 'Offer',
-      url: `${SITE_URL}/pricing`,
-      price: '8.00',
-      priceCurrency: 'GBP',
-      priceValidUntil,
-      availability: 'https://schema.org/InStock',
-      seller: { '@id': ORGANIZATION_ID },
-      eligibleQuantity: {
-        '@type': 'QuantitativeValue',
-        minValue: 5,
-        unitText: 'vehicles',
+    '@graph': [
+      {
+        '@type': 'SoftwareApplication',
+        '@id': `${SITE_URL}/#software`,
+        name: 'Stock Track PRO',
+        applicationCategory: 'BusinessApplication',
+        applicationSubCategory: 'Fleet management software',
+        operatingSystem: 'iOS, Android, Web',
+        description: SITE_SHORT_DESCRIPTION,
+        featureList: SOFTWARE_FEATURE_LIST,
+        url: SITE_URL,
+        screenshot: `${SITE_URL}/hero-demo-poster.jpg`,
+        inLanguage: 'en-GB',
+        offers: {
+          '@type': 'Offer',
+          url: `${SITE_URL}/pricing`,
+          price: '8.00',
+          priceCurrency: 'GBP',
+          priceValidUntil,
+          availability: 'https://schema.org/InStock',
+          seller: { '@id': ORGANIZATION_ID },
+          eligibleQuantity: {
+            '@type': 'QuantitativeValue',
+            minValue: 5,
+            unitText: 'vehicles',
+          },
+          priceSpecification: {
+            '@type': 'UnitPriceSpecification',
+            price: '8.00',
+            priceCurrency: 'GBP',
+            unitText: 'vehicle per month',
+            valueAddedTaxIncluded: true,
+          },
+        },
+        provider: { '@id': ORGANIZATION_ID },
+        isPartOf: { '@id': WEBSITE_ID },
       },
-      priceSpecification: {
-        '@type': 'UnitPriceSpecification',
-        price: '8.00',
-        priceCurrency: 'GBP',
-        unitText: 'vehicle per month',
-        valueAddedTaxIncluded: true,
+      {
+        '@type': 'VideoObject',
+        '@id': `${SITE_URL}/#hero-video`,
+        name: 'Stock Track PRO mobile app demonstration',
+        description: HOME_HERO_VIDEO_DESCRIPTION,
+        thumbnailUrl: `${SITE_URL}${HOME_HERO_POSTER_SRC}`,
+        contentUrl: `${SITE_URL}${HOME_HERO_VIDEO_SRC}`,
+        uploadDate: '2026-07-06',
+        inLanguage: 'en-GB',
       },
-    },
-    provider: { '@id': ORGANIZATION_ID },
+    ],
   };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplication) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }} />
   );
 }
