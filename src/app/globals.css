@@ -143,6 +143,14 @@ html {
     @apply mb-4 mt-12 scroll-mt-28 text-xl font-semibold tracking-tight text-white sm:text-2xl;
   }
 
+  .compliance-article > h3 {
+    @apply mb-3 mt-8 text-lg font-semibold text-white/95;
+  }
+
+  .compliance-article > blockquote {
+    @apply my-6 border-l-4 border-blue-500/50 bg-white/[0.03] px-5 py-4 text-base italic leading-relaxed text-white/70;
+  }
+
   .compliance-article > ul {
     @apply my-6 space-y-2.5 rounded-xl border border-white/10 bg-white/[0.03] p-5 sm:p-6;
   }

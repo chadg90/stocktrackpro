@@ -8,20 +8,42 @@ import { ComplianceArticleJsonLd } from '@/components/seo/ComplianceArticleJsonL
 import { format } from 'date-fns';
 import {
   COMPLIANCE_ARTICLES,
-  complianceArticleBySlug,
   type ComplianceArticle,
 } from '@/content/complianceArticles';
+import { getStaticComplianceArticle } from '@/lib/compliance-articles/static';
+import {
+  getAllPublishedComplianceArticles,
+  getCmsArticleBySlug,
+} from '@/lib/compliance-articles/server';
+import { polishComplianceMarkdown } from '@/lib/compliance-articles/polish';
+import type { ComplianceArticleMeta } from '@/lib/compliance-articles/types';
+import CmsComplianceArticleBody from '@/components/CmsComplianceArticleBody';
 
 type Props = { params: Promise<{ slug: string }> };
+
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return COMPLIANCE_ARTICLES.map((a) => ({ slug: a.slug }));
 }
 
+async function resolveArticle(slug: string) {
+  const staticArticle = getStaticComplianceArticle(slug);
+  if (staticArticle) {
+    return { kind: 'static' as const, article: staticArticle };
+  }
+  const cmsArticle = await getCmsArticleBySlug(slug);
+  if (cmsArticle) {
+    return { kind: 'cms' as const, article: cmsArticle };
+  }
+  return null;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const article = complianceArticleBySlug(slug);
-  if (!article) return {};
+  const resolved = await resolveArticle(slug);
+  if (!resolved) return {};
+  const article = resolved.article;
   return {
     title: article.title,
     description: article.metaDescription,
@@ -872,14 +894,19 @@ function ArticleBody({ article }: { article: ComplianceArticle }) {
 
 export default async function ComplianceArticlePage({ params }: Props) {
   const { slug } = await params;
-  const article = complianceArticleBySlug(slug);
-  if (!article) notFound();
+  const resolved = await resolveArticle(slug);
+  if (!resolved) notFound();
 
-  const related = COMPLIANCE_ARTICLES.filter((a) => a.slug !== slug);
+  const allArticles = await getAllPublishedComplianceArticles();
+  const related = allArticles.filter((a) => a.slug !== slug);
+  const articleMeta: ComplianceArticleMeta =
+    resolved.kind === 'static'
+      ? { ...resolved.article, source: 'static' }
+      : resolved.article;
 
   return (
     <div className="min-h-screen bg-black text-white antialiased">
-      <ComplianceArticleJsonLd article={article} />
+      <ComplianceArticleJsonLd article={articleMeta} />
       <Navbar />
       <main className="container mx-auto px-4 pt-24 sm:pt-28 pb-20 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-10 lg:gap-14">
@@ -889,15 +916,21 @@ export default async function ComplianceArticlePage({ params }: Props) {
                 Compliance Centre
               </Link>
             </p>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">{article.title}</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">{articleMeta.title}</h1>
             <p className="mb-10 text-sm text-white/45">
               Published{' '}
-              {format(new Date(article.datePublished), 'd MMMM yyyy')}
-              {article.dateModified && article.dateModified !== article.datePublished
-                ? ` · Updated ${format(new Date(article.dateModified), 'd MMMM yyyy')}`
+              {format(new Date(articleMeta.datePublished), 'd MMMM yyyy')}
+              {articleMeta.dateModified && articleMeta.dateModified !== articleMeta.datePublished
+                ? ` · Updated ${format(new Date(articleMeta.dateModified), 'd MMMM yyyy')}`
                 : ''}
             </p>
-            <ArticleBody article={article} />
+            {resolved.kind === 'static' ? (
+              <ArticleBody article={resolved.article} />
+            ) : (
+              <CmsComplianceArticleBody
+                markdown={polishComplianceMarkdown(resolved.article.bodyMarkdown, true)}
+              />
+            )}
             <ArticleBottomCta />
           </article>
           <aside className="lg:sticky lg:top-28 h-fit space-y-6">

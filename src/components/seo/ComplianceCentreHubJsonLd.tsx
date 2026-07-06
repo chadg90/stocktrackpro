@@ -1,9 +1,13 @@
-import { COMPLIANCE_ARTICLES } from '@/content/complianceArticles';
+import type { ComplianceArticleMeta } from '@/lib/compliance-articles/types';
 import { SITE_SHORT_DESCRIPTION } from '@/content/siteSeo';
 import { ORGANIZATION_ID, SITE_URL, WEBSITE_ID } from '@/lib/site';
 
+type Props = {
+  articles: ComplianceArticleMeta[];
+};
+
 /** BreadcrumbList + ItemList for the Compliance Centre index (Google + AI discovery). */
-export default function ComplianceCentreHubJsonLd() {
+export default function ComplianceCentreHubJsonLd({ articles }: Props) {
   const hubUrl = `${SITE_URL}/compliance-centre`;
 
   const breadcrumbLd = {
@@ -40,7 +44,7 @@ export default function ComplianceCentreHubJsonLd() {
   const itemListLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    itemListElement: COMPLIANCE_ARTICLES.map((article, index) => ({
+    itemListElement: articles.map((article, index) => ({
       '@type': 'ListItem',
       position: index + 1,
       name: article.title,

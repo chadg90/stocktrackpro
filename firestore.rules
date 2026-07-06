@@ -420,6 +420,14 @@ service cloud.firestore {
     }
 
     // ============================================
+    // COMPLIANCE ARTICLES (marketing CMS — admin write, public read when published)
+    // ============================================
+    match /compliance_articles/{articleId} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ============================================
     // GLOBAL ADMIN OVERRIDE (read-only catch-all)
     // Allows platform admins to read any unlisted collection for support.
     // Write access for unlisted collections is intentionally NOT granted here;

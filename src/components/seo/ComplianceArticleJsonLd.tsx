@@ -1,7 +1,7 @@
-import type { ComplianceArticle } from '@/content/complianceArticles';
+import type { ComplianceArticleMeta } from '@/lib/compliance-articles/types';
 import { ORGANIZATION_ID, SITE_URL } from '@/lib/site';
 
-type Props = { article: ComplianceArticle };
+type Props = { article: ComplianceArticleMeta };
 
 /**
  * Article + BreadcrumbList JSON-LD for compliance posts (Google rich results + clearer IA signals).

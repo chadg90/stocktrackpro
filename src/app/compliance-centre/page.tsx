@@ -1,12 +1,16 @@
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import ComplianceCentreHubJsonLd from '@/components/seo/ComplianceCentreHubJsonLd';
-import { COMPLIANCE_ARTICLES } from '@/content/complianceArticles';
+import { getAllPublishedComplianceArticles } from '@/lib/compliance-articles/server';
 
-export default function ComplianceCentreHubPage() {
+export const revalidate = 300;
+
+export default async function ComplianceCentreHubPage() {
+  const articles = await getAllPublishedComplianceArticles();
+
   return (
     <div className="min-h-screen bg-black text-white antialiased">
-      <ComplianceCentreHubJsonLd />
+      <ComplianceCentreHubJsonLd articles={articles} />
       <Navbar />
       <main className="container mx-auto px-4 pt-24 sm:pt-28 pb-20 max-w-3xl">
         <p className="text-[var(--brand-blue)] font-medium text-sm uppercase tracking-[0.2em] mb-4">
@@ -25,7 +29,7 @@ export default function ComplianceCentreHubPage() {
           and PUWER forms in one inspection entry — with separate PDFs, examination due reminders, and manager alerts.
         </p>
         <ul className="space-y-6">
-          {COMPLIANCE_ARTICLES.map((article) => (
+          {articles.map((article) => (
             <li key={article.slug}>
               <Link
                 href={`/compliance-centre/${article.slug}`}

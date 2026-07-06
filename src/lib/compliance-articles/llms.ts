@@ -1,4 +1,7 @@
-# Stock Track PRO
+import { SITE_URL } from '@/lib/site';
+import { getAllPublishedComplianceArticles } from '@/lib/compliance-articles/server';
+
+const STATIC_LLMS_BODY = `# Stock Track PRO
 
 > UK van fleet management and DVSA compliance software for commercial van operators.
 
@@ -6,7 +9,7 @@
 
 Stock Track PRO helps UK businesses run daily van walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for vans and light commercial fleets — not HGV operator licensing.
 
-Canonical website: https://www.stocktrackpro.co.uk
+Canonical website: ${SITE_URL}
 Support email: support@stocktrackpro.co.uk
 
 ## What it does
@@ -39,24 +42,17 @@ UK van fleet operators — trades, groundworks, logistics, construction, electri
 
 ## Key pages
 
-- Home: https://www.stocktrackpro.co.uk/
-- Features: https://www.stocktrackpro.co.uk/features/
-- Pricing: https://www.stocktrackpro.co.uk/pricing/
-- FAQ: https://www.stocktrackpro.co.uk/faq/
-- Compliance Centre: https://www.stocktrackpro.co.uk/compliance-centre/
-- Sign up (trial): https://www.stocktrackpro.co.uk/onboarding/
+- Home: ${SITE_URL}/
+- Features: ${SITE_URL}/features/
+- Pricing: ${SITE_URL}/pricing/
+- FAQ: ${SITE_URL}/faq/
+- Compliance Centre: ${SITE_URL}/compliance-centre/
+- Sign up (trial): ${SITE_URL}/onboarding/
 
 ## Compliance articles
+`;
 
-- Van fleet defect records: https://www.stocktrackpro.co.uk/compliance-centre/van-fleet-defect-records/
-- Paper vs digital inspections: https://www.stocktrackpro.co.uk/compliance-centre/paper-vs-digital-inspection-sheets/
-- MOT expiry tracking: https://www.stocktrackpro.co.uk/compliance-centre/mot-expiry-tracking-for-fleets/
-- Pre-use checks for company vans: https://www.stocktrackpro.co.uk/compliance-centre/pre-use-checks-company-vehicles/
-- Digital defect records under DVSA scrutiny: https://www.stocktrackpro.co.uk/compliance-centre/digital-defect-records-dvsa-scrutiny/
-- LOLER thorough examination records: https://www.stocktrackpro.co.uk/compliance-centre/loler-thorough-examination-records/
-- Plant service vs LOLER examination: https://www.stocktrackpro.co.uk/compliance-centre/plant-machinery-service-vs-loler-examination/
-- Plant examination due date tracking: https://www.stocktrackpro.co.uk/compliance-centre/plant-examination-due-date-tracking/
-
+const STATIC_LLMS_FOOTER = `
 ## Optional add-on
 
 Plant & Machinery module: complete LOLER, service, pre-hire/off-hire, and PUWER forms in one inspection entry — each with its own PDF, plus examination due reminders. Separate subscription from the core van fleet plan.
@@ -70,5 +66,18 @@ Plant & Machinery module: complete LOLER, service, pre-hire/off-hire, and PUWER 
 
 ## Contact
 
-Website: https://www.stocktrackpro.co.uk
+Website: ${SITE_URL}
 Email: support@stocktrackpro.co.uk
+`;
+
+export async function buildLlmsTxt(): Promise<string> {
+  const articles = await getAllPublishedComplianceArticles();
+  const articleLines = articles
+    .map((article) => {
+      const label = article.title.replace(/\s+/g, ' ').trim();
+      return `- ${label}: ${SITE_URL}/compliance-centre/${article.slug}/`;
+    })
+    .join('\n');
+
+  return `${STATIC_LLMS_BODY}\n${articleLines}\n${STATIC_LLMS_FOOTER}`;
+}
