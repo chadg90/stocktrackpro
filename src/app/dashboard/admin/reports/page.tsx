@@ -16,7 +16,8 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Building2, Calendar, FileText, ShieldAlert, Activity, CheckCircle2 } from 'lucide-react';
-import { type MonthlyCompanyReportTemplate, type OpenDefectRow, type ReportTrendPoint } from '@/lib/adminMonthlyCompanyReportPdf';
+import { type MonthlyCompanyReportTemplate, type OpenDefectRow, type ReportTrendPoint, type ReportUserCheckRow, type ReportUserNoCheckRow } from '@/lib/adminMonthlyCompanyReportPdf';
+import { isStaffExpectedToCheck } from '@/lib/adminMonthlyCompanyReportHelpers';
 
 type Profile = {
   role?: string;
@@ -163,6 +164,8 @@ export default function AdminReportsPage() {
   const [comparison, setComparison] = useState<ReportComparison | null>(null);
   const [trend, setTrend] = useState<ReportTrendPoint[]>([]);
   const [openDefectRows, setOpenDefectRows] = useState<OpenDefectRow[]>([]);
+  const [usersWithChecks, setUsersWithChecks] = useState<ReportUserCheckRow[]>([]);
+  const [usersWithoutChecks, setUsersWithoutChecks] = useState<ReportUserNoCheckRow[]>([]);
   const [snapshot, setSnapshot] = useState<CompanySnapshot | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [authIdToken, setAuthIdToken] = useState<string | null>(null);
@@ -302,6 +305,8 @@ export default function AdminReportsPage() {
     setComparison(null);
     setTrend([]);
     setOpenDefectRows([]);
+    setUsersWithChecks([]);
+    setUsersWithoutChecks([]);
   }, [selectedCompanyId, selectedMonth]);
 
   useEffect(() => {
@@ -426,14 +431,48 @@ export default function AdminReportsPage() {
           status: defect.status === 'resolved' ? 'resolved' : 'open',
         };
       });
+      const staffProfileDocs = profilesSnap.docs.filter((profileDoc) =>
+        isStaffExpectedToCheck((profileDoc.data() as Profile).role)
+      );
+      const staffIds = new Set(staffProfileDocs.map((profileDoc) => profileDoc.id));
+
+      const checksByUser: Record<string, number> = {};
+      inspectionsInMonth.forEach((inspection) => {
+        const userId = inspection.inspected_by;
+        if (!userId || !staffIds.has(userId)) return;
+        checksByUser[userId] = (checksByUser[userId] || 0) + 1;
+      });
+
+      const usersWithChecksRows: ReportUserCheckRow[] = [];
+      const usersWithoutChecksRows: ReportUserNoCheckRow[] = [];
+      staffProfileDocs.forEach((profileDoc) => {
+        const profile = profileDoc.data() as Profile;
+        const name = profileDisplayName(profile);
+        const email = profile.email;
+        const checksCount = checksByUser[profileDoc.id] || 0;
+        if (checksCount > 0) {
+          usersWithChecksRows.push({ name, email, checksCompleted: checksCount });
+        } else {
+          usersWithoutChecksRows.push({ name, email });
+        }
+      });
+      usersWithChecksRows.sort(
+        (a, b) => b.checksCompleted - a.checksCompleted || a.name.localeCompare(b.name)
+      );
+      usersWithoutChecksRows.sort((a, b) => a.name.localeCompare(b.name));
+
       const reportingUserIds = new Set<string>();
       inspectionsInMonth.forEach((inspection) => {
-        if (inspection.inspected_by) reportingUserIds.add(inspection.inspected_by);
+        if (inspection.inspected_by && staffIds.has(inspection.inspected_by)) {
+          reportingUserIds.add(inspection.inspected_by);
+        }
       });
       defectsReportedInMonth.forEach((defect) => {
-        if (defect.reported_by) reportingUserIds.add(defect.reported_by);
+        if (defect.reported_by && staffIds.has(defect.reported_by)) {
+          reportingUserIds.add(defect.reported_by);
+        }
       });
-      const totalUsers = profilesSnap.size;
+      const totalUsers = staffProfileDocs.length;
       const usersReportedCount = reportingUserIds.size;
       const usersNotReportedCount = Math.max(0, totalUsers - usersReportedCount);
 
@@ -450,6 +489,8 @@ export default function AdminReportsPage() {
       };
       setStats(nextStats);
       setOpenDefectRows(openRows);
+      setUsersWithChecks(usersWithChecksRows);
+      setUsersWithoutChecks(usersWithoutChecksRows);
       const previousMonthValue = getPreviousMonthValue(selectedMonth);
       const previousStats = await getMonthStats(selectedCompanyId, previousMonthValue);
       const trendValues = getRecentMonthValues(selectedMonth, 4);
@@ -549,6 +590,8 @@ export default function AdminReportsPage() {
         openDefectsList: openDefectRows,
         usersReportedCount: result.usersReportedCount,
         usersNotReportedCount: result.usersNotReportedCount,
+        usersWithChecks,
+        usersWithoutChecks,
       };
       const response = await fetch('/api/admin/reports/generate-pdf', {
         method: 'POST',
@@ -784,6 +827,39 @@ export default function AdminReportsPage() {
                     : `${comparison.resolutionRateDelta >= 0 ? '+' : ''}${comparison.resolutionRateDelta}pp`}
                 </span>
               </p>
+            </div>
+          </div>
+        )}
+
+        {stats && (usersWithChecks.length > 0 || usersWithoutChecks.length > 0) && (
+          <div className="rounded-lg border border-white/10 p-3 bg-white/[0.02] space-y-3">
+            <p className="text-white/60 text-xs uppercase tracking-wide">User check activity (report section 5)</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-white font-medium text-sm mb-2">Completed checks ({usersWithChecks.length})</p>
+                <ul className="space-y-1 text-sm text-white/80 max-h-40 overflow-y-auto">
+                  {usersWithChecks.map((user) => (
+                    <li key={`${user.name}-${user.checksCompleted}`} className="flex justify-between gap-2">
+                      <span className="truncate">{user.name}</span>
+                      <span className="text-blue-300 shrink-0">{user.checksCompleted}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-white font-medium text-sm mb-2">No checks this month ({usersWithoutChecks.length})</p>
+                <ul className="space-y-1 text-sm text-white/80 max-h-40 overflow-y-auto">
+                  {usersWithoutChecks.length ? (
+                    usersWithoutChecks.map((user) => (
+                      <li key={user.name} className="truncate">
+                        {user.name}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-white/50">All staff completed at least one check.</li>
+                  )}
+                </ul>
+              </div>
             </div>
           </div>
         )}

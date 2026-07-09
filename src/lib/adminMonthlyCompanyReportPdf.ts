@@ -1,5 +1,10 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import {
+  buildRecommendedActions,
+  formatDaysSinceLastCheck,
+  prepareOpenDefectRowsForReport,
+} from '@/lib/adminMonthlyCompanyReportHelpers';
 
 export type MonthlyCompanyReportTemplate = 'executive';
 
@@ -16,6 +21,17 @@ export type OpenDefectRow = {
   raised: string;
   priority: 'critical' | 'standard';
   status: 'open' | 'resolved';
+};
+
+export type ReportUserCheckRow = {
+  name: string;
+  email?: string;
+  checksCompleted: number;
+};
+
+export type ReportUserNoCheckRow = {
+  name: string;
+  email?: string;
 };
 
 export type MonthlyCompanyReportInput = {
@@ -43,6 +59,8 @@ export type MonthlyCompanyReportInput = {
   openDefectsList?: OpenDefectRow[];
   usersReportedCount?: number;
   usersNotReportedCount?: number;
+  usersWithChecks?: ReportUserCheckRow[];
+  usersWithoutChecks?: ReportUserNoCheckRow[];
   summaryNote?: string;
 };
 
@@ -144,7 +162,7 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
   const alertText = alertDanger ? [122, 26, 26] as [number, number, number] : [122, 74, 0] as [number, number, number];
   doc.setFillColor(...alertFill);
   doc.setDrawColor(...alertBorder);
-  doc.roundedRect(contentX, y, contentW, 10, 1.6, 1.6, 'FD');
+  doc.roundedRect(contentX, y, contentW, 12, 1.6, 1.6, 'FD');
   doc.setFillColor(...alertBorder);
   doc.circle(contentX + 3, y + 5, 1.2, 'F');
   doc.setTextColor(...alertText);
@@ -154,7 +172,7 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
       ? `Action required - ${critical} critical defect(s) open at month-end`
       : 'All critical defects resolved',
     contentX + 6,
-    y + 5.6
+    y + 4.8
   );
   doc.setFontSize(8);
   doc.text(
@@ -163,7 +181,9 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
     y + 5.6,
     { align: 'right' }
   );
-  y += 14;
+  doc.setFontSize(7);
+  doc.text(formatDaysSinceLastCheck(input.daysSinceLastCheck), contentX + 6, y + 9.2);
+  y += 16;
 
   const sectionLabel = (text: string) => {
     doc.setFont('helvetica', 'normal');
@@ -298,7 +318,7 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
 
   // Section 3 - open defects
   sectionLabel('3 - Open defects requiring action');
-  const openRows = (input.openDefectsList || []).filter((d) => d.status === 'open');
+  const { rows: openRows, overflowCount } = prepareOpenDefectRowsForReport(input.openDefectsList || []);
   if (!openRows.length) {
     doc.setFillColor(232, 245, 233);
     doc.setDrawColor(...SUCCESS);
@@ -342,7 +362,14 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
         }
       },
     });
-    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 7;
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 3;
+    if (overflowCount > 0) {
+      doc.setFontSize(7.5);
+      doc.setTextColor(...MUTED);
+      doc.text(`+ ${overflowCount} more open defect(s) not shown`, contentX, y + 3);
+      y += 6;
+    }
+    y += 4;
   }
 
   // Section 4 - actions
@@ -351,21 +378,8 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
     y = 14;
   }
   sectionLabel('4 - Recommended actions');
-  const actions: string[] = [];
-  if (critical > 0) {
-    actions.push(`Resolve ${critical} critical defect(s) immediately. Confirm repair and close in Stock Track PRO before further vehicle use.`);
-  }
-  if ((input.comparison?.checksDelta ?? 0) > 0) {
-    actions.push(`Maintain inspection frequency. ${input.monthLabel}'s ${Math.round(input.checksCompleted)} checks (+${Math.round(input.comparison?.checksDelta ?? 0)} on ${input.comparison?.previousMonthLabel || 'last month'}) is a strong result.`);
-  } else {
-    actions.push(`Inspection frequency dropped by ${Math.abs(Math.round(input.comparison?.checksDelta ?? 0))} this month. Ensure all drivers are completing checks via the Stock Track PRO app.`);
-  }
-  if ((input.resolutionRate ?? 0) > 100) {
-    actions.push(`Monitor resolution backlog. The ${Math.round(input.resolutionRate || 0)}% resolution rate reflects clearance of prior-month defects - aim to keep open defects below 3.`);
-  } else {
-    actions.push('Review unresolved defects weekly and assign ownership with due dates to prevent carry-over.');
-  }
-  actions.slice(0, 3).forEach((action, idx) => {
+  const actions = buildRecommendedActions(input);
+  actions.forEach((action, idx) => {
     const rowY = y + idx * 12.5;
     doc.setFillColor(...BLUE);
     doc.circle(contentX + 3.5, rowY + 2.4, 2.8, 'F');
@@ -380,6 +394,65 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
     doc.line(contentX, rowY + 8.8, contentX + contentW, rowY + 8.8);
   });
   y += 34;
+
+  // Section 5 - user check activity
+  doc.addPage();
+  y = 14;
+  sectionLabel(`5 - User check activity · ${input.monthLabel}`);
+  doc.setFontSize(8);
+  doc.setTextColor(...MUTED);
+  doc.text('Drivers and managers expected to complete vehicle checks.', contentX, y);
+  y += 6;
+
+  const usersWithChecks = input.usersWithChecks || [];
+  const usersWithoutChecks = input.usersWithoutChecks || [];
+  const halfW = (contentW - 4) / 2;
+
+  doc.setFontSize(8.5);
+  doc.setTextColor(...BLACK);
+  doc.text(`Completed checks (${usersWithChecks.length})`, contentX, y);
+  doc.text(`No checks this month (${usersWithoutChecks.length})`, contentX + halfW + 4, y);
+  y += 4;
+
+  const renderUserList = (items: Array<{ name: string; extra?: string }>, x: number, startY: number) => {
+    let rowY = startY;
+    if (!items.length) {
+      doc.setFontSize(8);
+      doc.setTextColor(...MUTED);
+      doc.text('None', x, rowY + 4);
+      return rowY + 8;
+    }
+    items.slice(0, 20).forEach((item) => {
+      doc.setFontSize(8);
+      doc.setTextColor(...BLACK);
+      doc.text(sanitizeText(item.name), x, rowY + 4);
+      if (item.extra) {
+        doc.setTextColor(...BLUE);
+        doc.text(item.extra, x + halfW - 8, rowY + 4, { align: 'right' });
+      }
+      rowY += 5.5;
+    });
+    if (items.length > 20) {
+      doc.setFontSize(7.5);
+      doc.setTextColor(...MUTED);
+      doc.text(`+ ${items.length - 20} more`, x, rowY + 4);
+      rowY += 5;
+    }
+    return rowY;
+  };
+
+  const listStartY = y;
+  const leftEnd = renderUserList(
+    usersWithChecks.map((user) => ({ name: user.name, extra: String(user.checksCompleted) })),
+    contentX,
+    listStartY
+  );
+  const rightEnd = renderUserList(
+    usersWithoutChecks.map((user) => ({ name: user.name })),
+    contentX + halfW + 4,
+    listStartY
+  );
+  y = Math.max(leftEnd, rightEnd) + 6;
 
   // Footer
   const footerY = Math.min(pageHeight - 12, y + 4);

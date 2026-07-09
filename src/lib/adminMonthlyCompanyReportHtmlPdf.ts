@@ -3,6 +3,11 @@ import puppeteer from 'puppeteer-core';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { MonthlyCompanyReportInput } from '@/lib/adminMonthlyCompanyReportPdf';
+import {
+  buildRecommendedActions,
+  formatDaysSinceLastCheck,
+  prepareOpenDefectRowsForReport,
+} from '@/lib/adminMonthlyCompanyReportHelpers';
 
 function esc(str: string): string {
   return str
@@ -57,8 +62,11 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
   const usersNot = Math.max(0, Math.round(input.usersNotReportedCount || 0));
   const usersTotal = usersReported + usersNot;
   const coverage = usersTotal > 0 ? Math.round((usersReported / usersTotal) * 100) : 0;
-  const openRows = (input.openDefectsList || [])
-    .filter((d) => d.status === 'open')
+  const resolutionRateText =
+    input.resolutionRate === null ? 'Resolution rate: N/A' : `Resolution rate: ${input.resolutionRate}%`;
+  const lastCheckText = esc(formatDaysSinceLastCheck(input.daysSinceLastCheck));
+  const { rows: openDefectRows, overflowCount } = prepareOpenDefectRowsForReport(input.openDefectsList || []);
+  const openRows = openDefectRows
     .map((row) => {
       const priClass = row.priority === 'critical' ? 'pri-critical' : 'pri-standard';
       return `<tr>
@@ -70,6 +78,27 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
       </tr>`;
     })
     .join('');
+  const openOverflowNote =
+    overflowCount > 0
+      ? `<p style="font-size:11px;color:#9ca3af;margin:8px 0 0">+ ${overflowCount} more open defect(s) not shown</p>`
+      : '';
+  const actions = buildRecommendedActions(input);
+  const actionsHtml = actions
+    .map((action, index) => `<li><span class="num">${index + 1}</span><span>${esc(action)}</span></li>`)
+    .join('');
+  const usersWithChecks = input.usersWithChecks || [];
+  const usersWithoutChecks = input.usersWithoutChecks || [];
+  const withChecksRows =
+    usersWithChecks
+      .map(
+        (user) =>
+          `<tr><td>${esc(user.name)}</td><td class="checks-count">${user.checksCompleted}</td></tr>`
+      )
+      .join('') || '<tr><td colspan="2" class="empty-cell">None</td></tr>';
+  const withoutChecksRows =
+    usersWithoutChecks
+      .map((user) => `<tr><td>${esc(user.name)}</td></tr>`)
+      .join('') || '<tr><td class="empty-cell">None</td></tr>';
 
   const chartLabels = JSON.stringify(trend.map((t) => t.month.slice(0, 3)));
   const chartChecks = JSON.stringify(trend.map((t) => Math.round(t.checks)));
@@ -86,7 +115,8 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     .hdr{padding:16px 24px 12px;border-bottom:.5px solid #e5e7eb;display:flex;justify-content:space-between;gap:16px}
     .meta-right{text-align:right}
     .meta-right .ref{font-size:11px;color:#9ca3af}
-    .alert{margin:14px 24px 0;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;border:.5px solid #d94040;background:#fce8e8;color:#7a1a1a;font-size:13px}
+    .alert{margin:14px 24px 0;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;gap:12px;border:.5px solid #d94040;background:#fce8e8;color:#7a1a1a;font-size:13px}
+    .alert-note{font-size:11px;margin-top:4px;opacity:.9}
     .section{padding:14px 24px 0}
     .label{font-size:11px;letter-spacing:.06em;color:#6b7280;text-transform:uppercase;margin:0 0 12px}
     .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -107,10 +137,16 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     .actions{padding-bottom:0}.actions li{padding:6px 0;margin:0;list-style:none;display:flex;gap:10px}
     .num{width:20px;height:20px;border-radius:50%;background:#3b82f6;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
     .ftr{margin:12px 24px 0;padding:14px 0;border-top:.5px solid #e5e7eb;color:#6b7280;font-size:11px;display:flex;justify-content:space-between}
+    .user-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .user-panel h3{font-size:13px;margin:0 0 8px;color:#111827}
+    .checks-count{text-align:right;font-weight:600;color:#3b82f6;width:56px}
+    .empty-cell{color:#9ca3af}
+    .user-activity-section{page-break-before:always;padding-top:18px}
     @media print {
       .section { page-break-inside: avoid; }
       .defects-table-wrap { page-break-inside: avoid; }
       .actions-section { page-break-inside: avoid; }
+      .user-activity-section { page-break-before: always; page-break-inside: avoid; }
       .report-footer { page-break-before: avoid; }
     }
   </style>
@@ -129,17 +165,17 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
       <div style="font-weight:700">${companyName}</div><div>${month}</div><div class="ref">Ref ${ref}</div><div>${input.generatedAt.toLocaleDateString('en-GB')}</div>
     </div>
   </header>
-  <div class="alert"><div>${critical > 0 ? `Action required — ${critical} critical defect(s) open at month-end` : 'All critical defects resolved'}</div><div>${critical > 0 ? 'Compliance risk: high · See section 3' : 'Compliance risk: amber'}</div></div>
+  <div class="alert"><div><div>${critical > 0 ? `Action required — ${critical} critical defect(s) open at month-end` : 'All critical defects resolved'}</div><div class="alert-note">${lastCheckText}</div></div><div>${critical > 0 ? 'Compliance risk: high · See section 3' : 'Compliance risk: amber'}</div></div>
 
   <section class="section">
     <p class="label">1 — Key performance indicators · ${month}</p>
     <div class="kpis">
       <div class="card"><div style="font-size:11px;color:#6b7280">Checks completed</div><div class="v">${checks}</div><p style="font-size:11px; margin:4px 0 0; color:${checksColor};">${cChecks.symbol} ${cChecks.text} vs ${prev}</p></div>
       <div class="card"><div style="font-size:11px;color:#6b7280">Defects reported</div><div class="v">${reported}</div><p style="font-size:11px; margin:4px 0 0; color:${reportedColor};">${cReported.symbol} ${cReported.text} vs ${prev}</p></div>
-      <div class="card"><div style="font-size:11px;color:#6b7280">Defects resolved</div><div class="v">${resolved}</div><p style="font-size:11px; margin:4px 0 0; color:${resolvedColor};">${cResolved.symbol} ${cResolved.text} vs ${prev}</p></div>
+      <div class="card"><div style="font-size:11px;color:#6b7280">Defects resolved</div><div class="v">${resolved}</div><p style="font-size:11px; margin:4px 0 0; color:${resolvedColor};">${cResolved.symbol} ${cResolved.text} vs ${prev}</p><p style="font-size:10px;margin:4px 0 0;color:#6b7280">${esc(resolutionRateText)}</p></div>
       <div class="card ${critical > 0 ? 'critical' : ''}"><div style="font-size:11px;${critical > 0 ? 'color:#a03030' : 'color:#6b7280'}">Critical open defects</div><div class="v" style="${critical > 0 ? 'color:#d94040' : ''}">${critical}</div></div>
     </div>
-    <div class="coverage"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:#6b7280">User reporting coverage</span><span style="font-size:12px;font-weight:500">${usersReported} of ${usersTotal} users submitted (${coverage}%)</span></div><div class="bar"><span style="width:${coverage}%"></span></div><p style="font-size:11px;color:#9ca3af;margin:6px 0 0">${usersNot} users did not submit any checks or defects in this period</p></div>
+    <div class="coverage"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:#6b7280">Staff reporting coverage</span><span style="font-size:12px;font-weight:500">${usersReported} of ${usersTotal} staff submitted (${coverage}%)</span></div><div class="bar"><span style="width:${coverage}%"></span></div><p style="font-size:11px;color:#9ca3af;margin:6px 0 0">${usersNot} staff did not submit any checks or defects in this period</p></div>
   </section>
 
   <section class="section">
@@ -152,16 +188,33 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
 
   <section class="section defects-table-wrap">
     <p class="label">3 — Open defects requiring action</p>
-    ${openRows ? `<table><colgroup><col style="width:90px"><col style="width:auto"><col style="width:90px"><col style="width:65px"><col style="width:65px"></colgroup><thead><tr><th>Vehicle</th><th>Defect description</th><th>Date raised</th><th>Priority</th><th>Status</th></tr></thead><tbody>${openRows}</tbody></table>` : `<div style="background:#e8f5e9;border:.5px solid #1a7a3a;color:#1a7a3a;border-radius:8px;padding:10px">No open defects at month-end</div>`}
+    ${openRows ? `<table><colgroup><col style="width:90px"><col style="width:auto"><col style="width:90px"><col style="width:65px"><col style="width:65px"></colgroup><thead><tr><th>Vehicle</th><th>Defect description</th><th>Date raised</th><th>Priority</th><th>Status</th></tr></thead><tbody>${openRows}</tbody></table>${openOverflowNote}` : `<div style="background:#e8f5e9;border:.5px solid #1a7a3a;color:#1a7a3a;border-radius:8px;padding:10px">No open defects at month-end</div>`}
   </section>
 
   <section class="section actions actions-section">
     <p class="label">4 — Recommended actions</p>
-    <ul>
-      <li><span class="num">1</span><span>${critical > 0 ? `Resolve ${critical} critical defect(s) immediately. Confirm repair and close in Stock Track PRO before further vehicle use.` : 'Continue daily checks and resolve raised defects within agreed SLA.'}</span></li>
-      <li><span class="num">2</span><span>${(input.comparison?.checksDelta ?? 0) >= 0 ? `Maintain inspection frequency. ${month}'s ${checks} checks (+${Math.round(input.comparison?.checksDelta ?? 0)} on ${prev}) is a strong result.` : `Inspection frequency dropped by ${Math.abs(Math.round(input.comparison?.checksDelta ?? 0))} this month. Ensure all drivers are completing checks via the Stock Track PRO app.`}</span></li>
-      <li><span class="num">3</span><span>${(input.resolutionRate ?? 0) > 100 ? `Monitor resolution backlog. The ${Math.round(input.resolutionRate || 0)}% resolution rate reflects clearance of prior-month defects — aim to keep open defects below 3.` : 'Review unresolved defects weekly and assign owners with due dates.'}</span></li>
-    </ul>
+    <ul>${actionsHtml}</ul>
+  </section>
+
+  <section class="section user-activity-section">
+    <p class="label">5 — User check activity · ${month}</p>
+    <p style="font-size:12px;color:#6b7280;margin:-6px 0 12px">Drivers and managers expected to complete vehicle checks.</p>
+    <div class="user-grid">
+      <div class="user-panel">
+        <h3>Completed checks (${usersWithChecks.length})</h3>
+        <table>
+          <thead><tr><th>Name</th><th style="text-align:right">Checks</th></tr></thead>
+          <tbody>${withChecksRows}</tbody>
+        </table>
+      </div>
+      <div class="user-panel">
+        <h3>No checks this month (${usersWithoutChecks.length})</h3>
+        <table>
+          <thead><tr><th>Name</th></tr></thead>
+          <tbody>${withoutChecksRows}</tbody>
+        </table>
+      </div>
+    </div>
   </section>
 
   <footer class="ftr report-footer"><div>Confidential — prepared for operational review · <span style="color:#3b82f6">stocktrackpro.co.uk</span></div><div>© 2026 Stock Track PRO Ltd</div></footer>
