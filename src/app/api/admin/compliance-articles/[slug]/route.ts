@@ -4,6 +4,7 @@ import { assertAdmin } from '@/lib/api/assert-admin';
 import { isStaticComplianceSlug } from '@/lib/compliance-articles/static';
 import { normalizeComplianceSlug } from '@/lib/compliance-articles/server';
 import { getAdminDb } from '@/lib/firebase-admin';
+import { notifyIndexNowForPaths } from '@/lib/indexnow';
 
 export const runtime = 'nodejs';
 
@@ -36,6 +37,7 @@ export async function DELETE(
     await db.collection(COLLECTION).doc(slug).delete();
 
     revalidateCompliancePaths(slug);
+    void notifyIndexNowForPaths(['/compliance-centre', `/compliance-centre/${slug}`]);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

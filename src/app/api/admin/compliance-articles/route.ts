@@ -14,6 +14,7 @@ import {
 } from '@/lib/compliance-articles/validate';
 import { getAdminDb } from '@/lib/firebase-admin';
 import type { CmsComplianceArticleInput } from '@/lib/compliance-articles/types';
+import { notifyIndexNowForPaths } from '@/lib/indexnow';
 
 export const runtime = 'nodejs';
 
@@ -103,6 +104,14 @@ export async function POST(request: NextRequest) {
     revalidateCompliancePaths(slug);
     if (originalSlug && originalSlug !== slug) {
       revalidateCompliancePaths(originalSlug);
+    }
+
+    if (payload.published) {
+      void notifyIndexNowForPaths([
+        '/compliance-centre',
+        `/compliance-centre/${slug}`,
+        ...(originalSlug && originalSlug !== slug ? [`/compliance-centre/${originalSlug}`] : []),
+      ]);
     }
 
     return NextResponse.json({ ok: true, slug });
