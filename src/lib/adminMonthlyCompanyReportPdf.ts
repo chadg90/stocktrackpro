@@ -1,9 +1,10 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {
-  buildRecommendedActions,
+  buildPriorityActions,
   formatDaysSinceLastCheck,
   prepareOpenDefectRowsForReport,
+  titleCaseName,
 } from '@/lib/adminMonthlyCompanyReportHelpers';
 
 export type MonthlyCompanyReportTemplate = 'executive';
@@ -21,17 +22,26 @@ export type OpenDefectRow = {
   raised: string;
   priority: 'critical' | 'standard';
   status: 'open' | 'resolved';
+  daysOpen?: number;
 };
 
 export type ReportUserCheckRow = {
   name: string;
   email?: string;
   checksCompleted: number;
+  defectsRaised?: number;
+  lastInspection?: string;
 };
 
 export type ReportUserNoCheckRow = {
   name: string;
   email?: string;
+};
+
+export type PriorityAction = {
+  tier: 'immediate' | 'this_week' | 'continue';
+  title: string;
+  detail: string;
 };
 
 export type MonthlyCompanyReportInput = {
@@ -48,12 +58,23 @@ export type MonthlyCompanyReportInput = {
   criticalOpenDefects: number;
   daysSinceLastCheck: number | null;
   inactivityDays?: number | null;
+  totalVehicles?: number;
+  vehiclesInspected?: number;
+  inspectionRate?: number | null;
+  avgDefectsPerVehicle?: number | null;
+  avgRepairDays?: number | null;
+  complianceRate?: number | null;
+  fleetHealthScore?: number | null;
+  previousComplianceRate?: number | null;
   comparison?: {
     previousMonthLabel: string;
     checksDelta: number;
     defectsReportedDelta: number;
     defectsResolvedDelta: number;
     resolutionRateDelta: number | null;
+    previousChecks?: number;
+    previousDefectsReported?: number;
+    previousDefectsResolved?: number;
   } | null;
   trend?: ReportTrendPoint[];
   openDefectsList?: OpenDefectRow[];
@@ -61,6 +82,8 @@ export type MonthlyCompanyReportInput = {
   usersNotReportedCount?: number;
   usersWithChecks?: ReportUserCheckRow[];
   usersWithoutChecks?: ReportUserNoCheckRow[];
+  topInspectorName?: string | null;
+  topInspectorChecks?: number | null;
   summaryNote?: string;
 };
 
@@ -330,11 +353,12 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
   } else {
     autoTable(doc, {
       startY: y,
-      head: [['Vehicle', 'Defect description', 'Date raised', 'Priority', 'Status']],
+      head: [['Vehicle', 'Defect description', 'Date raised', 'Days open', 'Priority', 'Status']],
       body: openRows.map((row) => [
         sanitizeText(row.vehicle),
         sanitizeText(row.description),
         row.raised,
+        row.daysOpen === undefined || row.daysOpen === null ? '—' : `${row.daysOpen}d`,
         row.priority === 'critical' ? 'Critical' : 'Standard',
         row.status === 'open' ? 'Open' : 'Resolved',
       ]),
@@ -342,20 +366,21 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
       styles: { fontSize: 8, textColor: BLACK, lineColor: LIGHT_GRAY, lineWidth: 0.12, valign: 'top', overflow: 'linebreak' },
       headStyles: { fillColor: [249, 250, 251], textColor: [75, 85, 99], fontStyle: 'normal' },
       columnStyles: {
-        0: { fontStyle: 'bold', cellWidth: 24 },
+        0: { fontStyle: 'bold', cellWidth: 22 },
         1: { cellWidth: 'auto' },
-        2: { cellWidth: 24 },
-        3: { cellWidth: 17 },
-        4: { cellWidth: 17 },
+        2: { cellWidth: 20 },
+        3: { cellWidth: 16 },
+        4: { cellWidth: 16 },
+        5: { cellWidth: 14 },
       },
       didParseCell: (data) => {
         if (data.section !== 'body') return;
-        if (data.column.index === 3) {
+        if (data.column.index === 4) {
           const criticalBadge = String(data.cell.raw).toLowerCase() === 'critical';
           data.cell.styles.fillColor = criticalBadge ? [252, 232, 232] : [255, 243, 205];
           data.cell.styles.textColor = criticalBadge ? [160, 48, 48] : [122, 74, 0];
         }
-        if (data.column.index === 4) {
+        if (data.column.index === 5) {
           const openBadge = String(data.cell.raw).toLowerCase() === 'open';
           data.cell.styles.fillColor = openBadge ? [255, 243, 205] : [232, 245, 233];
           data.cell.styles.textColor = openBadge ? [122, 74, 0] : [26, 122, 58];
@@ -377,8 +402,8 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
     doc.addPage();
     y = 14;
   }
-  sectionLabel('4 - Recommended actions');
-  const actions = buildRecommendedActions(input);
+  sectionLabel('4 - Priority actions');
+  const actions = buildPriorityActions(input).map((action) => `${action.title}: ${action.detail}`);
   actions.forEach((action, idx) => {
     const rowY = y + idx * 12.5;
     doc.setFillColor(...BLUE);
@@ -443,12 +468,15 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
 
   const listStartY = y;
   const leftEnd = renderUserList(
-    usersWithChecks.map((user) => ({ name: user.name, extra: String(user.checksCompleted) })),
+    usersWithChecks.map((user) => ({
+      name: titleCaseName(user.name),
+      extra: String(user.checksCompleted),
+    })),
     contentX,
     listStartY
   );
   const rightEnd = renderUserList(
-    usersWithoutChecks.map((user) => ({ name: user.name })),
+    usersWithoutChecks.map((user) => ({ name: titleCaseName(user.name) })),
     contentX + halfW + 4,
     listStartY
   );

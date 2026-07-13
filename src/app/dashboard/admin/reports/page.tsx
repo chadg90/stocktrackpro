@@ -17,7 +17,13 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Building2, Calendar, FileText, ShieldAlert, Activity, CheckCircle2 } from 'lucide-react';
 import { type MonthlyCompanyReportTemplate, type OpenDefectRow, type ReportTrendPoint, type ReportUserCheckRow, type ReportUserNoCheckRow } from '@/lib/adminMonthlyCompanyReportPdf';
-import { isStaffExpectedToCheck } from '@/lib/adminMonthlyCompanyReportHelpers';
+import {
+  computeFleetHealthScore,
+  daysOpenFromRaised,
+  isStaffExpectedToCheck,
+  polishDescription,
+  titleCaseName,
+} from '@/lib/adminMonthlyCompanyReportHelpers';
 
 type Profile = {
   role?: string;
@@ -39,6 +45,7 @@ type Company = {
 type Inspection = {
   id: string;
   company_id?: string;
+  vehicle_id?: string;
   inspected_at?: Timestamp | string;
   inspected_by?: string;
 };
@@ -64,6 +71,7 @@ type Vehicle = {
   registration?: string;
   make?: string;
   model?: string;
+  status?: string;
 };
 
 type CompanySnapshot = {
@@ -85,6 +93,16 @@ type ReportStats = {
   daysSinceLastCheck: number | null;
   usersReportedCount: number;
   usersNotReportedCount: number;
+  totalVehicles: number;
+  vehiclesInspected: number;
+  inspectionRate: number | null;
+  avgDefectsPerVehicle: number | null;
+  avgRepairDays: number | null;
+  complianceRate: number | null;
+  fleetHealthScore: number | null;
+  previousComplianceRate: number | null;
+  topInspectorName: string | null;
+  topInspectorChecks: number | null;
 };
 
 type ReportComparison = {
@@ -93,6 +111,9 @@ type ReportComparison = {
   defectsReportedDelta: number;
   defectsResolvedDelta: number;
   resolutionRateDelta: number | null;
+  previousChecks: number;
+  previousDefectsReported: number;
+  previousDefectsResolved: number;
 };
 
 const HIGH_DEFECT_THRESHOLD = 10;
@@ -138,10 +159,10 @@ function isWithinRange(value: Timestamp | string | undefined, start: Date, end: 
 function profileDisplayName(profile: Profile): string {
   // Match Team page: first/last > display_name > displayName > name > email prefix
   const full = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-  if (full) return full;
-  if (profile.display_name?.trim()) return profile.display_name.trim();
-  if (profile.displayName?.trim()) return profile.displayName.trim();
-  if (profile.name?.trim()) return profile.name.trim();
+  if (full) return titleCaseName(full);
+  if (profile.display_name?.trim()) return titleCaseName(profile.display_name.trim());
+  if (profile.displayName?.trim()) return titleCaseName(profile.displayName.trim());
+  if (profile.name?.trim()) return titleCaseName(profile.name.trim());
   if (profile.email) return profile.email.split('@')[0] || profile.email;
   return 'Unknown user';
 }
@@ -384,19 +405,44 @@ export default function AdminReportsPage() {
         return isWithinRange(inspection.inspected_at, start, end);
       }).length;
       const inspectionsInMonth = inspectionsByCompanySnap.docs
-        .map((docSnap) => docSnap.data() as Inspection)
+        .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as Omit<Inspection, 'id'>) }))
         .filter((inspection) => isWithinRange(inspection.inspected_at, start, end));
       const defectsReportedInMonth = allDefectsByCompanySnap.docs
         .map((docSnap) => docSnap.data() as Defect)
         .filter((defect) => isWithinRange(defect.reported_at, start, end));
-      const defectsReported = allDefectsByCompanySnap.docs.filter((docSnap) => {
-        const defect = docSnap.data() as Defect;
-        return isWithinRange(defect.reported_at, start, end);
-      }).length;
-      const defectsResolved = allDefectsByCompanySnap.docs.filter((docSnap) => {
-        const defect = docSnap.data() as Defect;
-        return isWithinRange(defect.resolved_at, start, end);
-      }).length;
+      const defectsReported = defectsReportedInMonth.length;
+      const defectsResolvedInMonth = allDefectsByCompanySnap.docs
+        .map((docSnap) => docSnap.data() as Defect)
+        .filter((defect) => isWithinRange(defect.resolved_at, start, end));
+      const defectsResolved = defectsResolvedInMonth.length;
+
+      const activeVehicles = vehiclesSnap.docs
+        .map((vehicleDoc) => ({ id: vehicleDoc.id, ...(vehicleDoc.data() as Omit<Vehicle, 'id'>) }))
+        .filter((vehicle) => {
+          const status = (vehicle.status || 'active').toLowerCase();
+          return status !== 'archived' && status !== 'sold';
+        });
+      const totalVehicles = activeVehicles.length;
+      const inspectedVehicleIds = new Set(
+        inspectionsInMonth.map((inspection) => inspection.vehicle_id).filter((id): id is string => Boolean(id))
+      );
+      const vehiclesInspected = inspectedVehicleIds.size;
+      const inspectionRate = totalVehicles > 0 ? Math.round((vehiclesInspected / totalVehicles) * 100) : null;
+      const avgDefectsPerVehicle =
+        totalVehicles > 0 ? Math.round((defectsReported / totalVehicles) * 100) / 100 : null;
+
+      const repairDurations = defectsResolvedInMonth
+        .map((defect) => {
+          const raised = toDate(defect.reported_at);
+          const closed = toDate(defect.resolved_at);
+          if (!raised || !closed) return null;
+          return Math.max(0, (closed.getTime() - raised.getTime()) / 86400000);
+        })
+        .filter((days): days is number => days !== null);
+      const avgRepairDays =
+        repairDurations.length > 0
+          ? Math.round((repairDurations.reduce((sum, days) => sum + days, 0) / repairDurations.length) * 10) / 10
+          : null;
 
       const openDefects = allDefectsByCompanySnap.docs
         .map((item) => item.data() as Defect)
@@ -429,14 +475,18 @@ export default function AdminReportsPage() {
             : '') ||
           'Unknown vehicle';
         const reporterName = defect.reported_by ? profileDisplayName(profilesById[defect.reported_by] || {}) : '';
+        const rawDescription = defect.description || defect.defect || defect.notes || 'Defect reported';
+        const description = polishDescription(
+          reporterName ? `${rawDescription} (reported by ${reporterName})` : rawDescription
+        );
+        const raised = raisedDate ? raisedDate.toLocaleDateString('en-GB') : 'Unknown date';
         return {
           vehicle: vehicleName,
-          description: reporterName
-            ? `${defect.description || defect.defect || defect.notes || 'Defect reported'} (reported by ${reporterName})`
-            : defect.description || defect.defect || defect.notes || 'Defect reported',
-          raised: raisedDate ? raisedDate.toLocaleDateString('en-GB') : 'Unknown date',
+          description,
+          raised,
           priority: sev === 'critical' || sev === 'high' ? 'critical' : 'standard',
           status: defect.status === 'resolved' ? 'resolved' : 'open',
+          daysOpen: daysOpenFromRaised(raised) ?? undefined,
         };
       });
       const staffProfileDocs = profilesSnap.docs.filter((profileDoc) =>
@@ -445,10 +495,22 @@ export default function AdminReportsPage() {
       const staffIds = new Set(staffProfileDocs.map((profileDoc) => profileDoc.id));
 
       const checksByUser: Record<string, number> = {};
+      const lastInspectionByUser: Record<string, Date> = {};
       inspectionsInMonth.forEach((inspection) => {
         const userId = inspection.inspected_by;
         if (!userId || !staffIds.has(userId)) return;
         checksByUser[userId] = (checksByUser[userId] || 0) + 1;
+        const at = toDate(inspection.inspected_at);
+        if (at && (!lastInspectionByUser[userId] || at > lastInspectionByUser[userId])) {
+          lastInspectionByUser[userId] = at;
+        }
+      });
+
+      const defectsByUser: Record<string, number> = {};
+      defectsReportedInMonth.forEach((defect) => {
+        const userId = defect.reported_by;
+        if (!userId || !staffIds.has(userId)) return;
+        defectsByUser[userId] = (defectsByUser[userId] || 0) + 1;
       });
 
       const usersWithChecksRows: ReportUserCheckRow[] = [];
@@ -459,7 +521,15 @@ export default function AdminReportsPage() {
         const email = profile.email;
         const checksCount = checksByUser[profileDoc.id] || 0;
         if (checksCount > 0) {
-          usersWithChecksRows.push({ name, email, checksCompleted: checksCount });
+          usersWithChecksRows.push({
+            name,
+            email,
+            checksCompleted: checksCount,
+            defectsRaised: defectsByUser[profileDoc.id] || 0,
+            lastInspection: lastInspectionByUser[profileDoc.id]
+              ? lastInspectionByUser[profileDoc.id].toLocaleDateString('en-GB')
+              : '—',
+          });
         } else {
           usersWithoutChecksRows.push({ name, email });
         }
@@ -468,6 +538,7 @@ export default function AdminReportsPage() {
         (a, b) => b.checksCompleted - a.checksCompleted || a.name.localeCompare(b.name)
       );
       usersWithoutChecksRows.sort((a, b) => a.name.localeCompare(b.name));
+      const topInspector = usersWithChecksRows[0] || null;
 
       const reportingUserIds = new Set<string>();
       inspectionsInMonth.forEach((inspection) => {
@@ -483,6 +554,37 @@ export default function AdminReportsPage() {
       const totalUsers = staffProfileDocs.length;
       const usersReportedCount = reportingUserIds.size;
       const usersNotReportedCount = Math.max(0, totalUsers - usersReportedCount);
+      const complianceRate = totalUsers > 0 ? Math.round((usersReportedCount / totalUsers) * 100) : null;
+
+      const previousMonthValue = getPreviousMonthValue(selectedMonth);
+      const previousStats = await getMonthStats(selectedCompanyId, previousMonthValue);
+      const previousRange = monthToRange(previousMonthValue);
+      const previousInspections = inspectionsByCompanySnap.docs
+        .map((docSnap) => docSnap.data() as Inspection)
+        .filter((inspection) => isWithinRange(inspection.inspected_at, previousRange.start, previousRange.end));
+      const previousDefects = allDefectsByCompanySnap.docs
+        .map((docSnap) => docSnap.data() as Defect)
+        .filter((defect) => isWithinRange(defect.reported_at, previousRange.start, previousRange.end));
+      const previousReportingIds = new Set<string>();
+      previousInspections.forEach((inspection) => {
+        if (inspection.inspected_by && staffIds.has(inspection.inspected_by)) {
+          previousReportingIds.add(inspection.inspected_by);
+        }
+      });
+      previousDefects.forEach((defect) => {
+        if (defect.reported_by && staffIds.has(defect.reported_by)) {
+          previousReportingIds.add(defect.reported_by);
+        }
+      });
+      const previousComplianceRate =
+        totalUsers > 0 ? Math.round((previousReportingIds.size / totalUsers) * 100) : null;
+
+      const fleetHealthScore = computeFleetHealthScore({
+        complianceRate,
+        inspectionRate,
+        criticalOpenDefects,
+        openDefects: openDefects.length,
+      });
 
       const nextStats: ReportStats = {
         checksCompleted,
@@ -494,13 +596,21 @@ export default function AdminReportsPage() {
         daysSinceLastCheck,
         usersReportedCount,
         usersNotReportedCount,
+        totalVehicles,
+        vehiclesInspected,
+        inspectionRate,
+        avgDefectsPerVehicle,
+        avgRepairDays,
+        complianceRate,
+        fleetHealthScore,
+        previousComplianceRate,
+        topInspectorName: topInspector?.name || null,
+        topInspectorChecks: topInspector?.checksCompleted ?? null,
       };
       setStats(nextStats);
       setOpenDefectRows(openRows);
       setUsersWithChecks(usersWithChecksRows);
       setUsersWithoutChecks(usersWithoutChecksRows);
-      const previousMonthValue = getPreviousMonthValue(selectedMonth);
-      const previousStats = await getMonthStats(selectedCompanyId, previousMonthValue);
       const trendValues = getRecentMonthValues(selectedMonth, 4);
       const trendSeries: ReportTrendPoint[] = [];
       for (const monthValue of trendValues) {
@@ -522,6 +632,9 @@ export default function AdminReportsPage() {
           nextStats.resolutionRate === null || previousStats.resolutionRate === null
             ? null
             : nextStats.resolutionRate - previousStats.resolutionRate,
+        previousChecks: previousStats.checksCompleted,
+        previousDefectsReported: previousStats.defectsReported,
+        previousDefectsResolved: previousStats.defectsResolved,
       });
       setStatusMessage('Preview ready.');
       return nextStats;
@@ -593,6 +706,14 @@ export default function AdminReportsPage() {
         openDefects: result.openDefects,
         criticalOpenDefects: result.criticalOpenDefects,
         daysSinceLastCheck: result.daysSinceLastCheck,
+        totalVehicles: result.totalVehicles,
+        vehiclesInspected: result.vehiclesInspected,
+        inspectionRate: result.inspectionRate,
+        avgDefectsPerVehicle: result.avgDefectsPerVehicle,
+        avgRepairDays: result.avgRepairDays,
+        complianceRate: result.complianceRate,
+        fleetHealthScore: result.fleetHealthScore,
+        previousComplianceRate: result.previousComplianceRate,
         comparison,
         trend,
         openDefectsList: openDefectRows,
@@ -600,6 +721,8 @@ export default function AdminReportsPage() {
         usersNotReportedCount: result.usersNotReportedCount,
         usersWithChecks,
         usersWithoutChecks,
+        topInspectorName: result.topInspectorName,
+        topInspectorChecks: result.topInspectorChecks,
       };
       const response = await fetch('/api/admin/reports/generate-pdf', {
         method: 'POST',
@@ -772,6 +895,10 @@ export default function AdminReportsPage() {
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
             <div className="rounded-lg border border-white/10 p-3">
+              <p className="text-white/50 text-xs">Fleet health</p>
+              <p className="text-white text-xl font-semibold">{stats.fleetHealthScore ?? '—'}/100</p>
+            </div>
+            <div className="rounded-lg border border-white/10 p-3">
               <p className="text-white/50 text-xs">Checks completed</p>
               <p className="text-white text-xl font-semibold">{stats.checksCompleted}</p>
             </div>
@@ -780,13 +907,31 @@ export default function AdminReportsPage() {
               <p className="text-white text-xl font-semibold">{stats.defectsReported}</p>
             </div>
             <div className="rounded-lg border border-white/10 p-3">
-              <p className="text-white/50 text-xs">Defects resolved</p>
-              <p className="text-white text-xl font-semibold">{stats.defectsResolved}</p>
+              <p className="text-white/50 text-xs">Compliance</p>
+              <p className="text-white text-xl font-semibold">
+                {stats.complianceRate === null ? 'N/A' : `${stats.complianceRate}%`}
+              </p>
             </div>
             <div className="rounded-lg border border-white/10 p-3">
-              <p className="text-white/50 text-xs">Resolution rate</p>
+              <p className="text-white/50 text-xs">Vehicles inspected</p>
               <p className="text-white text-xl font-semibold">
-                {stats.resolutionRate === null ? 'N/A' : `${stats.resolutionRate}%`}
+                {stats.vehiclesInspected}/{stats.totalVehicles}
+              </p>
+            </div>
+            <div className="rounded-lg border border-white/10 p-3">
+              <p className="text-white/50 text-xs">Inspection rate</p>
+              <p className="text-white text-xl font-semibold">
+                {stats.inspectionRate === null ? 'N/A' : `${stats.inspectionRate}%`}
+              </p>
+            </div>
+            <div className="rounded-lg border border-white/10 p-3">
+              <p className="text-white/50 text-xs">Critical open</p>
+              <p className="text-white text-xl font-semibold">{stats.criticalOpenDefects}</p>
+            </div>
+            <div className="rounded-lg border border-white/10 p-3">
+              <p className="text-white/50 text-xs">Avg repair time</p>
+              <p className="text-white text-xl font-semibold">
+                {stats.avgRepairDays === null ? 'N/A' : `${stats.avgRepairDays}d`}
               </p>
             </div>
           </div>
@@ -849,7 +994,10 @@ export default function AdminReportsPage() {
                   {usersWithChecks.map((user) => (
                     <li key={`${user.name}-${user.checksCompleted}`} className="flex justify-between gap-2">
                       <span className="truncate">{user.name}</span>
-                      <span className="text-blue-300 shrink-0">{user.checksCompleted}</span>
+                      <span className="text-blue-300 shrink-0">
+                        {user.checksCompleted} checks
+                        {typeof user.defectsRaised === 'number' ? ` · ${user.defectsRaised} defects` : ''}
+                      </span>
                     </li>
                   ))}
                 </ul>
