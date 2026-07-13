@@ -26,6 +26,8 @@ type Profile = {
   first_name?: string;
   last_name?: string;
   display_name?: string;
+  displayName?: string;
+  name?: string;
 };
 
 type Company = {
@@ -134,8 +136,14 @@ function isWithinRange(value: Timestamp | string | undefined, start: Date, end: 
 }
 
 function profileDisplayName(profile: Profile): string {
+  // Match Team page: first/last > display_name > displayName > name > email prefix
   const full = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
-  return profile.display_name || full || profile.email || 'Unknown user';
+  if (full) return full;
+  if (profile.display_name?.trim()) return profile.display_name.trim();
+  if (profile.displayName?.trim()) return profile.displayName.trim();
+  if (profile.name?.trim()) return profile.name.trim();
+  if (profile.email) return profile.email.split('@')[0] || profile.email;
+  return 'Unknown user';
 }
 
 function getRecentMonthValues(monthValue: string, count: number): string[] {
