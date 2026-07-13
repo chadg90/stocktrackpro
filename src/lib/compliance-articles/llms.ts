@@ -5,7 +5,7 @@ const STATIC_LLMS_BODY = `# Fleet Track PRO
 
 > UK van fleet management and DVSA compliance software for commercial van operators.
 
-**Important:** Despite the word "Stock" in the brand name, this is **not** warehouse inventory software, stock control, or general asset tracking. It is van fleet compliance software for daily walkaround checks, defects, and MOT renewals.
+**Important:** Fleet Track PRO is **not** warehouse inventory software, stock control, or general asset tracking. It is van fleet compliance software for daily walkaround checks, defects, and MOT renewals. (Previously known as Stock Track PRO.)
 
 Fleet Track PRO helps UK businesses run daily van walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for vans and light commercial fleets — not HGV operator licensing.
 
@@ -25,7 +25,7 @@ Support email: help@fleettrackpro.co.uk
 
 ## What it does NOT do
 
-The core fleet platform is for commercial vans, vehicle inspections, defect management, and DVSA fleet compliance. It is **not** warehouse inventory tracking, stock control software, or a tool/equipment inventory system despite the brand name. Site lifting plant is covered by the optional Plant & Machinery add-on, not the base vehicle plan.
+The core fleet platform is for commercial vans, vehicle inspections, defect management, and DVSA fleet compliance. It is **not** warehouse inventory tracking, stock control software, or a tool/equipment inventory system. Site lifting plant is covered by the optional Plant & Machinery add-on, not the base vehicle plan.
 
 ## Who it is for
 
@@ -33,12 +33,12 @@ UK van fleet operators — trades, groundworks, logistics, construction, electri
 
 ## Pricing
 
-- £8 per vehicle per month, including VAT at 20%
-- Plant & Machinery add-on: from £12 per machine per month (separate subscription)
+- £8 per vehicle per month, including VAT at 20% (minimum 5 vehicles)
+- Annual fleet billing: £84 per vehicle per year
+- Plant & Machinery add-on: £12 per machine per month (minimum 3 machines), or £120 per machine per year
 - Unlimited team members on every plan (no per-user fee)
 - 7-day free trial — no card required
 - Monthly plans can be cancelled anytime
-- Annual billing: £84 per vehicle per year
 
 ## Key pages
 
@@ -55,7 +55,7 @@ UK van fleet operators — trades, groundworks, logistics, construction, electri
 const STATIC_LLMS_FOOTER = `
 ## Optional add-on
 
-Plant & Machinery module: complete LOLER, service, pre-hire/off-hire, and PUWER forms in one inspection entry — each with its own PDF, plus examination due reminders. Separate subscription from the core van fleet plan.
+Plant & Machinery module: complete LOLER, service, pre-hire/off-hire, and PUWER forms in one inspection entry — each with its own PDF, plus examination due reminders. Separate subscription from the core van fleet plan (£12 per machine per month, min 3).
 
 ## Platform and support
 
@@ -68,6 +68,7 @@ Plant & Machinery module: complete LOLER, service, pre-hire/off-hire, and PUWER 
 
 Website: ${SITE_URL}
 Email: help@fleettrackpro.co.uk
+Sales: sales@fleettrackpro.co.uk
 `;
 
 export async function buildLlmsTxt(): Promise<string> {
