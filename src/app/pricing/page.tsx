@@ -121,7 +121,8 @@ export default function Pricing() {
             Minimum 5 vehicles. Annual billing is £84 per vehicle per year, paid upfront.
           </p>
           <p className="text-base text-white/55 leading-relaxed mt-4 max-w-2xl mx-auto">
-            Need LOLER and site plant records too? The optional Plant &amp; Machinery add-on is priced per machine below.
+            Need LOLER and site plant records too? Optional Plant &amp; Machinery is £12 per machine per month
+            (including VAT), minimum 3 machines — or £120 per machine per year. Calculator below.
           </p>
 
           {/* Trust strip — one-liner value anchors */}

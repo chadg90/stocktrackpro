@@ -489,7 +489,9 @@ export default function OnboardingPage() {
                           Explore the available product features with your real fleet and team.
                           When you&apos;re ready, subscribe from the dashboard: £8 per vehicle per
                           month, or £84 per vehicle per year (save ~12%).
-                          Minimum 5 vehicles. Cancel anytime on monthly plans.
+                          Minimum 5 vehicles. Cancel anytime on monthly plans. Optional Plant &amp;
+                          Machinery is from £12 per machine per month (min 3) when you need LOLER
+                          and site plant records.
                         </p>
                       </div>
                     </div>

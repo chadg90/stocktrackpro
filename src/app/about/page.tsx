@@ -62,7 +62,8 @@ export default function AboutPage() {
             <p className="text-white/70 leading-relaxed mb-4">
               Many of our customers run vans and site plant. The optional Plant &amp; Machinery module is a separate
               subscription for lifting equipment — excavators, telehandlers, MEWPs, hoists, and hired plant with LOLER
-              requirements.
+              requirements. It is priced from £12 per machine per month (including VAT), with a minimum of 3 machines,
+              or £120 per machine per year.
             </p>
             <p className="text-white/70 leading-relaxed mb-4">
               Fitters complete the forms needed for that visit in one inspection entry: LOLER thorough examination,
@@ -93,7 +94,8 @@ export default function AboutPage() {
           <section className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">Pricing and support</h2>
             <p className="text-white/75 leading-relaxed mb-5">
-              Fleet pricing, the 7-day free trial, and optional Plant &amp; Machinery are on our{' '}
+              Fleet is £8 per vehicle per month (min 5 vehicles), with optional Plant &amp; Machinery from £12 per
+              machine per month (min 3). Full detail and the 7-day free trial are on our{' '}
               <Link href="/pricing" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
                 pricing page
               </Link>

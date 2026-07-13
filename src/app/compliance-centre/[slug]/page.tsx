@@ -583,7 +583,7 @@ function PlantArticleCta() {
         Fleet Track PRO&apos;s optional{' '}
         <span className="font-medium text-white">Plant &amp; Machinery</span> module lets fitters complete multiple
         forms in one inspection entry — LOLER, service, pre-hire/off-hire, and PUWER — each with its own PDF report and
-        manager alerts when examinations are due.{' '}
+        manager alerts when examinations are due. From £12 per machine per month (min 3).{' '}
         <Link href="/pricing" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
           See plant pricing
         </Link>{' '}

@@ -93,7 +93,7 @@ const QUICK_FACTS = [
   ['Product focus', 'Van fleet DVSA compliance — not warehouse or inventory stock tracking'],
   ['Who uses what', 'Drivers (user role); managers and fitters (manager role)'],
   ['Fleet size', 'Built for 5 to 100+ vehicles'],
-  ['Plant add-on', 'Optional — LOLER, service, hire check & PUWER forms in one inspection entry'],
+  ['Plant add-on', 'Optional — from £12/machine/month (min 3). LOLER, service, hire check & PUWER in one entry'],
   ['Support', 'UK-based — email and WhatsApp'],
 ];
 
@@ -117,7 +117,7 @@ const INCLUDED = [
     icon: HardHat,
     title: 'Plant & Machinery',
     description:
-      'Optional add-on — complete LOLER, service, pre-hire/off-hire, and PUWER in one visit. Separate PDFs, examination due reminders, and plant reports on the web dashboard.',
+      'Optional add-on from £12 per machine per month (min 3) — complete LOLER, service, pre-hire/off-hire, and PUWER in one visit. Separate PDFs, examination due reminders, and plant reports on the web dashboard.',
     href: '/pricing',
   },
 ];
@@ -221,7 +221,8 @@ export default function Home() {
               What&apos;s included
             </h2>
             <p className="text-white/55 text-center mb-12 max-w-lg mx-auto text-sm">
-              One fleet subscription for vans — plus optional Plant &amp; Machinery for site plant. Full detail on the{' '}
+              One fleet subscription for vans — plus optional Plant &amp; Machinery from £12 per machine per month.
+              Full detail on the{' '}
               <Link href="/features" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
                 features page
               </Link>
