@@ -992,7 +992,7 @@ function DashboardPageInner() {
                   <ExportButton
                     data={exportData.vehicles}
                     filename={`stp-dashboard-export-${format(new Date(), 'yyyy-MM-dd')}`}
-                    reportTitle={`Stock Track PRO — Dashboard data export (${format(new Date(), 'PPP')})`}
+                    reportTitle={`Fleet Track PRO — Dashboard data export (${format(new Date(), 'PPP')})`}
                     fleetHealthPdf={{ onExport: handleFleetHealthPdf }}
                     pdfMeta={{ organization: profile?.company_name }}
                     multiSheetData={[

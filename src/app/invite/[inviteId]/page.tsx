@@ -50,7 +50,7 @@ export default function InviteAcceptPage() {
         if (!preview.valid) {
           if (preview.status === 'accepted') {
             setError(
-              'This invite was already used to set up an account. Open the Stock Track PRO app and sign in with the same email from your invite. If you are unsure of the password, use Forgot password on the login screen. A new invite cannot replace an existing account.'
+              'This invite was already used to set up an account. Open the Fleet Track PRO app and sign in with the same email from your invite. If you are unsure of the password, use Forgot password on the login screen. A new invite cannot replace an existing account.'
             );
           } else {
             setError('This invite is no longer valid. Please ask your manager for a new invite.');
@@ -142,7 +142,7 @@ export default function InviteAcceptPage() {
             </div>
             <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2">You have successfully signed up</h1>
             <p className="text-white/70 text-sm sm:text-base max-w-md">
-              Your Stock Track PRO account is ready. Open the app on your phone and sign in with the email and password you
+              Your Fleet Track PRO account is ready. Open the app on your phone and sign in with the email and password you
               just created.
             </p>
           </div>
@@ -160,7 +160,7 @@ export default function InviteAcceptPage() {
               are on Android (testing).
             </li>
             <li>
-              <span className="text-white/90">Open Stock Track PRO</span> and choose sign in (not create account).
+              <span className="text-white/90">Open Fleet Track PRO</span> and choose sign in (not create account).
             </li>
             <li>
               <span className="text-white/90">Enter your email and password</span> from this page. Use Forgot password in the
@@ -175,7 +175,7 @@ export default function InviteAcceptPage() {
               rel="noopener noreferrer"
               className="block w-full rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 text-center transition-colors"
             >
-              Open App Store — Stock Track PRO
+              Open App Store — Fleet Track PRO
             </a>
             <div className="rounded-lg border border-white/15 bg-white/5 p-4 text-left">
               <p className="text-sm text-white/80 font-medium">Android (internal testing)</p>
@@ -207,7 +207,7 @@ export default function InviteAcceptPage() {
       <div className="w-full max-w-lg rounded-2xl border border-blue-500/30 bg-zinc-950 p-6 sm:p-8">
         <h1 className="text-2xl font-semibold mb-2">Accept Invitation</h1>
         <p className="text-white/70 mb-6">
-          You were invited to join <span className="text-white">{invite?.companyName || 'Stock Track PRO'}</span>
+          You were invited to join <span className="text-white">{invite?.companyName || 'Fleet Track PRO'}</span>
           {invite?.role ? ` as ${invite.role}` : ''}. Set your password to continue.
         </p>
 

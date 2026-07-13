@@ -179,14 +179,14 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
         <div className="flex h-20 items-center justify-between px-5 border-b border-white/10 shrink-0">
           <Link
             href="/"
-            className="relative w-36 h-9 flex items-center"
+            className="relative h-9 w-[150px] flex items-center"
             onClick={() => setMobileMenuOpen(false)}
           >
             <Image
-              src="/logo.png"
-              alt="Stock Track PRO"
+              src="/logo-white.png"
+              alt="Fleet Track PRO"
               fill
-              style={{ objectFit: 'contain' }}
+              style={{ objectFit: 'contain', objectPosition: 'left center' }}
               priority
               className="object-left"
             />

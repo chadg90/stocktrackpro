@@ -442,7 +442,7 @@ export default function PlantMachinesPage() {
       </div>
 
       <p className="mt-6 text-sm text-zinc-500 dark:text-white/50">
-        Inspections are completed in the Stock Track PRO mobile app.
+        Inspections are completed in the Fleet Track PRO mobile app.
       </p>
 
       <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Add Machine">

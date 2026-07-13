@@ -8,7 +8,7 @@ export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   {
     question: 'Is Fleet Track PRO warehouse or inventory stock tracking software?',
     answer:
-      'No. Despite the brand name, Fleet Track PRO is UK van fleet compliance software — daily DVSA walkaround checks, vehicle defect reporting, MOT tracking, and repair close-out. It is not warehouse inventory control, stock management, or general asset tracking software.',
+      'No. Fleet Track PRO is UK van fleet compliance software — daily DVSA walkaround checks, vehicle defect reporting, MOT tracking, and repair close-out. It is not warehouse inventory control, stock management, or general asset tracking software.',
   },
   {
     question: 'Is Fleet Track PRO suitable for van fleets?',
