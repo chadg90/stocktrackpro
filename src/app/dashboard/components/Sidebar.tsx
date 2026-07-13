@@ -176,16 +176,18 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
         e.stopPropagation();
       }}
       >
-        <div className="flex h-20 items-center justify-between px-5 border-b border-white/10 shrink-0">
+        <div className="flex h-20 items-center justify-between px-4 border-b border-white/10 shrink-0">
           <Link
             href="/"
-            className="relative h-9 w-[150px] flex items-center"
+            className="relative h-12 w-[200px] flex items-center"
             onClick={() => setMobileMenuOpen(false)}
+            aria-label="Fleet Track PRO home"
           >
             <Image
               src="/logo-white.png"
               alt="Fleet Track PRO"
               fill
+              sizes="200px"
               style={{ objectFit: 'contain', objectPosition: 'left center' }}
               priority
               className="object-left"

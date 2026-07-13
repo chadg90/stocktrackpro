@@ -116,13 +116,13 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-14 sm:h-20">
           {/* Logo and brand */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <div className="relative h-9 w-[150px] sm:h-11 sm:w-[190px]">
+            <Link href="/" className="flex items-center" aria-label="Fleet Track PRO home">
+              <div className="relative h-12 w-[200px] sm:h-16 sm:w-[280px]">
                 <Image
                   src="/logo-white.png"
-                  alt="Fleet Track PRO Logo"
+                  alt="Fleet Track PRO"
                   fill
-                  sizes="(max-width: 640px) 150px, 190px"
+                  sizes="(max-width: 640px) 200px, 280px"
                   style={{ objectFit: 'contain', objectPosition: 'left center' }}
                   priority
                 />

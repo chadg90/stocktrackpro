@@ -286,10 +286,10 @@ function PaperVsDigitalArticle() {
 
       <h2>How much time can digital inspections save?</h2>
       <p>
-        Time savings vary by fleet size and process, but many operators can save around 10 to 20 minutes per driver per week on inspection administration alone. The saving comes from fewer paper handovers, less scanning, fewer phone calls, faster defect routing and easier retrieval when someone asks for evidence.
-      </p>
-      <p>
-        The bigger saving is often management time. Searching for a specific inspection from three months ago can take minutes in a digital system and much longer in a paper archive. If you run 20, 50 or 100 vehicles, that difference compounds quickly.
+        Time savings vary by fleet size and process. Digital inspections usually reduce admin by cutting paper
+        handovers, scanning, phone chasers, and the time spent finding an old form when someone asks for evidence.
+        The bigger gain is often management time: retrieving a specific inspection from months ago is far quicker in a
+        searchable system than in a paper archive — and that difference compounds across 20, 50 or 100 vehicles.
       </p>
 
       <h2>Paper is familiar, but digital is more resilient</h2>
@@ -297,12 +297,25 @@ function PaperVsDigitalArticle() {
         Paper inspection sheets are familiar and low cost at the point of use, but they depend heavily on human discipline. Digital systems do not remove responsibility; they make the responsible process easier to follow. Drivers get a consistent flow, fitters get clearer jobs, and managers get records that can be searched and reviewed without chasing paperwork.
       </p>
 
+      <p className="compliance-disclaimer">
+        This article summarises general principles and is not legal advice. Always check current{' '}
+        <a
+          href="https://www.gov.uk/roadside-vehicle-checks-for-commercial-drivers"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          GOV.UK roadside check guidance
+        </a>{' '}
+        for your operation.
+      </p>
+
       <KeyTakeaways>
         <li>Paper inspection sheets are vulnerable to lost forms, illegible notes and delayed reporting.</li>
         <li>Digital inspections create timestamped records with named users and photo evidence.</li>
         <li>A strong audit trail helps during insurance claims, court cases and compliance checks.</li>
         <li>Fleet Track PRO uses a 6-photo walkaround, timestamped submission and named user attribution.</li>
-        <li>Digital workflows can save drivers and managers meaningful admin time each week.</li>
+        <li>Digital workflows usually reduce admin for drivers and make historical records easier to retrieve.</li>
       </KeyTakeaways>
       <ArticleCta />
     </ComplianceArticleContent>
@@ -369,6 +382,19 @@ function MotExpiryTrackingArticle() {
         For commercial van fleets, this routine is part of the wider maintenance system. MOT tracking, daily inspections and defect close-out should support each other. If a vehicle fails an MOT because of a defect that should have been picked up earlier, the issue is not just the missed test; it is the process that allowed the fault to continue.
       </p>
 
+      <p className="compliance-disclaimer">
+        This article summarises general principles and is not legal advice. Always check current MOT and tax rules on{' '}
+        <a
+          href="https://www.gov.uk/check-mot-history"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          GOV.UK
+        </a>{' '}
+        for your vehicles.
+      </p>
+
       <KeyTakeaways>
         <li>Driving without a valid MOT can lead to a fine of up to £1,000 and may affect insurance.</li>
         <li>Spreadsheets become risky when vehicles, dates and responsibilities change across a fleet.</li>
@@ -388,7 +414,16 @@ function PreUseChecksArticle() {
         A pre-use check is the inspection a driver completes before operating a company vehicle. For UK fleet
         operators, it is one of the most practical ways to show that vehicles are checked for obvious defects before
         they go on the road. The check does not replace scheduled maintenance or an MOT, but it creates a daily record
-        that a responsible person looked at the vehicle at the point of use.
+        that a responsible person looked at the vehicle at the point of use. Government guidance on{' '}
+        <a
+          href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          van daily walkaround checks
+        </a>{' '}
+        sets out that duty clearly.
       </p>
 
       <h2>What should a driver check?</h2>
@@ -415,19 +450,12 @@ function PreUseChecksArticle() {
       <p>
         A useful record identifies the driver, date and time, vehicle registration, checklist responses, and any defects
         reported. Photos help where there is damage, tyre wear, or a lighting fault. If the record only says
-        &quot;all OK&quot; with no name and no timestamp, it is weak evidence when something goes wrong later.
-      </p>
-
-      <h2>Paper vs digital pre-use checks</h2>
-      <p>
-        Paper booklets can work for very small fleets if they are completed, collected, and stored properly. The
-        weakness is delay: a defect noted on paper may not reach a manager until hours or days later. Digital pre-use
-        checks can timestamp submissions, attach photos, notify managers immediately, and store records centrally for
-        retrieval during an audit or insurance enquiry.
-      </p>
-      <p>
-        Fleet Track PRO uses a structured mobile inspection flow with required photos and checklist items, so drivers
-        cannot skip steps and managers see new defects without waiting for paperwork.
+        &quot;all OK&quot; with no name and no timestamp, it is weak evidence when something goes wrong later. For the
+        full defect trail after a fault is found, see{' '}
+        <Link href="/compliance-centre/van-fleet-defect-records" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+          van fleet defect records
+        </Link>
+        .
       </p>
 
       <h2>How often should checks happen?</h2>
@@ -436,9 +464,22 @@ function PreUseChecksArticle() {
         If a vehicle is shared between drivers, each user should understand whether a fresh check is required when they
         take over. Consistency matters more than the exact label on the form.
       </p>
+      <p>
+        Fleet Track PRO uses a structured mobile inspection flow with required photos and checklist items, so drivers
+        cannot skip steps and managers see new defects without waiting for paperwork.
+      </p>
 
       <p className="compliance-disclaimer">
-        This article summarises general principles and is not legal advice. Follow current DVSA and employer guidance for your operation.
+        This article summarises general principles and is not legal advice. Follow current{' '}
+        <a
+          href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
+          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          GOV.UK van walkaround guidance
+        </a>{' '}
+        and employer policy for your operation.
       </p>
 
       <KeyTakeaways>
@@ -462,32 +503,33 @@ function DigitalDefectRecordsDvsaArticle() {
         support that story — but only if they are accurate, consistent, and used as part of a real workflow.
       </p>
 
-      <h2>What makes a defect record credible?</h2>
+      <h2>What examiners look for in the trail</h2>
       <p>
         A credible record answers basic questions without guesswork: which vehicle, who reported the issue, when it was
         reported, what the defect was, who reviewed it, what action was taken, and when the vehicle returned to
         service. Vague notes such as &quot;brake noise&quot; without context are easier to challenge than a clear
         description with supporting photos and a repair trail.
       </p>
-
-      <h2>How digital records differ from paper</h2>
       <p>
-        Paper can meet the requirement in theory, but it often fails in practice through lost sheets, late submission,
-        illegible handwriting, and missing signatures. Digital systems generate timestamps automatically, tie records to
-        named users, attach photos at the point of reporting, and route defects to managers or fitters without relying
-        on someone physically handing over a form.
-      </p>
-      <p>
-        That does not make digital records automatically acceptable. Inspectors can still ask whether drivers were
-        trained, whether managers acted on alerts, and whether the system was used consistently across the fleet.
+        For more on what to capture day to day, see our guide on{' '}
+        <Link href="/compliance-centre/van-fleet-defect-records" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+          van fleet defect records
+        </Link>
+        . This article focuses on how that trail holds up when an examiner asks harder questions.
       </p>
 
-      <h2>Roadside checks and follow-up investigations</h2>
+      <h2>Roadside findings that trigger follow-up</h2>
       <p>
         At the roadside, an examiner may find a defect that should have been visible during a recent check. If your
         records show no defect and no inspection around that period, you may be asked how your maintenance system works.
         If your records show a defect was reported, the vehicle was marked out of use, and repair was signed off before
-        return to service, that is a much stronger position.
+        return to service, that is a much stronger position — even when the stop still results in a prohibition for the
+        fault found on the day.
+      </p>
+      <p>
+        Follow-up can also look beyond one van. Patterns across the fleet matter: repeated tyre or lighting defects,
+        gaps between inspection dates, or vehicles that stay &quot;active&quot; while defects remain open all invite
+        deeper questions about whether the written system matches reality.
       </p>
 
       <h2>What operators should avoid</h2>
@@ -495,7 +537,11 @@ function DigitalDefectRecordsDvsaArticle() {
         Backdating checks, completing forms in bulk at the end of the week, or closing defects without evidence of repair
         undermines both paper and digital systems. Inspectors are interested in patterns. If every vehicle shows
         &quot;no defects&quot; every day while serious faults appear at roadside stops, the record-keeping system will
-        be questioned.
+        be questioned — regardless of whether the forms are paper or digital.
+      </p>
+      <p>
+        Digital tools do not make records automatically acceptable. Examiners can still ask whether drivers were
+        trained, whether managers acted on alerts, and whether the process was used consistently across the fleet.
       </p>
 
       <h2>Using software as part of compliance culture</h2>
@@ -521,8 +567,8 @@ function DigitalDefectRecordsDvsaArticle() {
 
       <KeyTakeaways>
         <li>DVSA looks for a working maintenance process, not isolated forms.</li>
-        <li>Digital records need timestamps, named users, and clear defect close-out.</li>
-        <li>Weak or inconsistent records are a liability at roadside checks and audits.</li>
+        <li>Credible trails show report → assessment → repair → return to service.</li>
+        <li>Patterns across the fleet matter as much as any single record.</li>
         <li>Software helps when it is used honestly as part of daily fleet routine.</li>
       </KeyTakeaways>
       <ArticleCta />

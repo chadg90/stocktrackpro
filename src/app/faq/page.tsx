@@ -23,6 +23,10 @@ export default function FAQ() {
       answer: "Yes. Your core subscription covers fleet management only — vehicle inspections, defect workflow, MOT and tax tracking, and team management. Plant & Machinery is an optional add-on if you also maintain lifting equipment and site plant.",
     },
     {
+      question: "How much does the fleet plan cost?",
+      answer: "£8 per vehicle per month (including VAT), with a minimum of 5 vehicles. Annual billing is £84 per vehicle per year (about £7 per month equivalent). Plant & Machinery is priced separately. See the Pricing page for the calculator and trial options.",
+    },
+    {
       question: "What is the Plant & Machinery add-on?",
       answer: "An optional module for LOLER thorough examinations, service inspections, and pre-hire / off-hire checks. Fitters complete the forms needed for that visit in one inspection entry — each form generates its own PDF. Managers use the mobile app and web dashboard to register machines, submit inspections, and download reports. Examination due reminders are sent to managers by push notification.",
     },
@@ -64,7 +68,7 @@ export default function FAQ() {
     },
     {
       question: "We have a very large fleet or many users. Is there an Enterprise plan?",
-      answer: "Yes. We support larger fleets and teams, including tailored onboarding for bigger deployments. Contact us for a tailored quote.",
+      answer: "Yes. We support larger fleets and teams, including tailored onboarding for bigger deployments. Contact sales@fleettrackpro.co.uk or use the Contact page for a tailored quote.",
     },
   ];
 

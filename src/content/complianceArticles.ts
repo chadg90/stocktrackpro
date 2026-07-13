@@ -22,7 +22,7 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     metaDescription:
       'How digital van inspection software reduces admin, prevents missed defects, and creates stronger evidence when DVSA stops a vehicle at the roadside.',
     datePublished: '2026-05-01T09:00:00+01:00',
-    dateModified: '2026-07-06T09:00:00+01:00',
+    dateModified: '2026-07-13T13:00:00+01:00',
   },
   {
     slug: 'mot-expiry-tracking-for-fleets',
@@ -30,7 +30,7 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     metaDescription:
       'Managing MOT and tax renewals across a van fleet is high-risk without a system. Here is how fleet managers automate reminders and avoid enforcement.',
     datePublished: '2026-05-12T09:00:00+01:00',
-    dateModified: '2026-07-06T09:00:00+01:00',
+    dateModified: '2026-07-13T13:00:00+01:00',
   },
   {
     slug: 'pre-use-checks-company-vehicles',
@@ -38,7 +38,7 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     metaDescription:
       'What UK van drivers should check before using a company vehicle, how fleet managers should record it, and why pre-use checks matter at DVSA roadside stops.',
     datePublished: '2026-06-02T09:00:00+01:00',
-    dateModified: '2026-07-06T09:00:00+01:00',
+    dateModified: '2026-07-13T13:00:00+01:00',
   },
   {
     slug: 'digital-defect-records-dvsa-scrutiny',
@@ -46,7 +46,7 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     metaDescription:
       'What DVSA looks for in van fleet defect records at roadside checks, and how digital systems provide clearer evidence than paper.',
     datePublished: '2026-06-02T09:00:00+01:00',
-    dateModified: '2026-07-06T09:00:00+01:00',
+    dateModified: '2026-07-13T13:00:00+01:00',
   },
   {
     slug: 'loler-thorough-examination-records',
