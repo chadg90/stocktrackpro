@@ -40,7 +40,7 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
             id="showcase-heading"
             className="text-slate-900 text-xl sm:text-2xl font-semibold tracking-tight mb-2"
           >
-            Teams that rely on Stock Track PRO
+            Teams that rely on Fleet Track PRO
           </h2>
           <p className="text-slate-600 text-sm sm:text-[15px] leading-relaxed">
             UK businesses keeping fleets compliant and organised.

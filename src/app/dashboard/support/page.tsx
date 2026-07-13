@@ -5,7 +5,7 @@ import { MessageCircle, ExternalLink } from 'lucide-react';
 
 const WHATSAPP_NUMBER = '447438146343';
 const WHATSAPP_TEXT = encodeURIComponent(
-  'Hi Stock Track PRO support, I need help with:'
+  'Hi Fleet Track PRO support, I need help with:'
 );
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_TEXT}`;
 

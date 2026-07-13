@@ -15,8 +15,12 @@ export function HomeJsonLd() {
       {
         '@type': 'SoftwareApplication',
         '@id': `${SITE_URL}/#software`,
-        name: 'Stock Track PRO',
-        alternateName: 'Stock Track PRO van fleet compliance software',
+        name: 'Fleet Track PRO',
+        alternateName: [
+          'Fleet Track PRO van fleet compliance software',
+          'Stock Track PRO',
+          'Stock Track PRO van fleet compliance software',
+        ],
         applicationCategory: 'BusinessApplication',
         applicationSubCategory: 'Van fleet management and DVSA compliance software',
         audience: {
@@ -58,7 +62,7 @@ export function HomeJsonLd() {
       {
         '@type': 'VideoObject',
         '@id': `${SITE_URL}/#hero-video`,
-        name: 'Stock Track PRO mobile app demonstration',
+        name: 'Fleet Track PRO mobile app demonstration',
         description: HOME_HERO_VIDEO_DESCRIPTION,
         thumbnailUrl: `${SITE_URL}${HOME_HERO_POSTER_SRC}`,
         contentUrl: `${SITE_URL}${HOME_HERO_VIDEO_SRC}`,

@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     const status = company?.subscription_status;
     if (!customerId || typeof customerId !== 'string') {
       const message = (status === 'active' || status === 'trial')
-        ? 'This company does not have a linked Stripe subscription. If you were added manually or on a legacy plan, contact support@stocktrackpro.co.uk for billing changes.'
+        ? 'This company does not have a linked Stripe subscription. If you were added manually or on a legacy plan, contact help@fleettrackpro.co.uk for billing changes.'
         : 'No Stripe subscription linked. Subscribe first from the pricing page.';
       return NextResponse.json(
         { error: message },

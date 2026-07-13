@@ -1,8 +1,13 @@
 /** Canonical marketing site origin — use for JSON-LD, sitemap, and AI-facing URLs. */
-export const SITE_URL = 'https://www.stocktrackpro.co.uk';
-
-export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
-export const WEBSITE_ID = `${SITE_URL}/#website`;
+export {
+  SITE_URL,
+  ORGANIZATION_ID,
+  WEBSITE_ID,
+  SITE_NAME,
+  SITE_LEGAL_NAME,
+  SUPPORT_EMAIL,
+  SALES_EMAIL,
+} from '@/lib/brand';
 
 /**
  * Optional comma-separated profile URLs for Organization `sameAs` (e.g. LinkedIn company page).

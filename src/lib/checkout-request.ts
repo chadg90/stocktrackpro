@@ -10,7 +10,7 @@ export function getCheckoutBaseUrl(): string {
     const trimmed = url.trim();
     return trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
   }
-  return 'https://stocktrackpro.co.uk';
+  return 'https://www.fleettrackpro.co.uk';
 }
 
 export function isAllowedCheckoutOrigin(request: NextRequest): boolean {
@@ -21,6 +21,8 @@ export function isAllowedCheckoutOrigin(request: NextRequest): boolean {
   const allowedOrigins = [
     `https://${allowedHost}`,
     `http://${allowedHost}`,
+    'https://www.fleettrackpro.co.uk',
+    'https://fleettrackpro.co.uk',
     'https://www.stocktrackpro.co.uk',
     'https://stocktrackpro.co.uk',
     'https://www.stocktrackpro.com',

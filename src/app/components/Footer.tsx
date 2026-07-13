@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { SITE_LEGAL_NAME, SITE_NAME, SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
 
 const Footer = () => {
   const pathname = usePathname();
@@ -13,12 +14,15 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h3 className="text-blue-500 font-semibold text-lg">Stock Track PRO</h3>
+            <h3 className="text-blue-500 font-semibold text-lg">{SITE_NAME}</h3>
             <p className="text-white text-sm mt-1">
-              Email: <Link href="mailto:support@stocktrackpro.co.uk" className="hover:text-blue-500">support@stocktrackpro.co.uk</Link>
+              Email:{' '}
+              <Link href={SUPPORT_MAILTO} className="hover:text-blue-500">
+                {SUPPORT_EMAIL}
+              </Link>
             </p>
             <p className="text-white/55 text-xs mt-3 max-w-md leading-relaxed">
-              Stock Track PRO Ltd · UK van fleet &amp; optional plant compliance software · Support via email and WhatsApp
+              {SITE_LEGAL_NAME} · UK van fleet &amp; optional plant compliance software · Support via email and WhatsApp
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-white/90">
@@ -37,7 +41,7 @@ const Footer = () => {
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-6 border-t border-blue-500/20">
           <p className="text-white text-sm">
-            © {new Date().getFullYear()} Stock Track PRO
+            © {new Date().getFullYear()} {SITE_NAME}
           </p>
           <div className="flex flex-wrap gap-4 text-sm text-white/90">
             <Link href="/terms" className="hover:text-blue-500">Terms & Conditions</Link>

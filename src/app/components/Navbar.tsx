@@ -119,8 +119,8 @@ const Navbar = () => {
             <Link href="/" className="flex items-center">
               <div className="relative w-[148px] sm:w-[240px] h-[48px] sm:h-[80px]">
                 <Image
-                  src="/logo.png"
-                  alt="Stock Track PRO Logo"
+                  src="/logo-white.png"
+                  alt="Fleet Track PRO Logo"
                   fill
                   sizes="(max-width: 640px) 180px, 240px"
                   style={{ objectFit: 'contain' }}

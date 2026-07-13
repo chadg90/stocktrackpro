@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import { Mail, Send, Loader2, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import { SALES_EMAIL, SALES_MAILTO } from '@/lib/brand';
 
 const HONEYPOT_FIELD = 'website_url';
-const WHATSAPP_SUPPORT_URL = 'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%20need%20help%20with%3A';
+const WHATSAPP_SUPPORT_URL = 'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%2C%20I%20need%20help%20with%3A';
 
 export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -43,8 +44,8 @@ export default function Contact() {
     {
       title: "Sales Inquiries",
       description: "For pricing and general enquiries",
-      value: "sales@stocktrackpro.co.uk",
-      href: "mailto:sales@stocktrackpro.co.uk",
+      value: SALES_EMAIL,
+      href: SALES_MAILTO,
       actionText: "Email Sales Team",
       type: "email",
     },
@@ -75,7 +76,7 @@ export default function Contact() {
               Get in <span className="text-blue-500">touch</span>
             </h1>
             <p className="text-lg text-white/75 leading-relaxed">
-              Have questions about Stock Track PRO? We&apos;re here to help with fleet setup, inspections, defects, the
+              Have questions about Fleet Track PRO? We&apos;re here to help with fleet setup, inspections, defects, the
               Plant &amp; Machinery add-on, and billing.
             </p>
           </div>

@@ -351,7 +351,7 @@ export default function Pricing() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-white/50">
-              New to Stock Track PRO?{' '}
+              New to Fleet Track PRO?{' '}
               <Link href="/contact" className="text-blue-500 hover:underline">Get in touch</Link>
               {' '}and we&apos;ll help you get set up.
             </p>

@@ -7,13 +7,13 @@ export default function AboutPage() {
       <Navbar />
       <main className="container mx-auto px-4 pt-24 sm:pt-32 pb-20 max-w-4xl">
         <p className="text-[var(--brand-blue)] font-medium text-sm uppercase tracking-[0.2em] mb-4">
-          About Stock Track PRO
+          About Fleet Track PRO
         </p>
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">
           Built for UK fleet operators who are tired of spreadsheets
         </h1>
         <p className="text-white/80 text-lg leading-relaxed mb-6">
-          Stock Track PRO was built because the tools available to small fleet operators were either overpriced
+          Fleet Track PRO was built because the tools available to small fleet operators were either overpriced
           enterprise software or a combination of spreadsheets and WhatsApp messages that let things fall through the
           cracks.
         </p>
@@ -25,13 +25,13 @@ export default function AboutPage() {
 
         <div className="grid gap-6">
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold mb-3">Why Stock Track PRO exists</h2>
+            <h2 className="text-2xl font-semibold mb-3">Why Fleet Track PRO exists</h2>
             <p className="text-white/70 leading-relaxed mb-4">
               Paper sheets get lost. Group chats bury urgent defects. MOT dates live in someone&apos;s memory until
               they are not. Managers end up chasing drivers and fitters instead of running the business.
             </p>
             <p className="text-white/70 leading-relaxed">
-              Stock Track PRO keeps daily checks, defect workflow, and renewal visibility in one place — mobile app for
+              Fleet Track PRO keeps daily checks, defect workflow, and renewal visibility in one place — mobile app for
               the field, web dashboard for managers — so records are timestamped and searchable when you need them.
             </p>
           </section>
@@ -80,7 +80,7 @@ export default function AboutPage() {
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">In the field</h2>
             <p className="text-white/70 leading-relaxed mb-4">
-              See how a groundworks contractor uses Stock Track PRO across multiple sites.
+              See how a groundworks contractor uses Fleet Track PRO across multiple sites.
             </p>
             <Link
               href="/customers/newstreet"

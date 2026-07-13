@@ -54,7 +54,7 @@ export default function CookiePolicy() {
                 You can disable cookies in your browser settings at any time. Doing so may impact website functionality.
               </p>
               <p className="text-white/80 leading-relaxed">
-                For questions, contact <a href="mailto:support@stocktrackpro.co.uk" className="text-primary hover:text-primary-light">support@stocktrackpro.co.uk</a>.
+                For questions, contact <a href="mailto:help@fleettrackpro.co.uk" className="text-primary hover:text-primary-light">help@fleettrackpro.co.uk</a>.
               </p>
             </div>
           </div>

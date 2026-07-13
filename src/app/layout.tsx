@@ -4,7 +4,8 @@ import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
 import SiteWideJsonLd from "@/components/seo/SiteWideJsonLd";
-import { SITE_META_DESCRIPTION, SITE_SHORT_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
+import { SITE_META_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
+import { SITE_LEGAL_NAME, SITE_NAME, SITE_URL } from "@/lib/brand";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,18 +17,18 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.stocktrackpro.co.uk'),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Stock Track PRO | UK Van Fleet & DVSA Compliance Software",
-    template: "%s | Stock Track PRO",
+    default: `${SITE_NAME} | UK Van Fleet & DVSA Compliance Software`,
+    template: `%s | ${SITE_NAME}`,
   },
   description: SITE_META_DESCRIPTION,
-  authors: [{ name: "Stock Track PRO" }],
+  authors: [{ name: SITE_NAME }],
   generator: "Next.js",
-  applicationName: "Stock Track PRO",
+  applicationName: SITE_NAME,
   referrer: "origin-when-cross-origin",
-  creator: "Stock Track PRO Ltd",
-  publisher: "Stock Track PRO Ltd",
+  creator: SITE_LEGAL_NAME,
+  publisher: SITE_LEGAL_NAME,
   category: "business",
   formatDetection: {
     email: false,
@@ -38,16 +39,16 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "Stock Track PRO | UK Van Fleet & DVSA Compliance Software",
+    title: `${SITE_NAME} | UK Van Fleet & DVSA Compliance Software`,
     description: SITE_META_DESCRIPTION,
-    url: "https://www.stocktrackpro.co.uk",
-    siteName: "Stock Track PRO",
+    url: SITE_URL,
+    siteName: SITE_NAME,
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Stock Track PRO — UK van fleet DVSA walkaround checks and defect reporting",
+        alt: `${SITE_NAME} — UK van fleet DVSA walkaround checks and defect reporting`,
       },
     ],
     locale: "en_GB",
@@ -55,7 +56,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stock Track PRO | UK Van Fleet & DVSA Compliance Software",
+    title: `${SITE_NAME} | UK Van Fleet & DVSA Compliance Software`,
     description: SITE_TAGLINE,
     images: ["/og-image.jpg"],
   },
@@ -74,7 +75,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Stock Track PRO",
+    title: SITE_NAME,
   },
   other: {
     "geo.region": "GB",
@@ -90,7 +91,7 @@ export default function RootLayout({
     <html lang="en-GB" className="scroll-smooth">
       <head>
         {/* iOS Smart App Banner */}
-        <meta name="apple-itunes-app" content="app-id=6744621973, app-argument=https://www.stocktrackpro.co.uk" />
+        <meta name="apple-itunes-app" content={`app-id=6744621973, app-argument=${SITE_URL}`} />
         
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -99,11 +100,11 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#3b82f6" />
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="#3b82f6" />
-        <meta name="application-name" content="Stock Track PRO" />
-        <meta name="apple-mobile-web-app-title" content="Stock Track PRO" />
-        <meta name="msapplication-tooltip" content="Stock Track PRO — UK van fleet DVSA compliance (not inventory software)" />
+        <meta name="application-name" content={SITE_NAME} />
+        <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
+        <meta name="msapplication-tooltip" content={`${SITE_NAME} — UK van fleet DVSA compliance (not inventory software)`} />
         <meta name="language" content="en-GB" />
-        <meta name="copyright" content={`© ${new Date().getFullYear()} Stock Track PRO Ltd`} />
+        <meta name="copyright" content={`© ${new Date().getFullYear()} ${SITE_LEGAL_NAME}`} />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />

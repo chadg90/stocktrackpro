@@ -7,18 +7,18 @@ export const metadata: Metadata = {
     'UK van fleet compliance articles — defect records, digital vehicle inspections, MOT tracking, and plant machinery guidance for commercial operators.',
   alternates: { canonical: '/compliance-centre' },
   openGraph: {
-    title: 'Compliance Centre | Stock Track PRO',
+    title: 'Compliance Centre | Fleet Track PRO',
     description:
       'Articles on van fleet defect records, digital vehicle inspections, MOT tracking, and plant machinery compliance for UK operators.',
-    url: 'https://www.stocktrackpro.co.uk/compliance-centre/',
-    siteName: 'Stock Track PRO',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Stock Track PRO Compliance Centre' }],
+    url: 'https://www.fleettrackpro.co.uk/compliance-centre/',
+    siteName: 'Fleet Track PRO',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Fleet Track PRO Compliance Centre' }],
     locale: 'en_GB',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Compliance Centre | Stock Track PRO',
+    title: 'Compliance Centre | Fleet Track PRO',
     description:
       'Articles on van fleet defect records, digital vehicle inspections, MOT tracking, and plant machinery compliance for UK operators.',
     images: ['/og-image.jpg'],

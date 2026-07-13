@@ -6,7 +6,7 @@ import Navbar from '@/app/components/Navbar';
 export const metadata: Metadata = {
   title: 'Newstreet Groundworks Case Study',
   description:
-    'How Newstreet Groundworks, County Durham, uses Stock Track PRO for fleet inspections, defect close-out, and compliance across active sites.',
+    'How Newstreet Groundworks, County Durham, uses Fleet Track PRO for fleet inspections, defect close-out, and compliance across active sites.',
   alternates: { canonical: '/customers/newstreet' },
 };
 
@@ -36,7 +36,7 @@ export default function NewstreetCaseStudyPage() {
 
         <div className="space-y-6 text-white/75 leading-relaxed">
           <p>
-            Newstreet Groundworks replaced WhatsApp groups and paper inspection sheets with Stock Track PRO so drivers,
+            Newstreet Groundworks replaced WhatsApp groups and paper inspection sheets with Fleet Track PRO so drivers,
             fitters, and managers work from the same live records.
           </p>
           <p>
@@ -45,7 +45,7 @@ export default function NewstreetCaseStudyPage() {
           </p>
           <p className="text-white/55 text-sm italic border-l-2 border-white/20 pl-4">
             A fuller case study with more detail from the Newstreet team is being prepared. If you run a similar
-            operation and want to see how Stock Track PRO fits your fleet, start a free trial or get in touch.
+            operation and want to see how Fleet Track PRO fits your fleet, start a free trial or get in touch.
           </p>
         </div>
 

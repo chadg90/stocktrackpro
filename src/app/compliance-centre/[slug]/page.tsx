@@ -49,10 +49,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: article.metaDescription,
     alternates: { canonical: `/compliance-centre/${slug}` },
     openGraph: {
-      title: `${article.title} | Stock Track PRO`,
+      title: `${article.title} | Fleet Track PRO`,
       description: article.metaDescription,
-      url: `https://www.stocktrackpro.co.uk/compliance-centre/${slug}`,
-      siteName: 'Stock Track PRO',
+      url: `https://www.fleettrackpro.co.uk/compliance-centre/${slug}`,
+      siteName: 'Fleet Track PRO',
       locale: 'en_GB',
       type: 'article',
       publishedTime: article.datePublished,
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${article.title} | Stock Track PRO`,
+      title: `${article.title} | Fleet Track PRO`,
       description: article.metaDescription,
     },
   };
@@ -79,7 +79,7 @@ function ArticleCta() {
   return (
     <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-7">
       <p className="text-base leading-relaxed text-white/85">
-        <span className="font-medium text-white">Stock Track PRO</span> helps automate this process for UK fleets.{' '}
+        <span className="font-medium text-white">Fleet Track PRO</span> helps automate this process for UK fleets.{' '}
         <Link href="/onboarding" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
           Try free for 7 days — no card required.
         </Link>
@@ -187,7 +187,7 @@ function VanFleetDefectRecordsArticle() {
         that your business checked vehicles before use and acted on faults promptly.
       </p>
       <p>
-        Stock Track PRO is built for this workflow: drivers complete structured inspections in the mobile app, defects
+        Fleet Track PRO is built for this workflow: drivers complete structured inspections in the mobile app, defects
         are raised with photo evidence, and fitters close jobs through a clear status trail managers can review later.
       </p>
 
@@ -252,7 +252,7 @@ function PaperVsDigitalArticle() {
         Digital vehicle inspection software can capture structured data that paper cannot manage well: server timestamps, named user attribution, photo evidence, consistent checklist responses and live notification to managers or fitters. Timestamped digital evidence is already a major improvement over handwritten sheets.
       </p>
       <p>
-        Stock Track PRO requires a 6-photo walkaround covering the front, rear, driver side, passenger side, interior and odometer. Each submission is timestamped and tied to a named user. If a defect is reported, managers and fitters can see the issue quickly instead of waiting for paper to reach the office.
+        Fleet Track PRO requires a 6-photo walkaround covering the front, rear, driver side, passenger side, interior and odometer. Each submission is timestamped and tied to a named user. If a defect is reported, managers and fitters can see the issue quickly instead of waiting for paper to reach the office.
       </p>
 
       <h2>The enforcement risk of incomplete records</h2>
@@ -301,7 +301,7 @@ function PaperVsDigitalArticle() {
         <li>Paper inspection sheets are vulnerable to lost forms, illegible notes and delayed reporting.</li>
         <li>Digital inspections create timestamped records with named users and photo evidence.</li>
         <li>A strong audit trail helps during insurance claims, court cases and compliance checks.</li>
-        <li>Stock Track PRO uses a 6-photo walkaround, timestamped submission and named user attribution.</li>
+        <li>Fleet Track PRO uses a 6-photo walkaround, timestamped submission and named user attribution.</li>
         <li>Digital workflows can save drivers and managers meaningful admin time each week.</li>
       </KeyTakeaways>
       <ArticleCta />
@@ -353,9 +353,9 @@ function MotExpiryTrackingArticle() {
         For larger fleets, reminders should go to people who can act. If a warning sits in one person&apos;s inbox while they are away, the system still fails. A better approach is to show expiry risk on the vehicle card, in the manager dashboard and through alerts that fit the team&apos;s daily workflow.
       </p>
 
-      <h2>How Stock Track PRO handles MOT and tax tracking</h2>
+      <h2>How Fleet Track PRO handles MOT and tax tracking</h2>
       <p>
-        Stock Track PRO displays MOT and tax status on every vehicle card so managers can review compliance while looking at the fleet. The platform uses DVLA data to support automatic MOT and tax status visibility by registration plate. It also sends automatic alerts before expiry, including 7-day advance warnings, so managers have time to book renewals instead of reacting after the deadline.
+        Fleet Track PRO displays MOT and tax status on every vehicle card so managers can review compliance while looking at the fleet. The platform uses DVLA data to support automatic MOT and tax status visibility by registration plate. It also sends automatic alerts before expiry, including 7-day advance warnings, so managers have time to book renewals instead of reacting after the deadline.
       </p>
       <p>
         The benefit is that MOT and tax tracking sit alongside inspections, defects and vehicle status. A manager can see whether a vehicle is active, in maintenance, due for renewal or affected by an open defect without moving between separate spreadsheets and browser tabs.
@@ -374,7 +374,7 @@ function MotExpiryTrackingArticle() {
         <li>Spreadsheets become risky when vehicles, dates and responsibilities change across a fleet.</li>
         <li>DVLA data integration helps keep MOT and tax status visible by registration plate.</li>
         <li>7-day advance warnings give managers time to book renewals before vehicles become non-compliant.</li>
-        <li>Stock Track PRO shows MOT and tax status on every vehicle card and sends automatic alerts before expiry.</li>
+        <li>Fleet Track PRO shows MOT and tax status on every vehicle card and sends automatic alerts before expiry.</li>
       </KeyTakeaways>
       <ArticleCta />
     </ComplianceArticleContent>
@@ -426,7 +426,7 @@ function PreUseChecksArticle() {
         retrieval during an audit or insurance enquiry.
       </p>
       <p>
-        Stock Track PRO uses a structured mobile inspection flow with required photos and checklist items, so drivers
+        Fleet Track PRO uses a structured mobile inspection flow with required photos and checklist items, so drivers
         cannot skip steps and managers see new defects without waiting for paperwork.
       </p>
 
@@ -500,7 +500,7 @@ function DigitalDefectRecordsDvsaArticle() {
 
       <h2>Using software as part of compliance culture</h2>
       <p>
-        Stock Track PRO supports defect reporting with timestamped submissions, photo evidence, workflow status from
+        Fleet Track PRO supports defect reporting with timestamped submissions, photo evidence, workflow status from
         open to resolved, and manager visibility on the web dashboard. The software does not replace operator
         responsibility, but it makes good practice easier to follow and easier to demonstrate when evidence is
         requested.
@@ -534,7 +534,7 @@ function PlantArticleCta() {
   return (
     <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-7">
       <p className="text-base leading-relaxed text-white/85">
-        Stock Track PRO&apos;s optional{' '}
+        Fleet Track PRO&apos;s optional{' '}
         <span className="font-medium text-white">Plant &amp; Machinery</span> module lets fitters complete multiple
         forms in one inspection entry — LOLER, service, pre-hire/off-hire, and PUWER — each with its own PDF report and
         manager alerts when examinations are due.{' '}
@@ -638,7 +638,7 @@ function LolerThoroughExaminationRecordsArticle() {
         they complement — rather than replace — the statutory examination record.
       </p>
 
-      <h2>How Stock Track PRO supports LOLER records</h2>
+      <h2>How Fleet Track PRO supports LOLER records</h2>
       <p>
         The optional Plant &amp; Machinery module lets managers register machines with examination due dates and usual
         locations. On site, a fitter or manager starts one inspection entry and can complete the forms needed for that
@@ -741,7 +741,7 @@ function PlantMachineryServiceVsLolerArticle() {
         machine register instead of scattered across email, paper, and different spreadsheets.
       </p>
 
-      <h2>How Stock Track PRO keeps each record type distinct in one visit</h2>
+      <h2>How Fleet Track PRO keeps each record type distinct in one visit</h2>
       <p>
         The Plant &amp; Machinery module is built for real site work: one inspection entry, multiple forms. A fitter can
         complete a LOLER thorough examination, a service inspection, and a pre-hire or off-hire check in the same
@@ -813,7 +813,7 @@ function PlantExaminationDueDateTrackingArticle() {
       <h2>Why advance reminders matter</h2>
       <p>
         Examiners need lead time to attend site. Projects need time to swap or stand down plant. A reminder on the due
-        date itself is often too late. Many operators use a seven-day warning — the same practical window Stock Track PRO
+        date itself is often too late. Many operators use a seven-day warning — the same practical window Fleet Track PRO
         uses for MOT renewals on vans — so managers can book the examiner before the certificate expires.
       </p>
       <p>
@@ -835,7 +835,7 @@ function PlantExaminationDueDateTrackingArticle() {
         multiple site cabins.
       </p>
 
-      <h2>How Stock Track PRO tracks examination due dates</h2>
+      <h2>How Fleet Track PRO tracks examination due dates</h2>
       <p>
         When you register a machine in the Plant &amp; Machinery module, you set examination due dates and whether the
         asset lifts persons (affecting the six-month LOLER interval). After forms are submitted from one inspection
@@ -943,7 +943,7 @@ export default async function ComplianceArticlePage({ params }: Props) {
                 href="/onboarding"
                 className="flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black"
               >
-                Try Stock Track PRO Free for 7 Days →
+                Try Fleet Track PRO Free for 7 Days →
               </Link>
             </div>
           </aside>

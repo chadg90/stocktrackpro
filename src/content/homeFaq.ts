@@ -6,14 +6,14 @@ export type HomeFaqItem = {
 /** Short set for the homepage — pricing and full list live on /pricing and /faq. */
 export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   {
-    question: 'Is Stock Track PRO warehouse or inventory stock tracking software?',
+    question: 'Is Fleet Track PRO warehouse or inventory stock tracking software?',
     answer:
-      'No. Despite the brand name, Stock Track PRO is UK van fleet compliance software — daily DVSA walkaround checks, vehicle defect reporting, MOT tracking, and repair close-out. It is not warehouse inventory control, stock management, or general asset tracking software.',
+      'No. Despite the brand name, Fleet Track PRO is UK van fleet compliance software — daily DVSA walkaround checks, vehicle defect reporting, MOT tracking, and repair close-out. It is not warehouse inventory control, stock management, or general asset tracking software.',
   },
   {
-    question: 'Is Stock Track PRO suitable for van fleets?',
+    question: 'Is Fleet Track PRO suitable for van fleets?',
     answer:
-      'Yes. Stock Track PRO is built for commercial van and light fleet operators — daily inspections, defect reports, MOT tracking, and repair close-out in one workflow. See our Compliance Centre for guidance on defect records.',
+      'Yes. Fleet Track PRO is built for commercial van and light fleet operators — daily inspections, defect reports, MOT tracking, and repair close-out in one workflow. See our Compliance Centre for guidance on defect records.',
   },
   {
     question: 'How many users can I add?',

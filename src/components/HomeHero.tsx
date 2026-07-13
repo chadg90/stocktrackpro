@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { HOME_HERO_POSTER_SRC, HOME_HERO_VIDEO_DESCRIPTION, HOME_HERO_VIDEO_SRC } from '@/content/homeHero';
 
 const WHATSAPP_DEMO_URL =
-  'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20see%20a%20quick%20demo.';
+  'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%2C%20I%27d%20like%20to%20see%20a%20quick%20demo.';
 
 const MOBILE_MEDIA_QUERY = '(max-width: 1023px)';
 
@@ -134,7 +134,7 @@ export default function HomeHero() {
           ) : (
             <Image
               src={HOME_HERO_POSTER_SRC}
-              alt="Stock Track PRO van fleet app — daily walkaround check and defect reporting demonstration"
+              alt="Fleet Track PRO van fleet app — daily walkaround check and defect reporting demonstration"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               priority

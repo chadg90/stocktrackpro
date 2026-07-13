@@ -25,25 +25,25 @@ import {
 import Link from 'next/link';
 
 const WHATSAPP_ENQUIRY_URL =
-  'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
+  'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Stock Track PRO | UK Van Fleet & DVSA Compliance Software',
+    absolute: 'Fleet Track PRO | UK Van Fleet & DVSA Compliance Software',
   },
   description: SITE_META_DESCRIPTION,
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Stock Track PRO | UK Van Fleet & DVSA Compliance Software',
+    title: 'Fleet Track PRO | UK Van Fleet & DVSA Compliance Software',
     description: SITE_META_DESCRIPTION,
-    url: 'https://www.stocktrackpro.co.uk',
-    siteName: 'Stock Track PRO',
+    url: 'https://www.fleettrackpro.co.uk',
+    siteName: 'Fleet Track PRO',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Stock Track PRO — UK van fleet management, inspections, and defect reporting',
+        alt: 'Fleet Track PRO — UK van fleet management, inspections, and defect reporting',
       },
     ],
     locale: 'en_GB',
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Stock Track PRO | UK Van Fleet & DVSA Compliance Software',
+    title: 'Fleet Track PRO | UK Van Fleet & DVSA Compliance Software',
     description: SITE_META_DESCRIPTION,
     images: ['/og-image.jpg'],
   },
@@ -141,7 +141,7 @@ export default function Home() {
                 Quick Facts
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
-                Stock Track PRO at a glance
+                Fleet Track PRO at a glance
               </h2>
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
                 {QUICK_FACTS.map(([term, detail]) => (

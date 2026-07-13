@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">1. Introduction</h2>
               <p className="text-white/80">
-                Stock Track PRO Ltd (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) trades as <strong className="text-white">Stock Track PRO</strong>. We are committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, how we use it, and your rights when using our website, dashboard, and companion mobile app.
+                Fleet Track PRO Ltd (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) trades as <strong className="text-white">Fleet Track PRO</strong>. We are committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, how we use it, and your rights when using our website, dashboard, and companion mobile app.
               </p>
             </div>
 
@@ -153,7 +153,7 @@ export default function PrivacyPolicy() {
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Platform access: a small number of authorised Stock Track PRO staff hold elevated platform-level access to customer data solely for the purposes of technical support, security monitoring, and service maintenance. This access is restricted, logged, and subject to internal security controls.</span>
+                  <span>Platform access: a small number of authorised Fleet Track PRO staff hold elevated platform-level access to customer data solely for the purposes of technical support, security monitoring, and service maintenance. This access is restricted, logged, and subject to internal security controls.</span>
                 </li>
               </ul>
             </div>
@@ -268,7 +268,7 @@ export default function PrivacyPolicy() {
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">9. How to Delete Your Account and Data</h2>
               <p className="text-white/80 mb-4">
-                You have control over your personal account and can delete your user account from the Stock Track PRO mobile app:
+                You have control over your personal account and can delete your user account from the Fleet Track PRO mobile app:
               </p>
               
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-4">
@@ -276,7 +276,7 @@ export default function PrivacyPolicy() {
                 <ol className="space-y-3 text-white/80">
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">1.</span>
-                    <span>Open the Stock Track PRO app and go to the <strong className="text-white">Account</strong> tab</span>
+                    <span>Open the Fleet Track PRO app and go to the <strong className="text-white">Account</strong> tab</span>
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">2.</span>
@@ -330,9 +330,9 @@ export default function PrivacyPolicy() {
             <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
               <h2 className="text-2xl font-semibold text-white mb-4">10. Children&apos;s Privacy</h2>
               <p className="text-white/80 mb-4">
-                Stock Track PRO is a business service and is not aimed at children. We do not knowingly collect personal data from anyone under 13. If you believe we have processed such information in error, please contact us at{' '}
-                <a href="mailto:support@stocktrackpro.co.uk" className="text-primary hover:underline">
-                  support@stocktrackpro.co.uk
+                Fleet Track PRO is a business service and is not aimed at children. We do not knowingly collect personal data from anyone under 13. If you believe we have processed such information in error, please contact us at{' '}
+                <a href="mailto:help@fleettrackpro.co.uk" className="text-primary hover:underline">
+                  help@fleettrackpro.co.uk
                 </a>{' '}
                 and we will delete it promptly where the law allows. Further safeguards apply to children&apos;s data under UK data protection law; seek advice if your organisation processes data about children.
               </p>
@@ -351,11 +351,11 @@ export default function PrivacyPolicy() {
               <ul className="space-y-3 text-white/80">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Email: support@stocktrackpro.co.uk</span>
+                  <span>Email: help@fleettrackpro.co.uk</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                  <span>Website: https://www.stocktrackpro.co.uk</span>
+                  <span>Website: https://www.fleettrackpro.co.uk</span>
                 </li>
               </ul>
             </div>

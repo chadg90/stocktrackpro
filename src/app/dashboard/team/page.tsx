@@ -310,7 +310,7 @@ export default function TeamPage() {
     const origin =
       typeof window !== 'undefined' && window.location?.origin
         ? window.location.origin
-        : 'https://www.stocktrackpro.co.uk';
+        : 'https://www.fleettrackpro.co.uk';
     const link = `${origin}/invite/${inviteId}`;
     try {
       if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {

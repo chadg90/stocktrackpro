@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({
             success: true,
             synced: false,
-            message: 'Your subscription is already active but not linked to Stripe (likely a legacy or manually-managed account). For billing changes, contact support@stocktrackpro.co.uk.',
+            message: 'Your subscription is already active but not linked to Stripe (likely a legacy or manually-managed account). For billing changes, contact help@fleettrackpro.co.uk.',
             subscription_status: currentStatus,
           });
         }
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({
             success: true,
             synced: false,
-            message: 'Your subscription is already active but not linked to Stripe (likely a legacy or manually-managed account). For billing changes, contact support@stocktrackpro.co.uk.',
+            message: 'Your subscription is already active but not linked to Stripe (likely a legacy or manually-managed account). For billing changes, contact help@fleettrackpro.co.uk.',
             subscription_status: currentStatus,
           });
         }

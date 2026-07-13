@@ -20,7 +20,7 @@ function getBaseUrl(): string {
   }
   // Default fallback - but warn if not set
   console.warn('NEXT_PUBLIC_APP_URL not set, using default. Set this in environment variables.');
-  return 'https://stocktrackpro.co.uk';
+  return 'https://www.fleettrackpro.co.uk';
 }
 
 function getSuccessPath(): string {
@@ -40,6 +40,8 @@ function isAllowedOrigin(request: NextRequest): boolean {
   const allowedOrigins = [
     `https://${allowedHost}`,
     `http://${allowedHost}`,
+    'https://www.fleettrackpro.co.uk',
+    'https://fleettrackpro.co.uk',
     'https://www.stocktrackpro.co.uk',
     'https://stocktrackpro.co.uk',
     'https://www.stocktrackpro.com',

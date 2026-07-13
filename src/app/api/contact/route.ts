@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Please enter a message (at least 10 characters)' }, { status: 400 });
     }
 
-    const to = process.env.CONTACT_EMAIL || 'support@stocktrackpro.co.uk';
+    const to = process.env.CONTACT_EMAIL || 'help@fleettrackpro.co.uk';
     const transporter = getTransporter();
     const escapeHtml = (s: string) =>
       s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to,
       replyTo: email.trim(),
-      subject: subject?.trim() ? `[Stock Track PRO] ${subject.trim()}` : `[Stock Track PRO] Contact from ${name.trim()}`,
+      subject: subject?.trim() ? `[Fleet Track PRO] ${subject.trim()}` : `[Fleet Track PRO] Contact from ${name.trim()}`,
       text: message.trim(),
       html: `<p>From: ${escapeHtml(name.trim())} &lt;${escapeHtml(email.trim())}&gt;</p><p>${escapeHtml(message.trim()).replace(/\n/g, '<br>')}</p>`,
     });

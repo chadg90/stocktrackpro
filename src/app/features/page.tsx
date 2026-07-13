@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Car, Users, Wrench, Shield, Gauge, FileCheck, ArrowRight, Smartphone, HardHat } from 'lucide-react';
 
 const WHATSAPP_ENQUIRY_URL =
-  'https://wa.me/447438146343?text=Hi%20Stock%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
+  'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
 
 type Feature = {
   title: string;

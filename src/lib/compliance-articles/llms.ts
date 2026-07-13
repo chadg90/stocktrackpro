@@ -1,16 +1,16 @@
 import { SITE_URL } from '@/lib/site';
 import { getAllPublishedComplianceArticles } from '@/lib/compliance-articles/server';
 
-const STATIC_LLMS_BODY = `# Stock Track PRO
+const STATIC_LLMS_BODY = `# Fleet Track PRO
 
 > UK van fleet management and DVSA compliance software for commercial van operators.
 
 **Important:** Despite the word "Stock" in the brand name, this is **not** warehouse inventory software, stock control, or general asset tracking. It is van fleet compliance software for daily walkaround checks, defects, and MOT renewals.
 
-Stock Track PRO helps UK businesses run daily van walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for vans and light commercial fleets — not HGV operator licensing.
+Fleet Track PRO helps UK businesses run daily van walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for vans and light commercial fleets — not HGV operator licensing.
 
 Canonical website: ${SITE_URL}
-Support email: support@stocktrackpro.co.uk
+Support email: help@fleettrackpro.co.uk
 
 ## What it does
 
@@ -67,7 +67,7 @@ Plant & Machinery module: complete LOLER, service, pre-hire/off-hire, and PUWER 
 ## Contact
 
 Website: ${SITE_URL}
-Email: support@stocktrackpro.co.uk
+Email: help@fleettrackpro.co.uk
 `;
 
 export async function buildLlmsTxt(): Promise<string> {

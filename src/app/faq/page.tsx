@@ -12,7 +12,7 @@ export default function FAQ() {
     },
     {
       question: "Do I need special hardware to use the app?",
-      answer: "No. You can run Stock Track PRO with standard smartphones and your web browser. Vehicles are added in the dashboard and selected in the app for inspections, defects, and workflow updates.",
+      answer: "No. You can run Fleet Track PRO with standard smartphones and your web browser. Vehicles are added in the dashboard and selected in the app for inspections, defects, and workflow updates.",
     },
     {
       question: "Do I need a limited company to use the app?",
@@ -52,7 +52,7 @@ export default function FAQ() {
     },
     {
       question: "What happens to my data if I cancel?",
-      answer: "After cancellation, your company data remains for a reasonable period so you can reactivate if needed. You can request permanent deletion by emailing support@stocktrackpro.co.uk. See our Subscription Terms and Privacy Policy for retention details.",
+      answer: "After cancellation, your company data remains for a reasonable period so you can reactivate if needed. You can request permanent deletion by emailing help@fleettrackpro.co.uk. See our Subscription Terms and Privacy Policy for retention details.",
     },
     {
       question: "How long does setup take?",
@@ -75,7 +75,7 @@ export default function FAQ() {
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-white mb-4">Frequently Asked Questions</h1>
-          <p className="text-white/80 mb-10 text-lg">Answers to common questions about Stock Track PRO.</p>
+          <p className="text-white/80 mb-10 text-lg">Answers to common questions about Fleet Track PRO.</p>
 
           <div className="space-y-6">
             {faqs.map((item) => (

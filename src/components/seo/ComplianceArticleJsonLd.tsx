@@ -22,12 +22,12 @@ export function ComplianceArticleJsonLd({ article }: Props) {
     author: {
       '@type': 'Organization',
       '@id': ORGANIZATION_ID,
-      name: 'Stock Track PRO Ltd',
+      name: 'Fleet Track PRO Ltd',
     },
     publisher: {
       '@type': 'Organization',
       '@id': ORGANIZATION_ID,
-      name: 'Stock Track PRO Ltd',
+      name: 'Fleet Track PRO Ltd',
       logo: {
         '@type': 'ImageObject',
         url: `${SITE_URL}/logo.png`,
@@ -40,7 +40,7 @@ export function ComplianceArticleJsonLd({ article }: Props) {
     isPartOf: {
       '@type': 'WebSite',
       '@id': `${SITE_URL}/#website`,
-      name: 'Stock Track PRO',
+      name: 'Fleet Track PRO',
       url: SITE_URL,
     },
     about: [

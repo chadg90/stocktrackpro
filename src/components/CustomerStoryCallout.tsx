@@ -27,7 +27,7 @@ export default function CustomerStoryCallout() {
                 Newstreet Groundworks, County Durham
               </h2>
               <p className="text-white/75 leading-relaxed text-sm sm:text-base">
-                Managing their fleet across multiple active sites. Stock Track PRO replaced WhatsApp groups and paper
+                Managing their fleet across multiple active sites. Fleet Track PRO replaced WhatsApp groups and paper
                 sheets with a single system their drivers and managers actually use.
               </p>
               <Link

@@ -1,5 +1,6 @@
 import { SITE_KNOWS_ABOUT, SITE_SHORT_DESCRIPTION, SITE_TAGLINE, SITE_BRAND_DISAMBIGUATION } from '@/content/siteSeo';
 import { getOrganizationSameAs, ORGANIZATION_ID, SITE_URL, WEBSITE_ID } from '@/lib/site';
+import { SITE_LEGAL_NAME, SITE_NAME, SUPPORT_EMAIL } from '@/lib/brand';
 
 /**
  * Organization + WebSite graph for every page (Google + AI entity consolidation).
@@ -10,10 +11,12 @@ export default function SiteWideJsonLd() {
   const organization: Record<string, unknown> = {
     '@type': 'Organization',
     '@id': ORGANIZATION_ID,
-    name: 'Stock Track PRO Ltd',
+    name: SITE_LEGAL_NAME,
     alternateName: [
-      'Stock Track PRO van fleet software',
-      'Stock Track PRO DVSA compliance software',
+      `${SITE_NAME} van fleet software`,
+      `${SITE_NAME} DVSA compliance software`,
+      'Stock Track PRO',
+      'Stock Track PRO Ltd',
     ],
     url: SITE_URL,
     description: `${SITE_SHORT_DESCRIPTION} ${SITE_BRAND_DISAMBIGUATION}`,
@@ -22,11 +25,11 @@ export default function SiteWideJsonLd() {
       '@type': 'ImageObject',
       url: `${SITE_URL}/logo.png`,
     },
-    email: 'support@stocktrackpro.co.uk',
+    email: SUPPORT_EMAIL,
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
-      email: 'support@stocktrackpro.co.uk',
+      email: SUPPORT_EMAIL,
       availableLanguage: 'English',
       areaServed: 'GB',
     },
@@ -51,8 +54,8 @@ export default function SiteWideJsonLd() {
       {
         '@type': 'WebSite',
         '@id': WEBSITE_ID,
-        name: 'Stock Track PRO',
-        alternateName: 'Stock Track PRO — UK van fleet compliance (not inventory software)',
+        name: SITE_NAME,
+        alternateName: `${SITE_NAME} — UK van fleet compliance (not inventory software)`,
         url: SITE_URL,
         description: SITE_TAGLINE,
         inLanguage: 'en-GB',

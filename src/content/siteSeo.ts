@@ -1,4 +1,6 @@
 /** Shared SEO copy — keep marketing metadata and JSON-LD aligned. */
+import { SITE_NAME } from '@/lib/brand';
+
 /** ~155 characters — primary meta description for Google SERP snippets. */
 export const SITE_META_DESCRIPTION =
   'UK van fleet compliance software. Daily DVSA walkaround checks, defect photos, MOT tracking, and repair close-out in one platform. 7-day free trial.';
@@ -11,7 +13,7 @@ export const SITE_TAGLINE =
   'UK van fleet management software for daily DVSA inspections, defect reporting, MOT tracking, and optional Plant & Machinery LOLER records.';
 
 export const SITE_SHORT_DESCRIPTION =
-  'Stock Track PRO helps UK van fleets complete daily DVSA walkaround checks, report defects with photos, track MOT and tax renewals, and close out repairs from one platform. Van fleet compliance software — not warehouse stock or inventory tracking. Optional Plant & Machinery add-on for LOLER, service, and hire-check PDFs. iOS, Android, and web dashboard. 7-day free trial.';
+  `${SITE_NAME} helps UK van fleets complete daily DVSA walkaround checks, report defects with photos, track MOT and tax renewals, and close out repairs from one platform. Van fleet compliance software — not warehouse stock or inventory tracking. Optional Plant & Machinery add-on for LOLER, service, and hire-check PDFs. iOS, Android, and web dashboard. 7-day free trial.`;
 
 export const SITE_KNOWS_ABOUT = [
   'Van fleet management',

@@ -17,7 +17,7 @@ export default function Terms() {
             <p className="text-zinc-400 mb-4">Last updated: {LAST_UPDATED}</p>
 
             <p className="text-zinc-300 mb-8">
-              Welcome to Stock Track PRO (&quot;we,&quot; &quot;our,&quot; &quot;us&quot;). These Terms and Conditions govern your use of our website,
+              Welcome to Fleet Track PRO (&quot;we,&quot; &quot;our,&quot; &quot;us&quot;). These Terms and Conditions govern your use of our website,
               fleet management application and related services. Please read them together with our{' '}
               <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
                 Privacy Policy
@@ -31,14 +31,14 @@ export default function Terms() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">1. Acceptance of Terms</h2>
             <p className="text-zinc-300 mb-4">
-              By using Stock Track PRO, you confirm that you are at least 18 years old or have the legal capacity to
+              By using Fleet Track PRO, you confirm that you are at least 18 years old or have the legal capacity to
               enter into a binding agreement. If you are using our services on behalf of an organisation, you represent
               that you have the authority to bind that organisation to these terms.
             </p>
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">2. Service Description</h2>
             <p className="text-zinc-300 mb-4">
-              Stock Track PRO is a fleet inspection and compliance platform that provides:
+              Fleet Track PRO is a fleet inspection and compliance platform that provides:
             </p>
             <ul className="list-disc pl-6 text-zinc-300 mb-4">
               <li>Visibility of fleet vehicle status, inspections and defects within the platform</li>
@@ -52,7 +52,7 @@ export default function Terms() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">3. User Accounts and Security</h2>
             <p className="text-zinc-300 mb-4">
-              When you create an account with Stock Track PRO, you must provide accurate and complete information.
+              When you create an account with Fleet Track PRO, you must provide accurate and complete information.
               You are responsible for maintaining the security of your account credentials and for all activities
               that occur under your account.
             </p>
@@ -82,7 +82,7 @@ export default function Terms() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">6. Acceptable Use</h2>
             <p className="text-zinc-300 mb-4">
-              You agree to use Stock Track PRO only for legitimate fleet management and compliance purposes. Prohibited activities include:
+              You agree to use Fleet Track PRO only for legitimate fleet management and compliance purposes. Prohibited activities include:
             </p>
             <ul className="list-disc pl-6 text-zinc-300 mb-4">
               <li>Sharing account credentials with unauthorised users</li>
@@ -93,7 +93,7 @@ export default function Terms() {
 
             <h2 className="text-2xl font-bold text-white mt-8 mb-4">7. Intellectual Property</h2>
             <p className="text-zinc-300 mb-4">
-              The Stock Track PRO application, including its code, design, logos and content, is protected by
+              The Fleet Track PRO application, including its code, design, logos and content, is protected by
               intellectual property laws. You may not copy, modify or create derivative works without our
               express permission.
             </p>
@@ -116,17 +116,17 @@ export default function Terms() {
               For any questions about these Terms and Conditions, please contact us at:
             </p>
             <ul className="list-none text-zinc-300 mb-8">
-              <li>Email: support@stocktrackpro.co.uk</li>
+              <li>Email: help@fleettrackpro.co.uk</li>
               <li>
                 Website:{' '}
-                <a href="https://www.stocktrackpro.co.uk" className="text-blue-400 hover:text-blue-300">
-                  https://www.stocktrackpro.co.uk
+                <a href="https://www.fleettrackpro.co.uk" className="text-blue-400 hover:text-blue-300">
+                  https://www.fleettrackpro.co.uk
                 </a>
               </li>
             </ul>
 
             <p className="text-zinc-400 mt-12 mb-8">
-              By using Stock Track PRO, you acknowledge that you have read, understood and agree to these
+              By using Fleet Track PRO, you acknowledge that you have read, understood and agree to these
               Terms and Conditions.
             </p>
             <p className="text-zinc-400 mb-8">

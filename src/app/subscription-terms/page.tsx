@@ -8,13 +8,13 @@ const LAST_UPDATED = '2 June 2026';
 export const metadata: Metadata = {
   title: 'Subscription Terms',
   description:
-    'Subscription terms for Stock Track PRO UK fleet software — 7-day trial, monthly and annual billing, cancellation, VAT, and renewal.',
+    'Subscription terms for Fleet Track PRO UK fleet software — 7-day trial, monthly and annual billing, cancellation, VAT, and renewal.',
   alternates: { canonical: '/subscription-terms' },
   openGraph: {
-    title: 'Subscription Terms | Stock Track PRO',
-    description: 'Billing, trials, and cancellation terms for Stock Track PRO subscriptions.',
-    url: 'https://www.stocktrackpro.co.uk/subscription-terms',
-    siteName: 'Stock Track PRO',
+    title: 'Subscription Terms | Fleet Track PRO',
+    description: 'Billing, trials, and cancellation terms for Fleet Track PRO subscriptions.',
+    url: 'https://www.fleettrackpro.co.uk/subscription-terms',
+    siteName: 'Fleet Track PRO',
     locale: 'en_GB',
     type: 'website',
   },
@@ -32,8 +32,8 @@ export default function SubscriptionTermsPage() {
             <p className="text-zinc-400 mb-6">Last updated: {LAST_UPDATED}</p>
 
             <p className="text-zinc-300 mb-4">
-              These Subscription Terms apply to all paid Stock Track PRO subscriptions purchased
-              through our website checkout. The Stock Track PRO mobile app is a companion app used
+              These Subscription Terms apply to all paid Fleet Track PRO subscriptions purchased
+              through our website checkout. The Fleet Track PRO mobile app is a companion app used
               by your team to log inspections, update defects and complete fleet workflows; subscriptions are
               not sold or renewed through the app itself. These Subscription Terms should be read
               alongside our{' '}
@@ -47,7 +47,7 @@ export default function SubscriptionTermsPage() {
               .
             </p>
             <p className="text-zinc-300 mb-8">
-              Stock Track PRO is a software service sold for business use. The service is not
+              Fleet Track PRO is a software service sold for business use. The service is not
               intended for consumers, and the Consumer Contracts (Information, Cancellation and
               Additional Charges) Regulations 2013 do not apply to business subscriptions.
             </p>
@@ -199,8 +199,8 @@ export default function SubscriptionTermsPage() {
               <li>
                 If your subscription has ended and has not been reactivated, you can request
                 permanent deletion of your company data at any time by emailing{' '}
-                <a href="mailto:support@stocktrackpro.co.uk" className="text-blue-400 hover:text-blue-300">
-                  support@stocktrackpro.co.uk
+                <a href="mailto:help@fleettrackpro.co.uk" className="text-blue-400 hover:text-blue-300">
+                  help@fleettrackpro.co.uk
                 </a>
                 .
               </li>
@@ -231,8 +231,8 @@ export default function SubscriptionTermsPage() {
             <h2 className="text-2xl font-bold text-white mt-10 mb-4">10. Contact</h2>
             <p className="text-zinc-300 mb-8">
               Questions about billing or these Subscription Terms can be sent to{' '}
-              <a href="mailto:support@stocktrackpro.co.uk" className="text-blue-400 hover:text-blue-300">
-                support@stocktrackpro.co.uk
+              <a href="mailto:help@fleettrackpro.co.uk" className="text-blue-400 hover:text-blue-300">
+                help@fleettrackpro.co.uk
               </a>
               .
             </p>

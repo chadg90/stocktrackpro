@@ -194,7 +194,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <Link href="/" className="inline-block mb-6">
-            <h1 className="text-3xl font-bold text-white">Stock Track PRO</h1>
+            <h1 className="text-3xl font-bold text-white">Fleet Track PRO</h1>
           </Link>
           {step !== 'success' && step !== 'choice' && (
             <div className="flex items-center justify-center gap-2 mb-6">
@@ -252,7 +252,7 @@ export default function OnboardingPage() {
                 <LogIn className="h-8 w-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
                 <h3 className="font-semibold text-white text-lg mb-2">Sign in</h3>
                 <p className="text-white/60 text-sm">
-                  Already have a Stock Track PRO account? Sign in to the dashboard.
+                  Already have a Fleet Track PRO account? Sign in to the dashboard.
                 </p>
                 <span className="inline-flex items-center gap-1 text-blue-500 font-medium text-sm mt-3">
                   Go to login <ArrowRight className="w-4 h-4" />
@@ -260,7 +260,7 @@ export default function OnboardingPage() {
               </Link>
             </div>
             <p className="text-white/50 text-center text-xs">
-              Joining an existing company? Open the invite email from your manager and follow the link, then sign in using the Stock Track PRO app.
+              Joining an existing company? Open the invite email from your manager and follow the link, then sign in using the Fleet Track PRO app.
             </p>
           </div>
         ) : step === 'success' ? (
