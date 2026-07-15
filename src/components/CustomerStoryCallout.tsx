@@ -1,44 +1,70 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { ArrowRight, MapPin } from 'lucide-react';
+
+const OUTCOMES = [
+  'Daily walkaround checks in the app',
+  'Defects visible to managers and fitters instantly',
+  'One audit trail instead of WhatsApp and paper',
+];
 
 export default function CustomerStoryCallout() {
   return (
-    <section
-      className="py-12 sm:py-16 border-y border-white/10 bg-white/[0.02]"
-      aria-labelledby="customer-story-heading"
-    >
-      <div className="container mx-auto px-4 max-w-4xl">
-        <p className="text-[var(--brand-blue)] font-medium text-sm uppercase tracking-[0.2em] mb-3 text-center">
-          Case study
-        </p>
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row sm:items-stretch gap-6">
-            <div className="relative mx-auto h-16 w-56 shrink-0 sm:mx-0 sm:h-auto sm:w-64 sm:self-stretch">
+    <section className="py-14 sm:py-20 bg-white" aria-labelledby="customer-story-heading">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="text-center mb-8 sm:mb-10">
+          <p className="text-[var(--brand-blue)] font-semibold text-sm uppercase tracking-[0.2em] mb-3">
+            Case study
+          </p>
+          <h2 id="customer-story-heading" className="text-2xl sm:text-3xl font-bold text-slate-900">
+            How a Durham groundworks fleet went digital
+          </h2>
+        </div>
+
+        <article className="mkt-card-static max-w-2xl mx-auto p-6 sm:p-8 lg:p-10">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6 mb-6">
+            <div className="relative h-24 w-48 sm:h-28 sm:w-56 shrink-0">
               <Image
                 src="/clients/newstreet-groundwork.png"
                 alt="Newstreet Groundwork Services"
                 fill
-                className="object-contain object-center sm:object-left"
-                sizes="(max-width: 640px) 224px, 256px"
+                className="object-contain object-left"
+                sizes="224px"
               />
             </div>
-            <div className="flex flex-1 min-w-0 flex-col text-center sm:text-left">
-              <h2 id="customer-story-heading" className="text-xl sm:text-2xl font-semibold text-white mb-3">
-                Newstreet Groundworks, County Durham
-              </h2>
-              <p className="text-white/75 leading-relaxed text-sm sm:text-base">
-                Managing their fleet across multiple active sites. Fleet Track PRO replaced WhatsApp groups and paper
-                sheets with a single system their drivers and managers actually use.
+            <div className="min-w-0">
+              <h3 className="text-xl sm:text-2xl font-semibold text-slate-900">
+                Newstreet Groundworks
+              </h3>
+              <p className="inline-flex items-center gap-2 text-slate-500 text-sm mt-2">
+                <MapPin className="h-3.5 w-3.5 text-[var(--brand-blue)]" aria-hidden />
+                County Durham
               </p>
-              <Link
-                href="/customers/newstreet"
-                className="inline-flex mt-5 text-[var(--brand-blue)] hover:text-blue-300 text-sm font-medium underline underline-offset-4"
-              >
-                Read the case study →
-              </Link>
             </div>
           </div>
-        </div>
+
+          <p className="text-slate-600 leading-relaxed text-sm sm:text-base mb-6">
+            Managing vehicles across multiple active sites, they replaced WhatsApp groups and paper sheets with Fleet
+            Track PRO — so drivers and managers work from the same live records.
+          </p>
+
+          <ul className="space-y-2.5 mb-7">
+            {OUTCOMES.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-sm text-slate-700">
+                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          <Link
+            href="/customers/newstreet"
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white"
+          >
+            Read the case study
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </article>
       </div>
     </section>
   );

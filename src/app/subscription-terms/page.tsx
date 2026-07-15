@@ -28,7 +28,7 @@ export default function SubscriptionTermsPage() {
       <div className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto pt-20">
           <div className="prose prose-invert max-w-none">
-            <h1 className="text-3xl font-bold text-white mb-2">Subscription Terms</h1>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Subscription Terms</h1>
             <p className="text-zinc-400 mb-6">Last updated: {LAST_UPDATED}</p>
 
             <p className="text-zinc-300 mb-4">
@@ -37,11 +37,11 @@ export default function SubscriptionTermsPage() {
               by your team to log inspections, update defects and complete fleet workflows; subscriptions are
               not sold or renewed through the app itself. These Subscription Terms should be read
               alongside our{' '}
-              <Link href="/terms" className="text-blue-400 hover:text-blue-300">
+              <Link href="/terms" className="text-[var(--brand-blue)] hover:text-blue-700">
                 Terms and Conditions
               </Link>{' '}
               and{' '}
-              <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
+              <Link href="/privacy" className="text-[var(--brand-blue)] hover:text-blue-700">
                 Privacy Policy
               </Link>
               .
@@ -52,14 +52,14 @@ export default function SubscriptionTermsPage() {
               Additional Charges) Regulations 2013 do not apply to business subscriptions.
             </p>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">1. Plan Model</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">1. Plan Model</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>Pricing is per subscribed vehicle. All features are included on every plan.</li>
               <li>
-                Monthly billing: <span className="text-white">&pound;8 per vehicle per month</span>.
+                Monthly billing: <span className="text-slate-900">&pound;8 per vehicle per month</span>.
               </li>
               <li>
-                Annual billing: <span className="text-white">&pound;84 per vehicle per year</span>{' '}
+                Annual billing: <span className="text-slate-900">&pound;84 per vehicle per year</span>{' '}
                 (approximately 12% less than monthly, paid in advance).
               </li>
               <li>Minimum subscription quantity is 5 vehicles.</li>
@@ -70,17 +70,17 @@ export default function SubscriptionTermsPage() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">1a. Plant &amp; Machinery add-on (optional)</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">1a. Plant &amp; Machinery add-on (optional)</h2>
             <p className="text-zinc-300 mb-4">
               Plant &amp; Machinery is a separate subscription from your fleet vehicle plan. It is billed per active
               machine seat and managed through the same Stripe billing portal as your main subscription.
             </p>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
-                Monthly billing: <span className="text-white">&pound;12 per machine per month</span>.
+                Monthly billing: <span className="text-slate-900">&pound;12 per machine per month</span>.
               </li>
               <li>
-                Annual billing: <span className="text-white">&pound;120 per machine per year</span> (paid in advance).
+                Annual billing: <span className="text-slate-900">&pound;120 per machine per year</span> (paid in advance).
               </li>
               <li>Minimum quantity is 3 machines.</li>
               <li>Displayed pricing is in GBP and includes UK VAT at 20%.</li>
@@ -103,10 +103,10 @@ export default function SubscriptionTermsPage() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">2. Free Trial</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">2. Free Trial</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
-                New companies receive a <span className="text-white">7-day free trial</span> of the
+                New companies receive a <span className="text-slate-900">7-day free trial</span> of the
                 available product features. No payment card is required to start the trial.
               </li>
               <li>
@@ -124,7 +124,7 @@ export default function SubscriptionTermsPage() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">3. Billing Cycle and Renewal</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">3. Billing Cycle and Renewal</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
                 Subscriptions renew automatically at the end of each billing period (monthly or
@@ -138,7 +138,7 @@ export default function SubscriptionTermsPage() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">4. Vehicle Quantity Changes</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">4. Vehicle Quantity Changes</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
                 You can request an increase or decrease to your subscribed vehicle quantity through
@@ -154,15 +154,15 @@ export default function SubscriptionTermsPage() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">5. Cancellation and Refunds</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">5. Cancellation and Refunds</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
-                <span className="text-white">Monthly plans:</span> you can cancel at any time from
+                <span className="text-slate-900">Monthly plans:</span> you can cancel at any time from
                 the billing portal. Cancellation takes effect at the end of the current paid month.
                 You keep access to the service until that date. There is no long-term contract.
               </li>
               <li>
-                <span className="text-white">Annual plans:</span> these are a 12-month term paid
+                <span className="text-slate-900">Annual plans:</span> these are a 12-month term paid
                 upfront at a discount. You can cancel renewal at any time (so you will not be
                 charged again), but unused months within the paid year are not refunded.
               </li>
@@ -172,7 +172,7 @@ export default function SubscriptionTermsPage() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">6. Failed Payments and Suspension</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">6. Failed Payments and Suspension</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
                 If a renewal payment fails, we will retry for a reasonable period through Stripe.
@@ -189,7 +189,7 @@ export default function SubscriptionTermsPage() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">7. Data Retention After Cancellation</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">7. Data Retention After Cancellation</h2>
             <ul className="list-disc pl-6 text-zinc-300 mb-4 space-y-1.5">
               <li>
                 After cancellation, your company data (vehicles, inspections, defects, plant machinery records where
@@ -199,21 +199,21 @@ export default function SubscriptionTermsPage() {
               <li>
                 If your subscription has ended and has not been reactivated, you can request
                 permanent deletion of your company data at any time by emailing{' '}
-                <a href="mailto:help@fleettrackpro.co.uk" className="text-blue-400 hover:text-blue-300">
+                <a href="mailto:help@fleettrackpro.co.uk" className="text-[var(--brand-blue)] hover:text-blue-700">
                   help@fleettrackpro.co.uk
                 </a>
                 .
               </li>
               <li>
                 Backups and log files are retained on a rolling schedule in line with our{' '}
-                <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
+                <Link href="/privacy" className="text-[var(--brand-blue)] hover:text-blue-700">
                   Privacy Policy
                 </Link>
                 .
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">8. Existing and Grandfathered Customers</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">8. Existing and Grandfathered Customers</h2>
             <p className="text-zinc-300 mb-4">
               Some early customers have agreed pricing or contract terms that differ from the rates
               published on our website. Those agreed terms continue to apply to those customers
@@ -221,17 +221,17 @@ export default function SubscriptionTermsPage() {
               pricing for current customers at our discretion.
             </p>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">9. Changes to Pricing or Terms</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">9. Changes to Pricing or Terms</h2>
             <p className="text-zinc-300 mb-4">
               We may update pricing or these Subscription Terms from time to time. Material changes
               will be communicated in advance by email or a notice in the dashboard. If you do not
               agree to a change, you may cancel your subscription before the change takes effect.
             </p>
 
-            <h2 className="text-2xl font-bold text-white mt-10 mb-4">10. Contact</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-4">10. Contact</h2>
             <p className="text-zinc-300 mb-8">
               Questions about billing or these Subscription Terms can be sent to{' '}
-              <a href="mailto:help@fleettrackpro.co.uk" className="text-blue-400 hover:text-blue-300">
+              <a href="mailto:help@fleettrackpro.co.uk" className="text-[var(--brand-blue)] hover:text-blue-700">
                 help@fleettrackpro.co.uk
               </a>
               .

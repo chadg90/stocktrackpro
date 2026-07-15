@@ -2,6 +2,8 @@
 
 import React, { Suspense, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Navbar from '../components/Navbar';
 import {
@@ -29,7 +31,39 @@ import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDay
 import { activityHistoryStartFromDashboardRange, TOOL_HISTORY_ANALYTICS_CAP } from '@/lib/dvsaRetention';
 import ExportButton from './components/ExportButton';
 import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
-import { RefreshCw, Users, Truck, TrendingDown, Target, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import {
+  RefreshCw,
+  Users,
+  Truck,
+  TrendingDown,
+  Target,
+  ArrowUpRight,
+  ArrowDownRight,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
+
+function mapSignInError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : 'Sign-in failed';
+  const code = msg.match(/auth\/([a-z0-9-]+)/i)?.[1];
+  switch (code) {
+    case 'invalid-credential':
+    case 'wrong-password':
+    case 'user-not-found':
+    case 'invalid-login-credentials':
+      return 'Incorrect email or password. Please try again.';
+    case 'too-many-requests':
+      return 'Too many attempts. Please wait a moment and try again.';
+    case 'invalid-email':
+      return 'Please enter a valid email address.';
+    case 'network-request-failed':
+      return 'Network error. Check your connection and try again.';
+    case 'user-disabled':
+      return 'This account has been disabled. Contact your administrator.';
+    default:
+      return msg.replace(/^Firebase:\s*/i, '').replace(/\s*\(auth\/[^)]+\)\.?/i, '').trim() || 'Sign-in failed';
+  }
+}
 
 const DashboardAnalyticsCharts = dynamic(
   () => import('./components/DashboardAnalyticsCharts'),
@@ -201,6 +235,7 @@ function DashboardPageInner() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [view, setView] = useState<'summary' | 'detailed'>(initialView);
 
@@ -474,7 +509,15 @@ function DashboardPageInner() {
       
       await loadProfile(cred.user);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Sign-in failed');
+      setError(mapSignInError(err));
+      // Keep the sign-in screen visible if profile/role checks fail after Firebase auth.
+      try {
+        if (firebaseAuth?.currentUser) {
+          await signOut(firebaseAuth);
+        }
+      } catch {
+        // ignore sign-out errors
+      }
     } finally {
       setLoading(false);
     }
@@ -847,7 +890,128 @@ function DashboardPageInner() {
   return (
     <div className="min-h-screen">
       {!authUser && <Navbar />}
-      <div className={`${!authUser ? 'container mx-auto px-4 pt-28 pb-16' : ''}`}>
+      {!authUser ? (
+            <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 pb-16 pt-28 sm:px-6">
+              <div
+                className="pointer-events-none absolute inset-0"
+                aria-hidden
+                style={{
+                  background:
+                    'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59,130,246,0.22), transparent 55%), radial-gradient(ellipse 60% 40% at 90% 80%, rgba(59,130,246,0.08), transparent 50%), linear-gradient(180deg, #09090b 0%, #000 100%)',
+                }}
+              />
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.35]"
+                aria-hidden
+                style={{
+                  backgroundImage:
+                    'linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)',
+                  backgroundSize: '48px 48px',
+                  maskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent)',
+                }}
+              />
+
+              <div className="relative w-full max-w-md">
+                <div className="mb-8 flex flex-col items-center text-center">
+                  <div className="relative mb-5 h-12 w-52 sm:h-14 sm:w-60">
+                    <Image
+                      src="/logo-white.png"
+                      alt="Fleet Track PRO"
+                      fill
+                      sizes="240px"
+                      className="object-contain object-center"
+                      priority
+                    />
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+                    Manager dashboard
+                  </h1>
+                  <p className="mt-2 max-w-sm text-sm text-white/55 leading-relaxed">
+                    Sign in to view your organisation’s fleet analytics, defects, and compliance.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/12 bg-white/[0.05] p-6 sm:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-md">
+                  {error && (
+                    <div
+                      className="mb-5 rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm text-red-100"
+                      role="alert"
+                    >
+                      {error}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div>
+                      <label htmlFor="dashboard-email" className="mb-1.5 block text-sm font-medium text-white/75">
+                        Email
+                      </label>
+                      <input
+                        id="dashboard-email"
+                        type="email"
+                        name="email"
+                        autoComplete="email"
+                        inputMode="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@company.com"
+                        className="w-full rounded-xl border border-white/15 bg-black/40 px-3.5 py-3 text-white placeholder:text-white/30 outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="dashboard-password" className="mb-1.5 block text-sm font-medium text-white/75">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          id="dashboard-password"
+                          type={showPassword ? 'text' : 'password'}
+                          name="password"
+                          autoComplete="current-password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Enter your password"
+                          className="w-full rounded-xl border border-white/15 bg-black/40 px-3.5 py-3 pr-11 text-white placeholder:text-white/30 outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-white/45 hover:text-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" aria-hidden />
+                          ) : (
+                            <Eye className="h-4 w-4" aria-hidden />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      className="mt-1 w-full rounded-xl bg-blue-500 py-3 text-sm font-semibold text-black transition-colors hover:bg-blue-400 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
+                      disabled={loading}
+                    >
+                      {loading ? 'Signing in…' : 'Sign in'}
+                    </button>
+                  </form>
+
+                  <p className="mt-5 text-center text-xs text-white/40">
+                    Manager and admin accounts only.
+                  </p>
+                </div>
+
+                <p className="mt-6 text-center text-sm text-white/45">
+                  New organisation?{' '}
+                  <Link href="/onboarding" className="font-medium text-blue-400 hover:text-blue-300 hover:underline">
+                    Start free trial
+                  </Link>
+                </p>
+              </div>
+            </div>
+          ) : (
         <div className="max-w-7xl mx-auto">
           {error && (
             <div
@@ -867,52 +1031,7 @@ function DashboardPageInner() {
             </div>
           )}
 
-          {!authUser && (
-          <div className="flex flex-col items-center justify-center min-h-[60vh]">
-            <div className="dashboard-card p-8 max-w-md w-full shadow-xl">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-semibold tracking-tight text-white">Dashboard</h2>
-                <p className="text-white/60 text-sm mt-2">Sign in to view your organisation’s analytics</p>
-              </div>
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-white/80 mb-1.5">Email</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white/80 mb-1.5">Password</label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg bg-white/5 border border-white/20 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-black font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
-                  disabled={loading}
-                >
-                  {loading ? 'Signing in…' : 'Sign in'}
-                </button>
-              </form>
-              <p className="text-white/60 text-center text-sm mt-4">Managers only.</p>
-              <p className="text-white/50 text-center text-xs mt-2">
-                New user? <a href="/onboarding" className="text-blue-500 hover:underline">Create an account</a> or download the app to get started.
-              </p>
-            </div>
-            </div>
-          )}
-
-          {isAuthedManager && (
-            <div className="space-y-6 lg:space-y-8">
+          {isAuthedManager && (            <div className="space-y-6 lg:space-y-8">
               {/* Header with controls */}
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 mb-6 no-print">
                 <div>
@@ -1148,7 +1267,7 @@ function DashboardPageInner() {
             </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -1,22 +1,97 @@
 import * as admin from 'firebase-admin';
+import fs from 'fs';
+import path from 'path';
+
+function stripWrappingQuotes(value: string): string {
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith("'") && trimmed.endsWith("'")) ||
+    (trimmed.startsWith('"') && trimmed.endsWith('"'))
+  ) {
+    return trimmed.slice(1, -1);
+  }
+  return trimmed;
+}
+
+function parseServiceAccountJson(raw: string): admin.ServiceAccount {
+  let candidate = stripWrappingQuotes(raw).replace(/^\uFEFF/, '').trim();
+
+  const attempts = [
+    candidate,
+    // Pretty-printed JSON in env sometimes keeps real newlines between keys
+    candidate.replace(/\r\n/g, '\n'),
+  ];
+
+  let lastError: unknown;
+  for (const attempt of attempts) {
+    try {
+      return JSON.parse(attempt) as admin.ServiceAccount;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  // Truncated values (e.g. unquoted multiline .env → just "{") are a common local failure mode
+  if (candidate.length < 20) {
+    throw new Error(
+      'FIREBASE_SERVICE_ACCOUNT_JSON looks truncated. Put the full service account JSON on one line in .env.local (wrap in single quotes), or set FIREBASE_SERVICE_ACCOUNT_PATH to a JSON file.'
+    );
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('FIREBASE_SERVICE_ACCOUNT_JSON is invalid JSON');
+}
+
+function readServiceAccountFile(filePath: string): admin.ServiceAccount {
+  const absolute = path.isAbsolute(filePath) ? filePath : path.join(process.cwd(), filePath);
+  const raw = fs.readFileSync(absolute, 'utf8');
+  return JSON.parse(raw) as admin.ServiceAccount;
+}
+
+function resolveLocalSdkPath(): string | null {
+  const fromEnv =
+    process.env.FIREBASE_SERVICE_ACCOUNT_PATH || process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  if (fromEnv && fs.existsSync(fromEnv)) return fromEnv;
+  if (fromEnv && fs.existsSync(path.join(process.cwd(), fromEnv))) {
+    return path.join(process.cwd(), fromEnv);
+  }
+
+  // Local fallback so marketing CMS pages work in dev without brittle multiline .env JSON
+  const candidates = fs
+    .readdirSync(process.cwd())
+    .filter((name) => /firebase-adminsdk.*\.json$/i.test(name));
+  if (candidates.length === 1) {
+    return path.join(process.cwd(), candidates[0]);
+  }
+  return null;
+}
 
 function getCredential(): admin.credential.Credential {
   const json = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  if (json) {
+  if (json && json.trim().length > 1) {
     try {
-      // Handle both single-line JSON strings and multi-line JSON
-      const cleanedJson = json.trim().replace(/\n/g, '');
-      const parsed = JSON.parse(cleanedJson) as admin.ServiceAccount;
+      const parsed = parseServiceAccountJson(json);
       return admin.credential.cert(parsed);
     } catch (error) {
       console.error('[Firebase Admin] Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:', error);
-      throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON is invalid JSON. Make sure it\'s set as a single-line JSON string in Vercel environment variables.');
+      // Fall through to file-based credentials for local recovery
     }
   }
-  
-  // If not set, try application default (won't work on Vercel)
-  console.error('[Firebase Admin] FIREBASE_SERVICE_ACCOUNT_JSON is not set');
-  throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON environment variable is not set. Please add it to your Vercel environment variables. Go to Vercel Dashboard > Your Project > Settings > Environment Variables and add FIREBASE_SERVICE_ACCOUNT_JSON with the full service account JSON as a single-line string.');
+
+  const filePath = resolveLocalSdkPath();
+  if (filePath) {
+    try {
+      const parsed = readServiceAccountFile(filePath);
+      return admin.credential.cert(parsed);
+    } catch (error) {
+      console.error('[Firebase Admin] Failed to read service account file:', filePath, error);
+    }
+  }
+
+  throw new Error(
+    'Firebase Admin credentials are not configured. Set FIREBASE_SERVICE_ACCOUNT_JSON as a single-line JSON string (quoted) in .env.local / Vercel, or set FIREBASE_SERVICE_ACCOUNT_PATH to a service-account JSON file.'
+  );
 }
 
 let app: admin.app.App | null = null;

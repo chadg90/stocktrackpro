@@ -9,7 +9,7 @@ export default async function ComplianceCentreHubPage() {
   const articles = await getAllPublishedComplianceArticles();
 
   return (
-    <div className="min-h-screen bg-black text-white antialiased">
+    <div className="marketing-shell">
       <ComplianceCentreHubJsonLd articles={articles} />
       <Navbar />
       <main className="container mx-auto px-4 pt-24 sm:pt-28 pb-20 max-w-3xl">
@@ -19,12 +19,12 @@ export default async function ComplianceCentreHubPage() {
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">
           Fleet compliance guidance for UK operators
         </h1>
-        <p className="text-white/70 text-lg leading-relaxed mb-12">
+        <p className="text-slate-600 text-lg leading-relaxed mb-12">
           Practical articles on defect records, moving from paper to digital inspections, staying ahead of MOT and tax
           renewals, and keeping plant machinery examination records in order — written for fleets that take compliance
           seriously.
         </p>
-        <p className="text-white/55 text-sm leading-relaxed mb-12 -mt-8">
+        <p className="text-slate-500 text-sm leading-relaxed mb-12 -mt-8">
           Use Fleet Track PRO&apos;s optional Plant &amp; Machinery module to complete LOLER, service, pre-hire/off-hire,
           and PUWER forms in one inspection entry — from £12 per machine per month (min 3), with separate PDFs,
           examination due reminders, and manager alerts.
@@ -34,10 +34,10 @@ export default async function ComplianceCentreHubPage() {
             <li key={article.slug}>
               <Link
                 href={`/compliance-centre/${article.slug}`}
-                className="block rounded-2xl border border-white/10 bg-white/[0.03] p-6 hover:border-[var(--brand-blue)]/40 hover:bg-white/[0.05] transition-colors"
+                className="block mkt-card p-6 hover:border-[var(--brand-blue)]/40"
               >
-                <h2 className="text-xl font-semibold text-white mb-2">{article.title}</h2>
-                <p className="text-white/60 text-sm leading-relaxed">{article.metaDescription}</p>
+                <h2 className="text-xl font-semibold text-slate-900 mb-2">{article.title}</h2>
+                <p className="text-slate-500 text-sm leading-relaxed">{article.metaDescription}</p>
                 <span className="inline-flex mt-4 text-[var(--brand-blue)] text-sm font-medium">
                   Read article →
                 </span>

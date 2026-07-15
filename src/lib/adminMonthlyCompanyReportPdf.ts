@@ -155,7 +155,7 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...BLACK);
   doc.setFontSize(10);
-  doc.text('Stock Track PRO', logoX + 15, y + 5);
+  doc.text('Fleet Track PRO', logoX + 15, y + 5);
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
   doc.text('Monthly fleet performance report', logoX + 15, y + 9.5);
@@ -489,7 +489,7 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
   doc.text('Confidential - prepared for operational review · stocktrackpro.co.uk', contentX, footerY);
-  doc.text('© 2026 Stock Track PRO Ltd', contentX + contentW, footerY, { align: 'right' });
+  doc.text('© 2026 Fleet Track PRO Ltd', contentX + contentW, footerY, { align: 'right' });
 
   return doc;
 }

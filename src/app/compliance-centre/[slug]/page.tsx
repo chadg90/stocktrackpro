@@ -68,8 +68,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function KeyTakeaways({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-12 rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6 sm:p-8">
-      <h2 className="mb-5 text-xl font-semibold text-white">Key takeaways</h2>
+    <div className="mt-12 rounded-2xl border border-slate-200 bg-blue-500/10 p-6 sm:p-8">
+      <h2 className="mb-5 text-xl font-semibold text-slate-900">Key takeaways</h2>
       <ul className="compliance-takeaway-list space-y-3">{children}</ul>
     </div>
   );
@@ -77,9 +77,9 @@ function KeyTakeaways({ children }: { children: React.ReactNode }) {
 
 function ArticleCta() {
   return (
-    <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-7">
-      <p className="text-base leading-relaxed text-white/85">
-        <span className="font-medium text-white">Fleet Track PRO</span> helps automate this process for UK fleets.{' '}
+    <div className="mt-10 rounded-2xl border border-slate-200 bg-white/[0.04] p-6 sm:p-7">
+      <p className="text-base leading-relaxed text-slate-700">
+        <span className="font-medium text-slate-900">Fleet Track PRO</span> helps automate this process for UK fleets.{' '}
         <Link href="/onboarding" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
           Try free for 7 days — no card required.
         </Link>
@@ -96,7 +96,7 @@ function VanFleetDefectRecordsArticle() {
         Government guidance on{' '}
         <a
           href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -124,7 +124,7 @@ function VanFleetDefectRecordsArticle() {
         According to{' '}
         <a
           href="https://www.gov.uk/roadside-vehicle-checks-for-commercial-drivers/roadside-prohibitions"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -148,7 +148,7 @@ function VanFleetDefectRecordsArticle() {
         DVSA publishes{' '}
         <a
           href="https://www.gov.uk/government/statistical-data-sets/vehicle-enforcement-data-for-great-britain"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -203,7 +203,7 @@ function VanFleetDefectRecordsArticle() {
         This article summarises general principles and is not legal advice. Always check current{' '}
         <a
           href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -260,7 +260,7 @@ function PaperVsDigitalArticle() {
         GOV.UK guidance on{' '}
         <a
           href="https://www.gov.uk/roadside-vehicle-checks-for-commercial-drivers"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -301,7 +301,7 @@ function PaperVsDigitalArticle() {
         This article summarises general principles and is not legal advice. Always check current{' '}
         <a
           href="https://www.gov.uk/roadside-vehicle-checks-for-commercial-drivers"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -386,7 +386,7 @@ function MotExpiryTrackingArticle() {
         This article summarises general principles and is not legal advice. Always check current MOT and tax rules on{' '}
         <a
           href="https://www.gov.uk/check-mot-history"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -417,7 +417,7 @@ function PreUseChecksArticle() {
         that a responsible person looked at the vehicle at the point of use. Government guidance on{' '}
         <a
           href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -452,7 +452,7 @@ function PreUseChecksArticle() {
         reported. Photos help where there is damage, tyre wear, or a lighting fault. If the record only says
         &quot;all OK&quot; with no name and no timestamp, it is weak evidence when something goes wrong later. For the
         full defect trail after a fault is found, see{' '}
-        <Link href="/compliance-centre/van-fleet-defect-records" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+        <Link href="/compliance-centre/van-fleet-defect-records" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4">
           van fleet defect records
         </Link>
         .
@@ -473,7 +473,7 @@ function PreUseChecksArticle() {
         This article summarises general principles and is not legal advice. Follow current{' '}
         <a
           href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -512,7 +512,7 @@ function DigitalDefectRecordsDvsaArticle() {
       </p>
       <p>
         For more on what to capture day to day, see our guide on{' '}
-        <Link href="/compliance-centre/van-fleet-defect-records" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+        <Link href="/compliance-centre/van-fleet-defect-records" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4">
           van fleet defect records
         </Link>
         . This article focuses on how that trail holds up when an examiner asks harder questions.
@@ -556,7 +556,7 @@ function DigitalDefectRecordsDvsaArticle() {
         This article summarises general principles and is not legal advice. Always check current{' '}
         <a
           href="https://www.gov.uk/roadside-vehicle-checks-for-commercial-drivers"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -578,10 +578,10 @@ function DigitalDefectRecordsDvsaArticle() {
 
 function PlantArticleCta() {
   return (
-    <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-7">
-      <p className="text-base leading-relaxed text-white/85">
+    <div className="mt-10 rounded-2xl border border-slate-200 bg-white/[0.04] p-6 sm:p-7">
+      <p className="text-base leading-relaxed text-slate-700">
         Fleet Track PRO&apos;s optional{' '}
-        <span className="font-medium text-white">Plant &amp; Machinery</span> module lets fitters complete multiple
+        <span className="font-medium text-slate-900">Plant &amp; Machinery</span> module lets fitters complete multiple
         forms in one inspection entry — LOLER, service, pre-hire/off-hire, and PUWER — each with its own PDF report and
         manager alerts when examinations are due. From £12 per machine per month (min 3).{' '}
         <Link href="/pricing" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
@@ -605,7 +605,7 @@ function LolerThoroughExaminationRecordsArticle() {
         hoists, or slings and shackles — the{' '}
         <a
           href="https://www.hse.gov.uk/work-equipment/loler/the-law.htm"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -626,7 +626,7 @@ function LolerThoroughExaminationRecordsArticle() {
         According to{' '}
         <a
           href="https://www.hse.gov.uk/work-equipment/loler/examination-of-lifting-equipment.htm"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -643,7 +643,7 @@ function LolerThoroughExaminationRecordsArticle() {
         HSE guidance on{' '}
         <a
           href="https://www.hse.gov.uk/work-equipment/loler/report-thorough-examination-lifting-equipment.htm"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -698,7 +698,7 @@ function LolerThoroughExaminationRecordsArticle() {
         This article summarises general principles and is not legal advice. Always refer to current{' '}
         <a
           href="https://www.hse.gov.uk/work-equipment/loler/"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -765,7 +765,7 @@ function PlantMachineryServiceVsLolerArticle() {
         examination scheme states otherwise. See{' '}
         <a
           href="https://www.hse.gov.uk/work-equipment/loler/examination-of-lifting-equipment.htm"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -801,7 +801,7 @@ function PlantMachineryServiceVsLolerArticle() {
         This article summarises general principles and is not legal advice. Check current{' '}
         <a
           href="https://www.hse.gov.uk/work-equipment/loler/"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -895,7 +895,7 @@ function PlantExaminationDueDateTrackingArticle() {
         This article summarises general principles and is not legal advice. Refer to{' '}
         <a
           href="https://www.hse.gov.uk/work-equipment/loler/report-thorough-examination-lifting-equipment.htm"
-          className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -951,7 +951,7 @@ export default async function ComplianceArticlePage({ params }: Props) {
       : resolved.article;
 
   return (
-    <div className="min-h-screen bg-black text-white antialiased">
+    <div className="marketing-shell">
       <ComplianceArticleJsonLd article={articleMeta} />
       <Navbar />
       <main className="container mx-auto px-4 pt-24 sm:pt-28 pb-20 max-w-6xl">
@@ -963,7 +963,7 @@ export default async function ComplianceArticlePage({ params }: Props) {
               </Link>
             </p>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">{articleMeta.title}</h1>
-            <p className="mb-10 text-sm text-white/45">
+            <p className="mb-10 text-sm text-slate-400">
               Published{' '}
               {format(new Date(articleMeta.datePublished), 'd MMMM yyyy')}
               {articleMeta.dateModified && articleMeta.dateModified !== articleMeta.datePublished
@@ -980,14 +980,14 @@ export default async function ComplianceArticlePage({ params }: Props) {
             <ArticleBottomCta />
           </article>
           <aside className="lg:sticky lg:top-28 h-fit space-y-6">
-            <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-6">
-              <p className="text-white font-semibold mb-3">Try the platform</p>
-              <p className="text-white/65 text-sm mb-4">
+            <div className="rounded-2xl border border-slate-200 bg-white/[0.04] p-6">
+              <p className="text-slate-900 font-semibold mb-3">Try the platform</p>
+              <p className="text-slate-600 text-sm mb-4">
                 See how inspections, defects, and reminders come together for UK fleets.
               </p>
               <Link
                 href="/onboarding"
-                className="flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black"
+                className="flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-slate-50"
               >
                 Try Fleet Track PRO Free for 7 Days →
               </Link>
@@ -995,8 +995,8 @@ export default async function ComplianceArticlePage({ params }: Props) {
           </aside>
         </div>
 
-        <section className="mt-16 pt-12 border-t border-white/10 max-w-3xl">
-          <h2 className="text-lg font-semibold text-white mb-4">Related articles</h2>
+        <section className="mt-16 pt-12 border-t border-slate-200 max-w-3xl">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Related articles</h2>
           <ul className="space-y-3">
             {related.map((r) => (
               <li key={r.slug}>

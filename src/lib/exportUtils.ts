@@ -243,7 +243,7 @@ export function applyEvidenceRecordFooters(
   const pageW = doc.internal.pageSize.getWidth();
   const gen = new Date().toLocaleString('en-GB');
   const line2 =
-    'Stock Track PRO — management evidence for operator records; not a statutory roadworthiness certificate, MOT pass, or DVSA inspection outcome.';
+    'Fleet Track PRO — management evidence for operator records; not a statutory roadworthiness certificate, MOT pass, or DVSA inspection outcome.';
 
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
@@ -320,7 +320,7 @@ export function exportMultipleSheetsToPDF(
       doc.setFontSize(8);
       doc.setTextColor(60, 60, 60);
       const coverNote = doc.splitTextToSize(
-        'Formal data extract from Stock Track PRO for retention, audit, and supporting evidence (e.g. DVSA enquiries or insurance claims). Contents reflect system records at generation time.',
+        'Formal data extract from Fleet Track PRO for retention, audit, and supporting evidence (e.g. DVSA enquiries or insurance claims). Contents reflect system records at generation time.',
         doc.internal.pageSize.getWidth() - margin * 2
       );
       doc.text(coverNote, margin, y);

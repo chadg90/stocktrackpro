@@ -60,7 +60,7 @@ export default function Contact() {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white antialiased">
+    <div className="marketing-shell">
       <Navbar />
 
       {/* Hero */}
@@ -72,10 +72,10 @@ export default function Contact() {
             Contact
           </p>
           <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
               Get in <span className="text-blue-500">touch</span>
             </h1>
-            <p className="text-lg text-white/75 leading-relaxed">
+            <p className="text-lg text-slate-600 leading-relaxed">
               Have questions about Fleet Track PRO? We&apos;re here to help with fleet setup, inspections, defects, the
               Plant &amp; Machinery add-on, and billing.
             </p>
@@ -84,13 +84,13 @@ export default function Contact() {
       </section>
 
       {/* Form card */}
-      <section className="py-12 sm:py-16 border-t border-white/10">
+      <section className="py-12 sm:py-16 border-t border-slate-200">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
-            <div className="p-8 sm:p-10 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/15 transition-colors">
-              <h2 className="text-xl font-bold text-white mb-6">Send us a message</h2>
+            <div className="p-8 sm:p-10 rounded-2xl border border-slate-200 bg-slate-50 hover:border-slate-200 transition-colors">
+              <h2 className="text-xl font-bold text-slate-900 mb-6">Send us a message</h2>
               {submitSuccess && (
-                <div role="status" aria-live="polite" className="mb-6 p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-500">
+                <div role="status" aria-live="polite" className="mb-6 p-4 rounded-xl bg-blue-500/10 border border-slate-200 text-blue-500">
                   Thanks! We&apos;ll get back to you soon.
                 </div>
               )}
@@ -113,7 +113,7 @@ export default function Contact() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="contact-name" className="block text-sm font-medium text-white/80 mb-2">Name</label>
+                  <label htmlFor="contact-name" className="block text-sm font-medium text-slate-600 mb-2">Name</label>
                   <input
                     id="contact-name"
                     name="name"
@@ -122,12 +122,12 @@ export default function Contact() {
                     minLength={2}
                     value={formData.name}
                     onChange={e => setFormData(d => ({ ...d, name: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-slate-200 text-slate-900 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="Your name"
                   />
                 </div>
                 <div>
-                  <label htmlFor="contact-email" className="block text-sm font-medium text-white/80 mb-2">Email</label>
+                  <label htmlFor="contact-email" className="block text-sm font-medium text-slate-600 mb-2">Email</label>
                   <input
                     id="contact-email"
                     name="email"
@@ -135,24 +135,24 @@ export default function Contact() {
                     required
                     value={formData.email}
                     onChange={e => setFormData(d => ({ ...d, email: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-slate-200 text-slate-900 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="you@example.com"
                   />
                 </div>
                 <div>
-                  <label htmlFor="contact-subject" className="block text-sm font-medium text-white/80 mb-2">Subject (optional)</label>
+                  <label htmlFor="contact-subject" className="block text-sm font-medium text-slate-600 mb-2">Subject (optional)</label>
                   <input
                     id="contact-subject"
                     name="subject"
                     type="text"
                     value={formData.subject}
                     onChange={e => setFormData(d => ({ ...d, subject: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-slate-200 text-slate-900 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="How can we help?"
                   />
                 </div>
                 <div>
-                  <label htmlFor="contact-message" className="block text-sm font-medium text-white/80 mb-2">Message</label>
+                  <label htmlFor="contact-message" className="block text-sm font-medium text-slate-600 mb-2">Message</label>
                   <textarea
                     id="contact-message"
                     name="message"
@@ -161,14 +161,14 @@ export default function Contact() {
                     rows={5}
                     value={formData.message}
                     onChange={e => setFormData(d => ({ ...d, message: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-slate-200 text-slate-900 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y transition-colors"
                     placeholder="Your message..."
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={sending}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black btn-brand-blue"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50 btn-brand-blue"
                   aria-busy={sending}
                 >
                   {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
@@ -181,24 +181,24 @@ export default function Contact() {
       </section>
 
       {/* Contact methods */}
-      <section className="py-12 sm:py-16 bg-white/[0.02] border-t border-white/10">
+      <section className="py-12 sm:py-16 bg-slate-50 border-t border-slate-200">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {contactMethods.map((method, index) => (
               <div
                 key={index}
-                className="group p-8 rounded-2xl border border-white/10 bg-black/40 hover:border-blue-500/25 hover:bg-white/[0.03] transition-all duration-300"
+                className="group p-8 rounded-2xl border border-slate-200 bg-white hover:border-blue-300 hover:bg-white transition-all duration-300"
               >
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500/20 transition-colors">
                     <Mail className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">{method.title}</h3>
-                    <p className="text-white/60 text-sm">{method.description}</p>
+                    <h3 className="text-lg font-semibold text-slate-900">{method.title}</h3>
+                    <p className="text-slate-500 text-sm">{method.description}</p>
                   </div>
                 </div>
-                <p className="text-white/90 mb-6 break-all">{method.value}</p>
+                <p className="text-slate-800 mb-6 break-all">{method.value}</p>
                 <Link
                   href={method.href}
                   target={method.type === 'whatsapp' ? '_blank' : undefined}
@@ -215,11 +215,11 @@ export default function Contact() {
       </section>
 
       {/* What to expect */}
-      <section className="py-12 sm:py-16 border-t border-white/10">
+      <section className="py-12 sm:py-16 border-t border-slate-200">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto p-8 rounded-2xl border border-white/10 bg-white/[0.02]">
-            <h3 className="text-xl font-semibold text-white mb-6">What to expect</h3>
-            <ul className="space-y-4 text-white/80">
+          <div className="max-w-4xl mx-auto p-8 rounded-2xl border border-slate-200 bg-slate-50">
+            <h3 className="text-xl font-semibold text-slate-900 mb-6">What to expect</h3>
+            <ul className="space-y-4 text-slate-600">
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
                 <span>We aim to respond to all inquiries within 24 hours during business days.</span>

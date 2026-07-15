@@ -75,7 +75,7 @@ export default function PricingSection() {
                   aria-selected={billingCycle === 'monthly'}
                   onClick={() => setBillingCycle('monthly')}
                   className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition ${
-                    billingCycle === 'monthly' ? 'bg-white text-blue-700 shadow' : 'text-white/85 hover:text-white'
+                    billingCycle === 'monthly' ? 'bg-white text-blue-700 shadow' : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
                   Monthly
@@ -86,23 +86,23 @@ export default function PricingSection() {
                   aria-selected={billingCycle === 'yearly'}
                   onClick={() => setBillingCycle('yearly')}
                   className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition inline-flex items-center gap-1.5 ${
-                    billingCycle === 'yearly' ? 'bg-white text-blue-700 shadow' : 'text-white/85 hover:text-white'
+                    billingCycle === 'yearly' ? 'bg-white text-blue-700 shadow' : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
                   Annual
                   <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
-                    billingCycle === 'yearly' ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-400/25 text-white'
+                    billingCycle === 'yearly' ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-400/25 text-slate-900'
                   }`}>
                     Save 12%
                   </span>
                 </button>
               </div>
             </div>
-            <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-3">
+            <span className="inline-block bg-white/20 text-slate-900 text-xs font-bold px-3 py-1 rounded-full mb-3">
               {tier.label}
             </span>
             <div className="flex items-end justify-center gap-1">
-              <span className="text-5xl font-bold text-white">£{billedTotal}</span>
+              <span className="text-5xl font-bold text-slate-900">£{billedTotal}</span>
               <span className="text-blue-200 text-lg mb-1">{billingCycle === 'yearly' ? '/year' : '/month'}</span>
             </div>
             <p className="text-blue-200 text-sm mt-1">

@@ -27,9 +27,9 @@ export default function CookieConsent() {
   if (!showConsent) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-primary/20 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-primary/20 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] z-50">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="text-white/80 text-sm text-center sm:text-left">
+        <div className="text-slate-600 text-sm text-center sm:text-left">
           <p>
             We use cookies to enhance your experience. By continuing to visit this site you agree to our use of cookies.{' '}
             <Link href="/cookies" className="text-primary hover:text-primary-light underline">
@@ -40,7 +40,7 @@ export default function CookieConsent() {
         <div className="flex w-full sm:w-auto gap-3 sm:gap-4">
           <button
             onClick={handleDecline}
-            className="flex-1 sm:flex-none px-4 py-3 min-h-[44px] text-sm text-white/80 hover:text-white transition-colors"
+            className="flex-1 sm:flex-none px-4 py-3 min-h-[44px] text-sm text-slate-600 hover:text-slate-900 transition-colors"
           >
             Decline
           </button>

@@ -136,7 +136,7 @@ const features: Feature[] = [
 
 export default function Features() {
   return (
-    <div className="min-h-screen bg-black text-white antialiased">
+    <div className="marketing-shell">
       <Navbar />
 
       {/* Hero */}
@@ -148,10 +148,10 @@ export default function Features() {
             Features
           </p>
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
               Everything a fleet manager actually needs
             </h1>
-            <p className="text-lg text-white/75 leading-relaxed">
+            <p className="text-lg text-slate-600 leading-relaxed">
               No bloat. One fleet subscription covers DVSA walkaround inspections, defect workflow, MOT monitoring, and team
               management across iOS, Android, and the web dashboard. Not warehouse stock tracking — van fleet compliance
               for UK operators. Add Plant &amp; Machinery when you need LOLER and site plant records.
@@ -161,7 +161,7 @@ export default function Features() {
       </section>
 
       {/* Feature deep dives */}
-      <section className="py-16 sm:py-20 border-t border-white/10">
+      <section className="py-16 sm:py-20 border-t border-slate-200">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto space-y-6">
             {features.map((feature) => {
@@ -169,38 +169,38 @@ export default function Features() {
               return (
                 <article
                   key={feature.title}
-                  className="group p-7 sm:p-10 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-blue-500/30 hover:bg-white/[0.04] transition-all duration-300"
+                  className="group p-7 sm:p-10 mkt-card hover:border-blue-300"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start gap-5 sm:gap-6">
                     <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500/20 transition-colors flex-shrink-0">
                       <Icon className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-xl sm:text-2xl font-semibold text-white mb-3">
+                      <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mb-3">
                         {feature.title}
                       </h2>
-                      <p className="text-white/75 leading-relaxed mb-5">
+                      <p className="text-slate-600 leading-relaxed mb-5">
                         {feature.summary}
                       </p>
                       <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 mb-5">
                         {feature.bullets.map((b) => (
                           <li
                             key={b}
-                            className="flex items-start gap-2.5 text-sm text-white/80"
+                            className="flex items-start gap-2.5 text-sm text-slate-600"
                           >
                             <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />
                             <span className="leading-relaxed">{b}</span>
                           </li>
                         ))}
                       </ul>
-                      <p className="text-sm text-white/55 italic border-l-2 border-blue-500/40 pl-4">
+                      <p className="text-sm text-slate-500 italic border-l-2 border-blue-500/40 pl-4">
                         {feature.useCase}
                       </p>
                       {feature.title === 'Vehicle inspections' && (
                         <p className="mt-4 text-sm">
                           <Link
                             href="/compliance-centre/paper-vs-digital-inspection-sheets"
-                            className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+                            className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
                           >
                             Read why UK fleets are moving from paper to digital inspection sheets
                           </Link>
@@ -210,7 +210,7 @@ export default function Features() {
                         <p className="mt-4 text-sm">
                           <Link
                             href="/compliance-centre/mot-expiry-tracking-for-fleets"
-                            className="text-blue-400 hover:text-blue-300 underline underline-offset-4"
+                            className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
                           >
                             Learn how MOT expiry tracking helps fleets stay ahead of renewals
                           </Link>
@@ -226,13 +226,13 @@ export default function Features() {
       </section>
 
       {/* CTA */}
-      <section className="relative py-20 sm:py-24 overflow-hidden border-t border-white/10">
+      <section className="relative py-20 sm:py-24 overflow-hidden border-t border-slate-200">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_100%,rgba(59,130,246,0.1),transparent_70%)]" />
         <div className="container relative mx-auto px-4 text-center">
-          <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
             See how it fits your business
           </h3>
-          <p className="text-white/70 max-w-lg mx-auto mb-8">
+          <p className="text-slate-600 max-w-lg mx-auto mb-8">
             Fleet features are included in your vehicle subscription (£8 per vehicle per month, or £84 per vehicle per
             year). Plant &amp; Machinery is optional from £12 per machine per month — see pricing for details. No
             long-term contract on monthly plans.
@@ -247,18 +247,18 @@ export default function Features() {
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-white/20 text-white hover:border-blue-500/50 hover:bg-white/5 transition-all duration-200 font-medium"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-slate-300 text-slate-900 hover:border-blue-400 hover:bg-slate-50 transition-all duration-200 font-medium"
             >
               View pricing
             </Link>
           </div>
-          <p className="mt-5 text-sm text-white/50">
+          <p className="mt-5 text-sm text-slate-500">
             7 days free &bull; no card required &bull;{' '}
             <a
               href={WHATSAPP_ENQUIRY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/70 hover:text-white underline underline-offset-2"
+              className="text-slate-600 hover:text-slate-900 underline underline-offset-2"
             >
               or talk to us on WhatsApp
             </a>

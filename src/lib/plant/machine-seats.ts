@@ -10,7 +10,7 @@ export function getPlantMachineSeatLimit(company: CompanyPlantAccessFields | nul
 }
 
 export function formatPlantSeatLimitMessage(limit: number, activeCount: number): string {
-  return `You have ${activeCount} of ${limit} machines on your Plant subscription. Add more seats on the Stock Track Pro website before registering another machine.`;
+  return `You have ${activeCount} of ${limit} machines on your Plant subscription. Add more seats on the Fleet Track PRO website before registering another machine.`;
 }
 
 export function assertCanAddPlantMachine(

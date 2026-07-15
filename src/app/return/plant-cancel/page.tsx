@@ -6,12 +6,12 @@ import Link from 'next/link';
 
 export default function PlantCancelPage() {
   return (
-    <div className="min-h-screen bg-black">
+    <div className="marketing-shell">
       <Navbar />
       <div className="container mx-auto px-4 pt-28 pb-20">
         <div className="max-w-xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-white mb-4">Checkout cancelled</h1>
-          <p className="text-white/70 mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 mb-4">Checkout cancelled</h1>
+          <p className="text-slate-600 mb-8">
             No charge was made. You can subscribe to the Plant &amp; Machinery module anytime from
             the pricing page.
           </p>

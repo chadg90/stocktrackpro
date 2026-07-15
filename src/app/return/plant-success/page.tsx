@@ -7,7 +7,7 @@ import { CheckCircle, HardHat } from 'lucide-react';
 
 function PlantSuccessContent() {
   return (
-    <div className="min-h-screen bg-black">
+    <div className="marketing-shell">
       <Navbar />
       <div className="container mx-auto px-4 pt-28 pb-20">
         <div className="max-w-xl mx-auto text-center">
@@ -15,8 +15,8 @@ function PlantSuccessContent() {
             <HardHat className="h-12 w-12 text-amber-400" aria-hidden />
           </div>
           <CheckCircle className="h-10 w-10 text-amber-400 mx-auto mb-4" aria-hidden />
-          <h1 className="text-3xl font-bold text-white mb-4">Plant module active</h1>
-          <p className="text-white/70 mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 mb-4">Plant module active</h1>
+          <p className="text-slate-600 mb-8">
             Your subscription is processing. You can register machines and assign plant access to
             inspectors from the dashboard once Stripe confirms payment (usually within a minute).
           </p>
@@ -29,7 +29,7 @@ function PlantSuccessContent() {
             </Link>
             <Link
               href="/dashboard"
-              className="inline-flex items-center justify-center px-6 py-3 border border-white/20 text-white hover:bg-white/10 rounded-xl transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 border border-slate-300 text-slate-900 hover:bg-slate-100 rounded-xl transition-colors"
             >
               Dashboard
             </Link>
@@ -42,7 +42,7 @@ function PlantSuccessContent() {
 
 export default function PlantSuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-black" />}>
+    <Suspense fallback={<div className="marketing-shell" />}>
       <PlantSuccessContent />
     </Suspense>
   );

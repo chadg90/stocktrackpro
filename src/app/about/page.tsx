@@ -3,7 +3,7 @@ import Navbar from '@/app/components/Navbar';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-black text-white antialiased">
+    <div className="marketing-shell">
       <Navbar />
       <main className="container mx-auto px-4 pt-24 sm:pt-32 pb-20 max-w-4xl">
         <p className="text-[var(--brand-blue)] font-medium text-sm uppercase tracking-[0.2em] mb-4">
@@ -12,88 +12,88 @@ export default function AboutPage() {
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">
           Built for UK fleet operators who are tired of spreadsheets
         </h1>
-        <p className="text-white/80 text-lg leading-relaxed mb-6">
+        <p className="text-slate-600 text-lg leading-relaxed mb-6">
           Fleet Track PRO was built because the tools available to small fleet operators were either overpriced
           enterprise software or a combination of spreadsheets and WhatsApp messages that let things fall through the
           cracks.
         </p>
-        <p className="text-white/75 text-lg leading-relaxed mb-10">
+        <p className="text-slate-600 text-lg leading-relaxed mb-10">
           We built one platform that does what fleet managers actually need — DVSA walkaround checks, defect close-out,
           and MOT visibility — without the complexity or the cost. This is van fleet compliance software, not warehouse
           inventory or stock control.
         </p>
 
         <div className="grid gap-6">
-          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">Why Fleet Track PRO exists</h2>
-            <p className="text-white/70 leading-relaxed mb-4">
+            <p className="text-slate-600 leading-relaxed mb-4">
               Paper sheets get lost. Group chats bury urgent defects. MOT dates live in someone&apos;s memory until
               they are not. Managers end up chasing drivers and fitters instead of running the business.
             </p>
-            <p className="text-white/70 leading-relaxed">
+            <p className="text-slate-600 leading-relaxed">
               Fleet Track PRO keeps daily checks, defect workflow, and renewal visibility in one place — mobile app for
               the field, web dashboard for managers — so records are timestamped and searchable when you need them.
             </p>
           </section>
 
-          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">Who it is built for</h2>
-            <p className="text-white/70 leading-relaxed">
+            <p className="text-slate-600 leading-relaxed">
               UK trades, groundworks, logistics, construction, haulage, and contractor businesses — from sole traders with
               a handful of vans to teams managing larger mixed fleets. Optional Plant &amp; Machinery covers LOLER and
               site plant when you need it.
             </p>
           </section>
 
-          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">How teams use it</h2>
-            <p className="text-white/70 leading-relaxed mb-4">
+            <p className="text-slate-600 leading-relaxed mb-4">
               Managers use the web dashboard to add vehicles, review inspections, manage defects, monitor MOT and tax
               status, invite team members, and handle billing.
             </p>
-            <p className="text-white/70 leading-relaxed">
+            <p className="text-slate-600 leading-relaxed">
               Drivers (user role) and fitters (manager role) use the iOS and Android app for daily inspections,
               photo-evidenced defect reports, My Jobs, and close-out when work is complete.
             </p>
           </section>
 
-          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">Plant &amp; Machinery (optional)</h2>
-            <p className="text-white/70 leading-relaxed mb-4">
+            <p className="text-slate-600 leading-relaxed mb-4">
               Many of our customers run vans and site plant. The optional Plant &amp; Machinery module is a separate
               subscription for lifting equipment — excavators, telehandlers, MEWPs, hoists, and hired plant with LOLER
               requirements. It is priced from £12 per machine per month (including VAT), with a minimum of 3 machines,
               or £120 per machine per year.
             </p>
-            <p className="text-white/70 leading-relaxed mb-4">
+            <p className="text-slate-600 leading-relaxed mb-4">
               Fitters complete the forms needed for that visit in one inspection entry: LOLER thorough examination,
               service inspection, pre-hire or off-hire checks, and PUWER. Each form generates its own PDF, stored on the
               web dashboard with examination due reminders for managers.
             </p>
             <Link
               href="/compliance-centre"
-              className="text-blue-400 hover:text-blue-300 text-sm font-medium underline underline-offset-4"
+              className="text-[var(--brand-blue)] hover:text-blue-700 text-sm font-medium underline underline-offset-4"
             >
               Plant &amp; LOLER compliance articles →
             </Link>
           </section>
 
-          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">In the field</h2>
-            <p className="text-white/70 leading-relaxed mb-4">
+            <p className="text-slate-600 leading-relaxed mb-4">
               See how a groundworks contractor uses Fleet Track PRO across multiple sites.
             </p>
             <Link
               href="/customers/newstreet"
-              className="text-blue-400 hover:text-blue-300 text-sm font-medium underline underline-offset-4"
+              className="text-[var(--brand-blue)] hover:text-blue-700 text-sm font-medium underline underline-offset-4"
             >
               Newstreet Groundworks case study →
             </Link>
           </section>
 
-          <section className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6 sm:p-8">
+          <section className="rounded-2xl border border-slate-200 bg-blue-500/10 p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">Pricing and support</h2>
-            <p className="text-white/75 leading-relaxed mb-5">
+            <p className="text-slate-600 leading-relaxed mb-5">
               Fleet is £8 per vehicle per month (min 5 vehicles), with optional Plant &amp; Machinery from £12 per
               machine per month (min 3). Full detail and the 7-day free trial are on our{' '}
               <Link href="/pricing" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
@@ -110,7 +110,7 @@ export default function AboutPage() {
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-medium border border-white/20 hover:bg-white/5"
+                className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-medium border border-slate-300 hover:bg-slate-50"
               >
                 Contact us
               </Link>

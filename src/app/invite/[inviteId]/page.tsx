@@ -121,15 +121,15 @@ export default function InviteAcceptPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <p className="text-white/70">Loading invite...</p>
+      <main className="marketing-shell flex items-center justify-center p-6">
+        <p className="text-slate-600">Loading invite...</p>
       </main>
     );
   }
 
   if (accepted) {
     return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+      <main className="marketing-shell flex items-center justify-center p-6">
         <div className="w-full max-w-lg rounded-2xl border border-emerald-500/35 bg-zinc-950 p-6 sm:p-8 shadow-lg shadow-emerald-500/5">
           <div className="flex flex-col items-center text-center mb-6">
             <div
@@ -140,30 +140,30 @@ export default function InviteAcceptPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2">You have successfully signed up</h1>
-            <p className="text-white/70 text-sm sm:text-base max-w-md">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 mb-2">You have successfully signed up</h1>
+            <p className="text-slate-600 text-sm sm:text-base max-w-md">
               Your Fleet Track PRO account is ready. Open the app on your phone and sign in with the email and password you
               just created.
             </p>
           </div>
 
           {signedUpEmail && (
-            <div className="mb-6 rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-left">
-              <p className="text-xs text-white/50 uppercase tracking-wide mb-1">Sign in with this email</p>
-              <p className="text-white font-medium break-all">{signedUpEmail}</p>
+            <div className="mb-6 rounded-lg border border-slate-200 bg-white/5 px-4 py-3 text-left">
+              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Sign in with this email</p>
+              <p className="text-slate-900 font-medium break-all">{signedUpEmail}</p>
             </div>
           )}
 
-          <ol className="text-sm text-white/75 space-y-3 mb-6 list-decimal list-inside text-left">
+          <ol className="text-sm text-slate-600 space-y-3 mb-6 list-decimal list-inside text-left">
             <li>
-              <span className="text-white/90">Get the app</span> — use the App Store link below, or your manager’s link if you
+              <span className="text-slate-800">Get the app</span> — use the App Store link below, or your manager’s link if you
               are on Android (testing).
             </li>
             <li>
-              <span className="text-white/90">Open Fleet Track PRO</span> and choose sign in (not create account).
+              <span className="text-slate-800">Open Fleet Track PRO</span> and choose sign in (not create account).
             </li>
             <li>
-              <span className="text-white/90">Enter your email and password</span> from this page. Use Forgot password in the
+              <span className="text-slate-800">Enter your email and password</span> from this page. Use Forgot password in the
               app if you need to reset it later.
             </li>
           </ol>
@@ -177,21 +177,21 @@ export default function InviteAcceptPage() {
             >
               Open App Store — Fleet Track PRO
             </a>
-            <div className="rounded-lg border border-white/15 bg-white/5 p-4 text-left">
-              <p className="text-sm text-white/80 font-medium">Android (internal testing)</p>
-              <p className="text-sm text-white/60 mt-1">
+            <div className="rounded-lg border border-slate-200 bg-white/5 p-4 text-left">
+              <p className="text-sm text-slate-600 font-medium">Android (internal testing)</p>
+              <p className="text-sm text-slate-500 mt-1">
                 Your manager will send your install or Play testing link. Then sign in with the same email and password as
                 above.
               </p>
             </div>
             <Link
               href="/"
-              className="block w-full rounded-lg border border-white/20 text-white/80 hover:text-white hover:border-white/40 py-3 px-4 text-center transition-colors"
+              className="block w-full rounded-lg border border-slate-300 text-slate-600 hover:text-slate-900 hover:border-white/40 py-3 px-4 text-center transition-colors"
             >
               Continue to website
             </Link>
             {isMobile && (
-              <p className="text-xs text-white/45 text-center">
+              <p className="text-xs text-slate-400 text-center">
                 Tip: after installing, return here if you need your sign-in email again, or use Continue to website when you are
                 done.
               </p>
@@ -203,11 +203,11 @@ export default function InviteAcceptPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-      <div className="w-full max-w-lg rounded-2xl border border-blue-500/30 bg-zinc-950 p-6 sm:p-8">
+    <main className="marketing-shell flex items-center justify-center p-6">
+      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-zinc-950 p-6 sm:p-8">
         <h1 className="text-2xl font-semibold mb-2">Accept Invitation</h1>
-        <p className="text-white/70 mb-6">
-          You were invited to join <span className="text-white">{invite?.companyName || 'Fleet Track PRO'}</span>
+        <p className="text-slate-600 mb-6">
+          You were invited to join <span className="text-slate-900">{invite?.companyName || 'Fleet Track PRO'}</span>
           {invite?.role ? ` as ${invite.role}` : ''}. Set your password to continue.
         </p>
 
@@ -224,14 +224,14 @@ export default function InviteAcceptPage() {
               placeholder="First name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full rounded-lg bg-black border border-blue-500/30 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 outline-none"
+              className="w-full rounded-lg bg-white border border-slate-200 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 outline-none"
             />
             <input
               type="text"
               placeholder="Last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full rounded-lg bg-black border border-blue-500/30 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 outline-none"
+              className="w-full rounded-lg bg-white border border-slate-200 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 outline-none"
             />
           </div>
           <input
@@ -239,7 +239,7 @@ export default function InviteAcceptPage() {
             placeholder="Create password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg bg-black border border-blue-500/30 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 outline-none"
+            className="w-full rounded-lg bg-white border border-slate-200 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 outline-none"
             required
             minLength={6}
           />
@@ -248,7 +248,7 @@ export default function InviteAcceptPage() {
             placeholder="Confirm password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full rounded-lg bg-black border border-blue-500/30 px-3 py-2.5 text-white placeholder:text-white/40 focus:border-blue-500 outline-none"
+            className="w-full rounded-lg bg-white border border-slate-200 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 outline-none"
             required
             minLength={6}
           />

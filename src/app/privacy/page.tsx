@@ -7,29 +7,29 @@ const LAST_UPDATED = '2 June 2026';
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen bg-black">
+    <div className="marketing-shell">
       <Navbar />
 
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-8">
+          <h1 className="text-4xl font-bold text-slate-900 mb-8">
             Privacy <span className="text-primary">Policy</span>
           </h1>
-          <p className="text-white/80 mb-8">Last updated: {LAST_UPDATED}</p>
+          <p className="text-slate-600 mb-8">Last updated: {LAST_UPDATED}</p>
 
           <div className="prose prose-invert max-w-none">
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">1. Introduction</h2>
-              <p className="text-white/80">
-                Fleet Track PRO Ltd (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) trades as <strong className="text-white">Fleet Track PRO</strong>. We are committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, how we use it, and your rights when using our website, dashboard, and companion mobile app.
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">1. Introduction</h2>
+              <p className="text-slate-600">
+                Fleet Track PRO Ltd (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) trades as <strong className="text-slate-900">Fleet Track PRO</strong>. We are committed to protecting your privacy. This policy explains what personal data we collect, why we collect it, how we use it, and your rights when using our website, dashboard, and companion mobile app.
               </p>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">2. Information We Collect</h2>
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">2. Information We Collect</h2>
               
-              <h3 className="text-xl font-semibold text-white mb-3">2.1 Information You Provide</h3>
-              <ul className="space-y-3 text-white/80 mb-6">
+              <h3 className="text-xl font-semibold text-slate-900 mb-3">2.1 Information You Provide</h3>
+              <ul className="space-y-3 text-slate-600 mb-6">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Account information (name, business email, password, company details)</span>
@@ -51,8 +51,8 @@ export default function PrivacyPolicy() {
                 </li>
               </ul>
 
-              <h3 className="text-xl font-semibold text-white mb-3">2.2 Automatically Collected Information</h3>
-              <ul className="space-y-3 text-white/80 mb-6">
+              <h3 className="text-xl font-semibold text-slate-900 mb-3">2.2 Automatically Collected Information</h3>
+              <ul className="space-y-3 text-slate-600 mb-6">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Device and app metadata (model, OS, app version)</span>
@@ -67,9 +67,9 @@ export default function PrivacyPolicy() {
                 </li>
               </ul>
 
-              <h3 className="text-xl font-semibold text-white mb-3">2.3 Camera, Photos, and Notifications</h3>
-              <p className="text-white/80 mb-4">We request access to your device&apos;s camera for:</p>
-              <ul className="space-y-3 text-white/80">
+              <h3 className="text-xl font-semibold text-slate-900 mb-3">2.3 Camera, Photos, and Notifications</h3>
+              <p className="text-slate-600 mb-4">We request access to your device&apos;s camera for:</p>
+              <ul className="space-y-3 text-slate-600">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Taking vehicle inspection photos (6 photos per inspection)</span>
@@ -92,12 +92,12 @@ export default function PrivacyPolicy() {
               </ul>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">3. How We Use Your Information</h2>
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">3. How We Use Your Information</h2>
 
-              <h3 className="text-xl font-semibold text-white mb-3">3.1 Core Platform Services</h3>
-              <p className="text-white/80 mb-4">We use Firebase for:</p>
-              <ul className="space-y-3 text-white/80 mb-6">
+              <h3 className="text-xl font-semibold text-slate-900 mb-3">3.1 Core Platform Services</h3>
+              <p className="text-slate-600 mb-4">We use Firebase for:</p>
+              <ul className="space-y-3 text-slate-600 mb-6">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Authentication: Managing user accounts and secure sign-in</span>
@@ -115,9 +115,9 @@ export default function PrivacyPolicy() {
                 </li>
               </ul>
 
-              <h3 className="text-xl font-semibold text-white mb-3">3.2 Billing, Email, and Notifications</h3>
-              <p className="text-white/80 mb-4">We use third-party providers to operate billing and communications:</p>
-              <ul className="space-y-3 text-white/80">
+              <h3 className="text-xl font-semibold text-slate-900 mb-3">3.2 Billing, Email, and Notifications</h3>
+              <p className="text-slate-600 mb-4">We use third-party providers to operate billing and communications:</p>
+              <ul className="space-y-3 text-slate-600">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>
@@ -136,9 +136,9 @@ export default function PrivacyPolicy() {
               </ul>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">4. Data Storage and Security</h2>
-              <ul className="space-y-3 text-white/80">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">4. Data Storage and Security</h2>
+              <ul className="space-y-3 text-slate-600">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>All data is encrypted in transit and at rest</span>
@@ -158,10 +158,10 @@ export default function PrivacyPolicy() {
               </ul>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">5. Your Rights</h2>
-              <p className="text-white/80 mb-4">You have the right to:</p>
-              <ul className="space-y-3 text-white/80">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">5. Your Rights</h2>
+              <p className="text-slate-600 mb-4">You have the right to:</p>
+              <ul className="space-y-3 text-slate-600">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Access your personal data</span>
@@ -181,9 +181,9 @@ export default function PrivacyPolicy() {
               </ul>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">6. Subscription Management</h2>
-              <ul className="space-y-3 text-white/80">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">6. Subscription Management</h2>
+              <ul className="space-y-3 text-slate-600">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Subscriptions are sold and managed via our website checkout powered by Stripe</span>
@@ -197,7 +197,7 @@ export default function PrivacyPolicy() {
                   <span>You can view and manage subscription details in the billing portal from your dashboard</span>
                 </li>
               </ul>
-              <p className="text-white/80 mt-4">
+              <p className="text-slate-600 mt-4">
                 For billing-specific contractual terms, see our{' '}
                 <Link href="/subscription-terms" className="text-primary hover:underline">
                   Subscription Terms
@@ -205,10 +205,10 @@ export default function PrivacyPolicy() {
               </p>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">7. Third-Party Services</h2>
-              <p className="text-white/80 mb-4">We use the following third-party services:</p>
-              <ul className="space-y-3 text-white/80 mb-4">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">7. Third-Party Services</h2>
+              <p className="text-slate-600 mb-4">We use the following third-party services:</p>
+              <ul className="space-y-3 text-slate-600 mb-4">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Firebase (Google LLC)</span>
@@ -222,19 +222,19 @@ export default function PrivacyPolicy() {
                   <span>Email delivery provider (for transactional messages)</span>
                 </li>
               </ul>
-              <p className="text-white/80">Each service has its own privacy policy that applies to your data.</p>
+              <p className="text-slate-600">Each service has its own privacy policy that applies to your data.</p>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">8. Data Retention</h2>
-              <p className="text-white/80 mb-4">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">8. Data Retention</h2>
+              <p className="text-slate-600 mb-4">
                 How long you can access the service, trial periods, billing changes and suspension are described in our{' '}
                 <Link href="/subscription-terms" className="text-primary hover:underline">
                   Subscription Terms
                 </Link>
                 . Company fleet records may be kept for operational and legal reasons while your organisation remains a customer or where the law requires.
               </p>
-              <ul className="space-y-3 text-white/80">
+              <ul className="space-y-3 text-slate-600">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Account data is retained whilst your user account is active.</span>
@@ -265,30 +265,30 @@ export default function PrivacyPolicy() {
               </ul>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">9. How to Delete Your Account and Data</h2>
-              <p className="text-white/80 mb-4">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">9. How to Delete Your Account and Data</h2>
+              <p className="text-slate-600 mb-4">
                 You have control over your personal account and can delete your user account from the Fleet Track PRO mobile app:
               </p>
               
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 mb-4">
-                <h3 className="text-lg font-semibold text-white mb-3">Account Deletion Steps:</h3>
-                <ol className="space-y-3 text-white/80">
+                <h3 className="text-lg font-semibold text-slate-900 mb-3">Account Deletion Steps:</h3>
+                <ol className="space-y-3 text-slate-600">
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">1.</span>
-                    <span>Open the Fleet Track PRO app and go to the <strong className="text-white">Account</strong> tab</span>
+                    <span>Open the Fleet Track PRO app and go to the <strong className="text-slate-900">Account</strong> tab</span>
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">2.</span>
-                    <span>Tap on <strong className="text-white">&quot;Manage Account&quot;</strong></span>
+                    <span>Tap on <strong className="text-slate-900">&quot;Manage Account&quot;</strong></span>
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">3.</span>
-                    <span>When the alert appears asking &quot;Choose an action&quot;, tap <strong className="text-white">&quot;Delete Account&quot;</strong></span>
+                    <span>When the alert appears asking &quot;Choose an action&quot;, tap <strong className="text-slate-900">&quot;Delete Account&quot;</strong></span>
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">4.</span>
-                    <span>Confirm your decision by tapping <strong className="text-white">&quot;Delete&quot;</strong> in the confirmation alert</span>
+                    <span>Confirm your decision by tapping <strong className="text-slate-900">&quot;Delete&quot;</strong> in the confirmation alert</span>
                   </li>
                   <li className="flex items-start space-x-3">
                     <span className="text-primary font-semibold">5.</span>
@@ -297,9 +297,9 @@ export default function PrivacyPolicy() {
                 </ol>
               </div>
 
-              <h3 className="text-xl font-semibold text-white mb-3">What Gets Deleted:</h3>
-              <p className="text-white/80 mb-3">When you delete your account, the following data is permanently removed:</p>
-              <ul className="space-y-3 text-white/80 mb-4">
+              <h3 className="text-xl font-semibold text-slate-900 mb-3">What Gets Deleted:</h3>
+              <p className="text-slate-600 mb-3">When you delete your account, the following data is permanently removed:</p>
+              <ul className="space-y-3 text-slate-600 mb-4">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Your user profile, credentials and user-level settings.</span>
@@ -327,9 +327,9 @@ export default function PrivacyPolicy() {
               </div>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">10. Children&apos;s Privacy</h2>
-              <p className="text-white/80 mb-4">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">10. Children&apos;s Privacy</h2>
+              <p className="text-slate-600 mb-4">
                 Fleet Track PRO is a business service and is not aimed at children. We do not knowingly collect personal data from anyone under 13. If you believe we have processed such information in error, please contact us at{' '}
                 <a href="mailto:help@fleettrackpro.co.uk" className="text-primary hover:underline">
                   help@fleettrackpro.co.uk
@@ -338,17 +338,17 @@ export default function PrivacyPolicy() {
               </p>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">11. Changes to Privacy Policy</h2>
-              <p className="text-white/80">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">11. Changes to Privacy Policy</h2>
+              <p className="text-slate-600">
                 We may update this Privacy Policy from time to time. Where changes are material, we will notify you through the app or by email where we have your contact details.
               </p>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">12. Contact Us</h2>
-              <p className="text-white/80 mb-4">If you have questions about this Privacy Policy, please contact us at:</p>
-              <ul className="space-y-3 text-white/80">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">12. Contact Us</h2>
+              <p className="text-slate-600 mb-4">If you have questions about this Privacy Policy, please contact us at:</p>
+              <ul className="space-y-3 text-slate-600">
                 <li className="flex items-start space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
                   <span>Email: help@fleettrackpro.co.uk</span>
@@ -360,9 +360,9 @@ export default function PrivacyPolicy() {
               </ul>
             </div>
 
-            <div className="bg-black border border-primary/20 rounded-2xl p-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">13. App Store Requirements</h2>
-              <p className="text-white/80">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">13. App Store Requirements</h2>
+              <p className="text-slate-600">
                 Our companion app follows applicable app store privacy and data transparency requirements.
               </p>
             </div>

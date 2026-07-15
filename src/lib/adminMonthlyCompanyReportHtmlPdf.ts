@@ -248,7 +248,7 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
   <div class="page">
     <header class="hdr">
       <div>
-        <img src="${logoSrc}" style="width:200px;height:auto;max-height:52px;object-fit:contain" alt="Stock Track PRO logo" />
+        <img src="${logoSrc}" style="width:200px;height:auto;max-height:52px;object-fit:contain" alt="Fleet Track PRO logo" />
         <div style="margin-top:8px;font-size:12px;color:#6b7280">Monthly fleet performance report</div>
       </div>
       <div class="meta-right">
@@ -438,18 +438,18 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
         <div><span>Company</span><br><strong>${companyName}</strong></div>
         <div><span>Reporting period</span><br><strong>${month}</strong></div>
         <div><span>Report reference</span><br><strong>${esc(ref)}</strong></div>
-        <div><span>Application version</span><br><strong>Stock Track PRO ${REPORT_APP_VERSION}</strong></div>
+        <div><span>Application version</span><br><strong>Fleet Track PRO ${REPORT_APP_VERSION}</strong></div>
       </div>
     </div>
 
     <footer class="ftr">
-      <div>Prepared automatically by Stock Track PRO</div>
+      <div>Prepared automatically by Fleet Track PRO</div>
       <div class="line">
         <span>Generated: ${generatedLabel} · Ref ${esc(ref)}</span>
         <span>Confidential Business Report · stocktrackpro.co.uk</span>
       </div>
       <div class="line">
-        <span>© ${input.generatedAt.getFullYear()} Stock Track PRO Ltd</span>
+        <span>© ${input.generatedAt.getFullYear()} Fleet Track PRO Ltd</span>
         <span>Report version ${REPORT_APP_VERSION}</span>
       </div>
     </footer>

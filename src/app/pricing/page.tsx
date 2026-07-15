@@ -104,31 +104,31 @@ export default function Pricing() {
   const featuredTestimonial = getFeaturedTestimonial();
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="marketing-shell">
       <Navbar />
 
       <div className="container mx-auto px-4 pt-20 sm:pt-32 pb-12 sm:pb-20">
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 px-2">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 leading-tight relative">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-5 leading-tight relative">
             Simple, Transparent{' '}
             <span className="text-blue-500 bg-gradient-to-r from-blue-500 to-blue-400 bg-clip-text text-transparent">
               Pricing
             </span>
           </h1>
-          <p className="text-lg sm:text-xl text-white/75 leading-relaxed">
+          <p className="text-lg sm:text-xl text-slate-600 leading-relaxed">
             £8 per vehicle per month (prices include VAT at 20%). Monthly billing can be cancelled anytime.
             Minimum 5 vehicles. Annual billing is £84 per vehicle per year, paid upfront.
           </p>
-          <p className="text-base text-white/55 leading-relaxed mt-4 max-w-2xl mx-auto">
+          <p className="text-base text-slate-500 leading-relaxed mt-4 max-w-2xl mx-auto">
             Need LOLER and site plant records too? Optional Plant &amp; Machinery is £12 per machine per month
             (including VAT), minimum 3 machines — or £120 per machine per year. Calculator below.
           </p>
 
           {/* Trust strip — one-liner value anchors */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/70">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-600">
             <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-blue-400" aria-hidden />
+              <ShieldCheck className="h-4 w-4 text-[var(--brand-blue)]" aria-hidden />
               Monthly: no long-term contract
             </span>
             <span className="inline-flex items-center gap-1.5">
@@ -141,13 +141,13 @@ export default function Pricing() {
             </span>
           </div>
 
-          <p className="text-sm text-white/45 mt-3">
+          <p className="text-sm text-slate-400 mt-3">
             Already subscribed? Managers can open the billing portal from the dashboard subscription page.
           </p>
         </div>
 
         <div className="max-w-6xl mx-auto">
-          <p className="text-white/70 text-sm sm:text-base leading-relaxed text-center max-w-2xl mx-auto mb-10 px-2">
+          <p className="text-slate-600 text-sm sm:text-base leading-relaxed text-center max-w-2xl mx-auto mb-10 px-2">
             {PRICING_ROI_PARAGRAPH}
           </p>
 
@@ -159,7 +159,7 @@ export default function Pricing() {
 
           <div className="grid lg:grid-cols-2 gap-8 items-start mb-8">
           {/* Fleet pricing */}
-          <div className="relative bg-black/80 backdrop-blur-sm rounded-3xl p-8 sm:p-10 border border-blue-500 shadow-2xl shadow-blue-500/20 ring-2 ring-blue-500/20">
+          <div className="relative bg-white backdrop-blur-sm rounded-3xl p-8 sm:p-10 border border-blue-500 shadow-2xl shadow-slate-200/50 ring-2 ring-blue-200">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2">
               <span className="bg-blue-500 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">
                 Fleet — all features included
@@ -171,7 +171,7 @@ export default function Pricing() {
               <div
                 role="tablist"
                 aria-label="Billing cycle"
-                className="inline-flex items-center rounded-full bg-white/5 p-1 border border-white/10"
+                className="inline-flex items-center rounded-full bg-white/5 p-1 border border-slate-200"
               >
                 <button
                   type="button"
@@ -181,7 +181,7 @@ export default function Pricing() {
                   className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-all ${
                     billingCycle === 'monthly'
                       ? 'bg-blue-500 text-white shadow'
-                      : 'text-white/60 hover:text-white/85'
+                      : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
                   Monthly
@@ -194,15 +194,15 @@ export default function Pricing() {
                   className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-all inline-flex items-center gap-1.5 ${
                     billingCycle === 'yearly'
                       ? 'bg-blue-500 text-white shadow'
-                      : 'text-white/60 hover:text-white/85'
+                      : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
                   Annual
                   <span
-                    className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                    className={`text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${
                       billingCycle === 'yearly'
-                        ? 'bg-white/20 text-white'
-                        : 'bg-emerald-500/20 text-emerald-300'
+                        ? 'bg-white text-emerald-800'
+                        : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                     }`}
                   >
                     Save 12.5%
@@ -213,20 +213,20 @@ export default function Pricing() {
 
             {/* Price display */}
             <div className="text-center mb-8 mt-2">
-              <p className="text-white font-semibold mb-4 max-w-md mx-auto">
+              <p className="text-slate-900 font-semibold mb-4 max-w-md mx-auto">
                 Unlimited team members — no per-user fee. Manager access included.
               </p>
               <div className="flex items-end justify-center gap-1 mb-1">
-                <span className="text-5xl sm:text-6xl font-bold text-white transition-all duration-200">
+                <span className="text-5xl sm:text-6xl font-bold text-slate-900 transition-all duration-200">
                   £{billedTotal.toFixed(0)}
                 </span>
-                <span className="text-white/50 text-lg mb-2">{cycleLabel}</span>
+                <span className="text-slate-500 text-lg mb-2">{cycleLabel}</span>
               </div>
-              <p className="text-white/50 text-sm">
+              <p className="text-slate-500 text-sm">
                 {billingCycle === 'yearly' ? (
                   <>
                     £{PRICE_PER_VEHICLE_YEARLY} per vehicle per year &times; {vehicleCount} vehicle{vehicleCount !== 1 ? 's' : ''}
-                    <span className="text-emerald-300/90"> · £{monthlyEquivalent.toFixed(2)}/month equivalent</span>
+                    <span className="text-emerald-700 font-medium"> · £{monthlyEquivalent.toFixed(2)}/month equivalent</span>
                   </>
                 ) : (
                   <>
@@ -235,7 +235,7 @@ export default function Pricing() {
                 )}
               </p>
               {billingCycle === 'yearly' && yearlySavings > 0 && (
-                <p className="text-emerald-300/85 text-xs mt-1">
+                <p className="text-emerald-700 text-sm font-medium mt-1">
                   You save £{yearlySavings.toFixed(0)} per year vs monthly billing.
                 </p>
               )}
@@ -243,9 +243,9 @@ export default function Pricing() {
 
             {/* Slider */}
             <div className="mb-8">
-              <div className="flex justify-between text-sm text-white/60 mb-3">
+              <div className="flex justify-between text-sm text-slate-500 mb-3">
                 <span>Vehicles</span>
-                <span className="text-white font-semibold">{vehicleCount}</span>
+                <span className="text-slate-900 font-semibold">{vehicleCount}</span>
               </div>
               <input
                 type="range"
@@ -254,20 +254,20 @@ export default function Pricing() {
                 step={1}
                 value={vehicleCount}
                 onChange={(e) => setVehicleCount(Number(e.target.value))}
-                className="w-full h-2 rounded-full appearance-none cursor-pointer bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:border-0"
+                className="w-full h-3 rounded-full appearance-none cursor-pointer accent-blue-500 [&::-webkit-slider-runnable-track]:h-3 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:-mt-0.5 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-[0_1px_4px_rgba(15,23,42,0.35)] [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-track]:h-3 [&::-moz-range-track]:rounded-full [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:box-border"
                 style={{
-                  background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((vehicleCount - MIN_VEHICLES) / (MAX_VEHICLES - MIN_VEHICLES)) * 100}%, rgba(255,255,255,0.1) ${((vehicleCount - MIN_VEHICLES) / (MAX_VEHICLES - MIN_VEHICLES)) * 100}%, rgba(255,255,255,0.1) 100%)`,
+                  background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((vehicleCount - MIN_VEHICLES) / (MAX_VEHICLES - MIN_VEHICLES)) * 100}%, #cbd5e1 ${((vehicleCount - MIN_VEHICLES) / (MAX_VEHICLES - MIN_VEHICLES)) * 100}%, #cbd5e1 100%)`,
                 }}
                 aria-label="Number of vehicles"
               />
-              <div className="flex justify-between text-xs text-white/30 mt-2">
+              <div className="flex justify-between text-xs text-slate-500 mt-2">
                 <span>{MIN_VEHICLES} min</span>
                 <span>{MAX_VEHICLES}+</span>
               </div>
               {vehicleCount >= MAX_VEHICLES && (
-                <p className="text-center text-sm text-blue-400 mt-2">
+                <p className="text-center text-sm text-[var(--brand-blue)] mt-2">
                   Need more than {MAX_VEHICLES} vehicles?{' '}
-                  <Link href="/contact" className="underline hover:text-blue-300">Contact us</Link> for a custom quote.
+                  <Link href="/contact" className="underline hover:text-blue-700">Contact us</Link> for a custom quote.
                 </p>
               )}
             </div>
@@ -284,7 +284,7 @@ export default function Pricing() {
                 type="button"
                 onClick={handleSubscribe}
                 disabled={checkoutLoading}
-                className="w-full py-4 px-6 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
+                className="w-full py-4 px-6 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50"
                 aria-busy={checkoutLoading}
               >
                 {checkoutLoading
@@ -294,13 +294,13 @@ export default function Pricing() {
             ) : (
               <Link
                 href={authLoading ? '#' : (profile ? '/contact' : '/onboarding')}
-                className="block w-full py-4 px-6 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base text-center shadow-lg shadow-blue-500/25 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
+                className="block w-full py-4 px-6 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base text-center shadow-lg shadow-blue-500/25 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50"
               >
                 {authLoading ? '…' : profile ? 'Contact us' : 'Start 7-Day Free Trial'}
               </Link>
             )}
 
-            <p className="text-center text-white/40 text-xs mt-3">
+            <p className="text-center text-slate-400 text-xs mt-3">
               {billingCycle === 'yearly' ? (
                 <>New companies receive a 7-day free trial &bull; 12-month term, paid upfront &bull; Cancel renewal anytime</>
               ) : (
@@ -309,17 +309,17 @@ export default function Pricing() {
             </p>
 
             {/* Features */}
-            <div className="mt-8 pt-8 border-t border-white/10">
-              <p className="text-white/60 text-sm font-medium mb-4">Included with every subscription:</p>
+            <div className="mt-8 pt-8 border-t border-slate-200">
+              <p className="text-slate-500 text-sm font-medium mb-4">Included with every subscription:</p>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
                 {features.map((f) => (
                   <li key={f} className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span className="text-white/75 text-sm leading-relaxed">{f}</span>
+                    <span className="text-slate-600 text-sm leading-relaxed">{f}</span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-4 text-xs text-white/45 leading-relaxed">
+              <p className="mt-4 text-xs text-slate-400 leading-relaxed">
                 Built for fleet operations: inspections, defects, MOT/tax visibility, and manager reporting in one plan.
               </p>
             </div>
@@ -334,12 +334,12 @@ export default function Pricing() {
           </div>
 
           {/* Subscription Terms */}
-          <div className="mt-8 bg-black/60 border border-blue-500/30 rounded-2xl p-6 text-left backdrop-blur-sm">
-            <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
+          <div className="mt-8 bg-slate-50 border border-slate-200 rounded-2xl p-6 text-left backdrop-blur-sm">
+            <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full" />
               Subscription Terms
             </h3>
-            <ul className="space-y-2 text-sm text-white/70">
+            <ul className="space-y-2 text-sm text-slate-600">
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Billed monthly — £{PRICE_PER_VEHICLE_MONTHLY} per vehicle, or annually — £{PRICE_PER_VEHICLE_YEARLY} per vehicle (save ~12.5%)</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Minimum {MIN_VEHICLES} vehicles (£{MIN_VEHICLES * PRICE_PER_VEHICLE_MONTHLY}/month or £{MIN_VEHICLES * PRICE_PER_VEHICLE_YEARLY}/year)</span></li>
               <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Vehicle count changes for active subscriptions are managed through the billing portal or support</span></li>
@@ -351,7 +351,7 @@ export default function Pricing() {
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-white/50">
+            <p className="text-sm text-slate-500">
               New to Fleet Track PRO?{' '}
               <Link href="/contact" className="text-blue-500 hover:underline">Get in touch</Link>
               {' '}and we&apos;ll help you get set up.

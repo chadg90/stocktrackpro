@@ -73,19 +73,19 @@ export default function FAQ() {
   ];
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="marketing-shell">
       <HomeFaqJsonLd items={faqs} />
       <Navbar />
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-4">Frequently Asked Questions</h1>
-          <p className="text-white/80 mb-10 text-lg">Answers to common questions about Fleet Track PRO.</p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">Frequently Asked Questions</h1>
+          <p className="text-slate-600 mb-10 text-lg">Answers to common questions about Fleet Track PRO.</p>
 
           <div className="space-y-6">
             {faqs.map((item) => (
-              <div key={item.question} className="bg-black border border-blue-500/25 rounded-2xl p-6 sm:p-7">
-                <h3 className="text-xl font-semibold text-white mb-2">{item.question}</h3>
-                <p className="text-white/80 leading-relaxed text-sm sm:text-base">{item.answer}</p>
+              <div key={item.question} className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7">
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">{item.question}</h3>
+                <p className="text-slate-600 leading-relaxed text-sm sm:text-base">{item.answer}</p>
               </div>
             ))}
           </div>

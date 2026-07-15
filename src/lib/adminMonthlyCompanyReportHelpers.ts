@@ -179,7 +179,7 @@ export function buildPriorityActions(input: MonthlyCompanyReportInput): Priority
       tier: 'immediate',
       title: 'Immediate',
       detail: uniqueCritical.length
-        ? `Repair ${uniqueCritical.join(', ')} before further use and close the defect${critical === 1 ? '' : 's'} in Stock Track PRO.`
+        ? `Repair ${uniqueCritical.join(', ')} before further use and close the defect${critical === 1 ? '' : 's'} in Fleet Track PRO.`
         : `Resolve ${critical} critical defect${critical === 1 ? '' : 's'} before further vehicle use.`,
     });
   } else if (openDefects > 0) {

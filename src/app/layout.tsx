@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
@@ -7,7 +7,10 @@ import SiteWideJsonLd from "@/components/seo/SiteWideJsonLd";
 import { SITE_META_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
 import { SITE_LEGAL_NAME, SITE_NAME, SITE_URL } from "@/lib/brand";
 
-const inter = Inter({ subsets: ["latin"] });
+const sourceSans = Source_Sans_3({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -112,7 +115,7 @@ export default function RootLayout({
         <link rel="alternate" type="text/plain" title="LLMs" href="/llms.txt" />
         <SiteWideJsonLd />
       </head>
-      <body className={`${inter.className} antialiased bg-black min-h-screen flex flex-col`}>
+      <body className={`${sourceSans.className} antialiased bg-slate-50 text-slate-900 min-h-screen flex flex-col`}>
         {children}
         <Footer />
         <CookieConsent />

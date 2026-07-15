@@ -3,14 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --foreground: 255, 255, 255;
-  --background: 0, 0, 0;
+  --foreground: 15, 23, 42;
+  --background: 248, 250, 252;
   --primary: #3b82f6;
   --primary-light: #2563eb;
   --brand-blue: #3b82f6;
   --brand-blue-hover: #2563eb;
   --text-dark: #000000;
   --text-light: #ffffff;
+  /* Marketing (depot daylight) */
+  --mkt-bg: #f8fafc;
+  --mkt-surface: #ffffff;
+  --mkt-muted-surface: #f1f5f9;
+  --mkt-text: #0f172a;
+  --mkt-muted: #475569;
+  --mkt-border: #e2e8f0;
 }
 
 /* Light mode design tokens */
@@ -34,11 +41,27 @@ html {
 
 @layer base {
   body {
-    @apply bg-black text-white antialiased;
+    @apply bg-slate-50 text-slate-900 antialiased;
   }
 }
 
 @layer components {
+  .marketing-shell {
+    @apply min-h-screen bg-[var(--mkt-bg)] text-[var(--mkt-text)] antialiased;
+  }
+
+  .mkt-card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.07)] transition-shadow duration-200;
+  }
+
+  .mkt-card:hover {
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
+  }
+
+  .mkt-card-static {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.07)];
+  }
+
   .bg-grid-white {
     @apply relative;
     background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
@@ -59,6 +82,86 @@ html {
     background-color: var(--brand-blue-hover);
     box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.3);
   }
+
+  @keyframes mkt-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes mkt-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .mkt-animate-fade-up {
+    animation: mkt-fade-up 0.7s ease-out both;
+  }
+
+  .mkt-animate-fade-in {
+    animation: mkt-fade-in 0.9s ease-out 0.15s both;
+  }
+
+  /* Professional section breaks — slate + brand blue */
+  .mkt-section-break {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(
+      90deg,
+      #0f172a 0%,
+      #0f172a 14%,
+      var(--brand-blue) 14%,
+      var(--brand-blue) 36%,
+      #94a3b8 36%,
+      #cbd5e1 58%,
+      #e2e8f0 100%
+    );
+  }
+
+  .mkt-section-break-soft {
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      #cbd5e1 12%,
+      var(--brand-blue) 40%,
+      var(--brand-blue) 52%,
+      #cbd5e1 80%,
+      transparent 100%
+    );
+  }
+
+  .mkt-section-band {
+    width: 100%;
+    height: 12px;
+    background: linear-gradient(
+      90deg,
+      #1e3a5f 0%,
+      #1e3a5f 22%,
+      var(--brand-blue) 22%,
+      #60a5fa 55%,
+      #e2e8f0 55%,
+      #f1f5f9 100%
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mkt-animate-fade-up,
+    .mkt-animate-fade-in {
+      animation: none;
+    }
+  }
+
   .dashboard-section-title {
     @apply text-lg font-semibold tracking-tight text-white;
   }

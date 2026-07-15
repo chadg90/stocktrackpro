@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import Navbar from './components/Navbar';
 import HomeHero from '@/components/HomeHero';
 import CustomerStoryCallout from '@/components/CustomerStoryCallout';
-import HomePricingCard from '@/components/HomePricingCard';
 import HomeFaqSection from '@/components/HomeFaqSection';
 import TestimonialQuote from '@/components/TestimonialQuote';
 import { HomeJsonLd } from '@/components/HomeJsonLd';
@@ -23,6 +22,8 @@ import {
   HardHat,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import MarketingBreak from '@/components/MarketingBreak';
 
 const WHATSAPP_ENQUIRY_URL =
   'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
@@ -79,7 +80,10 @@ const DEFECT_STEPS = [
     body: (
       <>
         The full history stays in one digital{' '}
-        <Link href="/compliance-centre/van-fleet-defect-records" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
+        <Link
+          href="/compliance-centre/van-fleet-defect-records"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
+        >
           audit trail
         </Link>{' '}
         for fleet compliance record keeping.
@@ -128,117 +132,156 @@ export default function Home() {
     <>
       <HomeJsonLd />
       <HomeFaqJsonLd />
-      <div className="min-h-screen bg-black text-white antialiased">
+      <div className="marketing-shell">
         <Navbar />
 
         <HomeHero />
 
-        {/* Quick facts */}
-        <section className="py-10 sm:py-16 border-t border-white/10 bg-black">
+        <MarketingBreak variant="band" />
+
+        <section className="py-12 sm:py-16 bg-white">
           <div className="container mx-auto px-4 max-w-5xl">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-              <p className="text-[var(--brand-blue)] font-medium text-sm uppercase tracking-[0.2em] mb-3">
-                Quick Facts
-              </p>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
-                Fleet Track PRO at a glance
-              </h2>
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-                {QUICK_FACTS.map(([term, detail]) => (
-                  <div key={term} className="border-t border-white/10 pt-4">
-                    <dt className="text-white font-semibold">{term}</dt>
-                    <dd className="text-white/65 text-sm mt-1 leading-relaxed">{detail}</dd>
-                  </div>
-                ))}
-              </dl>
+            <p className="text-[var(--brand-blue)] font-semibold text-sm uppercase tracking-[0.2em] mb-3">
+              Quick Facts
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-8">Fleet Track PRO at a glance</h2>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
+              {QUICK_FACTS.map(([term, detail]) => (
+                <div key={term} className="border-t border-slate-200 pt-4">
+                  <dt className="text-slate-900 font-semibold">{term}</dt>
+                  <dd className="text-slate-600 text-sm mt-1 leading-relaxed">{detail}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        <MarketingBreak />
+
+        <section className="py-12 sm:py-16 bg-slate-100">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="relative aspect-[4/3] overflow-hidden mkt-card-static">
+                <Image
+                  src="/fleet-operations.jpg"
+                  alt="Fleet Track PRO in use with UK van fleet operations"
+                  fill
+                  className="object-cover object-center"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
+              <div>
+                <p className="text-[var(--brand-blue)] font-semibold text-xs uppercase tracking-[0.2em] mb-3">
+                  Built for
+                </p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
+                  Trades and transport teams across the UK
+                </h2>
+                <p className="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                  DVSA roadworthiness records, driver pre-use walkaround checks, and van fleet risk management — from
+                  sole traders to national contractors. Optional Plant &amp; Machinery for site LOLER records.
+                </p>
+                <div className="flex flex-wrap gap-x-5 gap-y-3 text-slate-500">
+                  {[
+                    { icon: Zap, label: 'Electrical' },
+                    { icon: Droplets, label: 'Plumbing' },
+                    { icon: Truck, label: 'Logistics' },
+                    { icon: Wrench, label: 'Trades' },
+                    { icon: LandPlot, label: 'Groundworks' },
+                    { icon: Container, label: 'Haulage' },
+                    { icon: HardHat, label: 'Construction' },
+                  ].map(({ icon: Icon, label }) => (
+                    <div key={label} className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" strokeWidth={1.75} aria-hidden />
+                      <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Sectors */}
-        <section className="py-10 sm:py-16 border-y border-white/10 bg-white/[0.02]">
-          <div className="container mx-auto px-4 max-w-4xl">
-            <p className="text-center text-white/45 text-[11px] font-semibold uppercase tracking-[0.22em] mb-4 sm:mb-5">
-              Built for
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-10 mb-4 sm:mb-5">
-              {[
-                { icon: Zap, label: 'Electrical' },
-                { icon: Droplets, label: 'Plumbing' },
-                { icon: Truck, label: 'Logistics' },
-                { icon: Wrench, label: 'Trades' },
-                { icon: LandPlot, label: 'Groundworks' },
-                { icon: Container, label: 'Haulage' },
-                { icon: HardHat, label: 'Construction' },
-              ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex flex-col items-center gap-2 text-white/55">
-                  <Icon className="w-7 h-7 sm:w-9 sm:h-9" strokeWidth={1.5} aria-hidden />
-                  <span className="text-[11px] sm:text-xs font-medium uppercase tracking-wider">{label}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-center text-white/65 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-              UK transport and trades teams who need DVSA roadworthiness records, driver pre-use walkaround checks, and
-              van fleet risk management — from sole traders to national contractors. Optional Plant &amp; Machinery for
-              site LOLER records.
-            </p>
-          </div>
-        </section>
+        <MarketingBreak variant="soft" />
 
         <CustomerStoryCallout />
 
-        {/* Defect resolution loop */}
-        <section id="defect-workflow" className="py-14 sm:py-28 border-t border-white/10">
+        <MarketingBreak variant="band" />
+
+        <section id="defect-workflow" className="py-14 sm:py-24 bg-white">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
-              <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">
-                From defect report to sign-off
-              </h2>
-              <p className="text-white/60 text-base sm:text-lg leading-relaxed px-1">
-                Fitters and managers share the manager role for My Jobs and alerts; drivers report from the app.
-              </p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center mb-10 sm:mb-14">
+              <div className="max-w-xl">
+                <h2 className="text-2xl sm:text-4xl font-bold text-slate-900 mb-3 sm:mb-4">
+                  From defect report to sign-off
+                </h2>
+                <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
+                  Fitters and managers share the manager role for My Jobs and alerts; drivers report from the app.
+                </p>
+              </div>
+              <div className="relative aspect-[4/3] overflow-hidden mkt-card-static order-first lg:order-none">
+                <Image
+                  src="/fleet-walkaround.jpg"
+                  alt="Technician inspecting a van during a daily walkaround check"
+                  fill
+                  className="object-cover object-center"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
               {DEFECT_STEPS.map((step) => (
-                <div
-                  key={step.n}
-                  className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 flex flex-col"
-                >
-                  <span className="text-[var(--brand-blue)] font-bold text-sm mb-3">
+                <li key={step.n} className="border-t border-slate-200 pt-5">
+                  <p className="text-[var(--brand-blue)] font-bold text-sm mb-2 tracking-wide">
                     STEP {step.n} — {step.title}
-                  </span>
-                  <p className="text-white/75 text-sm leading-relaxed flex-1">{step.body}</p>
-                </div>
+                  </p>
+                  <p className="text-slate-600 text-sm leading-relaxed">{step.body}</p>
+                </li>
               ))}
-            </div>
+            </ol>
           </div>
         </section>
 
-        {/* What's included */}
-        <section className="py-14 sm:py-28 border-t border-white/10">
+        <MarketingBreak />
+
+        <section className="py-14 sm:py-24 bg-slate-100">
           <div className="container mx-auto px-4 max-w-5xl">
-            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3 text-center">
-              What&apos;s included
-            </h2>
-            <p className="text-white/55 text-center mb-12 max-w-lg mx-auto text-sm">
-              One fleet subscription for vans — plus optional Plant &amp; Machinery from £12 per machine per month.
-              Full detail on the{' '}
-              <Link href="/features" className="text-blue-400 hover:text-blue-300 underline underline-offset-4">
-                features page
-              </Link>
-              .
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center mb-12">
+              <div className="relative aspect-[4/3] overflow-hidden mkt-card-static">
+                <Image
+                  src="/fleet-manager-dashboard.jpg"
+                  alt="Fleet manager reviewing vehicles and MOT status on a laptop"
+                  fill
+                  className="object-cover object-center"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
+              <div>
+                <h2 className="text-2xl sm:text-4xl font-bold text-slate-900 mb-3">What&apos;s included</h2>
+                <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                  One fleet subscription for vans — plus optional Plant &amp; Machinery from £12 per machine per month.
+                  Full detail on the{' '}
+                  <Link
+                    href="/features"
+                    className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
+                  >
+                    features page
+                  </Link>
+                  .
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {INCLUDED.map((item) => {
                 const Icon = item.icon;
                 const inner = (
                   <>
-                    <div className="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+                    <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center text-[var(--brand-blue)] shrink-0">
                       <Icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white mb-1">{item.title}</h3>
-                      <p className="text-white/60 text-sm leading-relaxed">{item.description}</p>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-1">{item.title}</h3>
+                      <p className="text-slate-600 text-sm leading-relaxed">{item.description}</p>
                     </div>
                   </>
                 );
@@ -246,15 +289,12 @@ export default function Home() {
                   <Link
                     key={item.title}
                     href={item.href}
-                    className="flex gap-4 p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-blue-500/30 transition-colors"
+                    className="flex gap-4 p-0 sm:p-1 rounded-xl hover:opacity-90 transition-opacity"
                   >
                     {inner}
                   </Link>
                 ) : (
-                  <div
-                    key={item.title}
-                    className="flex gap-4 p-6 rounded-2xl border border-white/10 bg-white/[0.02]"
-                  >
+                  <div key={item.title} className="flex gap-4">
                     {inner}
                   </div>
                 );
@@ -263,51 +303,52 @@ export default function Home() {
           </div>
         </section>
 
+        <MarketingBreak variant="soft" />
+
         {featuredTestimonial && (
-          <section className="py-16 sm:py-20 border-t border-white/10 bg-white/[0.02]">
+          <section className="py-16 sm:py-20 bg-white">
             <div className="container mx-auto px-4 max-w-3xl">
               <TestimonialQuote testimonial={featuredTestimonial} />
             </div>
           </section>
         )}
 
-        <HomePricingCard />
+        <MarketingBreak variant="soft" />
 
         <HomeFaqSection />
 
-        {/* Final CTA */}
-        <section className="relative py-16 sm:py-32 overflow-hidden border-t border-white/10">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_100%,rgba(59,130,246,0.12),transparent_70%)]" />
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--brand-blue)]/40 to-transparent" />
+        <MarketingBreak />
+
+        <section className="relative py-16 sm:py-28 overflow-hidden bg-white">
           <div className="container relative mx-auto px-5 sm:px-4 text-center">
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-5 max-w-3xl mx-auto leading-tight">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4 sm:mb-5 max-w-3xl mx-auto leading-tight">
               Start managing your fleet today
             </h2>
-            <p className="text-white/70 max-w-xl mx-auto mb-10 text-lg">
+            <p className="text-slate-600 max-w-xl mx-auto mb-10 text-lg">
               Set up your company and invite your team in minutes. Add Plant &amp; Machinery later if you also run lifting
               equipment on site.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md sm:max-w-none mx-auto">
               <Link
                 href="/onboarding"
-                className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-4 min-h-[48px] rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-black"
+                className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-4 min-h-[48px] rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white"
               >
                 Start 7-Day Free Trial
               </Link>
               <Link
                 href="/pricing"
-                className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-4 min-h-[48px] rounded-xl border border-white/25 text-white hover:bg-white/10 transition-all duration-200 font-medium"
+                className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-4 min-h-[48px] rounded-xl border border-slate-300 text-slate-800 bg-slate-50 hover:bg-slate-100 transition-all duration-200 font-medium"
               >
                 View pricing
               </Link>
             </div>
-            <p className="mt-6 text-white/50 text-sm">
+            <p className="mt-6 text-slate-500 text-sm">
               Prefer to talk first?{' '}
               <a
                 href={WHATSAPP_ENQUIRY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
+                className="text-[var(--brand-blue)] hover:underline"
               >
                 Message us on WhatsApp
               </a>
