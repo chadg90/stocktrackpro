@@ -1,4 +1,5 @@
 rules_version = '2';
+// Plant module + legacy/trialing company access + web onboarding claim
 service cloud.firestore {
   match /databases/{database}/documents {
     
@@ -25,11 +26,18 @@ service cloud.firestore {
     }
     
     function isManager() {
-      return profileExists() && getProfile() != null && getProfile().role == 'manager';
+      return profileExists() && getProfile() != null &&
+        (getProfile().role == 'manager' || getProfile().role == 'Manager');
     }
 
     function isManagerOrAdmin() {
       return isAdmin() || isManager();
+    }
+
+    function plantInspectionOwnedByUser(inspectionId) {
+      return exists(/databases/$(database)/documents/plant_inspections/$(inspectionId)) &&
+        get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.company_id == userCompanyId() &&
+        get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.submitted_by == request.auth.uid;
     }
     
     function userCompanyId() {
@@ -44,11 +52,14 @@ service cloud.firestore {
     
     // Logic: Check if the COMPANY is active, not the individual user
     function isCompanyActive() {
+      let companyData = get(/databases/$(database)/documents/companies/$(userCompanyId())).data;
       return profileExists() &&
         companyExists(userCompanyId()) &&
         (
-          get(/databases/$(database)/documents/companies/$(userCompanyId())).data.subscription_status == 'active' ||
-          get(/databases/$(database)/documents/companies/$(userCompanyId())).data.subscription_status == 'trial'
+          companyData.get('legacy', false) == true ||
+          companyData.subscription_status == 'active' ||
+          companyData.subscription_status == 'trial' ||
+          companyData.subscription_status == 'trialing'
         );
     }
 
@@ -61,7 +72,8 @@ service cloud.firestore {
 
     function tokenSubscriptionActive() {
       return request.auth.token.subscriptionStatus == 'active' ||
-        request.auth.token.subscriptionStatus == 'trial';
+        request.auth.token.subscriptionStatus == 'trial' ||
+        request.auth.token.subscriptionStatus == 'trialing';
     }
 
     function tokenTenantOk(resourceCompanyId) {
@@ -104,8 +116,31 @@ service cloud.firestore {
             'app_ota_label',
             'app_ota_update_id',
             'app_ota_channel',
-            'app_last_seen_at'
+            'app_last_seen_at',
+            'inspector_job_title',
+            'inspector_address',
+            'qualification_name',
+            'qualification_number',
+            'qualification_expiry_date',
+            'qualification_issuing_body',
+            'employment_status',
+            'inspector_employer_name',
+            'inspector_employer_address'
           ]);
+    }
+
+    // Web onboarding only: creator of a new company may claim manager on that company once.
+    // Cannot join someone else's company or escalate an existing role.
+    function profileOnboardingClaim(userId) {
+      return request.auth.uid == userId &&
+        resource.data.company_id == null &&
+        (!('role' in resource.data) || resource.data.role == null || resource.data.role == 'user') &&
+        request.resource.data.role == 'manager' &&
+        request.resource.data.company_id is string &&
+        companyExists(request.resource.data.company_id) &&
+        get(/databases/$(database)/documents/companies/$(request.resource.data.company_id)).data.created_by == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['company_id', 'role', 'updated_at', 'company_name']);
     }
 
     function profileManagerUpdateOk() {
@@ -127,19 +162,24 @@ service cloud.firestore {
       
       // Self-serve create: unprivileged profile only; companies come from web/admin + invites.
       // Admins can create any profile.
+      // role may be omitted, null, or 'user' until company step (web onboarding).
       allow create: if isSignedIn() && (
         (
           request.auth.uid == userId &&
-          (!('role' in request.resource.data) || request.resource.data.role == 'user') &&
+          (!('role' in request.resource.data) ||
+            request.resource.data.role == null ||
+            request.resource.data.role == 'user') &&
           (!('company_id' in request.resource.data) || request.resource.data.company_id == null)
         ) ||
         isAdmin()
       );
       
-      // Users cannot change their own role or company_id; managers cannot promote to admin.
+      // Users cannot change their own role or company_id except onboarding claim;
+      // managers cannot promote to admin.
       allow update: if isSignedIn() && (
         isAdmin() ||
         profileSelfUpdateAllowed(userId) ||
+        profileOnboardingClaim(userId) ||
         profileManagerUpdateOk()
       );
       
@@ -413,29 +453,134 @@ service cloud.firestore {
     }
 
     // ============================================
-    // ADMIN REPORT EVENTS (platform audit log)
+    // PLANT MACHINES COLLECTION
     // ============================================
-    match /admin_report_events/{eventId} {
-      allow read, write: if isAdmin();
+
+    function hasPlantModule() {
+      let companyData = get(/databases/$(database)/documents/companies/$(userCompanyId())).data;
+      // Legacy customers: Plant module included without plant Stripe subscription
+      return companyData.get('legacy', false) == true ||
+        (isCompanyActive() && companyData.get('has_plant_module', false) == true);
+    }
+
+    function canAccessPlant() {
+      return isSignedIn() && hasPlantModule() &&
+        (isManagerOrAdmin() || getProfile().get('can_access_plant_module', false) == true);
+    }
+
+    match /plant_machines/{machineId} {
+      // Read: any user with plant access in same company
+      allow read: if canAccessPlant() &&
+        resource.data.company_id == userCompanyId();
+
+      // Create: managers/admins only
+      allow create: if isSignedIn() && isManagerOrAdmin() && hasPlantModule() &&
+        request.resource.data.company_id == userCompanyId();
+
+      // Update: managers/admins only (status, details)
+      allow update: if isSignedIn() && isManagerOrAdmin() && hasPlantModule() &&
+        resource.data.company_id == userCompanyId();
+
+      // No hard deletes — archive with is_active: false
+      allow delete: if false;
     }
 
     // ============================================
-    // COMPLIANCE ARTICLES (marketing CMS — admin write, public read when published)
+    // PLANT INSPECTIONS COLLECTION
     // ============================================
-    match /compliance_articles/{articleId} {
-      allow read: if resource.data.published == true || isAdmin();
-      allow create, update, delete: if isAdmin();
+
+    match /plant_inspections/{inspectionId} {
+      allow create: if canAccessPlant() &&
+        request.resource.data.company_id == userCompanyId() &&
+        request.resource.data.submitted_by == request.auth.uid &&
+        request.resource.data.locked == false;
+
+      allow read: if canAccessPlant() &&
+        resource.data.company_id == userCompanyId();
+
+      // Submitter locks their own draft; managers may update locked records (amendments etc.)
+      allow update: if isSignedIn() && hasPlantModule() &&
+        resource.data.company_id == userCompanyId() &&
+        (
+          (resource.data.submitted_by == request.auth.uid &&
+            resource.data.locked == false &&
+            request.resource.data.locked == true) ||
+          (isManagerOrAdmin() && resource.data.locked == true)
+        );
+
+      allow delete: if false;
+
+      match /checklist_items/{itemId} {
+        allow read: if canAccessPlant() &&
+          get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.company_id == userCompanyId();
+        allow create: if canAccessPlant() &&
+          request.resource.data.inspection_id == inspectionId &&
+          plantInspectionOwnedByUser(inspectionId) &&
+          get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.locked == false;
+        allow update, delete: if false;
+      }
+
+      match /parts_used/{partId} {
+        allow read: if canAccessPlant() &&
+          get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.company_id == userCompanyId();
+        allow create: if canAccessPlant() &&
+          request.resource.data.inspection_id == inspectionId &&
+          plantInspectionOwnedByUser(inspectionId) &&
+          get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.locked == false;
+        allow update, delete: if false;
+      }
+    }
+
+    match /plant_counters/{counterId} {
+      allow read: if isManagerOrAdmin() && hasPlantModule();
+      allow write: if false;
+    }
+
+    match /company_sites/{siteId} {
+      allow read: if canAccessPlant() && resource.data.company_id == userCompanyId();
+      allow create, update: if isSignedIn() && isManagerOrAdmin() && hasPlantModule() &&
+        request.resource.data.company_id == userCompanyId();
+      allow delete: if isSignedIn() && isAdmin() && hasPlantModule() &&
+        resource.data.company_id == userCompanyId();
+    }
+
+    match /plant_parts_library/{partId} {
+      allow read: if canAccessPlant() && resource.data.company_id == userCompanyId();
+      allow create: if canAccessPlant() &&
+        request.resource.data.company_id == userCompanyId() &&
+        request.resource.data.created_by == request.auth.uid;
+      allow update: if canAccessPlant() &&
+        resource.data.company_id == userCompanyId() &&
+        request.resource.data.company_id == userCompanyId() &&
+        (resource.data.created_by == request.auth.uid || isManagerOrAdmin());
+      allow delete: if isSignedIn() && isManagerOrAdmin() && hasPlantModule() &&
+        resource.data.company_id == userCompanyId();
+    }
+
+    match /plant_saved_addresses/{addressId} {
+      allow read: if canAccessPlant() && resource.data.company_id == userCompanyId();
+      allow create: if canAccessPlant() &&
+        request.resource.data.company_id == userCompanyId() &&
+        request.resource.data.created_by == request.auth.uid;
+      allow update: if canAccessPlant() &&
+        resource.data.company_id == userCompanyId() &&
+        request.resource.data.company_id == userCompanyId();
+      allow delete: if canAccessPlant() && resource.data.company_id == userCompanyId() &&
+        (resource.data.created_by == request.auth.uid || isManagerOrAdmin());
+    }
+
+    match /inspection_amendments/{amendmentId} {
+      allow read: if canAccessPlant() && resource.data.company_id == userCompanyId();
+      allow create: if isSignedIn() && isManagerOrAdmin() && hasPlantModule() &&
+        request.resource.data.company_id == userCompanyId();
+      allow update, delete: if false;
     }
 
     // ============================================
-    // GLOBAL ADMIN OVERRIDE (read-only catch-all)
-    // Allows platform admins to read any unlisted collection for support.
-    // Write access for unlisted collections is intentionally NOT granted here;
-    // each collection should have its own explicit write rule above.
-    // SECURITY: Keep admin accounts to a minimum and enforce MFA.
+    // GLOBAL ADMIN OVERRIDE
     // ============================================
     match /{path=**} {
-      allow read: if isAdmin();
+      allow read, write: if isAdmin();
     }
   }
 }

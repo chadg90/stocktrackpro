@@ -26,7 +26,7 @@ export function getStripePriceId(_tier: SubscriptionTier, cycle: BillingCycle = 
   return priceId;
 }
 
-export const MIN_VEHICLES = 5;
+export const MIN_VEHICLES = 2;
 export const PRICE_PER_VEHICLE = 8; // GBP, monthly
 export const PRICE_PER_VEHICLE_YEARLY = 84; // GBP per vehicle per year (~£7/mo, save ~12.5%)
 

@@ -89,8 +89,8 @@ function getLimitsFromCompany(company: CompanyDoc): { users: number | null; asse
     return { users: t.users, assets: t.assets, vehicles: t.vehicles };
   }
 
-  // No active subscription — allow minimal usage (5 vehicles, 500 assets, 5 users)
-  return { users: 15, assets: 500, vehicles: 5 };
+  // No subscribed_vehicles yet (trial) — allow minimal usage matching public min fleet size
+  return { users: 15, assets: 500, vehicles: 2 };
 }
 
 function inviteExpiryMs(value: unknown): number | null {

@@ -98,14 +98,13 @@ export default function OnboardingPage() {
         displayName: `${firstName.trim()} ${lastName.trim()}`.trim(),
       });
 
-      // Create profile document (without company_id yet)
+      // Create profile document (company + manager role set in the next step)
       await setDoc(doc(firebaseDb, 'profiles', user.uid), {
         email: email.trim(),
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         display_name: `${firstName.trim()} ${lastName.trim()}`.trim(),
-        role: null, // Will be set based on company option
-        company_id: null, // Will be set based on company option
+        company_id: null,
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
       });
@@ -118,6 +117,8 @@ export default function OnboardingPage() {
         setError('This email is already registered. Please sign in instead.');
       } else if (err.code === 'auth/weak-password') {
         setError('Password is too weak. Please use a stronger password.');
+      } else if (err.code === 'permission-denied') {
+        setError('Account setup was blocked. Please try again, or contact support if this continues.');
       } else {
         setError(err.message || 'Failed to create account. Please try again.');
       }
@@ -489,7 +490,7 @@ export default function OnboardingPage() {
                           Explore the available product features with your real fleet and team.
                           When you&apos;re ready, subscribe from the dashboard: £8 per vehicle per
                           month, or £84 per vehicle per year (save ~12%).
-                          Minimum 5 vehicles. Cancel anytime on monthly plans. Optional Plant &amp;
+                          Minimum 2 vehicles. Cancel anytime on monthly plans. Optional Plant &amp;
                           Machinery is from £12 per machine per month (min 3) when you need LOLER
                           and site plant records.
                         </p>

@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { ArrowRight, MapPin } from 'lucide-react';
 
 const OUTCOMES = [
-  'Daily walkaround checks in the app',
-  'Defects visible to managers and fitters instantly',
-  'One audit trail instead of WhatsApp and paper',
+  'Multi-site vans visible to the office each day',
+  'Fewer chase-ups when something is flagged on a vehicle',
+  'One shared record for drivers and managers',
 ];
 
 export default function CustomerStoryCallout() {
@@ -44,8 +44,8 @@ export default function CustomerStoryCallout() {
           </div>
 
           <p className="text-slate-600 leading-relaxed text-sm sm:text-base mb-6">
-            Managing vehicles across multiple active sites, they replaced WhatsApp groups and paper sheets with Fleet
-            Track PRO — so drivers and managers work from the same live records.
+            A County Durham groundworks team moved off WhatsApp groups and paper check sheets so site vans stay visible
+            to the office every day.
           </p>
 
           <ul className="space-y-2.5 mb-7">

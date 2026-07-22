@@ -29,11 +29,11 @@ The core fleet platform is for commercial vans, vehicle inspections, defect mana
 
 ## Who it is for
 
-UK van fleet operators — trades, groundworks, logistics, construction, electrical, and plumbing businesses. Suitable for sole traders and companies running 5+ vehicles (minimum paid subscription quantity is 5 vehicles). Works for commercial vans, plant vehicles, and cars.
+UK van fleet operators — trades, groundworks, logistics, construction, electrical, and plumbing businesses. Suitable for sole traders and companies running 2+ vehicles (minimum paid subscription quantity is 2 vehicles). Works for commercial vans, plant vehicles, and cars.
 
 ## Pricing
 
-- £8 per vehicle per month, including VAT at 20% (minimum 5 vehicles)
+- £8 per vehicle per month, including VAT at 20% (minimum 2 vehicles)
 - Annual fleet billing: £84 per vehicle per year
 - Plant & Machinery add-on: £12 per machine per month (minimum 3 machines), or £120 per machine per year
 - Unlimited team members on every plan (no per-user fee)

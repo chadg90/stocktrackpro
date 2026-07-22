@@ -9,7 +9,7 @@ import Link from 'next/link';
 
 const PRICE_PER_VEHICLE_MONTHLY = 8;
 const PRICE_PER_VEHICLE_YEARLY = 84;
-const MIN_VEHICLES = 5;
+const MIN_VEHICLES = 2;
 const MAX_VEHICLES = 100;
 const WHATSAPP_SUPPORT_URL = 'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%20support%2C%20I%20need%20help%20with%20billing%3A';
 

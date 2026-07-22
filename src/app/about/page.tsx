@@ -94,7 +94,7 @@ export default function AboutPage() {
           <section className="rounded-2xl border border-slate-200 bg-blue-500/10 p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">Pricing and support</h2>
             <p className="text-slate-600 leading-relaxed mb-5">
-              Fleet is £8 per vehicle per month (min 5 vehicles), with optional Plant &amp; Machinery from £12 per
+              Fleet is £8 per vehicle per month (min 2 vehicles), with optional Plant &amp; Machinery from £12 per
               machine per month (min 3). Full detail and the 7-day free trial are on our{' '}
               <Link href="/pricing" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
                 pricing page

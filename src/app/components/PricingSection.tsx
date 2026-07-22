@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 const PRICE_PER_VEHICLE_MONTHLY = 8;
 const PRICE_PER_VEHICLE_YEARLY = 84;
-const MIN_VEHICLES = 5;
+const MIN_VEHICLES = 2;
 const MAX_VEHICLES = 100;
 
 type BillingCycle = 'monthly' | 'yearly';

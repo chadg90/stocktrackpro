@@ -154,8 +154,8 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-[var(--mkt-bg,#f8fafc)] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[var(--brand-blue)]"></div>
       </div>
     );
   }
@@ -216,11 +216,11 @@ export default function DashboardLayout({
   }
 
   if (!authorized) {
-    // On /dashboard page, show login form without sidebar
+    // On /dashboard page, show login form without sidebar (marketing light theme)
     return (
       <ToastProvider>
         <DashboardQueryProvider>
-          <div className="min-h-screen bg-black">{children}</div>
+          <div className="min-h-screen bg-[var(--mkt-bg,#f8fafc)]">{children}</div>
         </DashboardQueryProvider>
       </ToastProvider>
     );

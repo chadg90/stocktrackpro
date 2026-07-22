@@ -87,10 +87,10 @@ export default function HomeHero() {
           UK DVSA van fleet compliance
         </p>
         <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight text-slate-800 mb-4 sm:mb-5 leading-snug max-w-xl">
-          Walkaround checks &amp; defect resolution that drivers actually use
+          DVSA walkaround checks and defect resolution for UK van fleets
         </h1>
         <p className="text-[0.95rem] sm:text-lg text-slate-600 max-w-md sm:max-w-xl leading-relaxed mb-6 sm:mb-8">
-          Daily DVSA checks, instant defect close-out, and MOT visibility — mobile for the yard, web dashboard for
+          Photo-led inspections, MOT and tax alerts, and a shared audit trail — mobile for drivers, web dashboard for
           managers.
         </p>
         <div className="flex w-full max-w-sm sm:max-w-none flex-col sm:flex-row gap-3 sm:gap-4 lg:w-auto">

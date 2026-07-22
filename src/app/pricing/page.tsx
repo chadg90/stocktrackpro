@@ -14,7 +14,7 @@ import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 
 const PRICE_PER_VEHICLE_MONTHLY = 8;
 const PRICE_PER_VEHICLE_YEARLY = 84; // = £7/vehicle/month effective, save ~12.5%
-const MIN_VEHICLES = 5;
+const MIN_VEHICLES = 2;
 const MAX_VEHICLES = 100;
 
 type BillingCycle = 'monthly' | 'yearly';
@@ -118,7 +118,7 @@ export default function Pricing() {
           </h1>
           <p className="text-lg sm:text-xl text-slate-600 leading-relaxed">
             £8 per vehicle per month (prices include VAT at 20%). Monthly billing can be cancelled anytime.
-            Minimum 5 vehicles. Annual billing is £84 per vehicle per year, paid upfront.
+            Minimum 2 vehicles. Annual billing is £84 per vehicle per year, paid upfront.
           </p>
           <p className="text-base text-slate-500 leading-relaxed mt-4 max-w-2xl mx-auto">
             Need LOLER and site plant records too? Optional Plant &amp; Machinery is £12 per machine per month
@@ -333,28 +333,150 @@ export default function Pricing() {
           />
           </div>
 
-          {/* Subscription Terms */}
-          <div className="mt-8 bg-slate-50 border border-slate-200 rounded-2xl p-6 text-left backdrop-blur-sm">
-            <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full" />
-              Subscription Terms
-            </h3>
-            <ul className="space-y-2 text-sm text-slate-600">
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Billed monthly — £{PRICE_PER_VEHICLE_MONTHLY} per vehicle, or annually — £{PRICE_PER_VEHICLE_YEARLY} per vehicle (save ~12.5%)</span></li>
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Minimum {MIN_VEHICLES} vehicles (£{MIN_VEHICLES * PRICE_PER_VEHICLE_MONTHLY}/month or £{MIN_VEHICLES * PRICE_PER_VEHICLE_YEARLY}/year)</span></li>
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>Vehicle count changes for active subscriptions are managed through the billing portal or support</span></li>
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>New companies receive a 7-day free trial</span></li>
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span><strong className="text-white/90">Monthly:</strong> cancel anytime — no long-term contract</span></li>
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span><strong className="text-white/90">Annual:</strong> 12-month term paid upfront — cancel renewal anytime; unused months are not refunded</span></li>
-              <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 shrink-0" /><span>All prices include VAT at 20%</span></li>
-            </ul>
+          {/* Subscription Terms summary — full legal text at /subscription-terms */}
+          <div className="mt-8 bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 text-left">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5 pb-5 border-b border-slate-200">
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">Subscription Terms</h3>
+                <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+                  Key billing points for business subscriptions. This summary does not replace the full terms.
+                </p>
+              </div>
+              <Link
+                href="/subscription-terms"
+                className="shrink-0 text-sm font-medium text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
+              >
+                Read full terms
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 text-sm text-slate-600">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 mb-3">
+                  Pricing
+                </p>
+                <ul className="space-y-2.5">
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      Fleet: £{PRICE_PER_VEHICLE_MONTHLY} per vehicle / month, or £{PRICE_PER_VEHICLE_YEARLY} per
+                      vehicle / year (paid upfront). Prices include UK VAT at 20%.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      Minimum {MIN_VEHICLES} vehicles (£{MIN_VEHICLES * PRICE_PER_VEHICLE_MONTHLY}/month or £
+                      {MIN_VEHICLES * PRICE_PER_VEHICLE_YEARLY}/year).
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      Optional Plant &amp; Machinery is a separate add-on (£12/machine/month or £120/year; min 3)
+                      and is not included in the fleet trial.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 mb-3">
+                  Billing &amp; changes
+                </p>
+                <ul className="space-y-2.5">
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      Subscriptions auto-renew via Stripe unless cancelled before the next renewal date.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      Vehicle or machine quantity changes are made via the billing portal or support and take
+                      effect from the next billing cycle (current period is not re-prorated).
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      Failed renewal payments may lead to suspension of access until payment is resolved.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 mb-3">
+                  Trial
+                </p>
+                <ul className="space-y-2.5">
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      New companies get a 7-day free trial of fleet features. No card required to start. The
+                      trial ends automatically; a paid subscription is required to continue.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 mb-3">
+                  Cancellation &amp; refunds
+                </p>
+                <ul className="space-y-2.5">
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      <strong className="font-semibold text-slate-800">Monthly:</strong> cancel anytime from the
+                      billing portal. Access continues until the end of the paid month. No long-term contract.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      <strong className="font-semibold text-slate-800">Annual:</strong> 12-month term paid
+                      upfront. You may cancel renewal anytime; unused months within the paid year are not
+                      refunded.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      Fees already paid are non-refundable except where required by law or where we have
+                      materially failed to provide the service.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <p className="mt-6 pt-5 border-t border-slate-200 text-xs text-slate-500 leading-relaxed">
+              Fleet Track PRO is sold for business use. These points should be read with our{' '}
+              <Link href="/subscription-terms" className="text-[var(--brand-blue)] hover:underline">
+                Subscription Terms
+              </Link>
+              ,{' '}
+              <Link href="/terms" className="text-[var(--brand-blue)] hover:underline">
+                Terms and Conditions
+              </Link>
+              , and{' '}
+              <Link href="/privacy" className="text-[var(--brand-blue)] hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
           </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-slate-500">
               New to Fleet Track PRO?{' '}
-              <Link href="/contact" className="text-blue-500 hover:underline">Get in touch</Link>
-              {' '}and we&apos;ll help you get set up.
+              <Link href="/contact" className="text-[var(--brand-blue)] hover:underline">
+                Get in touch
+              </Link>{' '}
+              and we&apos;ll help you get set up.
             </p>
           </div>
         </div>

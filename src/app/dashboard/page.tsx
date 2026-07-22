@@ -897,25 +897,16 @@ function DashboardPageInner() {
                 aria-hidden
                 style={{
                   background:
-                    'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59,130,246,0.22), transparent 55%), radial-gradient(ellipse 60% 40% at 90% 80%, rgba(59,130,246,0.08), transparent 50%), linear-gradient(180deg, #09090b 0%, #000 100%)',
+                    'radial-gradient(ellipse 70% 50% at 15% 40%, rgba(59,130,246,0.09), transparent 55%), radial-gradient(ellipse 50% 40% at 90% 80%, rgba(59,130,246,0.06), transparent 50%)',
                 }}
               />
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.35]"
-                aria-hidden
-                style={{
-                  backgroundImage:
-                    'linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)',
-                  backgroundSize: '48px 48px',
-                  maskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent)',
-                }}
-              />
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" aria-hidden />
 
               <div className="relative w-full max-w-md">
                 <div className="mb-8 flex flex-col items-center text-center">
                   <div className="relative mb-5 h-12 w-52 sm:h-14 sm:w-60">
                     <Image
-                      src="/logo-white.png"
+                      src="/logo-black.png"
                       alt="Fleet Track PRO"
                       fill
                       sizes="240px"
@@ -923,18 +914,18 @@ function DashboardPageInner() {
                       priority
                     />
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">
                     Manager dashboard
                   </h1>
-                  <p className="mt-2 max-w-sm text-sm text-white/55 leading-relaxed">
+                  <p className="mt-2 max-w-sm text-sm text-slate-600 leading-relaxed">
                     Sign in to view your organisation’s fleet analytics, defects, and compliance.
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white/12 bg-white/[0.05] p-6 sm:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-md">
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
                   {error && (
                     <div
-                      className="mb-5 rounded-xl border border-red-500/35 bg-red-500/10 px-4 py-3 text-sm text-red-100"
+                      className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
                       role="alert"
                     >
                       {error}
@@ -943,7 +934,7 @@ function DashboardPageInner() {
 
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div>
-                      <label htmlFor="dashboard-email" className="mb-1.5 block text-sm font-medium text-white/75">
+                      <label htmlFor="dashboard-email" className="mb-1.5 block text-sm font-medium text-slate-700">
                         Email
                       </label>
                       <input
@@ -955,12 +946,12 @@ function DashboardPageInner() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@company.com"
-                        className="w-full rounded-xl border border-white/15 bg-black/40 px-3.5 py-3 text-white placeholder:text-white/30 outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                        className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition-colors focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/25"
                         required
                       />
                     </div>
                     <div>
-                      <label htmlFor="dashboard-password" className="mb-1.5 block text-sm font-medium text-white/75">
+                      <label htmlFor="dashboard-password" className="mb-1.5 block text-sm font-medium text-slate-700">
                         Password
                       </label>
                       <div className="relative">
@@ -972,13 +963,13 @@ function DashboardPageInner() {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="Enter your password"
-                          className="w-full rounded-xl border border-white/15 bg-black/40 px-3.5 py-3 pr-11 text-white placeholder:text-white/30 outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                          className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 pr-11 text-slate-900 placeholder:text-slate-400 outline-none transition-colors focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/25"
                           required
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword((v) => !v)}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-white/45 hover:text-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]/40"
                           aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                           {showPassword ? (
@@ -991,21 +982,24 @@ function DashboardPageInner() {
                     </div>
                     <button
                       type="submit"
-                      className="mt-1 w-full rounded-xl bg-blue-500 py-3 text-sm font-semibold text-black transition-colors hover:bg-blue-400 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black"
+                      className="mt-1 w-full rounded-xl btn-brand-blue py-3 text-sm font-semibold text-white transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white"
                       disabled={loading}
                     >
                       {loading ? 'Signing in…' : 'Sign in'}
                     </button>
                   </form>
 
-                  <p className="mt-5 text-center text-xs text-white/40">
+                  <p className="mt-5 text-center text-xs text-slate-500">
                     Manager and admin accounts only.
                   </p>
                 </div>
 
-                <p className="mt-6 text-center text-sm text-white/45">
+                <p className="mt-6 text-center text-sm text-slate-500">
                   New organisation?{' '}
-                  <Link href="/onboarding" className="font-medium text-blue-400 hover:text-blue-300 hover:underline">
+                  <Link
+                    href="/onboarding"
+                    className="font-medium text-[var(--brand-blue)] hover:text-blue-700 hover:underline"
+                  >
                     Start free trial
                   </Link>
                 </p>

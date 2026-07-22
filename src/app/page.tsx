@@ -62,17 +62,17 @@ const DEFECT_STEPS = [
   {
     n: 1,
     title: 'REPORT',
-    body: 'Drivers complete DVSA daily walkaround checks in the app — photos, checklist, and defects captured with a timestamp.',
+    body: 'Drivers submit the daily check with required photos, checklist answers, and any defects — timestamped in the app.',
   },
   {
     n: 2,
     title: 'ALERT',
-    body: 'Managers get a push notification the moment a defect is raised, so nothing sits unnoticed.',
+    body: 'Managers get a push notification as soon as a defect is raised.',
   },
   {
     n: 3,
     title: 'RESOLVE',
-    body: 'Fitters work from My Jobs, update status, and close the job in the app when the vehicle is ready.',
+    body: 'Fitters work from My Jobs, update status, and close the job when the vehicle is ready.',
   },
   {
     n: 4,
@@ -86,7 +86,7 @@ const DEFECT_STEPS = [
         >
           audit trail
         </Link>{' '}
-        for fleet compliance record keeping.
+        for compliance record keeping.
       </>
     ),
   },
@@ -94,10 +94,10 @@ const DEFECT_STEPS = [
 
 const QUICK_FACTS = [
   ['Platform', 'iOS and Android app, plus web dashboard'],
-  ['Product focus', 'Van fleet DVSA compliance — not warehouse or inventory stock tracking'],
-  ['Who uses what', 'Drivers (user role); managers and fitters (manager role)'],
-  ['Fleet size', 'Built for 5 to 100+ vehicles'],
-  ['Plant add-on', 'Optional — from £12/machine/month (min 3). LOLER, service, hire check & PUWER in one entry'],
+  ['Roles', 'Drivers report; managers and fitters run My Jobs and oversight'],
+  ['Fleet size', 'From 2 to 100+ vehicles'],
+  ['Pricing', 'From £8 per vehicle per month (VAT included)'],
+  ['Plant add-on', 'Optional — priced separately on the Pricing page'],
   ['Support', 'UK-based — email and WhatsApp'],
 ];
 
@@ -110,7 +110,7 @@ const INCLUDED = [
   {
     icon: ClipboardList,
     title: 'Defects to close-out',
-    description: 'Report → notify → repair → resolve, with My Jobs for open work.',
+    description: 'Open defects stay on My Jobs until repaired and signed off.',
   },
   {
     icon: Map,
@@ -121,7 +121,7 @@ const INCLUDED = [
     icon: HardHat,
     title: 'Plant & Machinery',
     description:
-      'Optional add-on from £12 per machine per month (min 3) — complete LOLER, service, pre-hire/off-hire, and PUWER in one visit. Separate PDFs, examination due reminders, and plant reports on the web dashboard.',
+      'Optional add-on for LOLER, service, hire checks, and PUWER — with PDFs and due-date reminders.',
     href: '/pricing',
   },
 ];
@@ -178,8 +178,8 @@ export default function Home() {
                   Trades and transport teams across the UK
                 </h2>
                 <p className="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
-                  DVSA roadworthiness records, driver pre-use walkaround checks, and van fleet risk management — from
-                  sole traders to national contractors. Optional Plant &amp; Machinery for site LOLER records.
+                  Built for sole traders through to national contractors who need clear vehicle records without paper
+                  pads or scattered WhatsApp threads.
                 </p>
                 <div className="flex flex-wrap gap-x-5 gap-y-3 text-slate-500">
                   {[
@@ -216,7 +216,7 @@ export default function Home() {
                   From defect report to sign-off
                 </h2>
                 <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-                  Fitters and managers share the manager role for My Jobs and alerts; drivers report from the app.
+                  Four steps from the roadside check to a closed repair — with every update in one place.
                 </p>
               </div>
               <div className="relative aspect-[4/3] overflow-hidden mkt-card-static order-first lg:order-none">
@@ -259,15 +259,14 @@ export default function Home() {
               <div>
                 <h2 className="text-2xl sm:text-4xl font-bold text-slate-900 mb-3">What&apos;s included</h2>
                 <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                  One fleet subscription for vans — plus optional Plant &amp; Machinery from £12 per machine per month.
-                  Full detail on the{' '}
+                  Core van fleet tools in one subscription. See the{' '}
                   <Link
                     href="/features"
                     className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
                   >
                     features page
-                  </Link>
-                  .
+                  </Link>{' '}
+                  for the full list.
                 </p>
               </div>
             </div>
@@ -325,8 +324,7 @@ export default function Home() {
               Start managing your fleet today
             </h2>
             <p className="text-slate-600 max-w-xl mx-auto mb-10 text-lg">
-              Set up your company and invite your team in minutes. Add Plant &amp; Machinery later if you also run lifting
-              equipment on site.
+              Set up your company and invite your team in minutes — no card required for the 7-day trial.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md sm:max-w-none mx-auto">
               <Link
