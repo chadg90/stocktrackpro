@@ -314,6 +314,15 @@ function DashboardPageInner() {
       if (data.role !== 'manager' && data.role !== 'admin') {
         throw new Error('Access restricted. Only managers and authorised staff can access the dashboard.');
       }
+      // Ensure Auth custom claims (companyId / subscriptionStatus) are on the token
+      // after onboarding or claims-sync — needed for some Firestore vehicle rules.
+      if (data.company_id) {
+        try {
+          await user.getIdToken(true);
+        } catch {
+          // Non-fatal; security rules also allow profile/company fallback.
+        }
+      }
       setProfile(data);
       return data;
     },

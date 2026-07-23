@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { httpsCallable } from 'firebase/functions';
 import { firebaseFunctions } from '@/lib/firebase';
+import { SUPPORT_EMAIL } from '@/lib/brand';
 
 type InvitePreview = {
   valid: boolean;
@@ -16,6 +17,21 @@ type InvitePreview = {
 };
 
 const APP_STORE_URL = 'https://apps.apple.com/gb/app/stock-track-pro/id6744621973';
+
+function androidInviteMailto(opts: { email?: string | null; companyName?: string }) {
+  const subject = 'Android app invite request — Fleet Track PRO';
+  const lines = [
+    'Hi Fleet Track PRO team,',
+    '',
+    'Please add me to the Android (Google Play) testing / invite list.',
+    '',
+    opts.email ? `Account email: ${opts.email}` : null,
+    opts.companyName ? `Company: ${opts.companyName}` : null,
+    '',
+    'Thanks,',
+  ].filter(Boolean);
+  return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`;
+}
 
 export default function InviteAcceptPage() {
   const params = useParams<{ inviteId: string }>();
@@ -156,8 +172,8 @@ export default function InviteAcceptPage() {
 
           <ol className="text-sm text-slate-600 space-y-3 mb-6 list-decimal list-inside text-left">
             <li>
-              <span className="text-slate-800">Get the app</span> — use the App Store link below, or your manager’s link if you
-              are on Android (testing).
+              <span className="text-slate-800">Get the app</span> — use the App Store link below for iOS, or request an
+              Android invite if you are on Google Play testing.
             </li>
             <li>
               <span className="text-slate-800">Open Fleet Track PRO</span> and choose sign in (not create account).
@@ -177,12 +193,23 @@ export default function InviteAcceptPage() {
             >
               Open App Store — Fleet Track PRO
             </a>
-            <div className="rounded-lg border border-slate-200 bg-white/5 p-4 text-left">
-              <p className="text-sm text-slate-600 font-medium">Android (internal testing)</p>
-              <p className="text-sm text-slate-500 mt-1">
-                Your manager will send your install or Play testing link. Then sign in with the same email and password as
-                above.
-              </p>
+            <div className="rounded-lg border border-slate-200 bg-white/5 p-4 text-left space-y-3">
+              <div>
+                <p className="text-sm text-slate-600 font-medium">Android (invite only)</p>
+                <p className="text-sm text-slate-500 mt-1">
+                  Google Play access is by invite while we roll out testing. Request access and we&apos;ll email your
+                  Play testing link.
+                </p>
+              </div>
+              <a
+                href={androidInviteMailto({
+                  email: signedUpEmail || invite?.email,
+                  companyName: invite?.companyName,
+                })}
+                className="block w-full rounded-lg border border-slate-300 bg-slate-50 hover:border-blue-400 text-slate-900 font-medium py-2.5 px-4 text-center transition-colors"
+              >
+                Request Android invite
+              </a>
             </div>
             <Link
               href="/"

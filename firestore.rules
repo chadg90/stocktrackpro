@@ -82,11 +82,15 @@ service cloud.firestore {
         tokenSubscriptionActive();
     }
 
-    // Step 5.3: token-only for vehicles + vehicle_inspections (no extra get() in rules on those reads).
-    // Rollback (git): re-add legacyTenantOk + "return tokenTenantOk(x) || legacyTenantOk(x)" if needed.
+    // Prefer custom claims when present (fast path). Fall back to profile + company docs so
+    // brand-new trial signups work before claims sync / ID token refresh completes.
+    function legacyTenantOk(resourceCompanyId) {
+      return userCompanyId() == resourceCompanyId && isCompanyActive();
+    }
+
     // Admins still reach all docs via GLOBAL ADMIN OVERRIDE match /{path=**} below.
     function vehicleInspectionTenantOk(resourceCompanyId) {
-      return tokenTenantOk(resourceCompanyId);
+      return tokenTenantOk(resourceCompanyId) || legacyTenantOk(resourceCompanyId);
     }
     
     // ============================================
@@ -117,6 +121,7 @@ service cloud.firestore {
             'app_ota_update_id',
             'app_ota_channel',
             'app_last_seen_at',
+            'last_login',
             'inspector_job_title',
             'inspector_address',
             'qualification_name',

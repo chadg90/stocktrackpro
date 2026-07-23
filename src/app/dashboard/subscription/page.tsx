@@ -6,6 +6,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { CreditCard, Check, ExternalLink, AlertCircle, Calendar, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { companyHasPaidAccess, getTrialEndDate, isWebTrialExpired } from '@/lib/trialStatus';
 
 const PRICE_PER_VEHICLE_MONTHLY = 8;
 const PRICE_PER_VEHICLE_YEARLY = 84;
@@ -254,6 +255,13 @@ export default function SubscriptionPage() {
 
   const canManage = profile?.role === 'manager' || profile?.role === 'admin';
   const subscriptionStatus = company?.subscription_status;
+  const trialExpired = isWebTrialExpired(company);
+  const hasAccess = companyHasPaidAccess(company);
+  const trialEndLabel = (() => {
+    const end = getTrialEndDate(company);
+    if (!end) return null;
+    return end.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+  })();
   const hasStripeManagedSubscription =
     company?.subscription_type === 'stripe' &&
     (subscriptionStatus === 'active' || subscriptionStatus === 'trial');
@@ -302,6 +310,28 @@ export default function SubscriptionPage() {
           </p>
           <p className="text-amber-800 dark:text-amber-200/90 text-sm mt-1">
             This account is excluded from new per-vehicle pricing, including the monthly and annual plans available to new customers. Contact support via WhatsApp if you&apos;d like to discuss a plan change.
+          </p>
+        </div>
+      )}
+
+      {!hasAccess && !company?.legacy && (
+        <div className="rounded-xl border border-red-300 bg-red-50 px-5 py-4 dark:border-red-500/40 dark:bg-red-500/10">
+          <p className="text-red-900 dark:text-red-100 font-semibold">
+            {trialExpired ? 'Your free trial has ended' : 'Subscription required to continue'}
+          </p>
+          <p className="text-red-800 dark:text-red-200/90 text-sm mt-1">
+            {trialExpired && trialEndLabel
+              ? `Your trial ended on ${trialEndLabel}. Choose your vehicle count below and subscribe to keep full access — payment is taken via Stripe Checkout.`
+              : 'Choose your vehicle count below and subscribe via Stripe Checkout to restore dashboard and app access.'}
+          </p>
+        </div>
+      )}
+
+      {hasAccess && subscriptionStatus === 'trial' && trialEndLabel && (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 px-5 py-4 dark:border-amber-500/40 dark:bg-amber-500/10">
+          <p className="text-amber-900 dark:text-amber-100 font-semibold">Free trial active</p>
+          <p className="text-amber-800 dark:text-amber-200/90 text-sm mt-1">
+            Trial ends on {trialEndLabel}. After that, you must subscribe and pay to keep using Fleet Track PRO.
           </p>
         </div>
       )}

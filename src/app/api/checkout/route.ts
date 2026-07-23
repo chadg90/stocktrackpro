@@ -195,18 +195,25 @@ export async function POST(request: NextRequest) {
     const companySnap = await db.collection('companies').doc(trimmedCompanyId).get();
     const companyData = companySnap.exists ? companySnap.data() : null;
     const hasPreviousStripeSubscription = companyData?.stripe_subscription_id != null;
-    const isNewCompany = !hasPreviousStripeSubscription &&
-      (companyData?.subscription_status === 'trial' || companyData?.subscription_status == null);
+    const status = companyData?.subscription_status;
+    const alreadyUsedWebTrial =
+      companyData?.trial_start_date != null ||
+      companyData?.trial_end_date != null ||
+      status === 'trial' ||
+      status === 'trialing' ||
+      status === 'inactive';
 
     console.log('[Checkout] Company subscription status:', {
-      subscription_status: companyData?.subscription_status,
-      isNewCompany,
+      subscription_status: status,
+      alreadyUsedWebTrial,
+      hasPreviousStripeSubscription,
     });
 
-    // Prevent creating a second website (Stripe) subscription if one is already active/trial.
+    // Prevent a second Stripe subscription only when Stripe already manages an active/trial sub.
     const hasActiveStripeSubscription =
       companyData?.subscription_type === 'stripe' &&
-      (companyData.subscription_status === 'active' || companyData.subscription_status === 'trial');
+      hasPreviousStripeSubscription &&
+      (status === 'active' || status === 'trial');
 
     if (hasActiveStripeSubscription) {
       return NextResponse.json(
@@ -237,7 +244,8 @@ export async function POST(request: NextRequest) {
             vehicle_count: String(vehicleCount),
             billing_cycle: cycle,
           },
-          ...(isNewCompany && { trial_period_days: 7 }),
+          // No-card web trial is already used at onboarding — charge from day one on convert.
+          ...(!alreadyUsedWebTrial && !hasPreviousStripeSubscription && { trial_period_days: 7 }),
         },
       });
     } catch (stripeError: any) {

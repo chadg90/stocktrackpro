@@ -20,12 +20,27 @@ import {
   Apple,
 } from 'lucide-react';
 import Link from 'next/link';
+import { SUPPORT_EMAIL } from '@/lib/brand';
 
 type OnboardingStep = 'choice' | 'account' | 'company' | 'success';
 
 const TRIAL_DAYS = 7;
 const APP_STORE_URL = 'https://apps.apple.com/gb/app/stock-track-pro/id6744621973';
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.stocktrackpro.app';
+
+function androidInviteMailto(opts: { email?: string; companyName?: string }) {
+  const subject = 'Android app invite request — Fleet Track PRO';
+  const lines = [
+    'Hi Fleet Track PRO team,',
+    '',
+    'Please add me to the Android (Google Play) testing / invite list.',
+    '',
+    opts.email ? `Account email: ${opts.email}` : null,
+    opts.companyName ? `Company: ${opts.companyName}` : null,
+    '',
+    'Thanks,',
+  ].filter(Boolean);
+  return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`;
+}
 
 export default function OnboardingPage() {
   // Account creation
@@ -159,6 +174,8 @@ export default function OnboardingPage() {
         subscription_status: 'trial',
         trial_start_date: serverTimestamp(),
         trial_end_date: trialEnd.toISOString(),
+        // Kept in sync for mobile access checks (companySubscription.js).
+        subscription_expiry_date: trialEnd.toISOString(),
         created_at: serverTimestamp(),
         created_by: user.uid,
       });
@@ -173,6 +190,14 @@ export default function OnboardingPage() {
         },
         { merge: true }
       );
+
+      // Claims sync runs in Cloud Functions; refresh the ID token so dashboard
+      // vehicle/inspection reads work immediately when custom claims are ready.
+      try {
+        await user.getIdToken(true);
+      } catch {
+        // Non-fatal — rules also allow profile/company fallback for trial users.
+      }
 
       setCreatedCompanyName(companyName.trim());
       setStep('success');
@@ -333,15 +358,20 @@ export default function OnboardingPage() {
                   App Store (iOS)
                 </a>
                 <a
-                  href={PLAY_STORE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={androidInviteMailto({
+                    email: email.trim() || undefined,
+                    companyName: createdCompanyName || undefined,
+                  })}
                   className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-slate-50 py-2.5 px-3 text-sm text-slate-900 hover:border-blue-400 transition-colors"
                 >
                   <Smartphone className="w-4 h-4" />
-                  Google Play (Android)
+                  Request Android invite
                 </a>
               </div>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Android is invite-only while we roll out Google Play testing. Tap Request Android invite to email us —
+                we&apos;ll send your Play testing link.
+              </p>
             </div>
 
             <Link
