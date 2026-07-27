@@ -89,7 +89,7 @@ export default function DashboardLayout({
   const [signedIn, setSignedIn] = useState(false);
   const [needsSubscription, setNeedsSubscription] = useState(false);
   const [trialExpired, setTrialExpired] = useState(false);
-  const [theme, setTheme] = useState<ThemePreference>('dark');
+  const [theme, setTheme] = useState<ThemePreference>('light');
   const pathname = usePathname();
   const isSubscriptionPage =
     pathname === '/dashboard/subscription' || pathname?.startsWith('/dashboard/subscription/');
@@ -99,6 +99,9 @@ export default function DashboardLayout({
       const stored = window.localStorage.getItem('stp_dashboard_theme');
       if (stored === 'light' || stored === 'dark') {
         setTheme(stored);
+      } else {
+        // First visit: persist light as the default preference
+        window.localStorage.setItem('stp_dashboard_theme', 'light');
       }
     }
   }, []);

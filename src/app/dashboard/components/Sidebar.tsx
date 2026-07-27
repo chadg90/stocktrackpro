@@ -82,6 +82,8 @@ const navigationGroups: NavigationGroup[] = [
       { name: 'MOT & Tax', href: '/dashboard/mot-tax', icon: ShieldCheck, managerOnly: true },
       { name: 'Mileage monitor', href: '/dashboard/mileage-monitor', icon: Gauge, managerOnly: true },
       { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },
+      { name: 'Inspection proof', href: '/dashboard/inspection-proof', icon: FileText, managerOnly: true },
+      { name: 'Vehicle reports', href: '/dashboard/vehicle-reports', icon: ClipboardList, managerOnly: true },
       { name: 'Audit log', href: '/dashboard/history', icon: History },
     ]
   },
@@ -144,10 +146,14 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Menu Button — adapts to dashboard theme */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-[100] p-2 bg-black/90 border border-blue-500/30 rounded-lg text-white hover:bg-blue-500/10 transition-colors shadow-lg"
+        className={`lg:hidden fixed top-4 left-4 z-[100] p-2 rounded-lg shadow-lg transition-colors ${
+          theme === 'light'
+            ? 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-50'
+            : 'bg-black/90 border border-blue-500/30 text-white hover:bg-blue-500/10'
+        }`}
         aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
         aria-expanded={mobileMenuOpen}
         aria-controls="sidebar-navigation"

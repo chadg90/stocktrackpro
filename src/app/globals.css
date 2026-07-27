@@ -398,14 +398,14 @@ html {
 
   /* Team/status badges: defined border + legible text in light mode */
   .theme-light .badge-trial {
-    border: 1px solid #93c5fd !important;
-    background-color: #eff6ff !important;
-    color: #1d4ed8 !important;
+    border: 1px solid #60a5fa !important;
+    background-color: #dbeafe !important;
+    color: #1e3a8a !important;
   }
   .theme-light .badge-tier {
-    border: 1px solid #86efac !important;
-    background-color: #f0fdf4 !important;
-    color: #15803d !important;
+    border: 1px solid #4ade80 !important;
+    background-color: #dcfce7 !important;
+    color: #14532d !important;
   }
 
   /* Light mode: tables, cards, inputs - replace black with light surfaces */
@@ -455,44 +455,79 @@ html {
     background-color: #eff6ff !important;
   }
 
-  /* Light mode: KPI / chart accents (readable on white cards) */
-  .theme-light main .text-green-300 {
-    color: #15803d !important;
+  /* Light mode: KPI / chart / status accents — darkened for readability on white */
+  .theme-light main .text-green-300,
+  .theme-light main .text-green-400 {
+    color: #14532d !important;
   }
-  .theme-light main .text-amber-300 {
-    color: #b45309 !important;
+  .theme-light main .text-amber-200,
+  .theme-light main .text-amber-300,
+  .theme-light main .text-amber-400,
+  .theme-light main .text-yellow-300 {
+    color: #78350f !important;
   }
-  .theme-light main .text-red-300 {
-    color: #b91c1c !important;
-  }
+  .theme-light main .text-red-300,
   .theme-light main .text-red-400 {
-    color: #dc2626 !important;
+    color: #7f1d1d !important;
   }
   .theme-light main .text-cyan-400 {
-    color: #0e7490 !important;
+    color: #155e75 !important;
   }
+  .theme-light main .text-blue-300,
   .theme-light main .text-blue-400 {
-    color: #1d4ed8 !important;
+    color: #1e3a8a !important;
   }
   .theme-light main .text-blue-500 {
     color: #1d4ed8 !important;
   }
   .theme-light main .text-purple-400 {
-    color: #6d28d9 !important;
+    color: #5b21b6 !important;
   }
+  .theme-light main .text-emerald-300,
   .theme-light main .text-emerald-400 {
-    color: #047857 !important;
+    color: #064e3b !important;
   }
 
   /* Light mode: inline status / tier colors (not overridden by text-white rules) */
   .theme-light main .text-sky-400 {
-    color: #0369a1 !important;
+    color: #0c4a6e !important;
   }
   .theme-light main .text-indigo-400 {
-    color: #4338ca !important;
+    color: #312e81 !important;
   }
   .theme-light main .text-violet-400 {
-    color: #6d28d9 !important;
+    color: #4c1d95 !important;
+  }
+
+  /* Soft status pill backgrounds — keep text darker than before */
+  .theme-light main .bg-green-500\/10,
+  .theme-light main .bg-green-500\/20 {
+    background-color: #dcfce7 !important;
+  }
+  .theme-light main .bg-amber-500\/10,
+  .theme-light main .bg-yellow-500\/10 {
+    background-color: #fef3c7 !important;
+  }
+  .theme-light main .bg-red-500\/10,
+  .theme-light main .bg-red-500\/20 {
+    background-color: #fee2e2 !important;
+  }
+  .theme-light main .bg-blue-500\/10 {
+    background-color: #dbeafe !important;
+  }
+  .theme-light main .bg-emerald-500\/15,
+  .theme-light main .bg-emerald-100 {
+    background-color: #d1fae5 !important;
+  }
+  .theme-light main .text-emerald-800,
+  .theme-light main .text-green-700,
+  .theme-light main .text-green-800 {
+    color: #14532d !important;
+  }
+  .theme-light main .text-amber-800,
+  .theme-light main .text-amber-900,
+  .theme-light main .text-amber-950 {
+    color: #78350f !important;
   }
 
   /* Alerts: strong contrast on light background */

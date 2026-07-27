@@ -331,6 +331,33 @@ service cloud.firestore {
     }
 
     // ============================================
+    // VEHICLE DOCUMENTS (MOT / service / other — web reports)
+    // ============================================
+    match /vehicle_documents/{docId} {
+      allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
+      allow create: if isSignedIn() &&
+        isManagerOrAdmin() &&
+        userCompanyId() == request.resource.data.company_id &&
+        isCompanyActive() &&
+        request.resource.data.vehicle_id is string &&
+        request.resource.data.type in ['mot', 'service', 'other'] &&
+        request.resource.data.storage_path is string;
+      allow update: if isSignedIn() && (
+        (
+          isManager() &&
+          userCompanyId() == resource.data.company_id &&
+          request.resource.data.company_id == resource.data.company_id &&
+          isCompanyActive()
+        ) ||
+        isAdmin()
+      );
+      allow delete: if isSignedIn() && (
+        (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
+        isAdmin()
+      );
+    }
+
+    // ============================================
     // VEHICLE DAMAGE REPORTS
     // ============================================
     match /vehicle_damage_reports/{reportId} {

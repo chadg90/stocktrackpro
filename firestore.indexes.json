@@ -61,6 +61,24 @@
       ]
     },
     {
+      "collectionGroup": "vehicle_defects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "company_id", "order": "ASCENDING" },
+        { "fieldPath": "vehicle_id", "order": "ASCENDING" },
+        { "fieldPath": "reported_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vehicle_documents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "company_id", "order": "ASCENDING" },
+        { "fieldPath": "vehicle_id", "order": "ASCENDING" },
+        { "fieldPath": "document_date", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "vehicles",
       "queryScope": "COLLECTION",
       "fields": [
