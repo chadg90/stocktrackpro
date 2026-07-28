@@ -3,14 +3,7 @@ import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe-server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
-import {
-  isPlantStripeMetadata,
-  applyPlantCheckoutCompleted,
-  applyPlantSubscriptionToCompany,
-  applyPlantSubscriptionCancelled,
-  applyPlantPaymentFailed,
-  machineCountFromSubscription,
-} from '@/lib/stripe-plant-billing';
+
 const WEBHOOK_WINDOW_MS = 60 * 1000;
 const WEBHOOK_MAX_REQUESTS = 120; // Stripe may retry
 
@@ -68,9 +61,7 @@ export async function POST(request: NextRequest) {
         const subscriptionId = session.subscription as string | null;
         const companyId = session.metadata?.company_id;
         const vehicleCountRaw = session.metadata?.vehicle_count;
-        const machineCountRaw = session.metadata?.machine_count;
         const billingCycleMeta = session.metadata?.billing_cycle;
-        const isPlant = isPlantStripeMetadata(session.metadata);
 
         if (!subscriptionId || !companyId) {
           console.warn('Stripe webhook: checkout.session.completed missing subscription_id or company_id');
@@ -79,11 +70,6 @@ export async function POST(request: NextRequest) {
 
         const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
 
-        if (isPlant) {
-          await applyPlantCheckoutCompleted(db, companyId, subscription, machineCountRaw);
-          console.log('Updated company', companyId, 'plant module from checkout.session.completed');
-          break;
-        }
         const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
         const status = subscription.status;
         const intervalFromPrice = subscription.items?.data?.[0]?.price?.recurring?.interval;
@@ -140,16 +126,6 @@ export async function POST(request: NextRequest) {
           break;
         }
 
-        if (isPlantStripeMetadata(subscription.metadata)) {
-          const machineCount = machineCountFromSubscription(
-            subscription,
-            subscription.metadata?.machine_count
-          );
-          await applyPlantSubscriptionToCompany(db, companyId, subscription, machineCount);
-          console.log('Updated company', companyId, 'plant module active (invoice.paid)');
-          break;
-        }
-
         const periodEnd = subscription.current_period_end;
         const expiryDate = periodEnd ? new Date(periodEnd * 1000).toISOString().split('T')[0] : null;
         const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
@@ -172,16 +148,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice;
-        const subscriptionId = invoice.subscription as string | null;
-        if (!subscriptionId) break;
-
-        const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
-        const companyId = subscription.metadata?.company_id;
-        if (!companyId || !isPlantStripeMetadata(subscription.metadata)) break;
-
-        await applyPlantPaymentFailed(db, companyId);
-        console.log('Plant module past_due for company', companyId, '(invoice.payment_failed)');
+        // Acknowledged; fleet past_due / inactive is driven by customer.subscription.updated
         break;
       }
 
@@ -190,16 +157,6 @@ export async function POST(request: NextRequest) {
         const companyId = subscription.metadata?.company_id;
         const vehicleCountRaw = subscription.metadata?.vehicle_count;
         if (!companyId) break;
-
-        if (isPlantStripeMetadata(subscription.metadata)) {
-          const machineCount = machineCountFromSubscription(
-            subscription,
-            subscription.metadata?.machine_count
-          );
-          await applyPlantSubscriptionToCompany(db, companyId, subscription, machineCount);
-          console.log('Updated company', companyId, 'plant subscription (customer.subscription.updated)');
-          break;
-        }
 
         const status = subscription.status;
         const intervalFromPrice = subscription.items?.data?.[0]?.price?.recurring?.interval;
@@ -253,12 +210,6 @@ export async function POST(request: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription;
         const companyId = subscription.metadata?.company_id;
         if (!companyId) break;
-
-        if (isPlantStripeMetadata(subscription.metadata)) {
-          await applyPlantSubscriptionCancelled(db, companyId);
-          console.log('Plant module cancelled for company', companyId);
-          break;
-        }
 
         await db.collection('companies').doc(companyId).set(
           {

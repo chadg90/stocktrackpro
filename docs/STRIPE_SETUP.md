@@ -32,7 +32,7 @@ STRIPE_PRICE_PER_VEHICLE_YEARLY=price_xxxxxxxxxx # annual price
 1. Stripe Dashboard → **Developers** → **Webhooks** → **Add endpoint**
 2. **Endpoint URL:** `https://<your-domain>/api/webhooks/stripe`
 
-   Enable these events (vehicles + Plant module):
+   Enable these events:
 
    - `checkout.session.completed`
    - `invoice.paid`
