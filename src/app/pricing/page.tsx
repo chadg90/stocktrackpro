@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import { Check, ShieldCheck, Truck, Clock } from 'lucide-react';
 import Link from 'next/link';
-import PlantPricingCard from '../components/PlantPricingCard';
 import TestimonialQuote from '@/components/TestimonialQuote';
 import { PRICING_ROI_PARAGRAPH } from '@/content/pricingCopy';
 import { getFeaturedTestimonial } from '@/content/testimonials';
@@ -120,10 +119,6 @@ export default function Pricing() {
             £8 per vehicle per month (prices include VAT at 20%). Monthly billing can be cancelled anytime.
             Minimum 2 vehicles. Annual billing is £84 per vehicle per year, paid upfront.
           </p>
-          <p className="text-base text-slate-500 leading-relaxed mt-4 max-w-2xl mx-auto">
-            Need LOLER and site plant records too? Optional Plant &amp; Machinery is £12 per machine per month
-            (including VAT), minimum 3 machines — or £120 per machine per year. Calculator below.
-          </p>
 
           {/* Trust strip — one-liner value anchors */}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-600">
@@ -157,7 +152,7 @@ export default function Pricing() {
             </div>
           )}
 
-          <div className="grid lg:grid-cols-2 gap-8 items-start mb-8">
+          <div className="max-w-xl mx-auto mb-8">
           {/* Fleet pricing */}
           <div className="relative bg-white backdrop-blur-sm rounded-3xl p-8 sm:p-10 border border-blue-500 shadow-2xl shadow-slate-200/50 ring-2 ring-blue-200">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2">
@@ -324,13 +319,6 @@ export default function Pricing() {
               </p>
             </div>
           </div>
-
-          <PlantPricingCard
-            showCheckout
-            canSubscribe={canSubscribe}
-            companyId={profile?.company_id}
-            getIdToken={authUser ? () => authUser.getIdToken() : undefined}
-          />
           </div>
 
           {/* Subscription Terms summary — full legal text at /subscription-terms */}
@@ -370,13 +358,6 @@ export default function Pricing() {
                       {MIN_VEHICLES * PRICE_PER_VEHICLE_YEARLY}/year).
                     </span>
                   </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
-                    <span>
-                      Optional Plant &amp; Machinery is a separate add-on (£12/machine/month or £120/year; min 3)
-                      and is not included in the fleet trial.
-                    </span>
-                  </li>
                 </ul>
               </div>
 
@@ -394,7 +375,7 @@ export default function Pricing() {
                   <li className="flex items-start gap-2.5">
                     <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
                     <span>
-                      Vehicle or machine quantity changes are made via the billing portal or support and take
+                      Vehicle quantity changes are made via the billing portal or support and take
                       effect from the next billing cycle (current period is not re-prorated).
                     </span>
                   </li>

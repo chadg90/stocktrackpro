@@ -74,7 +74,7 @@ export default function PrivacyPolicy() {
                   For account, billing, website, and support data relating to how we operate {SITE_NAME},{' '}
                   <strong className="text-slate-800">{SITE_LEGAL_NAME}</strong> is the data controller.
                 </>,
-                'For fleet, inspection, defect, plant, and team records that your organisation stores in the Service, your organisation is typically the data controller, and we act as a processor on your instructions to provide the Service.',
+                'For fleet, inspection, defect, and team records that your organisation stores in the Service, your organisation is typically the data controller, and we act as a processor on your instructions to provide the Service.',
                 'If you are an employee or contractor using the app for your employer, contact your employer first about access, correction, or deletion of workplace records.',
               ]}
             />
@@ -87,7 +87,6 @@ export default function PrivacyPolicy() {
                 'Account information (name, business email, password, company details)',
                 'Team invitations and role assignments (manager or user)',
                 'Company, vehicle, inspection, and defect reporting data',
-                'Optional Plant & Machinery data: machine registers, examination and service records, inspector details, photos, and generated PDF reports',
                 'Support and contact messages you send us',
               ]}
             />
@@ -107,9 +106,8 @@ export default function PrivacyPolicy() {
             <BulletList
               items={[
                 'Taking vehicle inspection photos (including multi-photo walkaround checks)',
-                'Plant & Machinery inspection photos where your company uses that module',
                 'Storing inspection photos and PDF reports securely in our cloud systems',
-                'Push notification tokens for operational alerts (for example defect notifications and plant examination due reminders for managers)',
+                'Push notification tokens for operational alerts (for example defect notifications and MOT/tax reminders for managers)',
               ]}
             />
           </Section>
@@ -130,7 +128,7 @@ export default function PrivacyPolicy() {
             <BulletList
               items={[
                 'Authenticate users and manage secure sign-in',
-                'Store fleet data, optional plant records, profiles, and company data in Firestore and related storage',
+                'Store fleet data, profiles, and company data in Firestore and related storage',
                 'Host data on Google Cloud infrastructure with encryption in transit and at rest',
               ]}
             />
@@ -255,7 +253,6 @@ export default function PrivacyPolicy() {
               items={[
                 'Account data is retained while your user account is active',
                 'Vehicle and inspection data are retained according to your company’s needs and legal obligations',
-                'Where Plant & Machinery is used: LOLER-related records are kept for at least two years; service and hire-only records for at least fifteen months; machines that lift persons or require a lifetime examination scheme may be retained indefinitely while on your register',
                 'Inactive individual user accounts with no sign-in for 90 consecutive days may be deleted with associated personal data where this does not conflict with an active company subscription or legal retention duties; we will give reasonable notice where practicable',
                 'After company cancellation, data may remain for a reasonable period to allow reactivation, then be deleted or anonymised on request subject to legal holds',
               ]}

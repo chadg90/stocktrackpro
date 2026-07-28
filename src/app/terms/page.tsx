@@ -94,14 +94,13 @@ export default function Terms() {
                 'Mobile app access for drivers, fitters, and field staff',
                 'Audit trails and history for operational records',
                 'Role-based access (manager or user — fitters are typically assigned the manager role)',
-                'Optional Plant & Machinery records (LOLER, service, hire checks, and related PDFs) where subscribed',
               ]}
             />
             <p className="text-slate-600 leading-relaxed mt-4">
               The Service is a software tool to help you record and manage operational information. It does{' '}
               <strong className="text-slate-800">not</strong> replace professional advice and does{' '}
-              <strong className="text-slate-800">not</strong> guarantee DVSA, MOT, LOLER, HSE, or any other regulatory
-              outcome. You remain solely responsible for vehicle roadworthiness, plant safety, compliance with
+              <strong className="text-slate-800">not</strong> guarantee DVSA, MOT, HSE, or any other regulatory
+              outcome. You remain solely responsible for vehicle roadworthiness, compliance with
               applicable law, and the accuracy of information your users submit.
             </p>
           </Section>
@@ -121,7 +120,7 @@ export default function Terms() {
           <Section title="4. Customer content and responsibilities">
             <BulletList
               items={[
-                'You retain ownership of content you and your users submit (including photos, inspection answers, defect details, and plant records) (“Customer Content”).',
+                'You retain ownership of content you and your users submit (including photos, inspection answers, and defect details) (“Customer Content”).',
                 'You grant us a limited licence to host, process, display, and back up Customer Content solely to provide and improve the Service, provide support, and meet legal obligations.',
                 'You warrant that you have the rights needed to submit Customer Content and that it does not infringe third-party rights or applicable law.',
                 'You are responsible for configuring the Service appropriately for your organisation and for decisions made using information in the Service.',
@@ -147,14 +146,14 @@ export default function Terms() {
 
           <Section title="6. Acceptable use">
             <p className="text-slate-600 leading-relaxed mb-4">
-              You agree to use the Service only for legitimate business fleet and plant management purposes.
+              You agree to use the Service only for legitimate business fleet management purposes.
               You must not:
             </p>
             <BulletList
               items={[
                 'Share credentials with unauthorised persons or allow access outside your organisation’s authorised users',
                 'Use the Service for unlawful monitoring, harassment, or any illegal purpose',
-                'Submit false, misleading, or fraudulent inspection, defect, or plant records',
+                'Submit false, misleading, or fraudulent inspection or defect records',
                 'Attempt to reverse engineer, copy, scrape, overload, or disrupt the Service',
                 'Interfere with security, access controls, or other customers’ data',
                 'Resell, sublicense, or provide the Service to third parties as a bureau service without our prior written consent',
@@ -198,7 +197,7 @@ export default function Terms() {
             <BulletList
               items={[
                 'We are not liable for loss of profits, revenue, goodwill, business opportunity, anticipated savings, or any indirect or consequential loss, whether arising in contract, tort (including negligence), or otherwise.',
-                'We are not liable for losses arising from: system downtime or third-party outages; inaccurate, incomplete, or delayed Customer Content; misuse of the Service; your failure to maintain roadworthy vehicles or safe plant; or regulatory action against you.',
+                'We are not liable for losses arising from: system downtime or third-party outages; inaccurate, incomplete, or delayed Customer Content; misuse of the Service; your failure to maintain roadworthy vehicles; or regulatory action against you.',
                 'Subject to the non-excludable liabilities above, our total aggregate liability arising out of or in connection with the Service in any 12-month period is limited to the fees you paid us for the Service in that same 12-month period.',
               ]}
             />
@@ -209,7 +208,7 @@ export default function Terms() {
               You agree to indemnify and hold us harmless from claims, losses, and reasonable costs (including legal
               fees) arising from: (a) your Customer Content; (b) your breach of these Terms; (c) your unlawful use of
               the Service; or (d) claims by your employees, contractors, or regulators relating to how you operate
-              your fleet or plant, except to the extent caused by our wilful misconduct.
+              your fleet, except to the extent caused by our wilful misconduct.
             </p>
           </Section>
 

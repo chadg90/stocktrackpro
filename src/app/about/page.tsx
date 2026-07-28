@@ -40,8 +40,7 @@ export default function AboutPage() {
             <h2 className="text-2xl font-semibold mb-3">Who it is built for</h2>
             <p className="text-slate-600 leading-relaxed">
               UK trades, groundworks, logistics, construction, haulage, and contractor businesses — from sole traders with
-              a handful of vans to teams managing larger mixed fleets. Optional Plant &amp; Machinery covers LOLER and
-              site plant when you need it.
+              a handful of vans to teams managing larger mixed fleets.
             </p>
           </section>
 
@@ -55,27 +54,6 @@ export default function AboutPage() {
               Drivers (user role) and fitters (manager role) use the iOS and Android app for daily inspections,
               photo-evidenced defect reports, My Jobs, and close-out when work is complete.
             </p>
-          </section>
-
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold mb-3">Plant &amp; Machinery (optional)</h2>
-            <p className="text-slate-600 leading-relaxed mb-4">
-              Many of our customers run vans and site plant. The optional Plant &amp; Machinery module is a separate
-              subscription for lifting equipment — excavators, telehandlers, MEWPs, hoists, and hired plant with LOLER
-              requirements. It is priced from £12 per machine per month (including VAT), with a minimum of 3 machines,
-              or £120 per machine per year.
-            </p>
-            <p className="text-slate-600 leading-relaxed mb-4">
-              Fitters complete the forms needed for that visit in one inspection entry: LOLER thorough examination,
-              service inspection, pre-hire or off-hire checks, and PUWER. Each form generates its own PDF, stored on the
-              web dashboard with examination due reminders for managers.
-            </p>
-            <Link
-              href="/compliance-centre"
-              className="text-[var(--brand-blue)] hover:text-blue-700 text-sm font-medium underline underline-offset-4"
-            >
-              Plant &amp; LOLER compliance articles →
-            </Link>
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
@@ -94,8 +72,7 @@ export default function AboutPage() {
           <section className="rounded-2xl border border-slate-200 bg-blue-500/10 p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">Pricing and support</h2>
             <p className="text-slate-600 leading-relaxed mb-5">
-              Fleet is £8 per vehicle per month (min 2 vehicles), with optional Plant &amp; Machinery from £12 per
-              machine per month (min 3). Full detail and the 7-day free trial are on our{' '}
+              Fleet is £8 per vehicle per month (min 2 vehicles). Full detail and the 7-day free trial are on our{' '}
               <Link href="/pricing" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
                 pricing page
               </Link>

@@ -97,7 +97,6 @@ const QUICK_FACTS = [
   ['Roles', 'Drivers report; managers and fitters run My Jobs and oversight'],
   ['Fleet size', 'From 2 to 100+ vehicles'],
   ['Pricing', 'From £8 per vehicle per month (VAT included)'],
-  ['Plant add-on', 'Optional — priced separately on the Pricing page'],
   ['Support', 'UK-based — email and WhatsApp'],
 ];
 
@@ -116,13 +115,6 @@ const INCLUDED = [
     icon: Map,
     title: 'Fleet & renewals',
     description: 'Vehicles, mileage, MOT and tax in one manager dashboard.',
-  },
-  {
-    icon: HardHat,
-    title: 'Plant & Machinery',
-    description:
-      'Optional add-on for LOLER, service, hire checks, and PUWER — with PDFs and due-date reminders.',
-    href: '/pricing',
   },
 ];
 
@@ -273,8 +265,8 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {INCLUDED.map((item) => {
                 const Icon = item.icon;
-                const inner = (
-                  <>
+                return (
+                  <div key={item.title} className="flex gap-4">
                     <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center text-[var(--brand-blue)] shrink-0">
                       <Icon className="w-5 h-5" />
                     </div>
@@ -282,19 +274,6 @@ export default function Home() {
                       <h3 className="text-lg font-semibold text-slate-900 mb-1">{item.title}</h3>
                       <p className="text-slate-600 text-sm leading-relaxed">{item.description}</p>
                     </div>
-                  </>
-                );
-                return 'href' in item && item.href ? (
-                  <Link
-                    key={item.title}
-                    href={item.href}
-                    className="flex gap-4 p-0 sm:p-1 rounded-xl hover:opacity-90 transition-opacity"
-                  >
-                    {inner}
-                  </Link>
-                ) : (
-                  <div key={item.title} className="flex gap-4">
-                    {inner}
                   </div>
                 );
               })}

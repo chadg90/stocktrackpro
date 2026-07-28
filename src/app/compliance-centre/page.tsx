@@ -21,13 +21,8 @@ export default async function ComplianceCentreHubPage() {
         </h1>
         <p className="text-slate-600 text-lg leading-relaxed mb-12">
           Practical articles on defect records, moving from paper to digital inspections, staying ahead of MOT and tax
-          renewals, and keeping plant machinery examination records in order — written for fleets that take compliance
-          seriously.
-        </p>
-        <p className="text-slate-500 text-sm leading-relaxed mb-12 -mt-8">
-          Use Fleet Track PRO&apos;s optional Plant &amp; Machinery module to complete LOLER, service, pre-hire/off-hire,
-          and PUWER forms in one inspection entry — from £12 per machine per month (min 3), with separate PDFs,
-          examination due reminders, and manager alerts.
+          renewals, and industry guidance on plant machinery examination records — written for fleets that take
+          compliance seriously.
         </p>
         <ul className="space-y-6">
           {articles.map((article) => (

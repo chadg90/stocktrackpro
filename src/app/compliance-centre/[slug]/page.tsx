@@ -576,27 +576,6 @@ function DigitalDefectRecordsDvsaArticle() {
   );
 }
 
-function PlantArticleCta() {
-  return (
-    <div className="mt-10 rounded-2xl border border-slate-200 bg-white/[0.04] p-6 sm:p-7">
-      <p className="text-base leading-relaxed text-slate-700">
-        Fleet Track PRO&apos;s optional{' '}
-        <span className="font-medium text-slate-900">Plant &amp; Machinery</span> module lets fitters complete multiple
-        forms in one inspection entry — LOLER, service, pre-hire/off-hire, and PUWER — each with its own PDF report and
-        manager alerts when examinations are due. From £12 per machine per month (min 3).{' '}
-        <Link href="/pricing" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
-          See plant pricing
-        </Link>{' '}
-        or{' '}
-        <Link href="/onboarding" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
-          start your 7-day fleet trial
-        </Link>
-        .
-      </p>
-    </div>
-  );
-}
-
 function LolerThoroughExaminationRecordsArticle() {
   return (
     <ComplianceArticleContent>
@@ -684,14 +663,12 @@ function LolerThoroughExaminationRecordsArticle() {
         they complement — rather than replace — the statutory examination record.
       </p>
 
-      <h2>How Fleet Track PRO supports LOLER records</h2>
+      <h2>Keeping examination records organised</h2>
       <p>
-        The optional Plant &amp; Machinery module lets managers register machines with examination due dates and usual
-        locations. On site, a fitter or manager starts one inspection entry and can complete the forms needed for that
-        visit — including LOLER thorough examination, service inspection, pre-hire or off-hire checks, and PUWER — in a
-        single submission. Each selected form generates its own PDF, stored against the same inspection reference on the
-        web dashboard. Records are retained for at least two years to support LOLER compliance. Managers receive push
-        reminders when an examination is due within seven days or overdue.
+        Strong operators keep a machine register with examination due dates and usual locations, store each thorough
+        examination PDF against the right asset, and give site managers a clear view of upcoming due dates. Records
+        should be retained for at least two years to support LOLER compliance. Advance reminders (for example seven days
+        before due) help book examiners before certificates lapse.
       </p>
 
       <p className="compliance-disclaimer">
@@ -713,7 +690,6 @@ function LolerThoroughExaminationRecordsArticle() {
         <li>Reports must identify defects, state the next due date, and be kept until superseded.</li>
         <li>Site managers need current PDF reports and a clear view of upcoming due dates.</li>
       </KeyTakeaways>
-      <PlantArticleCta />
     </ComplianceArticleContent>
   );
 }
@@ -787,14 +763,13 @@ function PlantMachineryServiceVsLolerArticle() {
         machine register instead of scattered across email, paper, and different spreadsheets.
       </p>
 
-      <h2>How Fleet Track PRO keeps each record type distinct in one visit</h2>
+      <h2>Keeping each record type distinct</h2>
       <p>
-        The Plant &amp; Machinery module is built for real site work: one inspection entry, multiple forms. A fitter can
-        complete a LOLER thorough examination, a service inspection, and a pre-hire or off-hire check in the same
-        submission when all three are needed — without starting separate jobs or re-entering machine details each time.
-        PUWER documentation is included on every inspection. Each form type still produces its own PDF on the web
-        dashboard, so a service record never substitutes for a LOLER certificate, but the paperwork burden on site is
-        much lower.
+        On a real site visit, a fitter may need a LOLER thorough examination, a service inspection, and a pre-hire or
+        off-hire check in the same day. Each form type should still produce its own evidence, so a service record never
+        substitutes for a LOLER certificate. PUWER documentation sits alongside these records where it applies. The
+        paperwork burden drops when machine details are not re-entered for every form, but the compliance distinction
+        between record types must remain clear.
       </p>
 
       <p className="compliance-disclaimer">
@@ -816,7 +791,6 @@ function PlantMachineryServiceVsLolerArticle() {
         <li>Expired LOLER certificates are a compliance gap even if the machine was recently serviced.</li>
         <li>One site visit can cover multiple forms — each must still produce the correct PDF evidence.</li>
       </KeyTakeaways>
-      <PlantArticleCta />
     </ComplianceArticleContent>
   );
 }
@@ -881,14 +855,13 @@ function PlantExaminationDueDateTrackingArticle() {
         multiple site cabins.
       </p>
 
-      <h2>How Fleet Track PRO tracks examination due dates</h2>
+      <h2>Tracking examination due dates in practice</h2>
       <p>
-        When you register a machine in the Plant &amp; Machinery module, you set examination due dates and whether the
-        asset lifts persons (affecting the six-month LOLER interval). After forms are submitted from one inspection
-        entry, each PDF — LOLER, service, hire check, or PUWER — is stored against that inspection on the web dashboard.
-        Managers receive push notifications when an examination is due within seven days or overdue. Because multiple
-        forms can be completed in a single visit, fitters are less likely to skip the LOLER paperwork when they are
-        already on site for a service or hire check.
+        When you register a machine, set examination due dates and whether the asset lifts persons (affecting the
+        six-month LOLER interval). Store each PDF — LOLER, service, hire check, or PUWER — against that machine so
+        managers can retrieve the current certificate. Seven-day advance reminders give time to book examiners before
+        lapse. Completing multiple forms in a single site visit reduces the chance that LOLER paperwork is skipped when
+        a fitter is already on site for a service or hire check.
       </p>
 
       <p className="compliance-disclaimer">
@@ -910,7 +883,6 @@ function PlantExaminationDueDateTrackingArticle() {
         <li>Seven-day advance reminders give time to book examiners before lapse.</li>
         <li>Central PDF storage beats scattered email and paper when audits happen.</li>
       </KeyTakeaways>
-      <PlantArticleCta />
     </ComplianceArticleContent>
   );
 }

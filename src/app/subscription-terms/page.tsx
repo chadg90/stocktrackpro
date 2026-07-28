@@ -64,9 +64,9 @@ export default function SubscriptionTermsPage() {
           <Section title="Introduction">
             <p className="text-slate-600 leading-relaxed mb-4">
               These Subscription Terms apply to all Fleet Track PRO subscriptions purchased through our website
-              checkout (including fleet plans and optional Plant &amp; Machinery add-ons). The Fleet Track PRO
-              mobile app is a companion app used by your team to log inspections, update defects, and complete
-              fleet workflows. Subscriptions are not sold or renewed through the app itself.
+              checkout. The Fleet Track PRO mobile app is a companion app used by your team to log inspections,
+              update defects, and complete fleet workflows. Subscriptions are not sold or renewed through the app
+              itself.
             </p>
             <p className="text-slate-600 leading-relaxed mb-4">
               These Subscription Terms should be read alongside our{' '}
@@ -109,31 +109,6 @@ export default function SubscriptionTermsPage() {
             />
           </Section>
 
-          <Section title="1a. Plant & Machinery add-on (optional)">
-            <p className="text-slate-600 leading-relaxed mb-4">
-              Plant &amp; Machinery is a separate subscription from your fleet vehicle plan. It is billed per
-              active machine seat and managed through the same Stripe billing portal as your main subscription
-              where applicable.
-            </p>
-            <BulletList
-              items={[
-                <>
-                  Monthly billing: <strong className="text-slate-800">£12 per machine per month</strong>.
-                </>,
-                <>
-                  Annual billing: <strong className="text-slate-800">£120 per machine per year</strong> (paid in
-                  advance).
-                </>,
-                'Minimum quantity is 3 machines.',
-                'Displayed pricing is in GBP and includes UK VAT at 20%, unless we state otherwise.',
-                'Your subscribed machine quantity controls how many active plant machines your company can register at any one time.',
-                'The 7-day fleet trial does not automatically include Plant & Machinery. Subscribe to the add-on from the Pricing page or dashboard when ready.',
-                'Some early (“legacy”) customers have Plant & Machinery included without a separate add-on; agreed legacy terms continue until varied in writing.',
-                'Cancellation, renewal, failed payments, and quantity changes for the plant add-on follow the same principles as the fleet subscription (Sections 3–6), applied to the plant subscription line in Stripe.',
-              ]}
-            />
-          </Section>
-
           <Section title="2. Free trial">
             <BulletList
               items={[
@@ -164,9 +139,9 @@ export default function SubscriptionTermsPage() {
           <Section title="4. Quantity changes">
             <BulletList
               items={[
-                'You can request an increase or decrease to subscribed vehicle or machine quantity through the billing portal or by contacting support.',
+                'You can request an increase or decrease to subscribed vehicle quantity through the billing portal or by contacting support.',
                 'Quantity changes take effect at your next billing cycle. Your current paid period is not re-prorated, and no partial-period credit is given for mid-cycle reductions.',
-                'Feature limits (vehicles or machines you can manage) are tied to the active subscribed quantity. If you reduce quantity below what you have registered, you may need to remove or deactivate excess items before the new limit applies.',
+                'Feature limits (vehicles you can manage) are tied to the active subscribed quantity. If you reduce quantity below what you have registered, you may need to remove or deactivate excess items before the new limit applies.',
                 'We may refuse or delay a quantity reduction that would leave unpaid or disputed balances outstanding.',
               ]}
             />
@@ -187,7 +162,6 @@ export default function SubscriptionTermsPage() {
                 </>,
                 'Fees already paid are non-refundable except where required by law or where we have materially failed to provide the contracted service and have not remedied that failure within a reasonable time after written notice.',
                 'Chargebacks or payment disputes raised without first contacting us may result in suspension of access while we investigate. We will work with Stripe and you to resolve genuine billing errors.',
-                'Cancelling a fleet subscription does not automatically cancel a separate Plant & Machinery add-on, and vice versa, unless the billing portal shows a combined cancellation or we confirm otherwise in writing.',
               ]}
             />
           </Section>
@@ -199,7 +173,7 @@ export default function SubscriptionTermsPage() {
                   If a renewal payment fails, we will retry for a reasonable period through Stripe. During this time
                   the subscription may show as <em>past due</em>.
                 </>,
-                'If payment is not resolved, we may suspend access to the service. Suspended companies will not lose their data during a suspension period, but may be unable to add new inspections, defects, plant records, or team members.',
+                'If payment is not resolved, we may suspend access to the service. Suspended companies will not lose their data during a suspension period, but may be unable to add new inspections, defects, or team members.',
                 'We will notify the account email on file before a subscription is suspended or terminated for non-payment.',
                 'We may terminate a subscription for repeated non-payment, fraud, abuse, or material breach of these Subscription Terms or our Terms and Conditions.',
               ]}
@@ -209,7 +183,7 @@ export default function SubscriptionTermsPage() {
           <Section title="7. Data retention after cancellation">
             <BulletList
               items={[
-                'After cancellation, your company data (vehicles, inspections, defects, plant machinery records where applicable, and team profiles) remains in our systems for a reasonable period so you can reactivate and recover data if needed.',
+                'After cancellation, your company data (vehicles, inspections, defects, and team profiles) remains in our systems for a reasonable period so you can reactivate and recover data if needed.',
                 <>
                   If your subscription has ended and has not been reactivated, you can request permanent deletion by
                   emailing{' '}
@@ -239,8 +213,8 @@ export default function SubscriptionTermsPage() {
           <Section title="8. Nature of the service">
             <BulletList
               items={[
-                'Fleet Track PRO is a software tool to help you record inspections, defects, renewals, and related fleet or plant workflows. It does not replace professional advice, and it does not guarantee DVSA, MOT, LOLER, or any other regulatory outcome.',
-                'You remain solely responsible for the roadworthiness of your vehicles, the condition of plant, compliance with applicable law, and the accuracy of information your users submit.',
+                'Fleet Track PRO is a software tool to help you record inspections, defects, renewals, and related fleet workflows. It does not replace professional advice, and it does not guarantee DVSA, MOT, or any other regulatory outcome.',
+                'You remain solely responsible for the roadworthiness of your vehicles, compliance with applicable law, and the accuracy of information your users submit.',
                 'We do not warrant uninterrupted availability. Planned maintenance, third-party outages (including Stripe, hosting, or push notification providers), or force majeure events may affect access. Such events do not automatically entitle you to a refund for the affected period.',
               ]}
             />

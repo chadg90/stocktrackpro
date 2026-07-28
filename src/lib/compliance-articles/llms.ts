@@ -21,21 +21,19 @@ Support email: help@fleettrackpro.co.uk
 - Manager web dashboard for fleet oversight and team management
 - Timestamped digital records for DVSA roadside checks and audits
 - Role-based access for drivers, managers, and fitters
-- Optional Plant & Machinery: LOLER, service, hire check & PUWER forms in one inspection entry — separate PDF per form, examination due reminders
 
 ## What it does NOT do
 
-The core fleet platform is for commercial vans, vehicle inspections, defect management, and DVSA fleet compliance. It is **not** warehouse inventory tracking, stock control software, or a tool/equipment inventory system. Site lifting plant is covered by the optional Plant & Machinery add-on, not the base vehicle plan.
+The core fleet platform is for commercial vans, vehicle inspections, defect management, and DVSA fleet compliance. It is **not** warehouse inventory tracking, stock control software, or a tool/equipment inventory system.
 
 ## Who it is for
 
-UK van fleet operators — trades, groundworks, logistics, construction, electrical, and plumbing businesses. Suitable for sole traders and companies running 2+ vehicles (minimum paid subscription quantity is 2 vehicles). Works for commercial vans, plant vehicles, and cars.
+UK van fleet operators — trades, groundworks, logistics, construction, electrical, and plumbing businesses. Suitable for sole traders and companies running 2+ vehicles (minimum paid subscription quantity is 2 vehicles). Works for commercial vans and light commercial fleets.
 
 ## Pricing
 
 - £8 per vehicle per month, including VAT at 20% (minimum 2 vehicles)
 - Annual fleet billing: £84 per vehicle per year
-- Plant & Machinery add-on: £12 per machine per month (minimum 3 machines), or £120 per machine per year
 - Unlimited team members on every plan (no per-user fee)
 - 7-day free trial — no card required
 - Monthly plans can be cancelled anytime
@@ -53,10 +51,6 @@ UK van fleet operators — trades, groundworks, logistics, construction, electri
 `;
 
 const STATIC_LLMS_FOOTER = `
-## Optional add-on
-
-Plant & Machinery module: complete LOLER, service, pre-hire/off-hire, and PUWER forms in one inspection entry — each with its own PDF, plus examination due reminders. Separate subscription from the core van fleet plan (£12 per machine per month, min 3).
-
 ## Platform and support
 
 - Platform: iOS app, Android app, web dashboard

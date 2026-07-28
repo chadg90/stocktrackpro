@@ -19,24 +19,12 @@ export default function FAQ() {
       answer: "No. The app works for sole traders, partnerships, and limited companies.",
     },
     {
-      question: "Can I use this for fleet only?",
-      answer: "Yes. Your core subscription covers fleet management only — vehicle inspections, defect workflow, MOT and tax tracking, and team management. Plant & Machinery is an optional add-on from £12 per machine per month if you also maintain lifting equipment and site plant.",
+      question: "What does the fleet subscription cover?",
+      answer: "Your subscription covers fleet management — vehicle inspections, defect workflow, MOT and tax tracking, and team management across the web dashboard and companion app.",
     },
     {
       question: "How much does the fleet plan cost?",
-      answer: "£8 per vehicle per month (including VAT), with a minimum of 2 vehicles. Annual billing is £84 per vehicle per year (about £7 per month equivalent). Optional Plant & Machinery is £12 per machine per month (minimum 3 machines), or £120 per machine per year. See the Pricing page for the calculator and trial options.",
-    },
-    {
-      question: "What is the Plant & Machinery add-on?",
-      answer: "An optional module for LOLER thorough examinations, service inspections, and pre-hire / off-hire checks — from £12 per machine per month (minimum 3 machines), or £120 per machine per year. Fitters complete the forms needed for that visit in one inspection entry — each form generates its own PDF. Managers use the mobile app and web dashboard to register machines, submit inspections, and download reports. Examination due reminders are sent to managers by push notification.",
-    },
-    {
-      question: "How much does Plant & Machinery cost?",
-      answer: "£12 per machine per month (including VAT), with a minimum of 3 machines. Annual billing is £120 per machine per year. It is a separate subscription from your fleet vehicle plan and can be set up from the Pricing page or your dashboard.",
-    },
-    {
-      question: "Who can use Plant & Machinery in the app?",
-      answer: "Users with the manager role. There is no separate plant role — fitters and managers assigned the manager role can run inspections and view plant reports on the web dashboard.",
+      answer: "£8 per vehicle per month (including VAT), with a minimum of 2 vehicles. Annual billing is £84 per vehicle per year (about £7 per month equivalent). See the Pricing page for the calculator and trial options.",
     },
     {
       question: "Does this work on Android and iOS?",

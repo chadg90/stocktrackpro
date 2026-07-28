@@ -24,7 +24,6 @@ import {
   LifeBuoy,
   ShieldCheck,
   BarChart3,
-  HardHat,
   Newspaper,
 } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
@@ -66,13 +65,6 @@ const navigationGroups: NavigationGroup[] = [
     items: [
       { name: 'Fleet', href: '/dashboard/fleet', icon: Truck },
       { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
-    ]
-  },
-  {
-    label: 'Plant',
-    items: [
-      { name: 'Machines', href: '/dashboard/plant', icon: HardHat, managerOnly: true },
-      { name: 'Plant reports', href: '/dashboard/plant-reports', icon: FileText, managerOnly: true },
     ]
   },
   {

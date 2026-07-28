@@ -29,7 +29,7 @@ export default function HomeFaqSection() {
             href="/faq"
             className="text-[var(--brand-blue)] hover:text-blue-700 text-sm font-medium underline underline-offset-4"
           >
-            View all FAQs — pricing, plant add-on, and setup
+            View all FAQs — pricing and setup
           </Link>
         </p>
       </div>
