@@ -1,5 +1,5 @@
 rules_version = '2';
-// Plant module + legacy/trialing company access + web onboarding claim
+// Fleet Track PRO — Firestore rules (fleet inspections, defects, vehicles, team)
 service cloud.firestore {
   match /databases/{database}/documents {
     
@@ -32,12 +32,6 @@ service cloud.firestore {
 
     function isManagerOrAdmin() {
       return isAdmin() || isManager();
-    }
-
-    function plantInspectionOwnedByUser(inspectionId) {
-      return exists(/databases/$(database)/documents/plant_inspections/$(inspectionId)) &&
-        get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.company_id == userCompanyId() &&
-        get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.submitted_by == request.auth.uid;
     }
     
     function userCompanyId() {
@@ -482,130 +476,6 @@ service cloud.firestore {
       allow read: if isAdmin();
       // Only Cloud Functions can write (they bypass security rules)
       allow write: if false;
-    }
-
-    // ============================================
-    // PLANT MACHINES COLLECTION
-    // ============================================
-
-    function hasPlantModule() {
-      let companyData = get(/databases/$(database)/documents/companies/$(userCompanyId())).data;
-      // Legacy customers: Plant module included without plant Stripe subscription
-      return companyData.get('legacy', false) == true ||
-        (isCompanyActive() && companyData.get('has_plant_module', false) == true);
-    }
-
-    function canAccessPlant() {
-      return isSignedIn() && hasPlantModule() &&
-        (isManagerOrAdmin() || getProfile().get('can_access_plant_module', false) == true);
-    }
-
-    match /plant_machines/{machineId} {
-      // Read: any user with plant access in same company
-      allow read: if canAccessPlant() &&
-        resource.data.company_id == userCompanyId();
-
-      // Create: managers/admins only
-      allow create: if isSignedIn() && isManagerOrAdmin() && hasPlantModule() &&
-        request.resource.data.company_id == userCompanyId();
-
-      // Update: managers/admins only (status, details)
-      allow update: if isSignedIn() && isManagerOrAdmin() && hasPlantModule() &&
-        resource.data.company_id == userCompanyId();
-
-      // No hard deletes — archive with is_active: false
-      allow delete: if false;
-    }
-
-    // ============================================
-    // PLANT INSPECTIONS COLLECTION
-    // ============================================
-
-    match /plant_inspections/{inspectionId} {
-      allow create: if canAccessPlant() &&
-        request.resource.data.company_id == userCompanyId() &&
-        request.resource.data.submitted_by == request.auth.uid &&
-        request.resource.data.locked == false;
-
-      allow read: if canAccessPlant() &&
-        resource.data.company_id == userCompanyId();
-
-      // Submitter locks their own draft; managers may update locked records (amendments etc.)
-      allow update: if isSignedIn() && hasPlantModule() &&
-        resource.data.company_id == userCompanyId() &&
-        (
-          (resource.data.submitted_by == request.auth.uid &&
-            resource.data.locked == false &&
-            request.resource.data.locked == true) ||
-          (isManagerOrAdmin() && resource.data.locked == true)
-        );
-
-      allow delete: if false;
-
-      match /checklist_items/{itemId} {
-        allow read: if canAccessPlant() &&
-          get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.company_id == userCompanyId();
-        allow create: if canAccessPlant() &&
-          request.resource.data.inspection_id == inspectionId &&
-          plantInspectionOwnedByUser(inspectionId) &&
-          get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.locked == false;
-        allow update, delete: if false;
-      }
-
-      match /parts_used/{partId} {
-        allow read: if canAccessPlant() &&
-          get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.company_id == userCompanyId();
-        allow create: if canAccessPlant() &&
-          request.resource.data.inspection_id == inspectionId &&
-          plantInspectionOwnedByUser(inspectionId) &&
-          get(/databases/$(database)/documents/plant_inspections/$(inspectionId)).data.locked == false;
-        allow update, delete: if false;
-      }
-    }
-
-    match /plant_counters/{counterId} {
-      allow read: if isManagerOrAdmin() && hasPlantModule();
-      allow write: if false;
-    }
-
-    match /company_sites/{siteId} {
-      allow read: if canAccessPlant() && resource.data.company_id == userCompanyId();
-      allow create, update: if isSignedIn() && isManagerOrAdmin() && hasPlantModule() &&
-        request.resource.data.company_id == userCompanyId();
-      allow delete: if isSignedIn() && isAdmin() && hasPlantModule() &&
-        resource.data.company_id == userCompanyId();
-    }
-
-    match /plant_parts_library/{partId} {
-      allow read: if canAccessPlant() && resource.data.company_id == userCompanyId();
-      allow create: if canAccessPlant() &&
-        request.resource.data.company_id == userCompanyId() &&
-        request.resource.data.created_by == request.auth.uid;
-      allow update: if canAccessPlant() &&
-        resource.data.company_id == userCompanyId() &&
-        request.resource.data.company_id == userCompanyId() &&
-        (resource.data.created_by == request.auth.uid || isManagerOrAdmin());
-      allow delete: if isSignedIn() && isManagerOrAdmin() && hasPlantModule() &&
-        resource.data.company_id == userCompanyId();
-    }
-
-    match /plant_saved_addresses/{addressId} {
-      allow read: if canAccessPlant() && resource.data.company_id == userCompanyId();
-      allow create: if canAccessPlant() &&
-        request.resource.data.company_id == userCompanyId() &&
-        request.resource.data.created_by == request.auth.uid;
-      allow update: if canAccessPlant() &&
-        resource.data.company_id == userCompanyId() &&
-        request.resource.data.company_id == userCompanyId();
-      allow delete: if canAccessPlant() && resource.data.company_id == userCompanyId() &&
-        (resource.data.created_by == request.auth.uid || isManagerOrAdmin());
-    }
-
-    match /inspection_amendments/{amendmentId} {
-      allow read: if canAccessPlant() && resource.data.company_id == userCompanyId();
-      allow create: if isSignedIn() && isManagerOrAdmin() && hasPlantModule() &&
-        request.resource.data.company_id == userCompanyId();
-      allow update, delete: if false;
     }
 
     // ============================================
