@@ -196,6 +196,20 @@ service cloud.firestore {
     // ============================================
     // COMPANIES
     // ============================================
+    // Manager updates are restricted to display settings only.
+    // Subscription / billing / legacy / Stripe / entitlement fields are server-only
+    // (Admin SDK: Stripe webhooks, set-status, redeemPromoCode, expireWebTrials, etc.).
+    function managerCompanyUpdateAllowed() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['name', 'updated_at', 'updatedAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 200
+        && request.resource.data.get('created_by', null) == resource.data.get('created_by', null)
+        && request.resource.data.get('subscription_status', null) == resource.data.get('subscription_status', null)
+        && request.resource.data.get('legacy', null) == resource.data.get('legacy', null);
+    }
+
     match /companies/{companyId} {
       // Users in the company can read their company
       // Admins can read any company
@@ -208,13 +222,18 @@ service cloud.firestore {
       
       // Web onboarding creates a company with created_by = uid; mobile self-serve company signup
       // is removed in the app. Admins can create for support flows.
+      // Create is intentionally separate from update — do not broaden this path.
       allow create: if isSignedIn() && (
         isAdmin() ||
         request.resource.data.created_by == request.auth.uid
       );
       
-      // Only managers and admins can update companies
-      allow update: if isSignedIn() && (isAdmin() || (isManager() && userCompanyId() == companyId));
+      // Global admins retain full update access.
+      // Tenant managers may only change allowlisted settings fields.
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (isManager() && userCompanyId() == companyId && managerCompanyUpdateAllowed())
+      );
       
       // Companies should not be deleted (archive instead)
       allow delete: if false;
@@ -438,6 +457,51 @@ service cloud.firestore {
     // Invites: email match uses auth token email. Some providers omit email in the
     // token; invite rows should still be readable for company/manager. Prefer storing
     // normalised email on the invite; Cloud Functions use Admin SDK to grant access.
+    // Tenant invite roles are ONLY user|manager. Never allow admin via invite
+    // (isAdmin() is global via match /{path=**}).
+    function isTenantInviteRole(role) {
+      return role == 'user' || role == 'manager';
+    }
+
+    function inviteCreateAllowed() {
+      return isManager()
+        && request.resource.data.companyId == userCompanyId()
+        && isTenantInviteRole(request.resource.data.role)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.invitedBy == request.auth.uid
+        && request.resource.data.email is string
+        && request.resource.data.email.size() >= 3
+        && request.resource.data.email.size() <= 320
+        && request.resource.data.companyId is string
+        && request.resource.data.companyId.size() > 0
+        && request.resource.data.companyId.size() <= 128
+        && request.resource.data.keys().hasOnly([
+          'email',
+          'inviteeName',
+          'role',
+          'companyId',
+          'companyName',
+          'invitedBy',
+          'invitedByName',
+          'status',
+          'createdAt',
+          'updatedAt',
+          'expiresAt',
+          'emailSent'
+        ]);
+    }
+
+    function managerInviteUpdateAllowed() {
+      return isManager()
+        && resource.data.companyId == userCompanyId()
+        && request.resource.data.companyId == resource.data.companyId
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.invitedBy == resource.data.invitedBy
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'expiresAt', 'updatedAt', 'emailSent', 'emailError']);
+    }
+
     // ============================================
     // INVITES
     // ============================================
@@ -447,11 +511,12 @@ service cloud.firestore {
         resource.data.companyId == userCompanyId() ||
         (request.auth.token.email != null && resource.data.email == request.auth.token.email)
       );
-      allow create: if isSignedIn() && isManagerOrAdmin() &&
-        request.resource.data.companyId == userCompanyId();
+      // Global admins retain create via isAdmin() / catch-all.
+      // Managers may only create user|manager invites for their own company.
+      allow create: if isSignedIn() && (isAdmin() || inviteCreateAllowed());
       allow update: if isSignedIn() && (
         isAdmin() ||
-        (isManager() && resource.data.companyId == userCompanyId())
+        managerInviteUpdateAllowed()
       );
       allow delete: if isSignedIn() && (
         isAdmin() ||

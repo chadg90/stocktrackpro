@@ -10,10 +10,12 @@ import { SUPPORT_EMAIL } from '@/lib/brand';
 type InvitePreview = {
   valid: boolean;
   companyName?: string;
-  role?: string;
+  role?: string | null;
   inviteeName?: string | null;
+  /** @deprecated Stage 2 preview no longer returns email */
   email?: string | null;
   status?: string;
+  expiresAt?: string | null;
 };
 
 const APP_STORE_URL = 'https://apps.apple.com/gb/app/stock-track-pro/id6744621973';
