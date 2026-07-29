@@ -394,64 +394,25 @@ service cloud.firestore {
     // ============================================
     // PROMO CODES
     // ============================================
-    // List collection = enumerate all codes; only admins. getDoc by id = redeem (signed-in only).
+    // Customer clients (mobile + web) have NO direct access.
+    // Redemption uses Admin SDK via redeemPromoCode callable.
+    // Global admins may manage codes from /dashboard/admin/promo-codes.
     match /promoCodes/{codeId} {
-      allow get: if isSignedIn();
-      allow list: if isAdmin();
-      allow create: if isSignedIn() && isAdmin();
-      allow update: if isSignedIn() && (
-        isAdmin() ||
-        (
-          request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['used', 'usedAt', 'usedBy', 'usedCount', 'lastUsedAt', 'lastUsedBy']) &&
-          (
-            !request.resource.data.hasAny(['usedBy', 'lastUsedBy']) ||
-            request.resource.data.usedBy == request.auth.uid ||
-            request.resource.data.lastUsedBy == request.auth.uid
-          ) &&
-          !(resource.data.used == true && request.resource.data.used == false) &&
-          (
-            request.resource.data.usedCount == null ||
-            resource.data.usedCount == null ||
-            request.resource.data.usedCount >= resource.data.usedCount
-          ) &&
-          (
-            resource.data.expiresAt == null ||
-            resource.data.expiresAt > request.time
-          ) &&
-          (
-            resource.data.maxUses == null ||
-            request.resource.data.usedCount == null ||
-            request.resource.data.usedCount <= resource.data.maxUses
-          ) &&
-          (
-            request.resource.data.used != true ||
-            request.resource.data.usedBy == request.auth.uid
-          )
-        )
-      );
-      allow delete: if isSignedIn() && isAdmin();
+      allow get, list: if isSignedIn() && isAdmin();
+      allow create, update, delete: if isSignedIn() && isAdmin();
     }
 
     // ============================================
     // PROMOTIONAL SUBSCRIPTIONS
     // ============================================
+    // Writes only via Admin SDK (redeemPromoCode). Clients may read own/company rows.
     match /promotionalSubscriptions/{subId} {
       allow read: if isSignedIn() && (
         resource.data.userId == request.auth.uid ||
         (resource.data.companyId != null && resource.data.companyId == userCompanyId()) ||
         isAdmin()
       );
-      // Simplified create rule - detailed validation handled in app code within transaction
-      allow create: if isSignedIn() &&
-        request.resource.data.userId == request.auth.uid &&
-        (
-          request.resource.data.companyId == null ||
-          request.resource.data.companyId == userCompanyId()
-        ) &&
-        request.resource.data.promoCode != null &&
-        exists(/databases/$(database)/documents/promoCodes/$(request.resource.data.promoCode));
-      allow update, delete: if isSignedIn() && isAdmin();
+      allow create, update, delete: if false;
     }
 
     // Invites: email match uses auth token email. Some providers omit email in the

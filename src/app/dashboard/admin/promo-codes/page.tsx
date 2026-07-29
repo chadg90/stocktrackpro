@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  collection, query, getDocs, addDoc, deleteDoc, doc,
+  collection, query, getDocs, setDoc, deleteDoc, doc,
   updateDoc, serverTimestamp, Timestamp, getDoc,
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -17,8 +17,11 @@ type PromoCode = {
   code: string;
   description?: string;
   discountPercent?: number;
+  durationDays?: number;
+  tier?: string;
   maxUses?: number;
   usedCount?: number;
+  used?: boolean;
   expiresAt?: Timestamp | string | null;
   active: boolean;
   createdAt?: Timestamp | string;
@@ -43,6 +46,7 @@ export default function AdminPromoCodesPage() {
   const [formCode, setFormCode] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formDiscount, setFormDiscount] = useState('');
+  const [formDurationDays, setFormDurationDays] = useState('30');
   const [formMaxUses, setFormMaxUses] = useState('');
   const [formExpires, setFormExpires] = useState('');
 
@@ -80,20 +84,30 @@ export default function AdminPromoCodesPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseDb || !formCode.trim()) return;
+    const codeId = formCode.trim().toUpperCase();
+    const durationDays = Number(formDurationDays);
+    if (!Number.isFinite(durationDays) || durationDays <= 0) {
+      alert('Duration days must be a positive number.');
+      return;
+    }
     setProcessing(true);
     try {
-      await addDoc(collection(firebaseDb, 'promoCodes'), {
-        code: formCode.trim().toUpperCase(),
+      // Document ID must equal the code so redeemPromoCode can look it up without client reads.
+      await setDoc(doc(firebaseDb, 'promoCodes', codeId), {
+        code: codeId,
         description: formDescription.trim() || null,
         discountPercent: formDiscount ? Number(formDiscount) : null,
+        durationDays,
+        tier: 'PRO_STARTER',
         maxUses: formMaxUses ? Number(formMaxUses) : null,
         usedCount: 0,
+        used: false,
         expiresAt: formExpires ? new Date(formExpires) : null,
         active: true,
         createdAt: serverTimestamp(),
       });
       setIsModalOpen(false);
-      setFormCode(''); setFormDescription(''); setFormDiscount(''); setFormMaxUses(''); setFormExpires('');
+      setFormCode(''); setFormDescription(''); setFormDiscount(''); setFormDurationDays('30'); setFormMaxUses(''); setFormExpires('');
       fetchCodes();
     } catch (e) { alert('Failed to create promo code.'); console.error(e); }
     finally { setProcessing(false); }
@@ -235,10 +249,10 @@ export default function AdminPromoCodesPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/70 mb-1">Discount %</label>
-              <input type="number" min="1" max="100" value={formDiscount} onChange={(e) => setFormDiscount(e.target.value)}
+              <label className="block text-sm text-white/70 mb-1">Access duration (days) <span className="text-red-400">*</span></label>
+              <input type="number" min="1" max="3660" value={formDurationDays} onChange={(e) => setFormDurationDays(e.target.value)}
                 className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
-                placeholder="e.g. 20" />
+                placeholder="30" required />
             </div>
             <div>
               <label className="block text-sm text-white/70 mb-1">Max Uses</label>
@@ -246,6 +260,12 @@ export default function AdminPromoCodesPage() {
                 className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
                 placeholder="Unlimited" />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Discount % (optional / informational)</label>
+            <input type="number" min="1" max="100" value={formDiscount} onChange={(e) => setFormDiscount(e.target.value)}
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
+              placeholder="Not used for access redemption" />
           </div>
           <div>
             <label className="block text-sm text-white/70 mb-1">Expiry Date</label>

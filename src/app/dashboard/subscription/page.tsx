@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { CreditCard, Check, ExternalLink, AlertCircle, Calendar, Sparkles } from 'lucide-react';
+import { httpsCallable } from 'firebase/functions';
+import { firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
+import { CreditCard, Check, ExternalLink, AlertCircle, Calendar, Sparkles, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { companyHasPaidAccess, getTrialEndDate, isWebTrialExpired } from '@/lib/trialStatus';
 
@@ -58,6 +59,10 @@ export default function SubscriptionPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [vehicleCount, setVehicleCount] = useState<number>(MIN_VEHICLES);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
+  const [promoCode, setPromoCode] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoMessage, setPromoMessage] = useState<string | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
 
   const loadSubscriptionData = async (user: User) => {
     if (!firebaseDb) return;
@@ -201,6 +206,56 @@ export default function SubscriptionPage() {
       alert(err instanceof Error ? err.message : 'Could not sync subscription.');
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const mapPromoClientError = (err: unknown): string => {
+    const code = String((err as { code?: string })?.code || '');
+    const message = String((err as { message?: string })?.message || '');
+    if (code.includes('unauthenticated')) {
+      return 'Please sign in again, then try redeeming your code.';
+    }
+    if (code.includes('permission-denied')) {
+      return 'Only company managers can redeem promo codes.';
+    }
+    if (code.includes('failed-precondition')) {
+      if (message.toLowerCase().includes('eligible') || message.toLowerCase().includes('already')) {
+        return 'Your company is not eligible to redeem a promo code right now.';
+      }
+      return 'This promo code is unavailable.';
+    }
+    if (code.includes('invalid-argument') || code.includes('not-found')) {
+      return 'This promo code is unavailable.';
+    }
+    return 'Something went wrong. Please try again.';
+  };
+
+  const handleRedeemPromo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!authUser || !firebaseFunctions || promoLoading) return;
+    const trimmed = promoCode.trim();
+    if (!trimmed) {
+      setPromoError('Enter a promo code.');
+      setPromoMessage(null);
+      return;
+    }
+
+    setPromoLoading(true);
+    setPromoError(null);
+    setPromoMessage(null);
+    try {
+      const redeem = httpsCallable(firebaseFunctions, 'redeemPromoCode');
+      // Only send the code — company, role, and entitlements are resolved server-side.
+      const result = await redeem({ promoCode: trimmed });
+      const payload = result.data as { success?: boolean; message?: string };
+      setPromoMessage(payload?.message || 'Promo code redeemed successfully.');
+      setPromoCode('');
+      await loadSubscriptionData(authUser);
+    } catch (err) {
+      console.error('Promo redemption failed:', err);
+      setPromoError(mapPromoClientError(err));
+    } finally {
+      setPromoLoading(false);
     }
   };
 
@@ -419,6 +474,55 @@ export default function SubscriptionPage() {
           )}
         </div>
       </div>
+
+      {canManage && (
+        <div className="dashboard-card p-8">
+          <h2 className="text-2xl font-semibold text-white mb-2 flex items-center gap-3">
+            <Tag className="w-6 h-6 text-blue-500" aria-hidden />
+            Redeem Promo Code
+          </h2>
+          <p className="text-white/75 mb-6">
+            Managers can apply an access promo code here. Codes are validated securely on the server — the dashboard
+            never reads promo records directly.
+          </p>
+          <form onSubmit={handleRedeemPromo} className="max-w-xl space-y-4">
+            <div>
+              <label htmlFor="promo-code-input" className="block text-sm text-white/60 mb-2">
+                Promo code
+              </label>
+              <input
+                id="promo-code-input"
+                type="text"
+                autoComplete="off"
+                spellCheck={false}
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                disabled={promoLoading}
+                className="w-full rounded-lg bg-white/5 border border-white/15 px-3 py-2.5 text-white font-mono uppercase tracking-wide placeholder:text-white/30 focus:border-blue-500 outline-none disabled:opacity-60"
+                placeholder="ENTER CODE"
+                aria-describedby={promoError ? 'promo-code-error' : promoMessage ? 'promo-code-success' : undefined}
+              />
+            </div>
+            {promoError && (
+              <p id="promo-code-error" className="text-sm text-red-300" role="alert">
+                {promoError}
+              </p>
+            )}
+            {promoMessage && (
+              <p id="promo-code-success" className="text-sm text-emerald-300" role="status">
+                {promoMessage}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={promoLoading || !promoCode.trim()}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {promoLoading ? 'Redeeming…' : 'Redeem code'}
+            </button>
+          </form>
+        </div>
+      )}
 
       {canManage && !company?.legacy && !hasStripeManagedSubscription && (
         <div className="dashboard-card p-8">
