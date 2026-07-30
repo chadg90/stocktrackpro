@@ -245,6 +245,83 @@ html {
     opacity: 0.6;
   }
 
+  /* Vehicle count range — must stay visible on the light-only expired billing route. */
+  .subscription-page .subscription-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 0.625rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    background: linear-gradient(
+      to right,
+      #3b82f6 0%,
+      #3b82f6 var(--slider-pct, 0%),
+      #cbd5e1 var(--slider-pct, 0%),
+      #cbd5e1 100%
+    );
+  }
+
+  [data-theme='dark'] .subscription-page .subscription-slider,
+  .theme-dark .subscription-page .subscription-slider {
+    background: linear-gradient(
+      to right,
+      #3b82f6 0%,
+      #3b82f6 var(--slider-pct, 0%),
+      #52525b var(--slider-pct, 0%),
+      #52525b 100%
+    );
+  }
+
+  .subscription-page .subscription-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 9999px;
+    background: #2563eb;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 8px rgb(37 99 235 / 0.45);
+    cursor: pointer;
+  }
+
+  .subscription-page .subscription-slider::-moz-range-thumb {
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 9999px;
+    background: #2563eb;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 8px rgb(37 99 235 / 0.45);
+    cursor: pointer;
+  }
+
+  .subscription-page .subscription-slider::-moz-range-track {
+    height: 0.625rem;
+    border-radius: 9999px;
+    background: transparent;
+  }
+
+  .subscription-page .subscription-segment {
+    background-color: var(--dashboard-bg-muted);
+    border: 1px solid var(--dashboard-border);
+  }
+
+  .subscription-page .subscription-btn-secondary {
+    background-color: var(--dashboard-bg-muted);
+    border: 1px solid var(--dashboard-border);
+    color: var(--dashboard-text-primary);
+  }
+
+  .subscription-page .subscription-btn-secondary:hover {
+    background-color: color-mix(in srgb, var(--dashboard-bg-muted) 70%, var(--brand-blue) 12%);
+  }
+
+  .subscription-page .subscription-checkout-highlight {
+    box-shadow:
+      0 0 0 2px rgb(59 130 246 / 0.35),
+      0 16px 40px rgb(15 23 42 / 0.08);
+  }
+
   .theme-light .dashboard-card .text-white\/90 {
     @apply text-zinc-900;
   }

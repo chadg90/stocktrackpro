@@ -364,6 +364,133 @@ export default function SubscriptionPage() {
       ? (currentVehicles * PRICE_PER_VEHICLE_YEARLY) / 12
       : currentVehicles * PRICE_PER_VEHICLE_MONTHLY
     : 0;
+  const showCheckout = canManage && !company?.legacy && !hasStripeManagedSubscription;
+  const sliderPct =
+    ((vehicleCount - MIN_VEHICLES) / (MAX_VEHICLES - MIN_VEHICLES)) * 100;
+
+  const checkoutCard = (highlighted: boolean) => (
+    <div
+      className={`dashboard-card subscription-paid-card p-5 sm:p-8 ${
+        highlighted ? 'subscription-checkout-highlight' : ''
+      }`}
+    >
+      <div className="mb-4 inline-flex rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+        {highlighted ? 'Restore access' : 'Paid subscription'}
+      </div>
+      <h2 className="text-2xl font-semibold text-white mb-2">
+        {highlighted ? 'Choose vehicles and subscribe' : 'Set Vehicle Count and Billing Cycle'}
+      </h2>
+      <p className="text-white/75 mb-6">
+        £{PRICE_PER_VEHICLE_MONTHLY}/vehicle monthly or £{PRICE_PER_VEHICLE_YEARLY}/vehicle yearly (save ~12%).
+        Minimum {MIN_VEHICLES} vehicles. Payment is taken securely via Stripe Checkout.
+      </p>
+
+      {checkoutError && (
+        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-2 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-200">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          {checkoutError}
+        </div>
+      )}
+
+      <div className="max-w-2xl">
+        <div className="mb-5">
+          <p className="text-sm text-white/60 mb-2">Billing cycle</p>
+          <div
+            role="tablist"
+            aria-label="Billing cycle"
+            className="subscription-segment inline-flex items-center rounded-full p-1"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={billingCycle === 'monthly'}
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-4 py-1.5 text-sm font-semibold rounded-full transition ${
+                billingCycle === 'monthly'
+                  ? 'bg-blue-500 text-white shadow'
+                  : 'text-zinc-600 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white/85'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={billingCycle === 'yearly'}
+              onClick={() => setBillingCycle('yearly')}
+              className={`px-4 py-1.5 text-sm font-semibold rounded-full transition inline-flex items-center gap-1.5 ${
+                billingCycle === 'yearly'
+                  ? 'bg-blue-500 text-white shadow'
+                  : 'text-zinc-600 hover:text-zinc-900 dark:text-white/60 dark:hover:text-white/85'
+              }`}
+            >
+              Annual
+              <span
+                className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                  billingCycle === 'yearly'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
+                }`}
+              >
+                Save 12%
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-sm text-white/60 mb-3">
+          <span>Vehicles</span>
+          <span className="text-white font-semibold tabular-nums">{vehicleCount}</span>
+        </div>
+        <input
+          type="range"
+          min={MIN_VEHICLES}
+          max={MAX_VEHICLES}
+          step={1}
+          value={vehicleCount}
+          onChange={(e) => setVehicleCount(Number(e.target.value))}
+          className="subscription-slider"
+          style={{ ['--slider-pct' as string]: `${sliderPct}%` }}
+          aria-label="Number of vehicles"
+        />
+        <div className="flex justify-between text-xs text-zinc-500 dark:text-white/45 mt-2">
+          <span>{MIN_VEHICLES} min</span>
+          <span>{MAX_VEHICLES}+</span>
+        </div>
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <span className="text-white/60">
+            {billingCycle === 'yearly' ? 'Billed yearly' : 'Billed monthly'}
+          </span>
+          <span className="text-white font-semibold tabular-nums">
+            {formatCurrency(billedTotal)}
+            {billingCycle === 'yearly' ? '/yr' : '/mo'}
+          </span>
+        </div>
+        {billingCycle === 'yearly' && (
+          <div className="mt-1 flex items-center justify-between text-xs">
+            <span className="text-white/45">Monthly equivalent</span>
+            <span className="text-emerald-700 dark:text-emerald-300/90">
+              {formatCurrency(monthlyEquivalent)}/mo
+            </span>
+          </div>
+        )}
+        <div className="mt-3 text-sm text-white/70">
+          <span className={checkoutTier.colour}>{checkoutTier.label}</span> includes {checkoutTier.users}
+        </div>
+        <button
+          onClick={handleSubscribe}
+          disabled={checkoutLoading}
+          className="mt-6 w-full py-3.5 px-4 rounded-lg font-semibold transition-all bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/25 disabled:opacity-50"
+        >
+          {checkoutLoading
+            ? 'Processing...'
+            : `Continue to Checkout — ${formatCurrency(billedTotal)}${
+                billingCycle === 'yearly' ? '/year' : '/month'
+              }`}
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="subscription-page space-y-8">
@@ -385,7 +512,9 @@ export default function SubscriptionPage() {
 
       <div className="border-b border-zinc-200 dark:border-white/10 pb-6">
         <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Subscription Management</h1>
-        <p className="text-zinc-600 dark:text-white/75">Per-vehicle billing via Stripe. Managers can open the billing portal or contact support for plan changes.</p>
+        <p className="text-zinc-600 dark:text-white/75">
+          Per-vehicle billing via Stripe. Managers can open the billing portal or contact support for plan changes.
+        </p>
       </div>
 
       {company?.legacy && (
@@ -394,21 +523,36 @@ export default function SubscriptionPage() {
             Legacy pricing: your company remains on its initial agreed price long term.
           </p>
           <p className="text-amber-800 dark:text-amber-200/90 text-sm mt-1">
-            This account is excluded from new per-vehicle pricing, including the monthly and annual plans available to new customers. Contact support via WhatsApp if you&apos;d like to discuss a plan change.
+            This account is excluded from new per-vehicle pricing, including the monthly and annual plans available to
+            new customers. Contact support via WhatsApp if you&apos;d like to discuss a plan change.
           </p>
         </div>
       )}
 
       {!hasAccess && !company?.legacy && (
-        <div className="rounded-xl border border-red-300 bg-red-50 px-5 py-4 dark:border-red-500/40 dark:bg-red-500/10">
-          <p className="text-red-900 dark:text-red-100 font-semibold">
-            {trialExpired ? 'Your free trial has ended' : 'Subscription required to continue'}
-          </p>
-          <p className="text-red-800 dark:text-red-200/90 text-sm mt-1">
-            {trialExpired && trialEndLabel
-              ? `Your trial ended on ${trialEndLabel}. Choose your vehicle count below and subscribe to keep full access — payment is taken via Stripe Checkout.`
-              : 'Choose your vehicle count below and subscribe via Stripe Checkout to restore dashboard and app access.'}
-          </p>
+        <div
+          className="rounded-xl border-2 border-red-400 bg-red-50 px-5 py-5 dark:border-red-500/50 dark:bg-red-500/10"
+          role="alert"
+        >
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300">
+              <AlertCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-red-950 dark:text-red-100 text-lg font-bold">
+                {trialExpired
+                  ? 'Your free trial has ended'
+                  : displayStatus === 'expired'
+                    ? 'Your subscription has expired'
+                    : 'Subscription required to continue'}
+              </p>
+              <p className="text-red-800 dark:text-red-200/90 text-sm mt-1 leading-relaxed">
+                {trialExpired && trialEndLabel
+                  ? `Your trial ended on ${trialEndLabel}. Use the highlighted section below to choose your vehicle count and subscribe — payment is taken via Stripe Checkout.`
+                  : 'Dashboard and app access are paused until you subscribe. Use the highlighted section below to choose your vehicle count and continue to Stripe Checkout.'}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -420,6 +564,8 @@ export default function SubscriptionPage() {
           </p>
         </div>
       )}
+
+      {!hasAccess && showCheckout && checkoutCard(true)}
 
       <div className="dashboard-card subscription-paid-card p-5 sm:p-8">
         <div className="flex items-start justify-between mb-8">
@@ -486,7 +632,7 @@ export default function SubscriptionPage() {
               <button
                 onClick={handleSyncSubscription}
                 disabled={syncing}
-                className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-colors disabled:opacity-60"
+                className="subscription-btn-secondary flex items-center gap-2 px-6 py-3 font-semibold rounded-lg transition-colors disabled:opacity-60"
               >
                 {syncing ? (
                   <>
@@ -560,113 +706,7 @@ export default function SubscriptionPage() {
         </div>
       )}
 
-      {canManage && !company?.legacy && !hasStripeManagedSubscription && (
-        <div className="dashboard-card subscription-paid-card p-5 sm:p-8">
-          <div className="mb-4 inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-            Paid subscription
-          </div>
-          <h2 className="text-2xl font-semibold text-white mb-2">Set Vehicle Count and Billing Cycle</h2>
-          <p className="text-white/75 mb-6">
-            £{PRICE_PER_VEHICLE_MONTHLY}/vehicle monthly or £{PRICE_PER_VEHICLE_YEARLY}/vehicle yearly (save ~12%). Minimum {MIN_VEHICLES} vehicles. Existing Stripe subscriptions should be managed through the billing portal or support.
-          </p>
-
-          {checkoutError && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-2 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-200">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              {checkoutError}
-            </div>
-          )}
-
-          <div className="max-w-2xl">
-            {/* Billing cycle toggle */}
-            <div className="mb-5">
-              <p className="text-sm text-white/60 mb-2">Billing cycle</p>
-              <div
-                role="tablist"
-                aria-label="Billing cycle"
-                className="inline-flex items-center rounded-full bg-white/5 p-1 border border-white/10"
-              >
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={billingCycle === 'monthly'}
-                  onClick={() => setBillingCycle('monthly')}
-                  className={`px-4 py-1.5 text-sm font-semibold rounded-full transition ${
-                    billingCycle === 'monthly' ? 'bg-blue-500 text-white shadow' : 'text-white/60 hover:text-white/85'
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={billingCycle === 'yearly'}
-                  onClick={() => setBillingCycle('yearly')}
-                  className={`px-4 py-1.5 text-sm font-semibold rounded-full transition inline-flex items-center gap-1.5 ${
-                    billingCycle === 'yearly' ? 'bg-blue-500 text-white shadow' : 'text-white/60 hover:text-white/85'
-                  }`}
-                >
-                  Annual
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
-                    billingCycle === 'yearly' ? 'bg-white/20 text-white' : 'bg-emerald-500/20 text-emerald-300'
-                  }`}>
-                    Save 12%
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-sm text-white/60 mb-3">
-              <span>Vehicles</span>
-              <span className="text-white font-semibold">{vehicleCount}</span>
-            </div>
-            <input
-              type="range"
-              min={MIN_VEHICLES}
-              max={MAX_VEHICLES}
-              step={1}
-              value={vehicleCount}
-              onChange={(e) => setVehicleCount(Number(e.target.value))}
-              className="w-full h-2 rounded-full appearance-none cursor-pointer bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:border-0"
-              style={{
-                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((vehicleCount - MIN_VEHICLES) / (MAX_VEHICLES - MIN_VEHICLES)) * 100}%, rgba(255,255,255,0.1) ${((vehicleCount - MIN_VEHICLES) / (MAX_VEHICLES - MIN_VEHICLES)) * 100}%, rgba(255,255,255,0.1) 100%)`,
-              }}
-              aria-label="Number of vehicles"
-            />
-            <div className="flex justify-between text-xs text-white/30 mt-2">
-              <span>{MIN_VEHICLES} min</span>
-              <span>{MAX_VEHICLES}+</span>
-            </div>
-            <div className="mt-4 flex items-center justify-between text-sm">
-              <span className="text-white/60">
-                {billingCycle === 'yearly' ? 'Billed yearly' : 'Billed monthly'}
-              </span>
-              <span className="text-white font-semibold">
-                {formatCurrency(billedTotal)}
-                {billingCycle === 'yearly' ? '/yr' : '/mo'}
-              </span>
-            </div>
-            {billingCycle === 'yearly' && (
-              <div className="mt-1 flex items-center justify-between text-xs">
-                <span className="text-white/45">Monthly equivalent</span>
-                <span className="text-emerald-300/90">{formatCurrency(monthlyEquivalent)}/mo</span>
-              </div>
-            )}
-            <div className="mt-3 text-sm text-white/70">
-              <span className={checkoutTier.colour}>{checkoutTier.label}</span> includes {checkoutTier.users}
-            </div>
-            <button
-              onClick={handleSubscribe}
-              disabled={checkoutLoading}
-              className="mt-6 w-full py-3 px-4 rounded-lg font-semibold transition-all bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 disabled:opacity-50"
-            >
-              {checkoutLoading
-                ? 'Processing...'
-                : `Continue to Checkout — ${formatCurrency(billedTotal)}${billingCycle === 'yearly' ? '/year' : '/month'}`}
-            </button>
-          </div>
-        </div>
-      )}
+      {hasAccess && showCheckout && checkoutCard(false)}
 
       {canManage && !company?.legacy && hasStripeManagedSubscription && (
         <div className="dashboard-card subscription-paid-card p-5 sm:p-8">
@@ -677,7 +717,7 @@ export default function SubscriptionPage() {
         </div>
       )}
 
-      <div className="dashboard-card p-8 bg-gradient-to-br from-white/5 to-transparent border-blue-500/20">
+      <div className="dashboard-card p-8 border-blue-500/25">
         <h2 className="text-2xl font-semibold text-white mb-3">Need Help?</h2>
         <p className="text-white/80 mb-6">
           If you have questions about billing or need help changing your vehicle count, contact support.
@@ -687,14 +727,14 @@ export default function SubscriptionPage() {
             href={WHATSAPP_SUPPORT_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+            className="subscription-btn-secondary px-6 py-3 rounded-lg transition-colors font-medium flex items-center gap-2"
           >
             WhatsApp Support
             <ExternalLink className="w-4 h-4" />
           </a>
           <Link
             href="/pricing"
-            className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+            className="subscription-btn-secondary px-6 py-3 rounded-lg transition-colors font-medium flex items-center gap-2"
           >
             View Public Pricing
             <ExternalLink className="w-4 h-4" />

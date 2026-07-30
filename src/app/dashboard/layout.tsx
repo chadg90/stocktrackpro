@@ -235,7 +235,7 @@ export default function DashboardLayout({
         <ToastProvider>
           <DashboardQueryProvider>
             <div data-theme="light" className="theme-light min-h-screen bg-[var(--mkt-bg,#f8fafc)]">
-              <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">{children}</div>
+              <div className="mx-auto max-w-4xl px-4 py-10 sm:py-14">{children}</div>
             </div>
           </DashboardQueryProvider>
         </ToastProvider>
