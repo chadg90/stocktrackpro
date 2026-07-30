@@ -15,6 +15,11 @@ import {
   FLUID_STATUS_LABELS,
   FUEL_LEVEL_LABELS,
 } from '@/lib/bloodOrganCheckLabels';
+import {
+  hasEncodedSignature,
+  isSignatureStorageRef,
+  signatureEncodedToPngDataUrl,
+} from '@/lib/signaturePaths';
 
 const ACCENT: [number, number, number] = [66, 133, 244];
 const BLACK: [number, number, number] = [0, 0, 0];
@@ -393,12 +398,69 @@ export async function exportVehicleInspectionProofPdf(args: {
       `Physically completed checks: ${inspection.declaration.items.decl_physical ? 'Yes' : 'No'}`,
       `Faults reported accurately: ${inspection.declaration.items.decl_accurate ? 'Yes' : 'No'}`,
       `Signed at: ${inspection.declaration.confirmed_at || '—'}`,
-      `Signature on file: ${inspection.declaration.signature_paths ? 'Yes (digital signature captured)' : 'No'}`,
     ];
     for (const line of lines) {
       y = ensureSpace(doc, y, 6);
       doc.text(line, 14, y);
       y += 5;
+    }
+
+    const sigRaw = inspection.declaration.signature_paths;
+    let signatureEmbedded = false;
+    if (hasEncodedSignature(sigRaw)) {
+      const png = await signatureEncodedToPngDataUrl(sigRaw, { width: 560, height: 200 });
+      if (png) {
+        y = ensureSpace(doc, y, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Inspector signature', 14, y);
+        y += 3;
+        try {
+          doc.setDrawColor(226, 232, 240);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(14, y, 90, 34, 'FD');
+          doc.addImage(png, 'PNG', 16, y + 2, 86, 30, undefined, 'FAST');
+          signatureEmbedded = true;
+          y += 38;
+        } catch {
+          signatureEmbedded = false;
+        }
+        doc.setFont('helvetica', 'normal');
+      }
+    } else if (sigRaw && isSignatureStorageRef(sigRaw)) {
+      const url = await getImageUrlFromApp(sigRaw);
+      if (url) {
+        const img = await imageUrlToDataUrl(url);
+        if (img) {
+          y = ensureSpace(doc, y, 42);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Inspector signature', 14, y);
+          y += 3;
+          try {
+            doc.setDrawColor(226, 232, 240);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(14, y, 90, 34, 'FD');
+            doc.addImage(img.dataUrl, img.format, 16, y + 2, 86, 30, undefined, 'FAST');
+            signatureEmbedded = true;
+            y += 38;
+          } catch {
+            signatureEmbedded = false;
+          }
+          doc.setFont('helvetica', 'normal');
+        }
+      }
+    }
+
+    if (!signatureEmbedded) {
+      y = ensureSpace(doc, y, 6);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...GRAY);
+      doc.text(
+        sigRaw ? 'Signature captured on device (could not embed image).' : 'No signature recorded.',
+        14,
+        y
+      );
+      y += 6;
+      doc.setTextColor(...BLACK);
     }
   } else {
     doc.text(

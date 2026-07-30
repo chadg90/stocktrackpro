@@ -34,6 +34,12 @@ import {
   exportVehicleInspectionProofPdf,
   type InspectionProofDoc,
 } from '@/lib/vehicleInspectionProofPdf';
+import {
+  hasEncodedSignature,
+  isSignatureStorageRef,
+  signatureEncodedToSvgHtml,
+} from '@/lib/signaturePaths';
+import { getImageUrlFromApp } from '@/lib/getImageUrl';
 
 type Profile = {
   company_id?: string;
@@ -626,20 +632,19 @@ function InspectionDetailModal({
               Declaration
             </h3>
             {isBlood && inspection.declaration ? (
-              <div className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
-                <p>
-                  Physically completed checks:{' '}
-                  <strong>{inspection.declaration.items?.decl_physical ? 'Yes' : 'No'}</strong>
-                </p>
-                <p>
-                  Faults reported accurately:{' '}
-                  <strong>{inspection.declaration.items?.decl_accurate ? 'Yes' : 'No'}</strong>
-                </p>
-                <p>
-                  Signature on file:{' '}
-                  <strong>{inspection.declaration.signature_paths ? 'Yes' : 'No'}</strong>
-                </p>
-                <p>Signed at: {inspection.declaration.confirmed_at || '—'}</p>
+              <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+                <div className="space-y-1">
+                  <p>
+                    Physically completed checks:{' '}
+                    <strong>{inspection.declaration.items?.decl_physical ? 'Yes' : 'No'}</strong>
+                  </p>
+                  <p>
+                    Faults reported accurately:{' '}
+                    <strong>{inspection.declaration.items?.decl_accurate ? 'Yes' : 'No'}</strong>
+                  </p>
+                  <p>Signed at: {inspection.declaration.confirmed_at || '—'}</p>
+                </div>
+                <InspectionSignaturePreview signaturePaths={inspection.declaration.signature_paths} />
               </div>
             ) : (
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -678,5 +683,62 @@ function ResultBadge({ result, label }: { result?: string; label?: string }) {
     <span className={`rounded px-2 py-0.5 text-xs ${cls} ${label ? 'normal-case' : ''}`}>
       {label || r}
     </span>
+  );
+}
+
+function InspectionSignaturePreview({ signaturePaths }: { signaturePaths?: string }) {
+  const [storageUrl, setStorageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setStorageUrl(null);
+    if (!signaturePaths || !isSignatureStorageRef(signaturePaths)) return;
+    (async () => {
+      const url = await getImageUrlFromApp(signaturePaths);
+      if (!cancelled) setStorageUrl(url);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [signaturePaths]);
+
+  const svg = hasEncodedSignature(signaturePaths)
+    ? signatureEncodedToSvgHtml(signaturePaths, { width: 280, height: 100 })
+    : null;
+
+  if (svg) {
+    return (
+      <div>
+        <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Inspector signature
+        </div>
+        <div
+          className="inline-block rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-700"
+          dangerouslySetInnerHTML={{ __html: svg }}
+        />
+      </div>
+    );
+  }
+
+  if (storageUrl) {
+    return (
+      <div>
+        <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Inspector signature
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={storageUrl}
+          alt="Inspector signature"
+          className="max-h-24 max-w-xs rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-700"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <p className="text-xs text-gray-500">
+      {signaturePaths ? 'Signature on file.' : 'No signature recorded.'}
+    </p>
   );
 }
