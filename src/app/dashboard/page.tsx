@@ -28,7 +28,7 @@ import {
 } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDays } from 'date-fns';
-import { activityHistoryStartFromDashboardRange, TOOL_HISTORY_ANALYTICS_CAP } from '@/lib/dvsaRetention';
+import { activityHistoryStartFromDashboardRange, TOOL_HISTORY_ANALYTICS_CAP, INSPECTION_ANALYTICS_CAP, DEFECT_ANALYTICS_CAP } from '@/lib/dvsaRetention';
 import ExportButton from './components/ExportButton';
 import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
 import {
@@ -409,16 +409,17 @@ function DashboardPageInner() {
           staticDataCompanyRef.current = companyId;
         }
 
-        // Fetch inspections (always bounded by DVSA-style window + selected range)
+        // Fetch inspections (always bounded by DVSA-style window + selected range + hard cap)
         const inspQuery = query(
           collection(firebaseDb!, 'vehicle_inspections'),
           where('company_id', '==', companyId),
           where('inspected_at', '>=', Timestamp.fromDate(rangeStart)),
-          orderBy('inspected_at', 'desc')
+          orderBy('inspected_at', 'desc'),
+          limit(INSPECTION_ANALYTICS_CAP)
         );
         const inspSnap = await getDocs(inspQuery);
         const inspectionsData = inspSnap.docs.map(d => ({ id: d.id, ...d.data() } as Inspection));
-        // Full set for analytics + exports (website managers need complete history in range)
+        // Cap protects cost; analytics/export use this bounded recent set
         setInspections(inspectionsData);
         setInspectionsCount(inspectionsData.length);
 
@@ -426,7 +427,8 @@ function DashboardPageInner() {
           collection(firebaseDb!, 'vehicle_defects'),
           where('company_id', '==', companyId),
           where('reported_at', '>=', Timestamp.fromDate(rangeStart)),
-          orderBy('reported_at', 'desc')
+          orderBy('reported_at', 'desc'),
+          limit(DEFECT_ANALYTICS_CAP)
         );
         const defSnap = await getDocs(defQuery);
         const defectsData = defSnap.docs.map(d => ({ id: d.id, ...d.data() } as Defect));

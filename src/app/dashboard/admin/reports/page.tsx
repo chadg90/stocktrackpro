@@ -7,9 +7,12 @@ import {
   doc,
   getDoc,
   getDocs,
+  getCountFromServer,
   addDoc,
   query,
   where,
+  orderBy,
+  limit,
   Timestamp,
   serverTimestamp,
 } from 'firebase/firestore';
@@ -24,6 +27,7 @@ import {
   polishDescription,
   titleCaseName,
 } from '@/lib/adminMonthlyCompanyReportHelpers';
+import { ADMIN_REPORT_QUERY_CAP, fifteenMonthsAgoStart } from '@/lib/dvsaRetention';
 
 type Profile = {
   role?: string;
@@ -201,8 +205,8 @@ export default function AdminReportsPage() {
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [supportsMonthInput, setSupportsMonthInput] = useState(true);
 
-  const loadCompanies = useCallback(async (): Promise<void> => {
-    if (!firebaseDb) return;
+  const loadCompanies = useCallback(async (): Promise<Company[]> => {
+    if (!firebaseDb) return [];
     const companySnap = await getDocs(query(collection(firebaseDb!, 'companies')));
     const data = companySnap.docs.map((item) => ({ id: item.id, ...(item.data() as Omit<Company, 'id'>) }));
     data.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -210,12 +214,11 @@ export default function AdminReportsPage() {
     if (!selectedCompanyId && data[0]) {
       setSelectedCompanyId(data[0].id);
     }
+    return data;
   }, [selectedCompanyId]);
 
-  const loadAdminSnapshot = useCallback(async (): Promise<void> => {
+  const loadAdminSnapshot = useCallback(async (companyList: Company[]): Promise<void> => {
     if (!firebaseDb) return;
-    const companySnap = await getDocs(query(collection(firebaseDb!, 'companies')));
-    const companyList = companySnap.docs.map((item) => ({ id: item.id, ...(item.data() as Omit<Company, 'id'>) }));
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -223,43 +226,52 @@ export default function AdminReportsPage() {
     const highDefectCompanies: Array<{ id: string; name: string; defectsReported: number }> = [];
     const inactivityAlerts: Array<{ id: string; name: string; daysSinceLastCheck: number | null }> = [];
 
-    for (const company of companyList) {
-      const defectsSnap = await getDocs(
-        query(
-          collection(firebaseDb!, 'vehicle_defects'),
-          where('company_id', '==', company.id),
-          where('reported_at', '>=', Timestamp.fromDate(monthStart)),
-          where('reported_at', '<', Timestamp.fromDate(monthEnd))
-        )
-      );
-      if (defectsSnap.size >= HIGH_DEFECT_THRESHOLD) {
-        highDefectCompanies.push({
-          id: company.id,
-          name: company.name || company.id,
-          defectsReported: defectsSnap.size,
-        });
-      }
+    await Promise.all(
+      companyList.map(async (company) => {
+        const [defectsCountSnap, latestInspectionSnap] = await Promise.all([
+          getCountFromServer(
+            query(
+              collection(firebaseDb!, 'vehicle_defects'),
+              where('company_id', '==', company.id),
+              where('reported_at', '>=', Timestamp.fromDate(monthStart)),
+              where('reported_at', '<', Timestamp.fromDate(monthEnd))
+            )
+          ),
+          getDocs(
+            query(
+              collection(firebaseDb!, 'vehicle_inspections'),
+              where('company_id', '==', company.id),
+              orderBy('inspected_at', 'desc'),
+              limit(1)
+            )
+          ),
+        ]);
 
-      const inspectionsByCompanySnap = await getDocs(
-        query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', company.id))
-      );
-      const latestDate =
-        inspectionsByCompanySnap.docs
-          .map((docSnap) => (docSnap.data() as Inspection).inspected_at)
-          .map((value) => toDate(value))
-          .filter((dt): dt is Date => dt !== null)
-          .sort((a, b) => b.getTime() - a.getTime())[0] || null;
-      const daysSinceLastCheck = latestDate
-        ? Math.floor((Date.now() - latestDate.getTime()) / 86400000)
-        : null;
-      if (daysSinceLastCheck === null || daysSinceLastCheck >= INACTIVITY_ALERT_DAYS) {
-        inactivityAlerts.push({
-          id: company.id,
-          name: company.name || company.id,
-          daysSinceLastCheck,
-        });
-      }
-    }
+        const defectsReported = defectsCountSnap.data().count;
+        if (defectsReported >= HIGH_DEFECT_THRESHOLD) {
+          highDefectCompanies.push({
+            id: company.id,
+            name: company.name || company.id,
+            defectsReported,
+          });
+        }
+
+        const latestRaw = latestInspectionSnap.docs[0]
+          ? ((latestInspectionSnap.docs[0].data() as Inspection).inspected_at)
+          : undefined;
+        const latestDate = toDate(latestRaw);
+        const daysSinceLastCheck = latestDate
+          ? Math.floor((Date.now() - latestDate.getTime()) / 86400000)
+          : null;
+        if (daysSinceLastCheck === null || daysSinceLastCheck >= INACTIVITY_ALERT_DAYS) {
+          inactivityAlerts.push({
+            id: company.id,
+            name: company.name || company.id,
+            daysSinceLastCheck,
+          });
+        }
+      })
+    );
 
     const trialCompanies = companyList.filter((company) => company.subscription_status === 'trial').length;
     const paidCompanies = companyList.filter((company) => company.subscription_status === 'active').length;
@@ -271,6 +283,13 @@ export default function AdminReportsPage() {
         name: company.name || company.id,
         subscriptionStatus: company.subscription_status || 'inactive',
       }));
+
+    highDefectCompanies.sort((a, b) => b.defectsReported - a.defectsReported);
+    inactivityAlerts.sort((a, b) => {
+      if (a.daysSinceLastCheck === null) return -1;
+      if (b.daysSinceLastCheck === null) return 1;
+      return b.daysSinceLastCheck - a.daysSinceLastCheck;
+    });
 
     setSnapshot({
       activeCompanies,
@@ -315,7 +334,8 @@ export default function AdminReportsPage() {
           return;
         }
 
-        await Promise.all([loadCompanies(), loadAdminSnapshot()]);
+        const companyList = await loadCompanies();
+        await loadAdminSnapshot(companyList);
       } finally {
         setLoading(false);
       }
@@ -347,31 +367,22 @@ export default function AdminReportsPage() {
     setSupportsMonthInput(supports);
   }, []);
 
-  async function getMonthStats(
-    companyId: string,
+  function monthStatsFromRows(
+    inspections: Inspection[],
+    defectsForReported: Defect[],
+    defectsForResolved: Defect[],
     monthValue: string
-  ): Promise<Pick<ReportStats, 'checksCompleted' | 'defectsReported' | 'defectsResolved' | 'resolutionRate'>> {
-    if (!firebaseDb) {
-      return { checksCompleted: 0, defectsReported: 0, defectsResolved: 0, resolutionRate: null };
-    }
+  ): Pick<ReportStats, 'checksCompleted' | 'defectsReported' | 'defectsResolved' | 'resolutionRate'> {
     const { start, end } = monthToRange(monthValue);
-    const [inspectionsByCompanySnap, defectsByCompanySnap] = await Promise.all([
-      getDocs(query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', companyId))),
-      getDocs(query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', companyId))),
-    ]);
-
-    const checksCompleted = inspectionsByCompanySnap.docs.filter((docSnap) => {
-      const inspection = docSnap.data() as Inspection;
-      return isWithinRange(inspection.inspected_at, start, end);
-    }).length;
-    const defectsReported = defectsByCompanySnap.docs.filter((docSnap) => {
-      const defect = docSnap.data() as Defect;
-      return isWithinRange(defect.reported_at, start, end);
-    }).length;
-    const defectsResolved = defectsByCompanySnap.docs.filter((docSnap) => {
-      const defect = docSnap.data() as Defect;
-      return isWithinRange(defect.resolved_at, start, end);
-    }).length;
+    const checksCompleted = inspections.filter((inspection) =>
+      isWithinRange(inspection.inspected_at, start, end)
+    ).length;
+    const defectsReported = defectsForReported.filter((defect) =>
+      isWithinRange(defect.reported_at, start, end)
+    ).length;
+    const defectsResolved = defectsForResolved.filter((defect) =>
+      isWithinRange(defect.resolved_at, start, end)
+    ).length;
     const resolutionRate = defectsReported > 0 ? Math.round((defectsResolved / defectsReported) * 100) : null;
     return { checksCompleted, defectsReported, defectsResolved, resolutionRate };
   }
@@ -379,18 +390,62 @@ export default function AdminReportsPage() {
   async function calculateStats(): Promise<ReportStats | null> {
     if (!firebaseDb || !selectedCompanyId || !selectedMonth) return null;
     const { start, end } = monthToRange(selectedMonth);
+    const trendValues = getRecentMonthValues(selectedMonth, 4);
+    const windowStart = monthToRange(trendValues[0]).start;
+    const defectsSince = fifteenMonthsAgoStart();
 
     setPreviewLoading(true);
     setStatusMessage(null);
     try {
-      const [inspectionsByCompanySnap, allDefectsByCompanySnap] = await Promise.all([
-        getDocs(query(collection(firebaseDb!, 'vehicle_inspections'), where('company_id', '==', selectedCompanyId))),
-        getDocs(query(collection(firebaseDb!, 'vehicle_defects'), where('company_id', '==', selectedCompanyId))),
-      ]);
-      const [vehiclesSnap, profilesSnap] = await Promise.all([
+      const [
+        inspectionsWindowSnap,
+        defectsReportedSnap,
+        defectsResolvedWindowSnap,
+        latestInspectionSnap,
+        vehiclesSnap,
+        profilesSnap,
+      ] = await Promise.all([
+        getDocs(
+          query(
+            collection(firebaseDb!, 'vehicle_inspections'),
+            where('company_id', '==', selectedCompanyId),
+            where('inspected_at', '>=', Timestamp.fromDate(windowStart)),
+            where('inspected_at', '<', Timestamp.fromDate(end)),
+            orderBy('inspected_at', 'desc'),
+            limit(ADMIN_REPORT_QUERY_CAP)
+          )
+        ),
+        getDocs(
+          query(
+            collection(firebaseDb!, 'vehicle_defects'),
+            where('company_id', '==', selectedCompanyId),
+            where('reported_at', '>=', Timestamp.fromDate(defectsSince)),
+            orderBy('reported_at', 'desc'),
+            limit(ADMIN_REPORT_QUERY_CAP)
+          )
+        ),
+        getDocs(
+          query(
+            collection(firebaseDb!, 'vehicle_defects'),
+            where('company_id', '==', selectedCompanyId),
+            where('resolved_at', '>=', Timestamp.fromDate(windowStart)),
+            where('resolved_at', '<', Timestamp.fromDate(end)),
+            orderBy('resolved_at', 'desc'),
+            limit(ADMIN_REPORT_QUERY_CAP)
+          )
+        ),
+        getDocs(
+          query(
+            collection(firebaseDb!, 'vehicle_inspections'),
+            where('company_id', '==', selectedCompanyId),
+            orderBy('inspected_at', 'desc'),
+            limit(1)
+          )
+        ),
         getDocs(query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', selectedCompanyId))),
         getDocs(query(collection(firebaseDb!, 'profiles'), where('company_id', '==', selectedCompanyId))),
       ]);
+
       const vehiclesById: Record<string, Vehicle> = {};
       vehiclesSnap.docs.forEach((vehicleDoc) => {
         vehiclesById[vehicleDoc.id] = { id: vehicleDoc.id, ...(vehicleDoc.data() as Omit<Vehicle, 'id'>) };
@@ -400,20 +455,34 @@ export default function AdminReportsPage() {
         profilesById[profileDoc.id] = { ...(profileDoc.data() as Profile) };
       });
 
-      const checksCompleted = inspectionsByCompanySnap.docs.filter((docSnap) => {
-        const inspection = docSnap.data() as Inspection;
-        return isWithinRange(inspection.inspected_at, start, end);
-      }).length;
-      const inspectionsInMonth = inspectionsByCompanySnap.docs
-        .map((docSnap) => ({ id: docSnap.id, ...(docSnap.data() as Omit<Inspection, 'id'>) }))
-        .filter((inspection) => isWithinRange(inspection.inspected_at, start, end));
-      const defectsReportedInMonth = allDefectsByCompanySnap.docs
-        .map((docSnap) => docSnap.data() as Defect)
-        .filter((defect) => isWithinRange(defect.reported_at, start, end));
+      const inspectionsWindow = inspectionsWindowSnap.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...(docSnap.data() as Omit<Inspection, 'id'>),
+      }));
+      const defectsReportedAll = defectsReportedSnap.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...(docSnap.data() as Omit<Defect, 'id'>),
+      }));
+      const defectsReportedWindow = defectsReportedAll.filter((defect) => {
+        const dt = toDate(defect.reported_at);
+        return dt !== null && dt >= windowStart && dt < end;
+      });
+      const defectsResolvedWindow = defectsResolvedWindowSnap.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...(docSnap.data() as Omit<Defect, 'id'>),
+      }));
+
+      const inspectionsInMonth = inspectionsWindow.filter((inspection) =>
+        isWithinRange(inspection.inspected_at, start, end)
+      );
+      const checksCompleted = inspectionsInMonth.length;
+      const defectsReportedInMonth = defectsReportedWindow.filter((defect) =>
+        isWithinRange(defect.reported_at, start, end)
+      );
       const defectsReported = defectsReportedInMonth.length;
-      const defectsResolvedInMonth = allDefectsByCompanySnap.docs
-        .map((docSnap) => docSnap.data() as Defect)
-        .filter((defect) => isWithinRange(defect.resolved_at, start, end));
+      const defectsResolvedInMonth = defectsResolvedWindow.filter((defect) =>
+        isWithinRange(defect.resolved_at, start, end)
+      );
       const defectsResolved = defectsResolvedInMonth.length;
 
       const activeVehicles = vehiclesSnap.docs
@@ -444,19 +513,15 @@ export default function AdminReportsPage() {
           ? Math.round((repairDurations.reduce((sum, days) => sum + days, 0) / repairDurations.length) * 10) / 10
           : null;
 
-      const openDefects = allDefectsByCompanySnap.docs
-        .map((item) => item.data() as Defect)
-        .filter((defect) => defect.status !== 'resolved');
+      const openDefects = defectsReportedAll.filter((defect) => defect.status !== 'resolved');
       const criticalOpenDefects = openDefects.filter((defect) => {
         const severity = (defect.severity || '').toLowerCase();
         return severity === 'critical' || severity === 'high';
       }).length;
 
-      const latestInspectionDate = inspectionsByCompanySnap.docs
-        .map((docSnap) => (docSnap.data() as Inspection).inspected_at)
-        .map((value) => toDate(value))
-        .filter((dt): dt is Date => dt !== null)
-        .sort((a, b) => b.getTime() - a.getTime())[0] || null;
+      const latestInspectionDate = latestInspectionSnap.docs[0]
+        ? toDate((latestInspectionSnap.docs[0].data() as Inspection).inspected_at)
+        : null;
       const daysSinceLastCheck = latestInspectionDate
         ? Math.floor((Date.now() - latestInspectionDate.getTime()) / 86400000)
         : null;
@@ -557,14 +622,19 @@ export default function AdminReportsPage() {
       const complianceRate = totalUsers > 0 ? Math.round((usersReportedCount / totalUsers) * 100) : null;
 
       const previousMonthValue = getPreviousMonthValue(selectedMonth);
-      const previousStats = await getMonthStats(selectedCompanyId, previousMonthValue);
+      const previousStats = monthStatsFromRows(
+        inspectionsWindow,
+        defectsReportedWindow,
+        defectsResolvedWindow,
+        previousMonthValue
+      );
       const previousRange = monthToRange(previousMonthValue);
-      const previousInspections = inspectionsByCompanySnap.docs
-        .map((docSnap) => docSnap.data() as Inspection)
-        .filter((inspection) => isWithinRange(inspection.inspected_at, previousRange.start, previousRange.end));
-      const previousDefects = allDefectsByCompanySnap.docs
-        .map((docSnap) => docSnap.data() as Defect)
-        .filter((defect) => isWithinRange(defect.reported_at, previousRange.start, previousRange.end));
+      const previousInspections = inspectionsWindow.filter((inspection) =>
+        isWithinRange(inspection.inspected_at, previousRange.start, previousRange.end)
+      );
+      const previousDefects = defectsReportedWindow.filter((defect) =>
+        isWithinRange(defect.reported_at, previousRange.start, previousRange.end)
+      );
       const previousReportingIds = new Set<string>();
       previousInspections.forEach((inspection) => {
         if (inspection.inspected_by && staffIds.has(inspection.inspected_by)) {
@@ -611,17 +681,20 @@ export default function AdminReportsPage() {
       setOpenDefectRows(openRows);
       setUsersWithChecks(usersWithChecksRows);
       setUsersWithoutChecks(usersWithoutChecksRows);
-      const trendValues = getRecentMonthValues(selectedMonth, 4);
-      const trendSeries: ReportTrendPoint[] = [];
-      for (const monthValue of trendValues) {
-        const point = await getMonthStats(selectedCompanyId, monthValue);
-        trendSeries.push({
+      const trendSeries: ReportTrendPoint[] = trendValues.map((monthValue) => {
+        const point = monthStatsFromRows(
+          inspectionsWindow,
+          defectsReportedWindow,
+          defectsResolvedWindow,
+          monthValue
+        );
+        return {
           month: formatMonthLabel(monthValue),
           checks: point.checksCompleted,
           defectsReported: point.defectsReported,
           defectsResolved: point.defectsResolved,
-        });
-      }
+        };
+      });
       setTrend(trendSeries);
       setComparison({
         previousMonthLabel: formatMonthLabel(previousMonthValue),

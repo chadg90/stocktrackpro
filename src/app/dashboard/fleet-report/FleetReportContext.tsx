@@ -10,10 +10,15 @@ import {
   query,
   where,
   orderBy,
+  limit,
   Timestamp,
 } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { fifteenMonthsAgoStart } from '@/lib/dvsaRetention';
+import {
+  fifteenMonthsAgoStart,
+  INSPECTION_ANALYTICS_CAP,
+  DEFECT_ANALYTICS_CAP,
+} from '@/lib/dvsaRetention';
 import type {
   FleetDefect,
   FleetInspection,
@@ -107,13 +112,15 @@ export function FleetReportProvider({ children }: { children: React.ReactNode })
         collection(firebaseDb, 'vehicle_inspections'),
         where('company_id', '==', companyId),
         where('inspected_at', '>=', Timestamp.fromDate(startDate)),
-        orderBy('inspected_at', 'desc')
+        orderBy('inspected_at', 'desc'),
+        limit(INSPECTION_ANALYTICS_CAP)
       );
       const defQ = query(
         collection(firebaseDb, 'vehicle_defects'),
         where('company_id', '==', companyId),
         where('reported_at', '>=', Timestamp.fromDate(startDate)),
-        orderBy('reported_at', 'desc')
+        orderBy('reported_at', 'desc'),
+        limit(DEFECT_ANALYTICS_CAP)
       );
 
       const [vSnap, uSnap, iSnap, dSnap] = await Promise.all([

@@ -24,3 +24,12 @@ export function activityHistoryStartFromDashboardRange(
 
 /** Cap for tool_history reads on dashboard / analytics (was 2500). */
 export const TOOL_HISTORY_ANALYTICS_CAP = 1200;
+
+/** Cap for vehicle_inspections downloads on dashboard home / fleet report. */
+export const INSPECTION_ANALYTICS_CAP = 2500;
+
+/** Cap for vehicle_defects downloads on dashboard home / fleet report. */
+export const DEFECT_ANALYTICS_CAP = 2500;
+
+/** Cap for date-bounded admin monthly report inspection/defect fetches. */
+export const ADMIN_REPORT_QUERY_CAP = 5000;
