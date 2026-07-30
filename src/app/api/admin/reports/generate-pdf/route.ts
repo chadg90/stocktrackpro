@@ -3,9 +3,14 @@ import type { MonthlyCompanyReportInput } from '@/lib/adminMonthlyCompanyReportP
 import { buildAdminMonthlyCompanyReportHtmlPdfBytes } from '@/lib/adminMonthlyCompanyReportHtmlPdf';
 import { buildReportFilename } from '@/lib/adminMonthlyCompanyReportInput';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 export const maxDuration = 30;
 export const runtime = 'nodejs';
+
+// PDF rendering is CPU-heavy; cap per-IP generation to prevent spam/abuse.
+const PDF_WINDOW_MS = 60_000;
+const PDF_MAX_REQUESTS = 10;
 
 async function assertAdmin(request: NextRequest): Promise<void> {
   const authHeader = request.headers.get('authorization');
@@ -60,6 +65,10 @@ function normalizeReportInput(raw: MonthlyCompanyReportInput): MonthlyCompanyRep
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    if (!rateLimit(ip, 'admin-generate-pdf', PDF_WINDOW_MS, PDF_MAX_REQUESTS)) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
     await assertAdmin(request);
     const payload = (await request.json()) as MonthlyCompanyReportInput;
     const reportInput = normalizeReportInput(payload);

@@ -24,6 +24,10 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
 import { firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
+import {
+  getCachedCompanyVehicles,
+  setCachedCompanyVehicles,
+} from '@/lib/companyVehiclesCache';
 import { useToast } from '@/components/Toast';
 
 type RawVehicle = {
@@ -242,8 +246,17 @@ export default function MotTaxPage() {
       return;
     }
 
-    setLoading(true);
     setError(null);
+
+    // Show recent cached list immediately so remount/focus does not blank the UI
+    // or feel like a full reload; live listener still refreshes when data changes.
+    const cached = getCachedCompanyVehicles<RawVehicle>(companyId);
+    if (cached) {
+      setVehicles(cached);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
 
     const q = query(
       collection(firebaseDb, 'vehicles'),
@@ -257,6 +270,7 @@ export default function MotTaxPage() {
           id: docSnap.id,
           ...(docSnap.data() as Omit<RawVehicle, 'id'>),
         }));
+        setCachedCompanyVehicles(companyId, next);
         setVehicles(next);
         setLoading(false);
       },

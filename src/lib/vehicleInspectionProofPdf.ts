@@ -12,6 +12,8 @@ import {
   BLOOD_ORGAN_SECTION_ORDER,
   BLOOD_ORGAN_SECTION_TITLES,
   CAR_VAN_WALKAROUND_LABELS,
+  FLUID_STATUS_LABELS,
+  FUEL_LEVEL_LABELS,
 } from '@/lib/bloodOrganCheckLabels';
 
 const ACCENT: [number, number, number] = [66, 133, 244];
@@ -40,6 +42,7 @@ export type InspectionProofDoc = {
     string,
     {
       result?: string;
+      fluid_status?: string;
       reason?: string;
       severity?: string;
       vehicle_status?: string;
@@ -47,7 +50,7 @@ export type InspectionProofDoc = {
     }
   >;
   sections?: Record<string, { status?: string; confirmed_at?: string; confirmed_by?: string }>;
-  recorded_values?: { mileage?: number; fuel_or_battery?: string; temperature?: string };
+  recorded_values?: { mileage?: number; fuel_level?: number; fuel_or_battery?: string; temperature?: string };
   declaration?: {
     items?: Record<string, boolean>;
     signature_paths?: string;
@@ -181,6 +184,12 @@ export async function exportVehicleInspectionProofPdf(args: {
       ['Inspected at', inspectedAt],
       ['Inspector', inspection.inspector_name || '—'],
       ['Mileage', inspection.mileage != null ? `${inspection.mileage.toLocaleString()} miles` : '—'],
+      ...(typeof inspection.recorded_values?.fuel_level === 'number'
+        ? [[
+            'Fuel level',
+            `${FUEL_LEVEL_LABELS[inspection.recorded_values.fuel_level] || inspection.recorded_values.fuel_level} (${inspection.recorded_values.fuel_level}/5)`,
+          ]]
+        : []),
       ['Overall condition', (inspection.overall_condition || '—').toString()],
       ['Defects reported', inspection.has_defect ? 'Yes' : 'No'],
     ],
@@ -246,7 +255,19 @@ export async function exportVehicleInspectionProofPdf(args: {
         if (meta.sectionId !== sectionId) continue;
         const result = inspection.check_results[checkId];
         if (!result) continue;
-        const resultLabel = (result.result || '—').toUpperCase();
+        const fluidLabel =
+          result.fluid_status && FLUID_STATUS_LABELS[result.fluid_status];
+        const isYesNo =
+          checkId === 'cab_lockbox_secure' || checkId === 'cab_lockbox_key_returned';
+        const yesNoLabel =
+          isYesNo && result.result === 'pass'
+            ? 'Yes'
+            : isYesNo && result.result === 'fail'
+              ? 'No'
+              : isYesNo && result.result === 'na'
+                ? 'N/A'
+                : null;
+        const resultLabel = fluidLabel || yesNoLabel || (result.result || '—').toUpperCase();
         const detailParts = [
           result.reason ? `Reason: ${result.reason}` : '',
           result.severity ? `Severity: ${result.severity}` : '',

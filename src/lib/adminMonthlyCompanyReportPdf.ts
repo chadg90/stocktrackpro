@@ -489,7 +489,7 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
   doc.text('Confidential - prepared for operational review · stocktrackpro.co.uk', contentX, footerY);
-  doc.text('© 2026 Fleet Track PRO Ltd', contentX + contentW, footerY, { align: 'right' });
+  doc.text('© 2026 Fleet Track PRO', contentX + contentW, footerY, { align: 'right' });
 
   return doc;
 }

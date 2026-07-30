@@ -1,4 +1,5 @@
 import type { ComplianceArticleMeta } from '@/lib/compliance-articles/types';
+import { SITE_LEGAL_NAME } from '@/lib/brand';
 import { ORGANIZATION_ID, SITE_URL } from '@/lib/site';
 
 type Props = { article: ComplianceArticleMeta };
@@ -22,12 +23,12 @@ export function ComplianceArticleJsonLd({ article }: Props) {
     author: {
       '@type': 'Organization',
       '@id': ORGANIZATION_ID,
-      name: 'Fleet Track PRO Ltd',
+      name: SITE_LEGAL_NAME,
     },
     publisher: {
       '@type': 'Organization',
       '@id': ORGANIZATION_ID,
-      name: 'Fleet Track PRO Ltd',
+      name: SITE_LEGAL_NAME,
       logo: {
         '@type': 'ImageObject',
         url: `${SITE_URL}/logo.png`,

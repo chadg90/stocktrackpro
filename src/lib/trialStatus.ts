@@ -100,3 +100,41 @@ export function companyAlreadyUsedWebTrial(company: TrialCompanyFields | null | 
     company.subscription_status === 'inactive'
   );
 }
+
+/** UI badge status — based on real access, not a stale Firestore status field alone. */
+export type SubscriptionDisplayStatus =
+  | 'active'
+  | 'trial'
+  | 'trial_ended'
+  | 'expired'
+  | 'inactive';
+
+export function getSubscriptionDisplayStatus(
+  company: TrialCompanyFields | null | undefined,
+  now: Date = new Date()
+): SubscriptionDisplayStatus {
+  if (!company) return 'inactive';
+  if (company.legacy === true) return 'active';
+
+  const hasAccess = companyHasPaidAccess(company, now);
+  const status = company.subscription_status;
+
+  if (hasAccess) {
+    if (status === 'trial' || status === 'trialing') return 'trial';
+    return 'active';
+  }
+
+  if (isWebTrialExpired(company, now)) return 'trial_ended';
+
+  // Stored as active/trial but access checks failed (e.g. promo ended, expiry passed).
+  if (
+    status === 'active' ||
+    status === 'trial' ||
+    status === 'trialing' ||
+    company.subscription_type === 'promotional'
+  ) {
+    return 'expired';
+  }
+
+  return 'inactive';
+}

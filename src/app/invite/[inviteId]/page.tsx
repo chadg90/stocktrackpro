@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { httpsCallable } from 'firebase/functions';
 import { firebaseFunctions } from '@/lib/firebase';
-import { SUPPORT_EMAIL } from '@/lib/brand';
+import { APP_STORE_URL, SUPPORT_EMAIL } from '@/lib/brand';
 
 type InvitePreview = {
   valid: boolean;
@@ -17,8 +17,6 @@ type InvitePreview = {
   status?: string;
   expiresAt?: string | null;
 };
-
-const APP_STORE_URL = 'https://apps.apple.com/gb/app/stock-track-pro/id6744621973';
 
 function androidInviteMailto(opts: { email?: string | null; companyName?: string }) {
   const subject = 'Android app invite request — Fleet Track PRO';

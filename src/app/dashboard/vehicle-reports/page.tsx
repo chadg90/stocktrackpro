@@ -31,6 +31,10 @@ import {
   Upload,
 } from 'lucide-react';
 import { firebaseApp, firebaseAuth, firebaseDb } from '@/lib/firebase';
+import {
+  getCachedCompanyVehicles,
+  setCachedCompanyVehicles,
+} from '@/lib/companyVehiclesCache';
 import TableSkeleton from '../components/TableSkeleton';
 import { EmptyStateTableRow } from '../components/EmptyState';
 import {
@@ -187,27 +191,33 @@ export default function VehicleReportsPage() {
             ''
         );
 
-        const vehiclesQuery = query(
-          collection(firebaseDb, 'vehicles'),
-          where('company_id', '==', data.company_id)
-        );
-        const vehiclesSnap = await getDocs(vehiclesQuery);
-        const list: VehicleRow[] = [];
-        vehiclesSnap.forEach((d) => {
-          const v = d.data();
-          list.push({
-            id: d.id,
-            registration: (v.registration as string) || 'UNKNOWN',
-            make: v.make as string | undefined,
-            model: v.model as string | undefined,
-            mileage: (v.mileage as number) ?? null,
-            mot_expiry_date: (v.mot_expiry_date as Timestamp) || null,
-            tax_expiry_date: (v.tax_expiry_date as Timestamp) || null,
-            mot_status: v.mot_status as string | undefined,
-            tax_status: v.tax_status as string | undefined,
+        const cached = getCachedCompanyVehicles<VehicleRow>(data.company_id);
+        if (cached) {
+          setVehicles(cached);
+        } else {
+          const vehiclesQuery = query(
+            collection(firebaseDb, 'vehicles'),
+            where('company_id', '==', data.company_id)
+          );
+          const vehiclesSnap = await getDocs(vehiclesQuery);
+          const list: VehicleRow[] = [];
+          vehiclesSnap.forEach((d) => {
+            const v = d.data();
+            list.push({
+              id: d.id,
+              registration: (v.registration as string) || 'UNKNOWN',
+              make: v.make as string | undefined,
+              model: v.model as string | undefined,
+              mileage: (v.mileage as number) ?? null,
+              mot_expiry_date: (v.mot_expiry_date as Timestamp) || null,
+              tax_expiry_date: (v.tax_expiry_date as Timestamp) || null,
+              mot_status: v.mot_status as string | undefined,
+              tax_status: v.tax_status as string | undefined,
+            });
           });
-        });
-        setVehicles(list);
+          setCachedCompanyVehicles(data.company_id, list);
+          setVehicles(list);
+        }
       } catch (e) {
         console.error(e);
         setError('Failed to load vehicles.');

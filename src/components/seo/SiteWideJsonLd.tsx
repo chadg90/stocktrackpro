@@ -16,7 +16,6 @@ export default function SiteWideJsonLd() {
       `${SITE_NAME} van fleet software`,
       `${SITE_NAME} DVSA compliance software`,
       'Stock Track PRO',
-      'Stock Track PRO Ltd',
     ],
     url: SITE_URL,
     description: `${SITE_SHORT_DESCRIPTION} ${SITE_BRAND_DISAMBIGUATION}`,

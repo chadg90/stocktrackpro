@@ -42,10 +42,9 @@ export default function PrivacyPolicy() {
 
           <Section title="1. Introduction">
             <p className="text-slate-600 leading-relaxed mb-4">
-              {SITE_LEGAL_NAME} (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;) trades as{' '}
-              <strong className="text-slate-800">{SITE_NAME}</strong>. This policy explains what personal data we
-              collect, why we collect it, how we use it, and your rights when using our website, dashboard, and
-              companion mobile app.
+              <strong className="text-slate-800">{SITE_NAME}</strong> (&quot;we&quot;, &quot;our&quot;, &quot;us&quot;)
+              operates this website, dashboard, and companion mobile app. This policy explains what personal data we
+              collect, why we collect it, how we use it, and your rights when using our services.
             </p>
             <p className="text-slate-600 leading-relaxed">
               Read this together with our{' '}

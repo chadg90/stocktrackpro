@@ -449,7 +449,7 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
         <span>Confidential Business Report · stocktrackpro.co.uk</span>
       </div>
       <div class="line">
-        <span>© ${input.generatedAt.getFullYear()} Fleet Track PRO Ltd</span>
+        <span>© ${input.generatedAt.getFullYear()} Fleet Track PRO</span>
         <span>Report version ${REPORT_APP_VERSION}</span>
       </div>
     </footer>

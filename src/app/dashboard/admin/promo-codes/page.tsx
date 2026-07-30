@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   collection, query, getDocs, setDoc, deleteDoc, doc,
-  updateDoc, serverTimestamp, Timestamp, getDoc,
+  updateDoc, serverTimestamp, Timestamp, getDoc, limit,
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -83,7 +83,9 @@ export default function AdminPromoCodesPage() {
     if (!firebaseDb) return;
     setLoading(true);
     try {
-      const snap = await getDocs(query(collection(firebaseDb, 'promoCodes')));
+      // Cap reads at 500 docs (no orderBy — legacy codes may lack createdAt and
+      // orderBy would silently drop them). Sort client-side as before.
+      const snap = await getDocs(query(collection(firebaseDb, 'promoCodes'), limit(500)));
       const data = snap.docs.map((d) => ({ id: d.id, ...d.data() } as PromoCode));
       data.sort((a, b) => {
         const at = a.createdAt instanceof Timestamp ? a.createdAt.toMillis() : 0;

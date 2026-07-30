@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 // Check if we're in a browser environment and have required config
 const isBrowser = typeof window !== 'undefined';
@@ -21,6 +22,20 @@ const firebaseConfig = {
 let app: any = null;
 if (hasConfig && isBrowser) {
   app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
+  // App Check monitor-only when a reCAPTCHA site key is configured.
+  // Do NOT enable Firebase Console enforcement while legacy mobile clients remain.
+  const recaptchaSiteKey = process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_RECAPTCHA_SITE_KEY;
+  if (recaptchaSiteKey) {
+    try {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider(recaptchaSiteKey),
+        isTokenAutoRefreshEnabled: true,
+      });
+    } catch (err) {
+      console.warn('Firebase App Check init skipped:', err);
+    }
+  }
 }
 
 export const firebaseApp = app;

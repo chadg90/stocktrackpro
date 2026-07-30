@@ -14,6 +14,10 @@ import {
 import { onAuthStateChanged } from 'firebase/auth';
 import { Eye, FileDown, Search, Truck, X } from 'lucide-react';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
+import {
+  getCachedCompanyVehicles,
+  setCachedCompanyVehicles,
+} from '@/lib/companyVehiclesCache';
 import AuthenticatedImage from '../components/AuthenticatedImage';
 import TableSkeleton from '../components/TableSkeleton';
 import { EmptyStateTableRow } from '../components/EmptyState';
@@ -23,6 +27,8 @@ import {
   BLOOD_ORGAN_SECTION_ORDER,
   BLOOD_ORGAN_SECTION_TITLES,
   CAR_VAN_WALKAROUND_LABELS,
+  FLUID_STATUS_LABELS,
+  FUEL_LEVEL_LABELS,
 } from '@/lib/bloodOrganCheckLabels';
 import {
   exportVehicleInspectionProofPdf,
@@ -107,24 +113,30 @@ export default function InspectionProofPage() {
         const companyData = companySnap.data() || {};
         setCompanyName((companyData.name as string) || (companyData.company_name as string) || '');
 
-        const vehiclesQuery = query(
-          collection(firebaseDb, 'vehicles'),
-          where('company_id', '==', data.company_id)
-        );
-        const vehiclesSnap = await getDocs(vehiclesQuery);
-        const list: VehicleRow[] = [];
-        vehiclesSnap.forEach((d) => {
-          const v = d.data();
-          list.push({
-            id: d.id,
-            registration: String(v.registration || '').toUpperCase(),
-            make: v.make,
-            model: v.model,
-            inspection_category: v.inspection_category,
+        const cached = getCachedCompanyVehicles<VehicleRow>(data.company_id);
+        if (cached) {
+          setVehicles(cached);
+        } else {
+          const vehiclesQuery = query(
+            collection(firebaseDb, 'vehicles'),
+            where('company_id', '==', data.company_id)
+          );
+          const vehiclesSnap = await getDocs(vehiclesQuery);
+          const list: VehicleRow[] = [];
+          vehiclesSnap.forEach((d) => {
+            const v = d.data();
+            list.push({
+              id: d.id,
+              registration: String(v.registration || '').toUpperCase(),
+              make: v.make,
+              model: v.model,
+              inspection_category: v.inspection_category,
+            });
           });
-        });
-        list.sort((a, b) => a.registration.localeCompare(b.registration));
-        setVehicles(list);
+          list.sort((a, b) => a.registration.localeCompare(b.registration));
+          setCachedCompanyVehicles(data.company_id, list);
+          setVehicles(list);
+        }
       } catch (e) {
         console.error(e);
         setError('Failed to load vehicles.');
@@ -441,6 +453,12 @@ function InspectionDetailModal({
             <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-gray-500">Summary</h3>
             <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
               <SummaryChip label="Mileage" value={inspection.mileage?.toLocaleString() || '—'} />
+              {typeof inspection.recorded_values?.fuel_level === 'number' && (
+                <SummaryChip
+                  label="Fuel level"
+                  value={`${FUEL_LEVEL_LABELS[inspection.recorded_values.fuel_level] || inspection.recorded_values.fuel_level} (${inspection.recorded_values.fuel_level}/5)`}
+                />
+              )}
               <SummaryChip label="Condition" value={inspection.overall_condition || '—'} />
               <SummaryChip label="Defects" value={inspection.has_defect ? 'Yes' : 'No'} />
               <SummaryChip label="Inspection ID" value={inspection.id.slice(0, 10) + '…'} />
@@ -496,12 +514,39 @@ function InspectionDetailModal({
                         </thead>
                         <tbody>
                           {sectionChecks.map(([checkId, meta]) => {
-                            const r = inspection.check_results?.[checkId];
+                            const r = inspection.check_results?.[checkId] as
+                              | {
+                                  result?: string;
+                                  fluid_status?: string;
+                                  reason?: string;
+                                  severity?: string;
+                                  vehicle_status?: string;
+                                  evidence?: { url?: string };
+                                }
+                              | undefined;
+                            const fluidLabel =
+                              r?.fluid_status && FLUID_STATUS_LABELS[r.fluid_status];
+                            const isYesNo =
+                              checkId === 'cab_lockbox_secure' ||
+                              checkId === 'cab_lockbox_key_returned';
+                            const yesNoLabel =
+                              isYesNo && r?.result === 'pass'
+                                ? 'Yes'
+                                : isYesNo && r?.result === 'fail'
+                                  ? 'No'
+                                  : isYesNo && r?.result === 'na'
+                                    ? 'N/A'
+                                    : null;
+                            const displayLabel = fluidLabel || yesNoLabel || undefined;
                             return (
                               <tr key={checkId} className="border-t border-gray-100 dark:border-gray-800">
                                 <td className="px-3 py-2 text-gray-900 dark:text-gray-100">{meta.title}</td>
                                 <td className="px-3 py-2 font-semibold uppercase">
-                                  <ResultBadge result={r?.result} />
+                                  {displayLabel ? (
+                                    <ResultBadge result={r?.result} label={displayLabel} />
+                                  ) : (
+                                    <ResultBadge result={r?.result} />
+                                  )}
                                 </td>
                                 <td className="px-3 py-2 text-gray-600 dark:text-gray-400">
                                   {[
@@ -619,7 +664,7 @@ function SummaryChip({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ResultBadge({ result }: { result?: string }) {
+function ResultBadge({ result, label }: { result?: string; label?: string }) {
   const r = (result || '—').toLowerCase();
   const cls =
     r === 'pass'
@@ -629,5 +674,9 @@ function ResultBadge({ result }: { result?: string }) {
         : r === 'na'
           ? 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-800'
           : 'text-gray-500';
-  return <span className={`rounded px-2 py-0.5 text-xs ${cls}`}>{r}</span>;
+  return (
+    <span className={`rounded px-2 py-0.5 text-xs ${cls} ${label ? 'normal-case' : ''}`}>
+      {label || r}
+    </span>
+  );
 }

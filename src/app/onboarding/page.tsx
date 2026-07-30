@@ -20,12 +20,11 @@ import {
   Apple,
 } from 'lucide-react';
 import Link from 'next/link';
-import { SUPPORT_EMAIL } from '@/lib/brand';
+import { APP_STORE_URL, SUPPORT_EMAIL } from '@/lib/brand';
 
 type OnboardingStep = 'choice' | 'account' | 'company' | 'success';
 
 const TRIAL_DAYS = 7;
-const APP_STORE_URL = 'https://apps.apple.com/gb/app/stock-track-pro/id6744621973';
 
 function androidInviteMailto(opts: { email?: string; companyName?: string }) {
   const subject = 'Android app invite request — Fleet Track PRO';

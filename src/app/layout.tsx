@@ -5,7 +5,7 @@ import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
 import SiteWideJsonLd from "@/components/seo/SiteWideJsonLd";
 import { SITE_META_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
-import { SITE_LEGAL_NAME, SITE_NAME, SITE_URL } from "@/lib/brand";
+import { APP_STORE_ID, SITE_LEGAL_NAME, SITE_NAME, SITE_URL } from "@/lib/brand";
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -94,7 +94,7 @@ export default function RootLayout({
     <html lang="en-GB" className="scroll-smooth">
       <head>
         {/* iOS Smart App Banner */}
-        <meta name="apple-itunes-app" content={`app-id=6744621973, app-argument=${SITE_URL}`} />
+        <meta name="apple-itunes-app" content={`app-id=${APP_STORE_ID}, app-argument=${SITE_URL}`} />
         
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />

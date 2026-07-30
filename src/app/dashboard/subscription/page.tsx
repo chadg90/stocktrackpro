@@ -7,7 +7,13 @@ import { httpsCallable } from 'firebase/functions';
 import { firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
 import { CreditCard, Check, ExternalLink, AlertCircle, Calendar, Sparkles, Tag } from 'lucide-react';
 import Link from 'next/link';
-import { companyHasPaidAccess, getTrialEndDate, isWebTrialExpired } from '@/lib/trialStatus';
+import {
+  companyHasPaidAccess,
+  getSubscriptionDisplayStatus,
+  getTrialEndDate,
+  isWebTrialExpired,
+  type SubscriptionDisplayStatus,
+} from '@/lib/trialStatus';
 
 const PRICE_PER_VEHICLE_MONTHLY = 8;
 const PRICE_PER_VEHICLE_YEARLY = 84;
@@ -265,7 +271,7 @@ export default function SubscriptionPage() {
     }
   };
 
-  const getStatusBadge = (status?: string) => {
+  const getStatusBadge = (status: SubscriptionDisplayStatus) => {
     switch (status) {
       case 'active':
         return (
@@ -278,7 +284,21 @@ export default function SubscriptionPage() {
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-950 border border-amber-400 dark:bg-yellow-500/20 dark:text-yellow-300 dark:border-yellow-500/40">
             <Calendar className="w-4 h-4" />
-            7-Day Free Trial
+            Free Trial
+          </span>
+        );
+      case 'trial_ended':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 border border-red-300 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30">
+            <AlertCircle className="w-4 h-4" />
+            Trial ended
+          </span>
+        );
+      case 'expired':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 border border-red-300 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30">
+            <AlertCircle className="w-4 h-4" />
+            Expired
           </span>
         );
       case 'inactive':
@@ -318,6 +338,7 @@ export default function SubscriptionPage() {
   const subscriptionStatus = company?.subscription_status;
   const trialExpired = isWebTrialExpired(company);
   const hasAccess = companyHasPaidAccess(company);
+  const displayStatus = getSubscriptionDisplayStatus(company);
   const trialEndLabel = (() => {
     const end = getTrialEndDate(company);
     if (!end) return null;
@@ -325,12 +346,15 @@ export default function SubscriptionPage() {
   })();
   const hasStripeManagedSubscription =
     company?.subscription_type === 'stripe' &&
-    (subscriptionStatus === 'active' || subscriptionStatus === 'trial');
-  const tier = getTier(vehicleCount);
-  const effectiveTier = company?.legacy
-    ? { label: 'Legacy Plan', users: 'As agreed', colour: 'text-amber-700 dark:text-amber-300' }
-    : tier;
+    (subscriptionStatus === 'active' || subscriptionStatus === 'trial') &&
+    hasAccess;
+  const checkoutTier = getTier(vehicleCount);
   const currentVehicles = company?.subscribed_vehicles || 0;
+  const currentPlanTier = company?.legacy
+    ? { label: 'Legacy Plan', users: 'As agreed', colour: 'text-amber-700 dark:text-amber-300' }
+    : currentVehicles > 0
+      ? getTier(currentVehicles)
+      : { label: 'Not set', users: '', colour: 'text-white/60' };
   const currentCycle: BillingCycle = company?.billing_cycle === 'yearly' ? 'yearly' : 'monthly';
   const unitPrice = billingCycle === 'yearly' ? PRICE_PER_VEHICLE_YEARLY : PRICE_PER_VEHICLE_MONTHLY;
   const billedTotal = vehicleCount * unitPrice;
@@ -406,7 +430,7 @@ export default function SubscriptionPage() {
             </h2>
             <p className="text-white/75">Status and billing controls</p>
           </div>
-          {getStatusBadge(subscriptionStatus)}
+          {getStatusBadge(displayStatus)}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -433,9 +457,9 @@ export default function SubscriptionPage() {
           </div>
           <div className="subscription-muted-surface rounded-lg p-4 border">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Feature Tier</p>
-            <p className={`font-semibold text-lg ${effectiveTier.colour}`}>{effectiveTier.label}</p>
+            <p className={`font-semibold text-lg ${currentPlanTier.colour}`}>{currentPlanTier.label}</p>
           </div>
-          {subscriptionStatus === 'trial' && company?.trial_end_date ? (
+          {displayStatus === 'trial' && company?.trial_end_date ? (
             <div className="subscription-muted-surface rounded-lg p-4 border">
               <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Trial Ends</p>
               <p className="text-white font-semibold text-lg">{formatTrialEndDate(company.trial_end_date) || 'N/A'}</p>
@@ -629,7 +653,7 @@ export default function SubscriptionPage() {
               </div>
             )}
             <div className="mt-3 text-sm text-white/70">
-              <span className={effectiveTier.colour}>{effectiveTier.label}</span> includes {effectiveTier.users}
+              <span className={checkoutTier.colour}>{checkoutTier.label}</span> includes {checkoutTier.users}
             </div>
             <button
               onClick={handleSubscribe}
