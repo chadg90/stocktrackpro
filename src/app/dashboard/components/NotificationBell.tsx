@@ -13,7 +13,6 @@ import {
   onSnapshot,
   orderBy,
   limit,
-  Timestamp,
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
@@ -25,6 +24,7 @@ export default function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -38,6 +38,10 @@ export default function NotificationBell() {
         notificationsUnsubRef.current();
         notificationsUnsubRef.current = null;
       }
+      setLoadError(null);
+      setNotifications([]);
+      setUnreadCount(0);
+
       if (user && firebaseDb) {
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
         const snap = await getDoc(profileRef);
@@ -80,16 +84,27 @@ export default function NotificationBell() {
     const unsubscribe = onSnapshot(
       notificationsQuery,
       (snapshot) => {
-        const notifs = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Notification));
+        const notifs = snapshot.docs.map(
+          (docSnap) =>
+            ({
+              id: docSnap.id,
+              ...docSnap.data(),
+            }) as Notification
+        );
         setNotifications(notifs);
-        setUnreadCount(notifs.filter(n => !n.read).length);
+        setUnreadCount(notifs.filter((n) => !n.read).length);
+        setLoadError(null);
         setLoading(false);
       },
       (error) => {
         console.error('Error listening to notifications:', error);
+        if (notificationsUnsubRef.current) {
+          notificationsUnsubRef.current();
+          notificationsUnsubRef.current = null;
+        }
+        setNotifications([]);
+        setUnreadCount(0);
+        setLoadError('Unable to load notifications right now.');
         setLoading(false);
       }
     );
@@ -141,10 +156,10 @@ export default function NotificationBell() {
 
   const handleMarkAllAsRead = async () => {
     if (!firebaseDb) return;
-    const unreadNotifications = notifications.filter(n => !n.read);
+    const unreadNotifications = notifications.filter((n) => !n.read);
     try {
       await Promise.all(
-        unreadNotifications.map(notif =>
+        unreadNotifications.map((notif) =>
           updateDoc(doc(firebaseDb!, 'notifications', notif.id), { read: true })
         )
       );
@@ -159,6 +174,7 @@ export default function NotificationBell() {
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
         title="Notifications"
+        aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
@@ -186,12 +202,12 @@ export default function NotificationBell() {
               <div className="p-8 flex items-center justify-center">
                 <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
               </div>
+            ) : loadError ? (
+              <div className="p-8 text-center text-amber-200/90 text-sm">{loadError}</div>
             ) : notifications.length === 0 ? (
-              <div className="p-8 text-center text-white/50 text-sm">
-                No notifications
-              </div>
+              <div className="p-8 text-center text-white/50 text-sm">No notifications</div>
             ) : (
-              notifications.map(notification => (
+              notifications.map((notification) => (
                 <NotificationItem
                   key={notification.id}
                   notification={notification}

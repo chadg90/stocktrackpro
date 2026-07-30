@@ -95,28 +95,63 @@ export default function InspectionProofPage() {
   const [viewInspection, setViewInspection] = useState<InspectionRow | null>(null);
   const [pdfBusyId, setPdfBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) {
       setLoading(false);
+      setError('Firebase is not configured in this browser.');
       return;
     }
+    let cancelled = false;
+    let settled = false;
+    let timeoutId: number | null = null;
+    setLoading(true);
+    setError(null);
+
+    const clearLoadTimeout = () => {
+      if (timeoutId != null) {
+        window.clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    };
+    timeoutId = window.setTimeout(() => {
+      if (!cancelled && !settled) {
+        setError((prev) => prev || 'Loading is taking longer than expected. Please retry.');
+        setLoading(false);
+      }
+    }, 15000);
+
+    const finish = () => {
+      settled = true;
+      clearLoadTimeout();
+      if (!cancelled) setLoading(false);
+    };
+
     const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
       if (!user || !firebaseDb) {
-        setLoading(false);
+        if (!cancelled) {
+          setProfile(null);
+          setVehicles([]);
+          setError('Sign in required to view inspection proof.');
+          finish();
+        }
         return;
       }
       try {
         const profileSnap = await getDoc(doc(firebaseDb, 'profiles', user.uid));
         const data = (profileSnap.data() || {}) as Profile;
+        if (cancelled) return;
         setProfile(data);
         if (!data.company_id) {
-          setLoading(false);
+          setError('Your account is missing a company. Contact support if this persists.');
+          finish();
           return;
         }
 
         const companySnap = await getDoc(doc(firebaseDb, 'companies', data.company_id));
         const companyData = companySnap.data() || {};
+        if (cancelled) return;
         setCompanyName((companyData.name as string) || (companyData.company_name as string) || '');
 
         const cached = getCachedCompanyVehicles<VehicleRow>(data.company_id);
@@ -128,6 +163,7 @@ export default function InspectionProofPage() {
             where('company_id', '==', data.company_id)
           );
           const vehiclesSnap = await getDocs(vehiclesQuery);
+          if (cancelled) return;
           const list: VehicleRow[] = [];
           vehiclesSnap.forEach((d) => {
             const v = d.data();
@@ -143,15 +179,20 @@ export default function InspectionProofPage() {
           setCachedCompanyVehicles(data.company_id, list);
           setVehicles(list);
         }
+        setError(null);
       } catch (e) {
         console.error(e);
-        setError('Failed to load vehicles.');
+        if (!cancelled) setError('Failed to load vehicles. Please retry.');
       } finally {
-        setLoading(false);
+        finish();
       }
     });
-    return () => unsub();
-  }, []);
+    return () => {
+      cancelled = true;
+      clearLoadTimeout();
+      unsub();
+    };
+  }, [reloadToken]);
 
   const filteredVehicles = useMemo(() => {
     const q = vehicleSearch.trim().toUpperCase();
@@ -245,7 +286,9 @@ export default function InspectionProofPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-6 space-y-3">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Inspection proof</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Loading your fleet…</p>
         <TableSkeleton rows={6} cols={4} />
       </div>
     );
@@ -257,36 +300,54 @@ export default function InspectionProofPage() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Inspection proof</h1>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Select a vehicle registration, then view or download a full PDF of any inspection —
-          including photos and checklist results for NHS / compliance requests.
+          including photos and checklist results for clients, insurers and compliance audits.
         </p>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200">
-          {error}
+        <div
+          className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200"
+          role="alert"
+        >
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={() => setReloadToken((n) => n + 1)}
+            className="mt-2 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-100 dark:border-red-700 dark:bg-red-950 dark:text-red-100"
+          >
+            Retry
+          </button>
         </div>
       )}
 
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-        <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200">
+        <label
+          htmlFor="inspection-proof-vehicle"
+          className="block text-sm font-semibold text-gray-800 dark:text-gray-200"
+        >
           Vehicle registration
         </label>
         <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
+              id="inspection-proof-vehicle-search"
               value={vehicleSearch}
               onChange={(e) => setVehicleSearch(e.target.value)}
               placeholder="Search registration, make or model"
+              aria-label="Search vehicles by registration, make or model"
               className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 outline-none focus:border-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
             />
           </div>
           <select
+            id="inspection-proof-vehicle"
+            name="vehicle"
             value={selectedVehicleId}
             onChange={(e) => {
               setSelectedVehicleId(e.target.value);
               setViewInspection(null);
             }}
+            aria-label="Select vehicle registration"
             className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-blue-500 md:w-96 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
           >
             <option value="">Select a vehicle…</option>

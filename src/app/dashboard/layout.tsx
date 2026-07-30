@@ -2,7 +2,10 @@ import type { Metadata } from 'next';
 import DashboardLayoutClient from './DashboardLayoutClient';
 
 export const metadata: Metadata = {
-  title: 'Manager Dashboard Login | Fleet Track PRO',
+  // absolute avoids root template appending "| Fleet Track PRO" twice
+  title: {
+    absolute: 'Manager Dashboard Login | Fleet Track PRO',
+  },
   description:
     'Sign in to the Fleet Track PRO manager dashboard to manage vehicles, inspections, defects, team access, and billing.',
   robots: {

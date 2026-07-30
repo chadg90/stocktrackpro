@@ -250,6 +250,31 @@ export default function DashboardLayoutClient({
   }
 
   if (!authorized) {
+    const isDashboardRoot = pathname === '/dashboard' || pathname === '/dashboard/';
+    // Nested dashboard routes need a stable sign-in boundary (avoids blank chrome).
+    if (!isDashboardRoot && !isSubscriptionPage) {
+      return (
+        <ToastProvider>
+          <div className="min-h-screen bg-[var(--mkt-bg,#f8fafc)] flex items-center justify-center p-6">
+            <div className="max-w-md w-full rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+              <h1 className="text-xl font-semibold text-slate-900 mb-2">Sign in required</h1>
+              <p className="text-sm text-slate-600 mb-6">
+                {signedIn
+                  ? 'Your account does not have manager dashboard access for this page.'
+                  : 'Please sign in to open the manager dashboard.'}
+              </p>
+              <Link
+                href="/dashboard"
+                className="inline-flex w-full items-center justify-center rounded-xl btn-brand-blue px-6 py-3 text-sm font-semibold text-white"
+              >
+                Go to dashboard login
+              </Link>
+            </div>
+          </div>
+        </ToastProvider>
+      );
+    }
+
     return (
       <ToastProvider>
         <DashboardQueryProvider>

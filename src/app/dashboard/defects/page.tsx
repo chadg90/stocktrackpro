@@ -329,14 +329,20 @@ export default function DefectsPage() {
       alert('Only managers can delete defects. Please contact your administrator.');
       return;
     }
-    
+
+    const defect = defects.find((d) => d.id === defectId);
+    if (defect?.status === 'resolved') {
+      alert('Resolved defects are kept for your audit trail and cannot be deleted.');
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this defect? This action cannot be undone.') || !firebaseDb) return;
-    
+
     try {
       await deleteDoc(doc(firebaseDb!, 'vehicle_defects', defectId));
-      
+
       // Update local state
-      setDefects(prev => prev.filter(d => d.id !== defectId));
+      setDefects((prev) => prev.filter((d) => d.id !== defectId));
       alert('Defect deleted successfully.');
     } catch (error) {
       console.error('Error deleting defect:', error);
@@ -672,7 +678,7 @@ export default function DefectsPage() {
                               Resolve
                             </button>
                           )}
-                          {canManageDefects && (
+                          {canManageDefects && defect.status !== 'resolved' && (
                             <button
                               onClick={() => handleDeleteDefect(defect.id)}
                               className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"

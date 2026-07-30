@@ -214,11 +214,15 @@ export default function FleetPage() {
     } catch (error) {
       console.error('Error adding vehicle:', error);
       const code = String((error as { code?: string })?.code || '');
-      alert(code.includes('resource-exhausted')
-        ? 'Your company has reached its vehicle limit.'
-        : code.includes('permission-denied')
-          ? 'Only company managers can add vehicles.'
-          : 'The vehicle could not be added. Please check the details and try again.');
+      alert(
+        code.includes('already-exists')
+          ? 'An active vehicle with this registration already exists. Retire or edit the existing vehicle instead of adding a duplicate.'
+          : code.includes('resource-exhausted')
+            ? 'Your company has reached its vehicle limit.'
+            : code.includes('permission-denied')
+              ? 'Only company managers can add vehicles.'
+              : 'The vehicle could not be added. Please check the details and try again.'
+      );
     } finally {
       setProcessing(false);
     }

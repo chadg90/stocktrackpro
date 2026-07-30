@@ -45,7 +45,7 @@ type RawVehicle = {
   dvla_sync_error?: string | null;
 };
 
-type ExpiryBucket = 'expired' | 'urgent' | 'warning' | 'ok' | 'not_due' | 'unknown';
+type ExpiryBucket = 'expired' | 'urgent' | 'warning' | 'ok' | 'not_due' | 'unknown' | 'unverified';
 
 type VehicleRow = RawVehicle & {
   motDaysRemaining: number | null;
@@ -90,8 +90,20 @@ function bucketFor(days: number | null, type: 'mot' | 'tax'): ExpiryBucket {
 }
 
 function worstOf(a: ExpiryBucket, b: ExpiryBucket): ExpiryBucket {
-  const order: ExpiryBucket[] = ['expired', 'urgent', 'warning', 'unknown', 'not_due', 'ok'];
+  const order: ExpiryBucket[] = [
+    'expired',
+    'urgent',
+    'warning',
+    'unverified',
+    'unknown',
+    'not_due',
+    'ok',
+  ];
   return order.indexOf(a) <= order.indexOf(b) ? a : b;
+}
+
+function isDvlaUnverified(vehicle: RawVehicle): boolean {
+  return Boolean(vehicle.dvla_sync_error && String(vehicle.dvla_sync_error).trim());
 }
 
 function formatDate(date: Date | null): string {
@@ -121,6 +133,7 @@ function formatRelative(date: Date | null): string {
 }
 
 function daysLabel(days: number | null, bucket: ExpiryBucket): string {
+  if (bucket === 'unverified') return 'Unable to verify with DVLA';
   if (days === null) {
     return bucket === 'not_due' ? 'No MOT required yet' : 'No data';
   }
@@ -137,6 +150,8 @@ function bucketClasses(bucket: ExpiryBucket): string {
       return 'bg-red-100 text-red-900 border-red-400 dark:bg-red-500/20 dark:text-red-100 dark:border-red-500/50';
     case 'warning':
       return 'bg-amber-100 text-amber-900 border-amber-400 dark:bg-amber-500/15 dark:text-amber-100 dark:border-amber-500/40';
+    case 'unverified':
+      return 'bg-amber-100 text-amber-950 border-amber-500 dark:bg-amber-500/20 dark:text-amber-50 dark:border-amber-400/60';
     case 'ok':
       return 'bg-emerald-100 text-emerald-900 border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-100 dark:border-emerald-500/40';
     case 'not_due':
@@ -153,6 +168,7 @@ function cardTint(bucket: ExpiryBucket): string {
     case 'urgent':
       return 'bg-red-50/40 dark:bg-red-500/[0.03]';
     case 'warning':
+    case 'unverified':
       return 'bg-amber-50/40 dark:bg-amber-500/[0.03]';
     case 'ok':
     case 'not_due':
@@ -170,6 +186,8 @@ function bucketLabel(bucket: ExpiryBucket): string {
       return 'Urgent';
     case 'warning':
       return 'Due soon';
+    case 'unverified':
+      return 'Unable to verify';
     case 'ok':
       return 'OK';
     case 'not_due':
@@ -291,8 +309,9 @@ export default function MotTaxPage() {
         const taxDate = tsToDate(vehicle.tax_expiry_date || null);
         const motDays = daysBetween(motDate);
         const taxDays = daysBetween(taxDate);
-        const motBucket = bucketFor(motDays, 'mot');
-        const taxBucket = bucketFor(taxDays, 'tax');
+        const unverified = isDvlaUnverified(vehicle);
+        const motBucket: ExpiryBucket = unverified ? 'unverified' : bucketFor(motDays, 'mot');
+        const taxBucket: ExpiryBucket = unverified ? 'unverified' : bucketFor(taxDays, 'tax');
         const worst = worstOf(motBucket, taxBucket);
         const soonest = Math.min(
           motDate ? motDate.getTime() : Number.POSITIVE_INFINITY,
@@ -313,9 +332,10 @@ export default function MotTaxPage() {
           expired: 0,
           urgent: 1,
           warning: 2,
-          unknown: 3,
-          not_due: 4,
-          ok: 5,
+          unverified: 3,
+          unknown: 4,
+          not_due: 5,
+          ok: 6,
         };
         const diff = priority[a.worstBucket] - priority[b.worstBucket];
         if (diff !== 0) return diff;
@@ -342,14 +362,23 @@ export default function MotTaxPage() {
     const ok = rows.filter(
       (r) => r.worstBucket === 'ok' || r.worstBucket === 'not_due'
     ).length;
+    const unverified = rows.filter((r) => r.worstBucket === 'unverified').length;
     const unknown = rows.filter((r) => r.worstBucket === 'unknown').length;
-    return { expired, urgent, warning, ok, unknown, total: rows.length };
+    return { expired, urgent, warning, ok, unverified, unknown, total: rows.length };
   }, [rows]);
 
   const filteredRows = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     return rows.filter((r) => {
-      if (filter === 'attention' && !(r.worstBucket === 'expired' || r.worstBucket === 'urgent' || r.worstBucket === 'warning')) {
+      if (
+        filter === 'attention' &&
+        !(
+          r.worstBucket === 'expired' ||
+          r.worstBucket === 'urgent' ||
+          r.worstBucket === 'warning' ||
+          r.worstBucket === 'unverified'
+        )
+      ) {
         return false;
       }
       if (filter === 'expired' && r.worstBucket !== 'expired') {
@@ -358,7 +387,11 @@ export default function MotTaxPage() {
       if (filter === 'due_soon' && r.worstBucket !== 'urgent' && r.worstBucket !== 'warning') {
         return false;
       }
-      if (filter === 'unknown' && r.worstBucket !== 'unknown') {
+      if (
+        filter === 'unknown' &&
+        r.worstBucket !== 'unknown' &&
+        r.worstBucket !== 'unverified'
+      ) {
         return false;
       }
       if (!term) return true;
@@ -462,10 +495,16 @@ export default function MotTaxPage() {
           <div className="flex flex-wrap gap-1.5">
             {([
               { id: 'all', label: `All (${counts.total})` },
-              { id: 'attention', label: `Needs attention (${counts.expired + counts.urgent + counts.warning})` },
+              {
+                id: 'attention',
+                label: `Needs attention (${counts.expired + counts.urgent + counts.warning + counts.unverified})`,
+              },
               { id: 'expired', label: `Expired (${counts.expired})` },
               { id: 'due_soon', label: `Due soon (${counts.urgent + counts.warning})` },
-              { id: 'unknown', label: `Unknown (${counts.unknown})` },
+              {
+                id: 'unknown',
+                label: `Unable to verify / unknown (${counts.unverified + counts.unknown})`,
+              },
             ] as Array<{ id: FilterOption; label: string }>).map((opt) => (
               <button
                 key={opt.id}
@@ -670,7 +709,7 @@ function InlineExpiry({
       >
         {bucket === 'ok' || bucket === 'not_due' ? (
           <CheckCircle2 className="h-3 w-3" aria-hidden />
-        ) : bucket === 'unknown' ? (
+        ) : bucket === 'unknown' || bucket === 'unverified' ? (
           <HelpCircle className="h-3 w-3" aria-hidden />
         ) : (
           <AlertTriangle className="h-3 w-3" aria-hidden />
@@ -678,9 +717,17 @@ function InlineExpiry({
         {bucketLabel(bucket)}
       </span>
       <span className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
-        {date ? formatDate(date) : bucket === 'not_due' ? 'Not required yet' : '—'}
+        {bucket === 'unverified'
+          ? date
+            ? `Last known ${formatDate(date)}`
+            : 'Not verified'
+          : date
+            ? formatDate(date)
+            : bucket === 'not_due'
+              ? 'Not required yet'
+              : '—'}
       </span>
-      {date && (
+      {(date || bucket === 'unverified') && (
         <span className="text-xs text-zinc-600 dark:text-white/65 truncate">
           {daysLabel(days, bucket)}
         </span>

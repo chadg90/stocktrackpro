@@ -345,10 +345,13 @@ service cloud.firestore {
         ) ||
         isAdmin()
       );
-      allow delete: if isSignedIn() && (
-        (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
-        isAdmin()
-      );
+      // Resolved defects are audit records — hard delete is not allowed.
+      allow delete: if isSignedIn() &&
+        resource.data.status != 'resolved' &&
+        (
+          (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
+          isAdmin()
+        );
     }
 
     // ============================================
@@ -501,6 +504,36 @@ service cloud.firestore {
       allow read: if true;
       // Only admins can write app config
       allow write: if isAdmin();
+    }
+
+    // ============================================
+    // IN-APP NOTIFICATIONS (manager dashboard bell)
+    // ============================================
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn()
+        && resource.data.user_id == request.auth.uid
+        && resource.data.company_id == userCompanyId()
+        && isCompanyActive();
+
+      allow create: if isSignedIn()
+        && isManagerOrAdmin()
+        && request.resource.data.company_id == userCompanyId()
+        && isCompanyActive()
+        && request.resource.data.user_id is string
+        && request.resource.data.keys().hasAll([
+          'type', 'title', 'message', 'company_id', 'user_id', 'read', 'created_at'
+        ]);
+
+      allow update: if isSignedIn()
+        && resource.data.user_id == request.auth.uid
+        && resource.data.company_id == userCompanyId()
+        && isCompanyActive()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+
+      allow delete: if isSignedIn()
+        && resource.data.user_id == request.auth.uid
+        && resource.data.company_id == userCompanyId()
+        && isCompanyActive();
     }
 
     // ============================================
