@@ -9,6 +9,7 @@
   --primary-light: #2563eb;
   --brand-blue: #3b82f6;
   --brand-blue-hover: #2563eb;
+  --brand-success: #059669;
   --text-dark: #000000;
   --text-light: #ffffff;
   /* Marketing (depot daylight) */
@@ -24,9 +25,19 @@
 [data-theme='light'] {
   --dashboard-bg: #F8FAFC;
   --dashboard-bg-card: #ffffff;
+  --dashboard-bg-muted: #f8fafc;
   --dashboard-text-primary: #0F172A;
   --dashboard-text-secondary: #475569;
   --dashboard-border: #e2e8f0;
+}
+
+[data-theme='dark'] {
+  --dashboard-bg: #09090b;
+  --dashboard-bg-card: #18181b;
+  --dashboard-bg-muted: #27272a;
+  --dashboard-text-primary: #ffffff;
+  --dashboard-text-secondary: #d4d4d8;
+  --dashboard-border: #3f3f46;
 }
 
 body {
@@ -199,6 +210,39 @@ html {
 
   .theme-light .dashboard-card .text-white {
     @apply text-zinc-900;
+  }
+
+  /* Subscription cards use dashboard tokens so the expired light-only route
+     and the normal light/dark dashboard share readable controls. */
+  .subscription-page .dashboard-card {
+    color: var(--dashboard-text-primary);
+    border-color: var(--dashboard-border);
+    background-color: var(--dashboard-bg-card);
+  }
+
+  .subscription-page .subscription-promo-card {
+    border-top: 3px solid var(--brand-blue);
+  }
+
+  .subscription-page .subscription-paid-card {
+    border-top: 3px solid var(--brand-success);
+  }
+
+  .subscription-page .subscription-field,
+  .subscription-page .subscription-muted-surface {
+    color: var(--dashboard-text-primary);
+    border-color: var(--dashboard-border);
+    background-color: var(--dashboard-bg-muted);
+  }
+
+  .subscription-page .subscription-field:focus-visible {
+    border-color: var(--brand-blue);
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 0.22);
+  }
+
+  .subscription-page .subscription-field:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 
   .theme-light .dashboard-card .text-white\/90 {

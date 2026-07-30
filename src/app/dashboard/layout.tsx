@@ -19,10 +19,13 @@ type Profile = {
 
 type Company = {
   subscription_status?: string;
+  subscription_type?: string;
   subscription_tier?: string;
   trial_end_date?: unknown;
   subscription_expiry_date?: unknown;
   legacy?: boolean;
+  promo_schema_version?: number;
+  promo_vehicle_limit?: number;
 };
 
 type ThemePreference = 'light' | 'dark';
@@ -231,7 +234,7 @@ export default function DashboardLayout({
       return (
         <ToastProvider>
           <DashboardQueryProvider>
-            <div className="min-h-screen bg-[var(--mkt-bg,#f8fafc)]">
+            <div data-theme="light" className="theme-light min-h-screen bg-[var(--mkt-bg,#f8fafc)]">
               <div className="mx-auto max-w-3xl px-4 py-10 sm:py-14">{children}</div>
             </div>
           </DashboardQueryProvider>
