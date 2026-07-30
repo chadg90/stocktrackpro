@@ -51,7 +51,21 @@ type CompanyDoc = {
   subscribed_vehicles?: number;
   subscription_tier?: string;
   subscription_status?: string;
+  subscription_type?: string;
+  subscription_expiry_date?: unknown;
+  promo_schema_version?: number;
+  promo_vehicle_limit?: number;
 };
+
+function dateMs(value: unknown): number | null {
+  if (value == null) return null;
+  if (typeof value === 'object' && typeof (value as { toDate?: () => Date }).toDate === 'function') {
+    const time = (value as { toDate: () => Date }).toDate().getTime();
+    return Number.isNaN(time) ? null : time;
+  }
+  const time = new Date(value as string | number | Date).getTime();
+  return Number.isNaN(time) ? null : time;
+}
 
 function deriveLimits(subscribedVehicles: number): { users: number; assets: number | null; vehicles: number } {
   const tier = TIERS.find((t) => subscribedVehicles <= t.maxVehicles) ?? TIERS[TIERS.length - 1];
@@ -76,6 +90,19 @@ async function getCount(db: Firestore, collectionName: string, companyId: string
 function getLimitsFromCompany(company: CompanyDoc): { users: number | null; assets: number | null; vehicles: number | null } {
   if (company.legacy) {
     return { users: MAX_TEAM_USERS_LEGACY, assets: null, vehicles: null };
+  }
+
+  if (company.subscription_type === 'promotional') {
+    const expiry = dateMs(company.subscription_expiry_date);
+    const active =
+      company.subscription_status === 'active' &&
+      company.promo_schema_version === 2 &&
+      company.promo_vehicle_limit === 10 &&
+      expiry != null &&
+      expiry >= Date.now();
+    return active
+      ? { users: MAX_TEAM_USERS_PER_COMPANY, assets: 1_000, vehicles: 10 }
+      : { users: 0, assets: 0, vehicles: 0 };
   }
 
   // New per-vehicle model

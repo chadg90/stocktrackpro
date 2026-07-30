@@ -28,9 +28,12 @@ type Company = {
   stripe_customer_id?: string;
   subscription_type?: string;
   trial_end_date?: any;
+  subscription_expiry_date?: unknown;
   subscribed_vehicles?: number;
   billing_cycle?: BillingCycle;
   legacy?: boolean;
+  promo_schema_version?: number;
+  promo_vehicle_limit?: number;
 };
 
 type Tier = { label: string; users: string; colour: string };
@@ -219,6 +222,9 @@ export default function SubscriptionPage() {
       return 'Only company managers can redeem promo codes.';
     }
     if (code.includes('failed-precondition')) {
+      if (message.toLowerCase().includes('up to 10 vehicles')) {
+        return 'Promo access is available only to companies with 10 or fewer vehicles.';
+      }
       if (message.toLowerCase().includes('eligible') || message.toLowerCase().includes('already')) {
         return 'Your company is not eligible to redeem a promo code right now.';
       }
@@ -336,7 +342,7 @@ export default function SubscriptionPage() {
     : 0;
 
   return (
-    <div className="space-y-8">
+    <div className="subscription-page space-y-8">
       {loadError && authUser && (
         <div
           className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 flex flex-wrap items-center justify-between gap-2 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-100"
@@ -391,7 +397,7 @@ export default function SubscriptionPage() {
         </div>
       )}
 
-      <div className="dashboard-card p-8">
+      <div className="dashboard-card subscription-paid-card p-5 sm:p-8">
         <div className="flex items-start justify-between mb-8">
           <div className="flex-1">
             <h2 className="text-2xl font-semibold text-white mb-2 flex items-center gap-3">
@@ -404,13 +410,13 @@ export default function SubscriptionPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <div className="subscription-muted-surface rounded-lg p-4 border">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Current Vehicles</p>
             <p className="text-white font-semibold text-lg">
               {company?.legacy ? 'Legacy plan' : (currentVehicles || 'Not set')}
             </p>
           </div>
-          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <div className="subscription-muted-surface rounded-lg p-4 border">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Estimated Monthly</p>
             <p className="text-white font-semibold text-lg">
               {company?.legacy
@@ -425,17 +431,17 @@ export default function SubscriptionPage() {
               </p>
             )}
           </div>
-          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+          <div className="subscription-muted-surface rounded-lg p-4 border">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Feature Tier</p>
             <p className={`font-semibold text-lg ${effectiveTier.colour}`}>{effectiveTier.label}</p>
           </div>
           {subscriptionStatus === 'trial' && company?.trial_end_date ? (
-            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+            <div className="subscription-muted-surface rounded-lg p-4 border">
               <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Trial Ends</p>
               <p className="text-white font-semibold text-lg">{formatTrialEndDate(company.trial_end_date) || 'N/A'}</p>
             </div>
           ) : (
-            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+            <div className="subscription-muted-surface rounded-lg p-4 border">
               <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Billing</p>
               <p className="text-white font-semibold text-lg">{company?.stripe_customer_id ? 'Stripe (website)' : 'Not linked yet'}</p>
             </div>
@@ -476,7 +482,10 @@ export default function SubscriptionPage() {
       </div>
 
       {canManage && (
-        <div className="dashboard-card p-8">
+        <div className="dashboard-card subscription-promo-card p-5 sm:p-8">
+          <div className="mb-4 inline-flex rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-700 dark:text-blue-300">
+            Promotional access
+          </div>
           <h2 className="text-2xl font-semibold text-white mb-2 flex items-center gap-3">
             <Tag className="w-6 h-6 text-blue-500" aria-hidden />
             Redeem Promo Code
@@ -484,6 +493,9 @@ export default function SubscriptionPage() {
           <p className="text-white/75 mb-6">
             Managers can apply an access promo code here. Codes are validated securely on the server — the dashboard
             never reads promo records directly.
+          </p>
+          <p className="mb-6 text-sm font-semibold text-blue-700 dark:text-blue-300">
+            Includes access for up to 10 vehicles
           </p>
           <form onSubmit={handleRedeemPromo} className="max-w-xl space-y-4">
             <div>
@@ -498,18 +510,18 @@ export default function SubscriptionPage() {
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                 disabled={promoLoading}
-                className="w-full rounded-lg bg-white/5 border border-white/15 px-3 py-2.5 text-white font-mono uppercase tracking-wide placeholder:text-white/30 focus:border-blue-500 outline-none disabled:opacity-60"
+                className="subscription-field w-full rounded-lg border px-3 py-2.5 font-mono uppercase tracking-wide placeholder:text-zinc-400 outline-none"
                 placeholder="ENTER CODE"
                 aria-describedby={promoError ? 'promo-code-error' : promoMessage ? 'promo-code-success' : undefined}
               />
             </div>
             {promoError && (
-              <p id="promo-code-error" className="text-sm text-red-300" role="alert">
+              <p id="promo-code-error" className="text-sm text-red-700 dark:text-red-300" role="alert">
                 {promoError}
               </p>
             )}
             {promoMessage && (
-              <p id="promo-code-success" className="text-sm text-emerald-300" role="status">
+              <p id="promo-code-success" className="text-sm text-emerald-700 dark:text-emerald-300" role="status">
                 {promoMessage}
               </p>
             )}
@@ -525,7 +537,10 @@ export default function SubscriptionPage() {
       )}
 
       {canManage && !company?.legacy && !hasStripeManagedSubscription && (
-        <div className="dashboard-card p-8">
+        <div className="dashboard-card subscription-paid-card p-5 sm:p-8">
+          <div className="mb-4 inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+            Paid subscription
+          </div>
           <h2 className="text-2xl font-semibold text-white mb-2">Set Vehicle Count and Billing Cycle</h2>
           <p className="text-white/75 mb-6">
             £{PRICE_PER_VEHICLE_MONTHLY}/vehicle monthly or £{PRICE_PER_VEHICLE_YEARLY}/vehicle yearly (save ~12%). Minimum {MIN_VEHICLES} vehicles. Existing Stripe subscriptions should be managed through the billing portal or support.
@@ -630,7 +645,7 @@ export default function SubscriptionPage() {
       )}
 
       {canManage && !company?.legacy && hasStripeManagedSubscription && (
-        <div className="dashboard-card p-8">
+        <div className="dashboard-card subscription-paid-card p-5 sm:p-8">
           <h2 className="text-2xl font-semibold text-white mb-2">Plan Changes</h2>
           <p className="text-white/75">
             Your company already has a Stripe website subscription. Use the billing portal above for payment and cancellation controls, or contact support if you need to change vehicle quantity or billing cycle.

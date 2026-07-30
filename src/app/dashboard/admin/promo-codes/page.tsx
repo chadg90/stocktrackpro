@@ -19,6 +19,10 @@ type PromoCode = {
   discountPercent?: number;
   durationDays?: number;
   tier?: string;
+  plan?: string;
+  subscription_tier?: string;
+  schemaVersion?: number;
+  vehicleLimit?: number;
   maxUses?: number;
   usedCount?: number;
   used?: boolean;
@@ -26,6 +30,16 @@ type PromoCode = {
   active: boolean;
   createdAt?: Timestamp | string;
 };
+
+const PROMO_SCHEMA_VERSION = 2;
+const PROMO_VEHICLE_LIMIT = 10;
+
+const isSchemaV2Promo = (code: PromoCode) =>
+  code.schemaVersion === PROMO_SCHEMA_VERSION &&
+  code.vehicleLimit === PROMO_VEHICLE_LIMIT &&
+  !Object.prototype.hasOwnProperty.call(code, 'tier') &&
+  !Object.prototype.hasOwnProperty.call(code, 'plan') &&
+  !Object.prototype.hasOwnProperty.call(code, 'subscription_tier');
 
 const formatDate = (value?: Timestamp | string | null) => {
   if (!value) return 'No expiry';
@@ -85,9 +99,18 @@ export default function AdminPromoCodesPage() {
     e.preventDefault();
     if (!firebaseDb || !formCode.trim()) return;
     const codeId = formCode.trim().toUpperCase();
+    if (!/^[A-Z0-9][A-Z0-9_-]{0,63}$/.test(codeId)) {
+      alert('Code may contain only letters, numbers, hyphens, and underscores.');
+      return;
+    }
     const durationDays = Number(formDurationDays);
     if (!Number.isFinite(durationDays) || durationDays <= 0) {
       alert('Duration days must be a positive number.');
+      return;
+    }
+    const maxUses = formMaxUses ? Number(formMaxUses) : null;
+    if (maxUses != null && (!Number.isInteger(maxUses) || maxUses <= 0)) {
+      alert('Max uses must be a positive whole number.');
       return;
     }
     setProcessing(true);
@@ -98,8 +121,9 @@ export default function AdminPromoCodesPage() {
         description: formDescription.trim() || null,
         discountPercent: formDiscount ? Number(formDiscount) : null,
         durationDays,
-        tier: 'PRO_STARTER',
-        maxUses: formMaxUses ? Number(formMaxUses) : null,
+        schemaVersion: PROMO_SCHEMA_VERSION,
+        vehicleLimit: PROMO_VEHICLE_LIMIT,
+        maxUses,
         usedCount: 0,
         used: false,
         expiresAt: formExpires ? new Date(formExpires) : null,
@@ -115,6 +139,10 @@ export default function AdminPromoCodesPage() {
 
   const handleToggle = async (code: PromoCode) => {
     if (!firebaseDb) return;
+    if (!isSchemaV2Promo(code) && !code.active) {
+      alert('Legacy-schema promo codes cannot be reactivated. Create a schema-v2 code instead.');
+      return;
+    }
     try {
       await updateDoc(doc(firebaseDb, 'promoCodes', code.id), { active: !code.active });
       fetchCodes();
@@ -163,7 +191,7 @@ export default function AdminPromoCodesPage() {
               <tr>
                 <th className="px-6 py-4 font-medium">Code</th>
                 <th className="px-6 py-4 font-medium">Description</th>
-                <th className="px-6 py-4 font-medium">Discount</th>
+                <th className="px-6 py-4 font-medium">Access</th>
                 <th className="px-6 py-4 font-medium">Uses</th>
                 <th className="px-6 py-4 font-medium">Expires</th>
                 <th className="px-6 py-4 font-medium">Status</th>
@@ -192,7 +220,7 @@ export default function AdminPromoCodesPage() {
                     </td>
                     <td className="px-6 py-4 text-white/60 text-sm">{code.description || '—'}</td>
                     <td className="px-6 py-4 text-white/80 text-sm">
-                      {code.discountPercent ? `${code.discountPercent}% off` : '—'}
+                      {isSchemaV2Promo(code) ? 'Up to 10 vehicles' : 'Legacy schema'}
                     </td>
                     <td className="px-6 py-4 text-white/60 text-sm">
                       {code.usedCount ?? 0}{code.maxUses ? ` / ${code.maxUses}` : ''}
@@ -200,19 +228,26 @@ export default function AdminPromoCodesPage() {
                     <td className="px-6 py-4 text-white/60 text-sm">{formatDate(code.expiresAt)}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        code.active
-                          ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                          : 'bg-white/10 text-white/40 border border-white/20'
+                        !isSchemaV2Promo(code)
+                          ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
+                          : code.active
+                            ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                            : 'bg-white/10 text-white/40 border border-white/20'
                       }`}>
-                        {code.active ? 'Active' : 'Inactive'}
+                        {!isSchemaV2Promo(code)
+                          ? 'Legacy schema — non-redeemable'
+                          : code.active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleToggle(code)}
+                          disabled={!isSchemaV2Promo(code) && !code.active}
                           className="p-2 text-white/40 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                          title={code.active ? 'Deactivate' : 'Activate'}
+                          title={!isSchemaV2Promo(code)
+                            ? code.active ? 'Deactivate legacy code' : 'Legacy codes cannot be reactivated'
+                            : code.active ? 'Deactivate' : 'Activate'}
                         >
                           {code.active ? <ToggleRight className="h-4 w-4 text-green-400" /> : <ToggleLeft className="h-4 w-4" />}
                         </button>
@@ -235,6 +270,10 @@ export default function AdminPromoCodesPage() {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Promo Code">
         <form onSubmit={handleCreate} className="space-y-4">
+          <div className="rounded-lg border border-blue-400/30 bg-blue-500/10 px-4 py-3">
+            <p className="text-sm font-semibold text-blue-100">Includes access for up to 10 vehicles</p>
+            <p className="mt-1 text-xs text-blue-100/70">This fixed limit cannot be changed.</p>
+          </div>
           <div>
             <label className="block text-sm text-white/70 mb-1">Code <span className="text-red-400">*</span></label>
             <input type="text" value={formCode} onChange={(e) => setFormCode(e.target.value.toUpperCase())}

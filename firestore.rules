@@ -44,47 +44,41 @@ service cloud.firestore {
       return companyId != null && exists(/databases/$(database)/documents/companies/$(companyId));
     }
     
-    // Logic: Check if the COMPANY is active, not the individual user
+    function companyHasActivePromo(companyData) {
+      return companyData.get('subscription_type', '') == 'promotional' &&
+        companyData.subscription_status == 'active' &&
+        companyData.get('promo_schema_version', 0) == 2 &&
+        companyData.get('promo_vehicle_limit', 0) == 10 &&
+        companyData.get('subscription_expiry_date', null) is timestamp &&
+        companyData.subscription_expiry_date >= request.time;
+    }
+
+    function companyHasActiveTrial(companyData) {
+      return companyData.subscription_status == 'trial' ||
+        companyData.subscription_status == 'trialing';
+    }
+
+    // Logic: Check if the COMPANY is active, not the individual user.
+    // Promotional access must be schema v2, fixed at 10 vehicles, and unexpired.
     function isCompanyActive() {
       let companyData = get(/databases/$(database)/documents/companies/$(userCompanyId())).data;
       return profileExists() &&
         companyExists(userCompanyId()) &&
         (
           companyData.get('legacy', false) == true ||
-          companyData.subscription_status == 'active' ||
-          companyData.subscription_status == 'trial' ||
-          companyData.subscription_status == 'trialing'
+          companyHasActivePromo(companyData) ||
+          (
+            companyData.subscription_status == 'active' &&
+            companyData.get('subscription_type', '') != 'promotional'
+          ) ||
+          companyHasActiveTrial(companyData)
         );
     }
 
-    // Custom claims (synced by Cloud Functions). Prefer token when present; legacy uses profile + company reads.
-    function tokenCompanyMatches(resourceCompanyId) {
-      return request.auth != null &&
-        request.auth.token.companyId != null &&
-        request.auth.token.companyId == resourceCompanyId;
-    }
-
-    function tokenSubscriptionActive() {
-      return request.auth.token.subscriptionStatus == 'active' ||
-        request.auth.token.subscriptionStatus == 'trial' ||
-        request.auth.token.subscriptionStatus == 'trialing';
-    }
-
-    function tokenTenantOk(resourceCompanyId) {
-      return isSignedIn() &&
-        tokenCompanyMatches(resourceCompanyId) &&
-        tokenSubscriptionActive();
-    }
-
-    // Prefer custom claims when present (fast path). Fall back to profile + company docs so
-    // brand-new trial signups work before claims sync / ID token refresh completes.
-    function legacyTenantOk(resourceCompanyId) {
-      return userCompanyId() == resourceCompanyId && isCompanyActive();
-    }
-
-    // Admins still reach all docs via GLOBAL ADMIN OVERRIDE match /{path=**} below.
+    // Always confirm current company state so stale custom claims cannot preserve
+    // access after a promotional subscription expires.
     function vehicleInspectionTenantOk(resourceCompanyId) {
-      return tokenTenantOk(resourceCompanyId) || legacyTenantOk(resourceCompanyId);
+      return userCompanyId() == resourceCompanyId && isCompanyActive();
     }
     
     // ============================================
@@ -291,11 +285,25 @@ service cloud.firestore {
     // ============================================
     match /vehicles/{vehicleId} {
       allow read: if isSignedIn() && vehicleInspectionTenantOk(resource.data.company_id);
-      allow create: if isSignedIn() && vehicleInspectionTenantOk(request.resource.data.company_id);
+      // Creation is Admin SDK only via createVehicle so subscription/promo limits
+      // are enforced transactionally and concurrent requests cannot exceed them.
+      allow create: if false;
       allow update: if isSignedIn() &&
         request.resource.data.company_id == resource.data.company_id &&
         vehicleInspectionTenantOk(resource.data.company_id);
-      allow delete: if isSignedIn() && vehicleInspectionTenantOk(resource.data.company_id);
+      allow delete: if isSignedIn() && (
+        (
+          isManager() &&
+          userCompanyId() == resource.data.company_id &&
+          isCompanyActive()
+        ) ||
+        isAdmin()
+      );
+    }
+
+    // Server-only transaction lock used by createVehicle to serialize additions.
+    match /vehicleCreationLocks/{companyId} {
+      allow read, write: if false;
     }
 
     // ============================================
@@ -507,8 +515,15 @@ service cloud.firestore {
     // ============================================
     // GLOBAL ADMIN OVERRIDE
     // ============================================
-    match /{path=**} {
-      allow read, write: if isAdmin();
+    match /{collection}/{document=**} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() &&
+        collection != 'vehicles' &&
+        collection != 'promotionalSubscriptions' &&
+        collection != 'vehicleCreationLocks';
+      allow update, delete: if isAdmin() &&
+        collection != 'promotionalSubscriptions' &&
+        collection != 'vehicleCreationLocks';
     }
   }
 }

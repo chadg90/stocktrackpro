@@ -5,11 +5,14 @@
 
 export type TrialCompanyFields = {
   subscription_status?: string | null;
+  subscription_type?: string | null;
   legacy?: boolean | null;
   trial_end_date?: unknown;
   subscription_expiry_date?: unknown;
   stripe_subscription_id?: string | null;
   trial_start_date?: unknown;
+  promo_schema_version?: number | null;
+  promo_vehicle_limit?: number | null;
 };
 
 /** Parse Firestore Timestamp | Date | ISO string into a Date, or null. */
@@ -68,6 +71,16 @@ export function companyHasPaidAccess(
   if (company.legacy === true) return true;
 
   const status = company.subscription_status;
+  if (company.subscription_type === 'promotional') {
+    const end = parseCompanyDate(company.subscription_expiry_date);
+    return (
+      status === 'active' &&
+      company.promo_schema_version === 2 &&
+      company.promo_vehicle_limit === 10 &&
+      end != null &&
+      end.getTime() >= now.getTime()
+    );
+  }
   if (status === 'active') return true;
 
   if (status === 'trial' || status === 'trialing') {

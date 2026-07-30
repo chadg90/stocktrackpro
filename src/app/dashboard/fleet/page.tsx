@@ -7,7 +7,6 @@ import {
   where,
   getDocs,
   getDoc,
-  addDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -15,8 +14,9 @@ import {
   orderBy,
   limit,
 } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { onAuthStateChanged } from 'firebase/auth';
-import { firebaseAuth, firebaseDb } from '@/lib/firebase';
+import { firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
 import { Plus, Pencil, Trash2, Search, Truck, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import Modal from '../components/Modal';
 import ExportButton from '../components/ExportButton';
@@ -186,7 +186,7 @@ export default function FleetPage() {
 
   const handleAddVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firebaseDb || !profile?.company_id) return;
+    if (!firebaseDb || !firebaseFunctions || !profile?.company_id) return;
 
     const limitCheck = await checkCanAddVehicle(firebaseDb, profile.company_id);
     if (!limitCheck.allowed) {
@@ -196,18 +196,29 @@ export default function FleetPage() {
 
     setProcessing(true);
     try {
-      await addDoc(collection(firebaseDb!, 'vehicles'), {
-        ...formData,
-        company_id: profile.company_id,
-        created_at: serverTimestamp(),
-        status: formData.status || 'active',
-        mileage: Number(formData.mileage) || 0,
+      const createVehicle = httpsCallable(firebaseFunctions, 'createVehicle');
+      await createVehicle({
+        vehicle: {
+          make: formData.make || '',
+          model: formData.model || '',
+          registration: formData.registration || '',
+          vin: formData.vin || '',
+          image_url: formData.image_url || '',
+          status: formData.status || 'active',
+          mileage: Number(formData.mileage) || 0,
+        },
       });
       setIsAddModalOpen(false);
       setFormData({});
       fetchVehicles(profile.company_id);
     } catch (error) {
       console.error('Error adding vehicle:', error);
+      const code = String((error as { code?: string })?.code || '');
+      alert(code.includes('resource-exhausted')
+        ? 'Your company has reached its vehicle limit.'
+        : code.includes('permission-denied')
+          ? 'Only company managers can add vehicles.'
+          : 'The vehicle could not be added. Please check the details and try again.');
     } finally {
       setProcessing(false);
     }
