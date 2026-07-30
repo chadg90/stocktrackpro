@@ -253,7 +253,7 @@ export default function PrivacyPolicy() {
                 'Account data is retained while your user account is active',
                 'Vehicle and inspection data are retained according to your company’s needs and legal obligations',
                 'Inactive individual user accounts with no sign-in for 90 consecutive days may be deleted with associated personal data where this does not conflict with an active company subscription or legal retention duties; we will give reasonable notice where practicable',
-                'After company cancellation, data may remain for a reasonable period to allow reactivation, then be deleted or anonymised on request subject to legal holds',
+                'After company cancellation, account and fleet data are normally retained for up to 90 days to allow reactivation or export requests, then deleted or anonymised, unless a longer legal hold applies (for example ongoing disputes, security investigations, or tax/accounting requirements). Inspection and defect records may also be retained up to the operational compliance window of 15 months where that is longer and still relevant',
               ]}
             />
           </Section>

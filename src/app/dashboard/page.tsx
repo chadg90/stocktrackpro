@@ -8,6 +8,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Navbar from '../components/Navbar';
 import {
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   User,
@@ -236,6 +237,8 @@ function DashboardPageInner() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
 
   const [view, setView] = useState<'summary' | 'detailed'>(initialView);
 
@@ -491,9 +494,44 @@ function DashboardPageInner() {
     fetchData(id);
   }, [profile?.company_id, dateRange, fetchData]);
 
+  const handleForgotPassword = async () => {
+    setError(null);
+    setResetMessage(null);
+    const trimmed = email.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setError('Enter your account email above, then tap Forgot password.');
+      return;
+    }
+    if (!isFirebaseAvailable || !firebaseAuth) {
+      setError('Firebase is not configured properly');
+      return;
+    }
+    setResetBusy(true);
+    try {
+      await sendPasswordResetEmail(firebaseAuth, trimmed);
+      setResetMessage('If an account exists for that email, a password reset link has been sent.');
+    } catch (err: unknown) {
+      // Avoid account enumeration — same message for most failures.
+      const code =
+        typeof err === 'object' && err !== null && 'code' in err && typeof (err as { code: unknown }).code === 'string'
+          ? (err as { code: string }).code
+          : '';
+      if (code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else if (code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please wait a moment and try again.');
+      } else {
+        setResetMessage('If an account exists for that email, a password reset link has been sent.');
+      }
+    } finally {
+      setResetBusy(false);
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setResetMessage(null);
     setLoading(true);
     
     // Capture password and clear it from state immediately for security
@@ -942,8 +980,16 @@ function DashboardPageInner() {
                       {error}
                     </div>
                   )}
+                  {resetMessage && (
+                    <div
+                      className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+                      role="status"
+                    >
+                      {resetMessage}
+                    </div>
+                  )}
 
-                  <form onSubmit={handleSignIn} className="space-y-4">
+                  <form onSubmit={handleSignIn} method="post" className="space-y-4">
                     <div>
                       <label htmlFor="dashboard-email" className="mb-1.5 block text-sm font-medium text-slate-700">
                         Email
@@ -962,9 +1008,19 @@ function DashboardPageInner() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="dashboard-password" className="mb-1.5 block text-sm font-medium text-slate-700">
-                        Password
-                      </label>
+                      <div className="mb-1.5 flex items-center justify-between gap-3">
+                        <label htmlFor="dashboard-password" className="block text-sm font-medium text-slate-700">
+                          Password
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleForgotPassword}
+                          disabled={resetBusy}
+                          className="text-xs font-medium text-[var(--brand-blue)] hover:text-blue-700 hover:underline disabled:opacity-60"
+                        >
+                          {resetBusy ? 'Sending…' : 'Forgot password?'}
+                        </button>
+                      </div>
                       <div className="relative">
                         <input
                           id="dashboard-password"

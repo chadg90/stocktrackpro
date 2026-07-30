@@ -114,12 +114,20 @@ html {
     }
   }
 
-  .mkt-animate-fade-up {
-    animation: mkt-fade-up 0.7s ease-out both;
+  /* Visible by default; animate only when motion is allowed (avoids blank hero if JS/CSS is slow). */
+  .mkt-animate-fade-up,
+  .mkt-animate-fade-in {
+    opacity: 1;
   }
 
-  .mkt-animate-fade-in {
-    animation: mkt-fade-in 0.9s ease-out 0.15s both;
+  @media (prefers-reduced-motion: no-preference) {
+    .mkt-animate-fade-up {
+      animation: mkt-fade-up 0.7s ease-out both;
+    }
+
+    .mkt-animate-fade-in {
+      animation: mkt-fade-in 0.9s ease-out 0.15s both;
+    }
   }
 
   /* Professional section breaks — slate + brand blue */
@@ -169,7 +177,9 @@ html {
   @media (prefers-reduced-motion: reduce) {
     .mkt-animate-fade-up,
     .mkt-animate-fade-in {
-      animation: none;
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
     }
   }
 

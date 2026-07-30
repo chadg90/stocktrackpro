@@ -22,7 +22,8 @@ const Footer = () => {
               </Link>
             </p>
             <p className="text-slate-400 text-xs mt-3 max-w-md leading-relaxed">
-              {SITE_LEGAL_NAME} · UK van fleet compliance software · Support via email and WhatsApp
+              {SITE_LEGAL_NAME} · UK van fleet compliance software · Operated in the United Kingdom · Support via
+              email and WhatsApp
             </p>
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-slate-300">

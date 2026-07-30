@@ -18,8 +18,7 @@ export function HomeJsonLd() {
         name: 'Fleet Track PRO',
         alternateName: [
           'Fleet Track PRO van fleet compliance software',
-          'Stock Track PRO',
-          'Stock Track PRO van fleet compliance software',
+          'Stock Track PRO', // former product name — kept for search continuity
         ],
         applicationCategory: 'BusinessApplication',
         applicationSubCategory: 'Van fleet management and DVSA compliance software',
@@ -45,7 +44,7 @@ export function HomeJsonLd() {
           seller: { '@id': ORGANIZATION_ID },
           eligibleQuantity: {
             '@type': 'QuantitativeValue',
-            minValue: 5,
+            minValue: 2,
             unitText: 'vehicles',
           },
           priceSpecification: {

@@ -1,6 +1,6 @@
 /** ROI anchor — pricing context (UK English). */
 export const PRICING_ROI_PARAGRAPH =
-  'A single DVSA roadside prohibition notice costs upward of £300 in fines and lost working time — before the vehicle is off road. Fleet Track PRO\u2019s 5-vehicle plan costs £40 a month.';
+  'A DVSA roadside fixed penalty for roadworthiness issues can be £50–£300, and a prohibition can take the vehicle off the road until defects are fixed. Fleet Track PRO starts from £16 a month for 2 vehicles.';
 
 export const PRICING_ROI_SHORT =
-  'For context: one prohibition notice can cost more than £300 — a 5-vehicle plan is £40 a month.';
+  'For context: roadside fixed penalties can reach £300, and a prohibition can stop the vehicle working — a 2-vehicle plan starts at £16 a month.';

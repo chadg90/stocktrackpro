@@ -99,7 +99,7 @@ export default function Contact() {
                   {submitError}
                 </div>
               )}
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} method="post" className="space-y-6">
                 <div className="hidden" aria-hidden="true">
                   <label htmlFor={HONEYPOT_FIELD}>Leave blank</label>
                   <input
@@ -118,6 +118,7 @@ export default function Contact() {
                     id="contact-name"
                     name="name"
                     type="text"
+                    autoComplete="name"
                     required
                     minLength={2}
                     value={formData.name}
@@ -132,6 +133,7 @@ export default function Contact() {
                     id="contact-email"
                     name="email"
                     type="email"
+                    autoComplete="email"
                     required
                     value={formData.email}
                     onChange={e => setFormData(d => ({ ...d, email: e.target.value }))}

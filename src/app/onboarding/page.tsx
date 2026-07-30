@@ -62,8 +62,10 @@ export default function OnboardingPage() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
+  const MIN_PASSWORD_LENGTH = 12;
+
   const validatePassword = (password: string) => {
-    return password.length >= 6;
+    return password.length >= MIN_PASSWORD_LENGTH;
   };
 
   const handleAccountCreation = async (e: React.FormEvent) => {
@@ -81,7 +83,7 @@ export default function OnboardingPage() {
     }
 
     if (!validatePassword(password)) {
-      setError('Password must be at least 6 characters');
+      setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
       return;
     }
 
@@ -396,11 +398,14 @@ export default function OnboardingPage() {
             <form onSubmit={handleAccountCreation} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                  <label htmlFor="onboarding-first-name" className="block text-sm font-medium text-slate-600 mb-1.5">
                     First Name
                   </label>
                   <input
+                    id="onboarding-first-name"
+                    name="given-name"
                     type="text"
+                    autoComplete="given-name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
@@ -408,11 +413,14 @@ export default function OnboardingPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                  <label htmlFor="onboarding-last-name" className="block text-sm font-medium text-slate-600 mb-1.5">
                     Last Name
                   </label>
                   <input
+                    id="onboarding-last-name"
+                    name="family-name"
                     type="text"
+                    autoComplete="family-name"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
@@ -422,11 +430,14 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                <label htmlFor="onboarding-email" className="block text-sm font-medium text-slate-600 mb-1.5">
                   Email
                 </label>
                 <input
+                  id="onboarding-email"
+                  name="email"
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
@@ -435,33 +446,39 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                <label htmlFor="onboarding-password" className="block text-sm font-medium text-slate-600 mb-1.5">
                   Password
                 </label>
                 <input
+                  id="onboarding-password"
+                  name="new-password"
                   type="password"
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                   required
-                  minLength={6}
+                  minLength={12}
                 />
                 <p className="text-slate-500 text-xs mt-1">
-                  Must be at least 6 characters
+                  Must be at least 12 characters
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                <label htmlFor="onboarding-confirm-password" className="block text-sm font-medium text-slate-600 mb-1.5">
                   Confirm Password
                 </label>
                 <input
+                  id="onboarding-confirm-password"
+                  name="confirm-password"
                   type="password"
+                  autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                   required
-                  minLength={6}
+                  minLength={12}
                 />
               </div>
 
@@ -492,15 +509,18 @@ export default function OnboardingPage() {
             <div className="space-y-6">
               <form onSubmit={handleCreateCompany} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-slate-600 mb-1.5">
+                    <label htmlFor="onboarding-company-name" className="block text-sm font-medium text-slate-600 mb-1.5">
                       Company name
                     </label>
                     <input
+                      id="onboarding-company-name"
+                      name="organization"
                       type="text"
+                      autoComplete="organization"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
-                      placeholder="Your Company Ltd"
+                      placeholder="Your company name"
                       required
                     />
                     <p className="text-slate-500 text-xs mt-1">
