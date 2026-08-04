@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Source_Sans_3 } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
@@ -119,6 +120,8 @@ export default function RootLayout({
         {children}
         <Footer />
         <CookieConsent />
+        {/* Hobby-plan Web Analytics — privacy-friendly, no advertising cookies */}
+        <Analytics />
       </body>
     </html>
   );

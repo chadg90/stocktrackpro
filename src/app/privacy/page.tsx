@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { SITE_LEGAL_NAME, SITE_NAME, SITE_URL, SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
 
 /** Update only when the policy text changes. */
-const LAST_UPDATED = '22 July 2026';
+const LAST_UPDATED = '4 August 2026';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -212,8 +212,9 @@ export default function PrivacyPolicy() {
           <Section title="9. Cookies and similar technologies">
             <p className="text-slate-600 leading-relaxed">
               We use essential cookies and local storage to run the website, keep sessions secure, and remember
-              cookie preferences. We do not currently use third-party advertising or analytics cookies on the
-              marketing site. Details are in our{' '}
+              cookie preferences. We use privacy-friendly Vercel Web Analytics for aggregate traffic (not
+              advertising cookies) and first-party dashboard usage counts in Firebase to understand which manager
+              tools are used. We do not use Google Analytics or advertising pixels. Details are in our{' '}
               <Link href="/cookies" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Cookie Policy
               </Link>
@@ -226,6 +227,7 @@ export default function PrivacyPolicy() {
             <BulletList
               items={[
                 'Firebase / Google LLC (authentication, database, storage, hosting-related services)',
+                'Vercel Inc. (website hosting and privacy-friendly Web Analytics)',
                 'Stripe Payments Europe Ltd / Stripe, Inc. (payments and billing)',
                 'Email delivery providers (transactional messages)',
                 'Apple / Google (app distribution and, where used, push notification infrastructure)',

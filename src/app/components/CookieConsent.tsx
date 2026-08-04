@@ -36,8 +36,9 @@ export default function CookieConsent() {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-slate-600 text-sm text-center sm:text-left">
           <p>
-            We use essential cookies and local storage to run this site and keep the dashboard secure. We do not
-            currently use advertising or analytics cookies.{' '}
+            We use essential cookies and local storage to run this site and keep the dashboard secure. We use
+            privacy-friendly Vercel Web Analytics (no advertising cookies) for traffic, and first-party dashboard
+            usage counts for product improvement.{' '}
             <Link
               href="/cookies"
               className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"

@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
 
 /** Update only when the policy text changes. */
-const LAST_UPDATED = '22 July 2026';
+const LAST_UPDATED = '4 August 2026';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -66,12 +66,18 @@ export default function CookiePolicy() {
                   securely and prevent fraud. Those cookies are governed by Stripe’s policies.
                 </>,
                 <>
-                  <strong className="text-slate-800">No advertising cookies</strong> — we do not currently use
-                  third-party advertising or tracking pixels on the marketing site.
+                  <strong className="text-slate-800">No advertising cookies</strong> — we do not use third-party
+                  advertising or tracking pixels on the marketing site.
                 </>,
                 <>
-                  <strong className="text-slate-800">No third-party analytics cookies</strong> — we do not currently
-                  load Google Analytics, Meta Pixel, or similar analytics cookies on the marketing site.
+                  <strong className="text-slate-800">Privacy-friendly web analytics</strong> — we use Vercel Web
+                  Analytics to understand aggregate page traffic. It is designed not to rely on advertising cookies
+                  or cross-site trackers. We do not use Google Analytics or Meta Pixel.
+                </>,
+                <>
+                  <strong className="text-slate-800">Dashboard product usage</strong> — when you are signed in to the
+                  manager dashboard, we record first-party feature/page usage counts in our Firebase database so we
+                  can improve popular tools and simplify unused ones. These counts are not used for advertising.
                 </>,
               ]}
             />
@@ -92,8 +98,8 @@ export default function CookiePolicy() {
             <BulletList
               items={[
                 'Essential technologies are required for the Service to work. You can block cookies in your browser, but sign-in and some features may fail.',
-                'Our site banner records whether you have acknowledged this notice. Because we do not currently set optional analytics or advertising cookies, declining optional categories is not applicable at this time.',
-                'If we introduce non-essential cookies in future (for example analytics), we will update this policy and, where required by law, ask for consent before setting them.',
+                'Our site banner records whether you have acknowledged this notice.',
+                'If we introduce non-essential advertising cookies in future, we will update this policy and, where required by law, ask for consent before setting them.',
               ]}
             />
           </Section>

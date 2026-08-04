@@ -17,6 +17,7 @@ import {
   type CompliancePeriodPreset,
 } from '@/lib/fleetReportLogic';
 import { exportMultipleSheetsToExcel } from '@/lib/exportUtils';
+import { trackFeatureClick } from '@/lib/productUsage';
 
 type GapFilter = 'all' | 'inactive_users' | 'unchecked_vehicles';
 
@@ -109,6 +110,7 @@ export default function FleetReportCompliancePage() {
         ],
         `stp-who-checked-${slug}`
       );
+      void trackFeatureClick('fleet_report_export');
     } finally {
       setExporting(false);
     }

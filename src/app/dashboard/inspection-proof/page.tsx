@@ -276,6 +276,8 @@ export default function InspectionProofPage() {
         inspection,
         companyName,
       });
+      const { trackFeatureClick } = await import('@/lib/productUsage');
+      void trackFeatureClick('inspection_proof_export');
     } catch (e) {
       console.error(e);
       setError('PDF generation failed. Please try again.');

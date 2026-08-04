@@ -6,6 +6,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import Sidebar from './components/Sidebar';
 import NotificationBell from './components/NotificationBell';
+import DashboardUsageTracker from './components/DashboardUsageTracker';
 import { usePathname } from 'next/navigation';
 import { ToastProvider } from '@/components/Toast';
 import DashboardQueryProvider from './providers/DashboardQueryProvider';
@@ -294,6 +295,7 @@ export default function DashboardLayoutClient({
           }`}
         >
           <Sidebar theme={theme} onToggleTheme={toggleTheme} />
+          <DashboardUsageTracker />
           <main
             className={`min-h-screen overflow-x-hidden pt-20 lg:pt-0 lg:pl-64 ${
               theme === 'light' ? 'bg-[#F8FAFC]' : 'bg-zinc-950/50'

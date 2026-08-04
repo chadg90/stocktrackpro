@@ -47,6 +47,7 @@ import {
   type VehiclePeriodDocument,
   type VehiclePeriodInspection,
 } from '@/lib/vehiclePeriodReportPdf';
+import { trackFeatureClick } from '@/lib/productUsage';
 
 type Profile = {
   company_id?: string;
@@ -539,6 +540,7 @@ export default function VehicleReportsPage() {
       a.remove();
       URL.revokeObjectURL(url);
 
+      void trackFeatureClick(months === 6 ? 'vehicle_pack_6m' : 'vehicle_pack_12m');
       setSuccess(
         `${months}-month pack ready (${periodDocs.length} document${
           periodDocs.length === 1 ? '' : 's'
