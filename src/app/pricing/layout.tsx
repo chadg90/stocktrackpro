@@ -35,7 +35,7 @@ export default function PricingLayout({
       <MarketingWebPageJsonLd
         path="/pricing"
         title="Pricing"
-        description="£8 per vehicle per month for UK van fleet management. 7-day free trial."
+        description="£8 per vehicle per month for UK fleet management. 7-day free trial."
       />
       {children}
     </>

@@ -19,8 +19,8 @@ export default function AboutPage() {
         </p>
         <p className="text-slate-600 text-lg leading-relaxed mb-10">
           We built one platform that does what fleet managers actually need — DVSA walkaround checks, defect close-out,
-          and MOT visibility — without the complexity or the cost. This is van fleet compliance software, not warehouse
-          inventory or stock control.
+          and MOT visibility — without the complexity or the cost. This is fleet compliance software for cars, vans, and
+          light commercial vehicles — not warehouse inventory or stock control.
         </p>
 
         <div className="grid gap-6">
@@ -40,7 +40,7 @@ export default function AboutPage() {
             <h2 className="text-2xl font-semibold mb-3">Who it is built for</h2>
             <p className="text-slate-600 leading-relaxed">
               UK trades, groundworks, logistics, construction, haulage, and contractor businesses — from sole traders with
-              a handful of vans to teams managing larger mixed fleets.
+              a handful of vehicles to teams managing larger mixed fleets.
             </p>
           </section>
 

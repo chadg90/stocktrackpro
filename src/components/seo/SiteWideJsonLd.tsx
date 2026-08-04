@@ -13,7 +13,7 @@ export default function SiteWideJsonLd() {
     '@id': ORGANIZATION_ID,
     name: SITE_LEGAL_NAME,
     alternateName: [
-      `${SITE_NAME} van fleet software`,
+      `${SITE_NAME} fleet software`,
       `${SITE_NAME} DVSA compliance software`,
       'Stock Track PRO',
     ],
@@ -54,7 +54,7 @@ export default function SiteWideJsonLd() {
         '@type': 'WebSite',
         '@id': WEBSITE_ID,
         name: SITE_NAME,
-        alternateName: `${SITE_NAME} — UK van fleet compliance (not inventory software)`,
+        alternateName: `${SITE_NAME} — UK fleet compliance (not inventory software)`,
         url: SITE_URL,
         description: SITE_TAGLINE,
         inLanguage: 'en-GB',

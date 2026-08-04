@@ -84,10 +84,10 @@ export default function HomeHero() {
           {SITE_NAME}
         </p>
         <p className="text-[var(--brand-blue)] font-semibold text-xs sm:text-sm uppercase tracking-[0.18em] mb-3 sm:mb-4">
-          UK DVSA van fleet compliance
+          UK DVSA fleet compliance
         </p>
         <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight text-slate-800 mb-4 sm:mb-5 leading-snug max-w-xl">
-          DVSA walkaround checks and defect resolution for UK van fleets
+          DVSA walkaround checks and defect resolution for UK vehicle fleets
         </h1>
         <p className="text-[0.95rem] sm:text-lg text-slate-600 max-w-md sm:max-w-xl leading-relaxed mb-6 sm:mb-8">
           Photo-led inspections, MOT and tax alerts, and a shared audit trail — mobile for drivers, web dashboard for
@@ -138,7 +138,7 @@ export default function HomeHero() {
           ) : (
             <Image
               src={HOME_HERO_POSTER_SRC}
-              alt="Fleet Track PRO van fleet app — adding vehicle inspection photos during a daily walkaround check"
+              alt="Fleet Track PRO fleet app — adding vehicle inspection photos during a daily walkaround check"
               fill
               sizes="(max-width: 640px) 280px, (max-width: 1024px) 420px, 560px"
               priority

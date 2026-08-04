@@ -17,20 +17,20 @@ export function HomeJsonLd() {
         '@id': `${SITE_URL}/#software`,
         name: 'Fleet Track PRO',
         alternateName: [
-          'Fleet Track PRO van fleet compliance software',
+          'Fleet Track PRO fleet compliance software',
           'Stock Track PRO', // former product name — kept for search continuity
         ],
         applicationCategory: 'BusinessApplication',
-        applicationSubCategory: 'Van fleet management and DVSA compliance software',
+        applicationSubCategory: 'Fleet management and DVSA compliance software',
         audience: {
           '@type': 'BusinessAudience',
-          audienceType: 'UK commercial van fleet operators and transport managers',
+          audienceType: 'UK commercial vehicle fleet operators and transport managers',
         },
         operatingSystem: 'iOS, Android, Web',
         description: SITE_SHORT_DESCRIPTION,
         featureList: SOFTWARE_FEATURE_LIST,
         keywords:
-          'van fleet compliance, DVSA walkaround checks, vehicle defect reporting, MOT tracking, fleet management UK',
+          'fleet compliance, DVSA walkaround checks, vehicle defect reporting, MOT tracking, fleet management UK',
         url: SITE_URL,
         screenshot: `${SITE_URL}/hero-demo-poster.jpg`,
         inLanguage: 'en-GB',
@@ -52,7 +52,7 @@ export function HomeJsonLd() {
             price: '8.00',
             priceCurrency: 'GBP',
             unitText: 'vehicle per month',
-            valueAddedTaxIncluded: true,
+            valueAddedTaxIncluded: false,
           },
         },
         provider: { '@id': ORGANIZATION_ID },

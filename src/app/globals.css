@@ -360,50 +360,62 @@ html {
     @apply text-zinc-500;
   }
 
-  /* Compliance Centre article typography */
+  /* Compliance Centre article typography (light marketing shell) */
   .compliance-article {
-    @apply max-w-3xl;
+    @apply max-w-none text-slate-700;
   }
 
   .compliance-article > p {
-    @apply mb-5 text-base sm:text-[17px] leading-[1.75] text-white/75;
+    @apply mb-5 text-base sm:text-[17px] leading-[1.8] text-slate-700;
   }
 
   .compliance-article > p:first-of-type {
-    @apply mb-8 border-b border-white/10 pb-8 text-lg sm:text-xl leading-relaxed text-white/90;
+    @apply mb-8 border-b border-slate-200 pb-8 text-lg sm:text-xl leading-relaxed text-slate-800;
   }
 
   .compliance-article > h2 {
-    @apply mb-4 mt-12 scroll-mt-28 text-xl font-semibold tracking-tight text-white sm:text-2xl;
+    @apply mb-4 mt-12 scroll-mt-28 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl;
   }
 
   .compliance-article > h3 {
-    @apply mb-3 mt-8 text-lg font-semibold text-white/95;
+    @apply mb-3 mt-8 text-lg font-semibold text-slate-900;
   }
 
   .compliance-article > blockquote {
-    @apply my-6 border-l-4 border-blue-500/50 bg-white/[0.03] px-5 py-4 text-base italic leading-relaxed text-white/70;
+    @apply my-6 border-l-4 border-[var(--brand-blue)] bg-slate-50 px-5 py-4 text-base italic leading-relaxed text-slate-600;
   }
 
   .compliance-article > ul {
-    @apply my-6 space-y-2.5 rounded-xl border border-white/10 bg-white/[0.03] p-5 sm:p-6;
+    @apply my-6 space-y-2.5 rounded-xl border border-slate-200 bg-slate-50 p-5 sm:p-6;
   }
 
   .compliance-article > ul > li {
-    @apply relative pl-5 text-base leading-relaxed text-white/80;
+    @apply relative pl-5 text-base leading-relaxed text-slate-700;
   }
 
   .compliance-article > ul > li::before {
     content: '';
-    @apply absolute left-0 top-[0.6em] h-1.5 w-1.5 rounded-full bg-blue-500;
+    @apply absolute left-0 top-[0.6em] h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)];
+  }
+
+  .compliance-article > ol {
+    @apply my-6 list-decimal space-y-2.5 pl-6 text-base leading-relaxed text-slate-700;
+  }
+
+  .compliance-article a {
+    @apply text-[var(--brand-blue)] underline underline-offset-4 hover:text-blue-700;
+  }
+
+  .compliance-article strong {
+    @apply font-semibold text-slate-900;
   }
 
   .compliance-disclaimer {
-    @apply mb-8 mt-10 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm italic leading-relaxed text-white/50;
+    @apply mb-8 mt-10 rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm italic leading-relaxed text-slate-500;
   }
 
   .compliance-article > p.compliance-disclaimer {
-    @apply mb-8 text-sm;
+    @apply mb-8 text-sm text-slate-500;
   }
 
   .compliance-article > p.compliance-disclaimer:first-of-type {
@@ -411,12 +423,12 @@ html {
   }
 
   .compliance-takeaway-list > li {
-    @apply relative pl-5 text-base leading-relaxed text-white/85;
+    @apply relative pl-5 text-base leading-relaxed text-slate-700;
   }
 
   .compliance-takeaway-list > li::before {
     content: '';
-    @apply absolute left-0 top-[0.55em] h-1.5 w-1.5 rounded-full bg-blue-400;
+    @apply absolute left-0 top-[0.55em] h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)];
   }
 
   .theme-light .dashboard-card .text-white\/50 {

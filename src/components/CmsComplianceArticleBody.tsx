@@ -7,8 +7,8 @@ type Props = {
 
 function KeyTakeaways({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-12 rounded-2xl border border-blue-500/30 bg-blue-500/10 p-6 sm:p-8">
-      <h2 className="mb-5 text-xl font-semibold text-white">Key takeaways</h2>
+    <div className="mt-12 rounded-2xl border border-slate-200 bg-blue-50/70 p-6 sm:p-8">
+      <h2 className="mb-5 text-xl font-semibold text-slate-900">Key takeaways</h2>
       <ul className="compliance-takeaway-list space-y-3">{children}</ul>
     </div>
   );

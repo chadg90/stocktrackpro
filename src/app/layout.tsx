@@ -23,7 +23,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} | UK Van Fleet & DVSA Compliance Software`,
+    default: `${SITE_NAME} | UK Fleet & DVSA Compliance Software`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_META_DESCRIPTION,
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: `${SITE_NAME} | UK Van Fleet & DVSA Compliance Software`,
+    title: `${SITE_NAME} | UK Fleet & DVSA Compliance Software`,
     description: SITE_META_DESCRIPTION,
     url: SITE_URL,
     siteName: SITE_NAME,
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: `${SITE_NAME} — UK van fleet DVSA walkaround checks and defect reporting`,
+        alt: `${SITE_NAME} — UK fleet DVSA walkaround checks and defect reporting`,
       },
     ],
     locale: "en_GB",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} | UK Van Fleet & DVSA Compliance Software`,
+    title: `${SITE_NAME} | UK Fleet & DVSA Compliance Software`,
     description: SITE_TAGLINE,
     images: ["/og-image.jpg"],
   },
@@ -106,7 +106,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#3b82f6" />
         <meta name="application-name" content={SITE_NAME} />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
-        <meta name="msapplication-tooltip" content={`${SITE_NAME} — UK van fleet DVSA compliance (not inventory software)`} />
+        <meta name="msapplication-tooltip" content={`${SITE_NAME} — UK fleet DVSA compliance (not inventory software)`} />
         <meta name="language" content="en-GB" />
         <meta name="copyright" content={`© ${new Date().getFullYear()} ${SITE_LEGAL_NAME}`} />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />

@@ -4,11 +4,11 @@ import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
 export const metadata: Metadata = {
   title: 'Contact',
   description:
-    'Contact Fleet Track PRO — UK van fleet management and defect reporting software. Sales and support for commercial van operators.',
+    'Contact Fleet Track PRO — UK fleet management and defect reporting software. Sales and support for commercial vehicle operators.',
   alternates: { canonical: '/contact' },
   openGraph: {
     title: 'Contact | Fleet Track PRO',
-    description: 'Get in touch with Fleet Track PRO for demos, billing, and van fleet compliance support.',
+    description: 'Get in touch with Fleet Track PRO for demos, billing, and fleet compliance support.',
     url: 'https://www.fleettrackpro.co.uk/contact/',
     siteName: 'Fleet Track PRO',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Contact Fleet Track PRO' }],
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Contact | Fleet Track PRO',
-    description: 'Contact Fleet Track PRO for UK van fleet software support and enquiries.',
+    description: 'Contact Fleet Track PRO for UK fleet software support and enquiries.',
     images: ['/og-image.jpg'],
   },
 };
@@ -33,7 +33,7 @@ export default function ContactLayout({
       <MarketingWebPageJsonLd
         path="/contact"
         title="Contact"
-        description="Contact Fleet Track PRO for UK van fleet management software support, demos, and billing enquiries."
+        description="Contact Fleet Track PRO for UK fleet management software support, demos, and billing enquiries."
       />
       {children}
     </>

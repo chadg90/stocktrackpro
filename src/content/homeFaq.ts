@@ -8,7 +8,7 @@ export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   {
     question: 'Is Fleet Track PRO warehouse or inventory stock tracking software?',
     answer:
-      'No. It is UK van fleet compliance software for DVSA walkaround checks, defect reporting, MOT tracking, and repair close-out — not warehouse inventory or stock management.',
+      'No. It is UK fleet compliance software for DVSA walkaround checks, defect reporting, MOT tracking, and repair close-out — not warehouse inventory or stock management.',
   },
   {
     question: 'How many users can I add?',

@@ -87,19 +87,30 @@ export default function Contact() {
       <section className="py-12 sm:py-16 border-t border-slate-200">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto">
-            <div className="p-8 sm:p-10 rounded-2xl border border-slate-200 bg-slate-50 hover:border-slate-200 transition-colors">
-              <h2 className="text-xl font-bold text-slate-900 mb-6">Send us a message</h2>
+            <div className="p-8 sm:p-10 rounded-2xl border border-slate-200 bg-slate-100/90 shadow-inner">
+              <h2 className="text-xl font-bold text-slate-900 mb-2">Send us a message</h2>
+              <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                Fill in the form below and we&apos;ll reply by email. Fields marked required must be completed.
+              </p>
               {submitSuccess && (
-                <div role="status" aria-live="polite" className="mb-6 p-4 rounded-xl bg-blue-500/10 border border-slate-200 text-blue-500">
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm leading-relaxed"
+                >
                   Thanks! We&apos;ll get back to you soon.
                 </div>
               )}
               {submitError && (
-                <div role="alert" aria-live="assertive" className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200">
+                <div
+                  role="alert"
+                  aria-live="assertive"
+                  className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm leading-relaxed"
+                >
                   {submitError}
                 </div>
               )}
-              <form onSubmit={handleSubmit} method="post" className="space-y-6">
+              <form onSubmit={handleSubmit} method="post" className="space-y-5">
                 <div className="hidden" aria-hidden="true">
                   <label htmlFor={HONEYPOT_FIELD}>Leave blank</label>
                   <input
@@ -113,7 +124,9 @@ export default function Contact() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="contact-name" className="block text-sm font-medium text-slate-600 mb-2">Name</label>
+                  <label htmlFor="contact-name" className="block text-sm font-semibold text-slate-800 mb-1.5">
+                    Name <span className="text-slate-500 font-normal">(required)</span>
+                  </label>
                   <input
                     id="contact-name"
                     name="name"
@@ -123,12 +136,14 @@ export default function Contact() {
                     minLength={2}
                     value={formData.name}
                     onChange={e => setFormData(d => ({ ...d, name: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-slate-200 text-slate-900 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="contact-field w-full px-4 py-3.5 rounded-xl bg-white border border-white text-base text-slate-900 placeholder:text-slate-400 shadow-[0_1px_2px_rgba(15,23,42,0.06),0_8px_20px_rgba(15,23,42,0.08)] hover:shadow-[0_2px_4px_rgba(15,23,42,0.08),0_12px_28px_rgba(15,23,42,0.12)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:shadow-[0_2px_4px_rgba(15,23,42,0.08),0_12px_28px_rgba(15,23,42,0.12)] focus:-translate-y-0.5 transition-all duration-200"
                     placeholder="Your name"
                   />
                 </div>
                 <div>
-                  <label htmlFor="contact-email" className="block text-sm font-medium text-slate-600 mb-2">Email</label>
+                  <label htmlFor="contact-email" className="block text-sm font-semibold text-slate-800 mb-1.5">
+                    Email <span className="text-slate-500 font-normal">(required)</span>
+                  </label>
                   <input
                     id="contact-email"
                     name="email"
@@ -137,40 +152,44 @@ export default function Contact() {
                     required
                     value={formData.email}
                     onChange={e => setFormData(d => ({ ...d, email: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-slate-200 text-slate-900 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="contact-field w-full px-4 py-3.5 rounded-xl bg-white border border-white text-base text-slate-900 placeholder:text-slate-400 shadow-[0_1px_2px_rgba(15,23,42,0.06),0_8px_20px_rgba(15,23,42,0.08)] hover:shadow-[0_2px_4px_rgba(15,23,42,0.08),0_12px_28px_rgba(15,23,42,0.12)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:shadow-[0_2px_4px_rgba(15,23,42,0.08),0_12px_28px_rgba(15,23,42,0.12)] focus:-translate-y-0.5 transition-all duration-200"
                     placeholder="you@example.com"
                   />
                 </div>
                 <div>
-                  <label htmlFor="contact-subject" className="block text-sm font-medium text-slate-600 mb-2">Subject (optional)</label>
+                  <label htmlFor="contact-subject" className="block text-sm font-semibold text-slate-800 mb-1.5">
+                    Subject <span className="text-slate-500 font-normal">(optional)</span>
+                  </label>
                   <input
                     id="contact-subject"
                     name="subject"
                     type="text"
                     value={formData.subject}
                     onChange={e => setFormData(d => ({ ...d, subject: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-slate-200 text-slate-900 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="contact-field w-full px-4 py-3.5 rounded-xl bg-white border border-white text-base text-slate-900 placeholder:text-slate-400 shadow-[0_1px_2px_rgba(15,23,42,0.06),0_8px_20px_rgba(15,23,42,0.08)] hover:shadow-[0_2px_4px_rgba(15,23,42,0.08),0_12px_28px_rgba(15,23,42,0.12)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:shadow-[0_2px_4px_rgba(15,23,42,0.08),0_12px_28px_rgba(15,23,42,0.12)] focus:-translate-y-0.5 transition-all duration-200"
                     placeholder="How can we help?"
                   />
                 </div>
                 <div>
-                  <label htmlFor="contact-message" className="block text-sm font-medium text-slate-600 mb-2">Message</label>
+                  <label htmlFor="contact-message" className="block text-sm font-semibold text-slate-800 mb-1.5">
+                    Message <span className="text-slate-500 font-normal">(required)</span>
+                  </label>
                   <textarea
                     id="contact-message"
                     name="message"
                     required
                     minLength={10}
-                    rows={5}
+                    rows={6}
                     value={formData.message}
                     onChange={e => setFormData(d => ({ ...d, message: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-slate-200 text-slate-900 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y transition-colors"
-                    placeholder="Your message..."
+                    className="contact-field w-full px-4 py-3.5 rounded-xl bg-white border border-white text-base text-slate-900 placeholder:text-slate-400 shadow-[0_1px_2px_rgba(15,23,42,0.06),0_8px_20px_rgba(15,23,42,0.08)] hover:shadow-[0_2px_4px_rgba(15,23,42,0.08),0_12px_28px_rgba(15,23,42,0.12)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:shadow-[0_2px_4px_rgba(15,23,42,0.08),0_12px_28px_rgba(15,23,42,0.12)] focus:-translate-y-0.5 resize-y transition-all duration-200 leading-relaxed"
+                    placeholder="Tell us what you need help with…"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={sending}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50 btn-brand-blue"
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-white text-base font-semibold transition-all duration-200 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white btn-brand-blue"
                   aria-busy={sending}
                 >
                   {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}

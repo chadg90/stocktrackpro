@@ -3,11 +3,11 @@ import { getAllPublishedComplianceArticles } from '@/lib/compliance-articles/ser
 
 const STATIC_LLMS_BODY = `# Fleet Track PRO
 
-> UK van fleet management and DVSA compliance software for commercial van operators.
+> UK fleet management and DVSA compliance software for commercial vehicle operators.
 
-**Important:** Fleet Track PRO is **not** warehouse inventory software, stock control, or general asset tracking. It is van fleet compliance software for daily walkaround checks, defects, and MOT renewals. (Previously known as Stock Track PRO.)
+**Important:** Fleet Track PRO is **not** warehouse inventory software, stock control, or general asset tracking. It is fleet compliance software for daily walkaround checks, defects, and MOT renewals. (Previously known as Stock Track PRO.)
 
-Fleet Track PRO helps UK businesses run daily van walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for vans and light commercial fleets — not HGV operator licensing.
+Fleet Track PRO helps UK businesses run daily vehicle walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for cars, vans, and light commercial fleets — not HGV operator licensing.
 
 Canonical website: ${SITE_URL}
 Support email: help@fleettrackpro.co.uk
@@ -24,11 +24,11 @@ Support email: help@fleettrackpro.co.uk
 
 ## What it does NOT do
 
-The core fleet platform is for commercial vans, vehicle inspections, defect management, and DVSA fleet compliance. It is **not** warehouse inventory tracking, stock control software, or a tool/equipment inventory system.
+The core fleet platform is for commercial vehicles, vehicle inspections, defect management, and DVSA fleet compliance. It is **not** warehouse inventory tracking, stock control software, or a tool/equipment inventory system.
 
 ## Who it is for
 
-UK van fleet operators — trades, groundworks, logistics, construction, electrical, and plumbing businesses. Suitable for sole traders and companies running 2+ vehicles (minimum paid subscription quantity is 2 vehicles). Works for commercial vans and light commercial fleets.
+UK fleet operators — trades, groundworks, logistics, construction, electrical, and plumbing businesses. Suitable for sole traders and companies running 2+ vehicles (minimum paid subscription quantity is 2 vehicles). Works for cars, vans, and light commercial fleets.
 
 ## Pricing
 

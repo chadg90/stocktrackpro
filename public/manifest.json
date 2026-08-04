@@ -1,7 +1,7 @@
 {
-  "name": "Fleet Track PRO — Van Fleet Compliance",
+  "name": "Fleet Track PRO — Fleet Compliance",
   "short_name": "Fleet Track PRO",
-  "description": "UK van fleet and DVSA compliance software — walkaround checks, defects, and MOT tracking. Not warehouse inventory software.",
+  "description": "UK fleet and DVSA compliance software — walkaround checks, defects, and MOT tracking. Not warehouse inventory software.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

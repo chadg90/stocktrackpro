@@ -30,12 +30,12 @@ const WHATSAPP_ENQUIRY_URL =
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Fleet Track PRO | UK Van Fleet & DVSA Compliance Software',
+    absolute: 'Fleet Track PRO | UK Fleet & DVSA Compliance Software',
   },
   description: SITE_META_DESCRIPTION,
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Fleet Track PRO | UK Van Fleet & DVSA Compliance Software',
+    title: 'Fleet Track PRO | UK Fleet & DVSA Compliance Software',
     description: SITE_META_DESCRIPTION,
     url: 'https://www.fleettrackpro.co.uk',
     siteName: 'Fleet Track PRO',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Fleet Track PRO — UK van fleet management, inspections, and defect reporting',
+        alt: 'Fleet Track PRO — UK fleet management, inspections, and defect reporting',
       },
     ],
     locale: 'en_GB',
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fleet Track PRO | UK Van Fleet & DVSA Compliance Software',
+    title: 'Fleet Track PRO | UK Fleet & DVSA Compliance Software',
     description: SITE_META_DESCRIPTION,
     images: ['/og-image.jpg'],
   },
@@ -156,7 +156,7 @@ export default function Home() {
               <div className="relative aspect-[4/3] overflow-hidden mkt-card-static">
                 <Image
                   src="/fleet-operations.jpg"
-                  alt="Fleet Track PRO in use with UK van fleet operations"
+                  alt="Fleet Track PRO in use with UK fleet operations"
                   fill
                   className="object-cover object-center"
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -214,7 +214,7 @@ export default function Home() {
               <div className="relative aspect-[4/3] overflow-hidden mkt-card-static order-first lg:order-none">
                 <Image
                   src="/fleet-walkaround.jpg"
-                  alt="Technician inspecting a van during a daily walkaround check"
+                  alt="Technician inspecting a vehicle during a daily walkaround check"
                   fill
                   className="object-cover object-center"
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -251,7 +251,7 @@ export default function Home() {
               <div>
                 <h2 className="text-2xl sm:text-4xl font-bold text-slate-900 mb-3">What&apos;s included</h2>
                 <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                  Core van fleet tools in one subscription. See the{' '}
+                  Core fleet tools in one subscription. See the{' '}
                   <Link
                     href="/features"
                     className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"

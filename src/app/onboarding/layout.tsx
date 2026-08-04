@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Sign up',
   description:
-    'Create your Fleet Track PRO company account — 7-day free trial for UK van fleet DVSA walkaround checks, defects, and MOT tracking.',
+    'Create your Fleet Track PRO company account — 7-day free trial for UK fleet DVSA walkaround checks, defects, and MOT tracking.',
   alternates: { canonical: '/onboarding' },
   robots: { index: false, follow: true },
   openGraph: {

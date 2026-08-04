@@ -4,12 +4,12 @@ import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
 export const metadata: Metadata = {
   title: 'Compliance Centre',
   description:
-    'UK van fleet compliance articles — defect records, digital vehicle inspections, MOT tracking, for UK commercial van operators.',
+    'UK fleet compliance articles — defect records, walkaround checks, retention, roadside readiness and MOT tracking for commercial vehicle operators.',
   alternates: { canonical: '/compliance-centre' },
   openGraph: {
     title: 'Compliance Centre | Fleet Track PRO',
     description:
-      'Articles on van fleet defect records, digital vehicle inspections, MOT tracking, for UK commercial van operators.',
+      'Articles on fleet defect records, walkaround checks, retention, roadside readiness and MOT tracking for UK commercial vehicle operators.',
     url: 'https://www.fleettrackpro.co.uk/compliance-centre/',
     siteName: 'Fleet Track PRO',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Fleet Track PRO Compliance Centre' }],
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Compliance Centre | Fleet Track PRO',
     description:
-      'Articles on van fleet defect records, digital vehicle inspections, MOT tracking, for UK commercial van operators.',
+      'Articles on fleet defect records, walkaround checks, retention, roadside readiness and MOT tracking for UK commercial vehicle operators.',
     images: ['/og-image.jpg'],
   },
 };
@@ -31,7 +31,7 @@ export default function ComplianceCentreLayout({ children }: { children: React.R
       <MarketingWebPageJsonLd
         path="/compliance-centre"
         title="Compliance Centre"
-        description="UK van fleet compliance guidance — defect records, digital inspections, MOT tracking, ."
+        description="UK fleet compliance guidance — defect records, walkaround checks, retention and MOT tracking."
       />
       {children}
     </>

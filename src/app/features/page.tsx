@@ -137,8 +137,8 @@ export default function Features() {
             </h1>
             <p className="text-lg text-slate-600 leading-relaxed">
               No bloat. One fleet subscription covers DVSA walkaround inspections, defect workflow, MOT monitoring, and team
-              management across iOS, Android, and the web dashboard. Not warehouse stock tracking — van fleet compliance
-              for UK operators.
+              management across iOS, Android, and the web dashboard. Not warehouse stock tracking — fleet compliance for
+              cars, vans, and light commercial vehicles.
             </p>
           </div>
         </div>

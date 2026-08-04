@@ -18,6 +18,13 @@ import {
 import { polishComplianceMarkdown } from '@/lib/compliance-articles/polish';
 import type { ComplianceArticleMeta } from '@/lib/compliance-articles/types';
 import CmsComplianceArticleBody from '@/components/CmsComplianceArticleBody';
+import { ArticleCta, KeyTakeaways } from '@/components/compliance-articles/ArticleChrome';
+import {
+  ClosingDefectsReturnToServiceArticle,
+  HowLongToKeepFleetRecordsArticle,
+  NilDefectReportsArticle,
+  PreparingForDvsaRoadsideCheckArticle,
+} from '@/components/compliance-articles/NewArticles';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -66,52 +73,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function KeyTakeaways({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mt-12 rounded-2xl border border-slate-200 bg-blue-500/10 p-6 sm:p-8">
-      <h2 className="mb-5 text-xl font-semibold text-slate-900">Key takeaways</h2>
-      <ul className="compliance-takeaway-list space-y-3">{children}</ul>
-    </div>
-  );
-}
-
-function ArticleCta() {
-  return (
-    <div className="mt-10 rounded-2xl border border-slate-200 bg-white/[0.04] p-6 sm:p-7">
-      <p className="text-base leading-relaxed text-slate-700">
-        <span className="font-medium text-slate-900">Fleet Track PRO</span> helps automate this process for UK fleets.{' '}
-        <Link href="/onboarding" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
-          Try free for 7 days — no card required.
-        </Link>
-      </p>
-    </div>
-  );
-}
-
 function VanFleetDefectRecordsArticle() {
   return (
     <ComplianceArticleContent>
       <p>
-        If you run commercial vans, you are responsible for making sure each vehicle is safe before it is used.
-        Government guidance on{' '}
+        If you run company vehicles — cars, vans or light commercials — you are responsible for making sure each one
+        is safe before it is used. Government guidance on{' '}
         <a
           href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
-          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
-          van daily walkaround checks
+          daily walkaround checks
         </a>{' '}
-        makes that duty clear. A defect record is your evidence that faults were spotted, reported, assessed and dealt
-        with before the van went back on the road.
+        makes that duty clear for van operators, and the same discipline applies across mixed fleets. A defect record
+        is your evidence that faults were spotted, reported, assessed and dealt with before the vehicle went back on
+        the road.
       </p>
 
-      <h2>Why defect records matter for van fleets</h2>
+      <h2>Why defect records matter for fleets</h2>
       <p>
-        The police and DVSA can stop vans at the roadside and inspect them. If a vehicle is dangerous, DVSA can stop
-        you using it until the problem is fixed. You may also be fined, prosecuted, or given penalty points on your
-        licence. Government guidance states you can receive three penalty points for each tyre that is not safe and
-        legal, and that using a van in a dangerous condition can lead to an unlimited fine and a prison sentence.
+        The police and DVSA can stop commercial vehicles at the roadside and inspect them. If a vehicle is dangerous,
+        DVSA can stop you using it until the problem is fixed. You may also be fined, prosecuted, or given penalty
+        points on your licence. Government guidance states you can receive three penalty points for each tyre that is
+        not safe and legal, and that using a vehicle in a dangerous condition can lead to an unlimited fine and a
+        prison sentence.
       </p>
       <p>
         DVSA can ask to see a record of your walkaround check during a roadside stop. If a serious defect is found and
@@ -175,14 +161,14 @@ function VanFleetDefectRecordsArticle() {
         manager, mechanic, fitter or another competent person authorised by the business.
       </p>
 
-      <h2>Why an app beats paper for van fleets</h2>
+      <h2>Why an app beats paper for fleets</h2>
       <p>
         Paper booklets can work for a very small fleet if they are completed, collected and stored properly. In practice,
         forms go missing, handwriting is unclear, photos are absent, and managers only learn about defects hours or days
         later. That delay is risky when DVSA stops a vehicle and asks what your maintenance system looks like.
       </p>
       <p>
-        A van inspection app creates timestamped records tied to a named driver, attaches photos at the point of
+        A digital inspection app creates timestamped records tied to a named driver, attaches photos at the point of
         reporting, and notifies managers or fitters immediately. That is not just convenience — it is stronger evidence
         that your business checked vehicles before use and acted on faults promptly.
       </p>
@@ -193,9 +179,9 @@ function VanFleetDefectRecordsArticle() {
 
       <h2>Keep records factual and consistent</h2>
       <p>
-        A good defect record avoids vague language. &quot;Problem with van&quot; is not enough. &quot;Nearside rear tyre
-        below safe tread depth, vehicle removed from use, replacement fitted by fitter and signed off before return to
-        service&quot; is much stronger. The same principle applies whether you use paper or software: someone outside
+        A good defect record avoids vague language. &quot;Problem with vehicle&quot; is not enough. &quot;Nearside rear
+        tyre below safe tread depth, vehicle removed from use, replacement fitted by fitter and signed off before return
+        to service&quot; is much stronger. The same principle applies whether you use paper or software: someone outside
         your business should be able to understand the decision made at the time.
       </p>
 
@@ -203,17 +189,16 @@ function VanFleetDefectRecordsArticle() {
         This article summarises general principles and is not legal advice. Always check current{' '}
         <a
           href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
-          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
-          GOV.UK van walkaround guidance
+          GOV.UK walkaround guidance
         </a>{' '}
         and DVSA enforcement publications for your own operation.
       </p>
 
       <KeyTakeaways>
-        <li>Van operators are responsible for ensuring vehicles are safe before use.</li>
+        <li>Fleet operators are responsible for ensuring vehicles are safe before use.</li>
         <li>DVSA can issue prohibitions, fines and penalty points where defects are found at roadside checks.</li>
         <li>Defect records should identify the driver, vehicle, time, fault and close-out action.</li>
         <li>Digital records with timestamps and photos are stronger evidence than lost or late paper forms.</li>
@@ -267,7 +252,7 @@ function PaperVsDigitalArticle() {
           roadside vehicle checks
         </a>{' '}
         states that police and DVSA can issue fines where offences are found, with amounts varying by seriousness.
-        Prohibition notices can immobilise a van until defects are repaired. If your inspection records are missing,
+        Prohibition notices can immobilise a vehicle until defects are repaired. If your inspection records are missing,
         unsigned or completed after the event, it is harder to show that your business operated responsibly.
       </p>
       <p>
@@ -326,7 +311,10 @@ function MotExpiryTrackingArticle() {
   return (
     <ComplianceArticleContent>
       <p>
-        MOT expiry tracking is one of the simplest fleet compliance tasks to understand and one of the easiest to get wrong at scale. A single missed MOT can take a vehicle off the road, create customer disruption and expose the business to enforcement action. When a company runs multiple vans or mixed light-commercial assets, relying on memory or a spreadsheet becomes a risk.
+        MOT expiry tracking is one of the simplest fleet compliance tasks to understand and one of the easiest to get
+        wrong at scale. A single missed MOT can take a vehicle off the road, create customer disruption and expose the
+        business to enforcement action. When a company runs multiple vehicles — cars, vans or light commercials —
+        relying on memory or a spreadsheet becomes a risk.
       </p>
 
       <h2>Why expired MOTs are high risk</h2>
@@ -334,7 +322,9 @@ function MotExpiryTrackingArticle() {
         In the UK, driving a vehicle without a valid MOT can lead to a fine of up to £1,000. If the vehicle is also in a dangerous condition, the consequences can be more serious. An expired MOT may also affect insurance, especially if a vehicle involved in an incident was not legally roadworthy or should not have been used.
       </p>
       <p>
-        For commercial van operators, the risk goes beyond the single vehicle. A roadside stop, customer complaint or collision can trigger wider scrutiny of maintenance records. If a fleet manager cannot show that renewals are monitored and vehicles are kept roadworthy, DVSA may ask harder questions about the business&apos;s compliance culture.
+        For fleet operators, the risk goes beyond the single vehicle. A roadside stop, customer complaint or collision
+        can trigger wider scrutiny of maintenance records. If a fleet manager cannot show that renewals are monitored
+        and vehicles are kept roadworthy, DVSA may ask harder questions about the business&apos;s compliance culture.
       </p>
 
       <h2>Potential prohibition notices and downtime</h2>
@@ -379,7 +369,10 @@ function MotExpiryTrackingArticle() {
         The best systems combine automation with routine. Managers should still review upcoming renewals weekly, confirm bookings, and check that failed MOTs or advisory items are followed up. Software reduces missed dates, but accountability remains with the operator.
       </p>
       <p>
-        For commercial van fleets, this routine is part of the wider maintenance system. MOT tracking, daily inspections and defect close-out should support each other. If a vehicle fails an MOT because of a defect that should have been picked up earlier, the issue is not just the missed test; it is the process that allowed the fault to continue.
+        For any commercial fleet, this routine is part of the wider maintenance system. MOT tracking, daily inspections
+        and defect close-out should support each other. If a vehicle fails an MOT because of a defect that should have
+        been picked up earlier, the issue is not just the missed test; it is the process that allowed the fault to
+        continue.
       </p>
 
       <p className="compliance-disclaimer">
@@ -417,13 +410,12 @@ function PreUseChecksArticle() {
         that a responsible person looked at the vehicle at the point of use. Government guidance on{' '}
         <a
           href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
-          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
-          van daily walkaround checks
+          daily walkaround checks
         </a>{' '}
-        sets out that duty clearly.
+        sets out that duty clearly for vans, and the same pre-use discipline applies across company fleets.
       </p>
 
       <h2>What should a driver check?</h2>
@@ -452,8 +444,8 @@ function PreUseChecksArticle() {
         reported. Photos help where there is damage, tyre wear, or a lighting fault. If the record only says
         &quot;all OK&quot; with no name and no timestamp, it is weak evidence when something goes wrong later. For the
         full defect trail after a fault is found, see{' '}
-        <Link href="/compliance-centre/van-fleet-defect-records" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4">
-          van fleet defect records
+        <Link href="/compliance-centre/van-fleet-defect-records">
+          fleet defect records
         </Link>
         .
       </p>
@@ -473,11 +465,10 @@ function PreUseChecksArticle() {
         This article summarises general principles and is not legal advice. Follow current{' '}
         <a
           href="https://www.gov.uk/guidance/carry-out-van-daily-walkaround-checks"
-          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
         >
-          GOV.UK van walkaround guidance
+          GOV.UK walkaround guidance
         </a>{' '}
         and employer policy for your operation.
       </p>
@@ -512,8 +503,8 @@ function DigitalDefectRecordsDvsaArticle() {
       </p>
       <p>
         For more on what to capture day to day, see our guide on{' '}
-        <Link href="/compliance-centre/van-fleet-defect-records" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4">
-          van fleet defect records
+        <Link href="/compliance-centre/van-fleet-defect-records">
+          fleet defect records
         </Link>
         . This article focuses on how that trail holds up when an examiner asks harder questions.
       </p>
@@ -527,7 +518,7 @@ function DigitalDefectRecordsDvsaArticle() {
         fault found on the day.
       </p>
       <p>
-        Follow-up can also look beyond one van. Patterns across the fleet matter: repeated tyre or lighting defects,
+        Follow-up can also look beyond one vehicle. Patterns across the fleet matter: repeated tyre or lighting defects,
         gaps between inspection dates, or vehicles that stay &quot;active&quot; while defects remain open all invite
         deeper questions about whether the written system matches reality.
       </p>
@@ -588,6 +579,14 @@ function ArticleBody({ article }: { article: ComplianceArticle }) {
       return <PreUseChecksArticle />;
     case 'digital-defect-records-dvsa-scrutiny':
       return <DigitalDefectRecordsDvsaArticle />;
+    case 'nil-defect-reports-why-they-matter':
+      return <NilDefectReportsArticle />;
+    case 'how-long-to-keep-fleet-records':
+      return <HowLongToKeepFleetRecordsArticle />;
+    case 'closing-defects-return-to-service':
+      return <ClosingDefectsReturnToServiceArticle />;
+    case 'preparing-for-dvsa-roadside-check':
+      return <PreparingForDvsaRoadsideCheckArticle />;
     default:
       return null;
   }
@@ -609,59 +608,68 @@ export default async function ComplianceArticlePage({ params }: Props) {
     <div className="marketing-shell">
       <ComplianceArticleJsonLd article={articleMeta} />
       <Navbar />
-      <main className="container mx-auto px-4 pt-24 sm:pt-28 pb-20 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-10 lg:gap-14">
-          <article>
-            <p className="text-[var(--brand-blue)] font-medium text-sm uppercase tracking-[0.2em] mb-4">
-              <Link href="/compliance-centre" className="hover:underline">
-                Compliance Centre
-              </Link>
-            </p>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">{articleMeta.title}</h1>
-            <p className="mb-10 text-sm text-slate-400">
-              Published{' '}
-              {format(new Date(articleMeta.datePublished), 'd MMMM yyyy')}
-              {articleMeta.dateModified && articleMeta.dateModified !== articleMeta.datePublished
-                ? ` · Updated ${format(new Date(articleMeta.dateModified), 'd MMMM yyyy')}`
-                : ''}
-            </p>
-            {resolved.kind === 'static' ? (
-              <ArticleBody article={resolved.article} />
-            ) : (
-              <CmsComplianceArticleBody
-                markdown={polishComplianceMarkdown(resolved.article.bodyMarkdown, true)}
-              />
-            )}
-            <ArticleBottomCta />
-          </article>
-          <aside className="lg:sticky lg:top-28 h-fit space-y-6">
-            <div className="rounded-2xl border border-slate-200 bg-white/[0.04] p-6">
-              <p className="text-slate-900 font-semibold mb-3">Try the platform</p>
-              <p className="text-slate-600 text-sm mb-4">
-                See how inspections, defects, and reminders come together for UK fleets.
-              </p>
-              <Link
-                href="/onboarding"
-                className="flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-slate-50"
-              >
-                Try Fleet Track PRO Free for 7 Days →
-              </Link>
-            </div>
-          </aside>
-        </div>
-
-        <section className="mt-16 pt-12 border-t border-slate-200 max-w-3xl">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Related articles</h2>
-          <ul className="space-y-3">
-            {related.map((r) => (
-              <li key={r.slug}>
-                <Link href={`/compliance-centre/${r.slug}`} className="text-[var(--brand-blue)] hover:underline">
-                  {r.title}
+      <main className="border-t border-slate-200 bg-slate-50/80">
+        <div className="container mx-auto px-4 pt-24 sm:pt-28 pb-20 max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-8 lg:gap-10">
+            <article className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
+              <p className="text-[var(--brand-blue)] font-semibold text-xs sm:text-sm uppercase tracking-[0.18em] mb-4">
+                <Link href="/compliance-centre" className="hover:underline">
+                  Compliance Centre
                 </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+              </p>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mb-3 leading-tight">
+                {articleMeta.title}
+              </h1>
+              <p className="mb-8 sm:mb-10 text-sm text-slate-500">
+                Published{' '}
+                {format(new Date(articleMeta.datePublished), 'd MMMM yyyy')}
+                {articleMeta.dateModified && articleMeta.dateModified !== articleMeta.datePublished
+                  ? ` · Updated ${format(new Date(articleMeta.dateModified), 'd MMMM yyyy')}`
+                  : ''}
+              </p>
+              {resolved.kind === 'static' ? (
+                <ArticleBody article={resolved.article} />
+              ) : (
+                <CmsComplianceArticleBody
+                  markdown={polishComplianceMarkdown(resolved.article.bodyMarkdown, true)}
+                />
+              )}
+              <ArticleBottomCta />
+            </article>
+
+            <aside className="lg:sticky lg:top-28 h-fit space-y-5">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <p className="text-slate-900 font-semibold mb-2">Try the platform</p>
+                <p className="text-slate-600 text-sm mb-5 leading-relaxed">
+                  See how inspections, defects, and reminders come together for UK fleets.
+                </p>
+                <Link
+                  href="/onboarding"
+                  className="flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white"
+                >
+                  Start free 7-day trial →
+                </Link>
+              </div>
+              {related.length > 0 && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <p className="text-slate-900 font-semibold mb-3">Related articles</p>
+                  <ul className="space-y-3">
+                    {related.slice(0, 4).map((r) => (
+                      <li key={r.slug}>
+                        <Link
+                          href={`/compliance-centre/${r.slug}`}
+                          className="text-sm text-slate-700 hover:text-[var(--brand-blue)] leading-snug block"
+                        >
+                          {r.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </aside>
+          </div>
+        </div>
       </main>
     </div>
   );
