@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import { SITE_LEGAL_NAME, SITE_NAME, SITE_URL, SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
 
 /** Update only when the terms text changes. */
-const LAST_UPDATED = '22 July 2026';
+const LAST_UPDATED = '4 August 2026';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -130,8 +130,8 @@ export default function Terms() {
 
           <Section title="5. Subscriptions and payments">
             <p className="text-slate-600 leading-relaxed">
-              Paid access is provided on a subscription basis. Prices are shown on our Pricing page in GBP and
-              typically include UK VAT as stated there. Subscriptions are purchased through website checkout
+              Paid access is provided on a subscription basis. Prices are shown on our Pricing page in GBP.
+              Subscriptions are purchased through website checkout
               (Stripe) and are not sold or renewed through the mobile app. Full rules on trials, billing cycles,
               quantity changes, cancellation, and refunds are in our{' '}
               <Link

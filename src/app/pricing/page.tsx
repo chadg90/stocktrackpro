@@ -116,7 +116,7 @@ export default function Pricing() {
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-slate-600 leading-relaxed">
-            £8 per vehicle per month (prices include VAT at 20%). Monthly billing can be cancelled anytime.
+            £8 per vehicle per month. Monthly billing can be cancelled anytime.
             Minimum 2 vehicles. Annual billing is £84 per vehicle per year, paid upfront.
           </p>
 
@@ -348,7 +348,7 @@ export default function Pricing() {
                     <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
                     <span>
                       Fleet: £{PRICE_PER_VEHICLE_MONTHLY} per vehicle / month, or £{PRICE_PER_VEHICLE_YEARLY} per
-                      vehicle / year (paid upfront). Prices include UK VAT at 20%.
+                      vehicle / year (paid upfront).
                     </span>
                   </li>
                   <li className="flex items-start gap-2.5">

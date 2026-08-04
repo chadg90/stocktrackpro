@@ -16,12 +16,14 @@ import {
 } from 'firebase/firestore';
 import {
   deleteObject,
+  getBytes,
   getDownloadURL,
   getStorage,
   ref,
   uploadBytes,
 } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
+import JSZip from 'jszip';
 import {
   Download,
   FileText,
@@ -38,7 +40,7 @@ import {
 import TableSkeleton from '../components/TableSkeleton';
 import { EmptyStateTableRow } from '../components/EmptyState';
 import {
-  exportVehiclePeriodReportPdf,
+  buildVehiclePeriodReportPdf,
   getPeriodBounds,
   type PeriodMonths,
   type VehiclePeriodDefect,
@@ -128,8 +130,7 @@ export default function VehicleReportsPage() {
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [docsLoading, setDocsLoading] = useState(false);
-  const [months, setMonths] = useState<PeriodMonths>(6);
-  const [pdfBusy, setPdfBusy] = useState(false);
+  const [packBusyMonths, setPackBusyMonths] = useState<PeriodMonths | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -158,10 +159,15 @@ export default function VehicleReportsPage() {
     });
   }, [vehicles, vehicleSearch]);
 
-  const periodDocs = useMemo(() => {
-    const { start, end } = getPeriodBounds(months);
+  const docsLast6 = useMemo(() => {
+    const { start, end } = getPeriodBounds(6);
     return documents.filter((d) => inRange(d.document_date as Timestamp | null, start, end));
-  }, [documents, months]);
+  }, [documents]);
+
+  const docsLast12 = useMemo(() => {
+    const { start, end } = getPeriodBounds(12);
+    return documents.filter((d) => inRange(d.document_date as Timestamp | null, start, end));
+  }, [documents]);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) {
@@ -399,12 +405,16 @@ export default function VehicleReportsPage() {
     }
   };
 
-  const handlePdf = async () => {
-    if (!firebaseDb || !profile?.company_id || !selectedVehicle) return;
-    setPdfBusy(true);
+  const handleDownloadPack = async (months: PeriodMonths) => {
+    if (!firebaseApp || !firebaseDb || !profile?.company_id || !selectedVehicle) return;
+    setPackBusyMonths(months);
     setError(null);
+    setSuccess(null);
     try {
       const { start, end } = getPeriodBounds(months);
+      const periodDocs = documents.filter((d) =>
+        inRange(d.document_date as Timestamp | null, start, end)
+      );
 
       const inspections: VehiclePeriodInspection[] = [];
       try {
@@ -472,7 +482,7 @@ export default function VehicleReportsPage() {
         );
       }
 
-      await exportVehiclePeriodReportPdf({
+      const { blob: reportBlob, fileName: reportName } = await buildVehiclePeriodReportPdf({
         vehicle: selectedVehicle,
         companyName,
         months,
@@ -480,11 +490,65 @@ export default function VehicleReportsPage() {
         defects,
         documents: periodDocs,
       });
+
+      const zip = new JSZip();
+      zip.file(reportName, reportBlob);
+
+      const storage = getStorage(firebaseApp);
+      const docsFolder = zip.folder('documents');
+      const usedNames = new Set<string>();
+
+      for (const row of periodDocs) {
+        if (!row.storage_path || !docsFolder) continue;
+        try {
+          const bytes = await getBytes(ref(storage, row.storage_path));
+          const datePart = formatDateOnly(row.document_date as Timestamp).replace(/\s+/g, '-');
+          const typePart = String(row.type || 'other');
+          const base = safeFileName(
+            `${datePart}_${typePart}_${row.file_name || row.title || row.id || 'document'}`
+          );
+          let name = base;
+          let n = 2;
+          while (usedNames.has(name.toLowerCase())) {
+            const dot = base.lastIndexOf('.');
+            name =
+              dot > 0
+                ? `${base.slice(0, dot)}_${n}${base.slice(dot)}`
+                : `${base}_${n}`;
+            n += 1;
+          }
+          usedNames.add(name.toLowerCase());
+          docsFolder.file(name, bytes);
+        } catch (docErr) {
+          console.warn('Pack document skip:', row.id, docErr);
+        }
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const safeReg = (selectedVehicle.registration || 'vehicle')
+        .toUpperCase()
+        .replace(/[^a-zA-Z0-9_-]/g, '');
+      const zipName = `FTP-${safeReg}-${months}month-pack.zip`;
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = zipName;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      setSuccess(
+        `${months}-month pack ready (${periodDocs.length} document${
+          periodDocs.length === 1 ? '' : 's'
+        } included). Share the ZIP with NHS as needed.`
+      );
     } catch (err) {
       console.error(err);
-      setError('PDF generation failed. Please try again.');
+      setError('Pack download failed. Please try again.');
     } finally {
-      setPdfBusy(false);
+      setPackBusyMonths(null);
     }
   };
 
@@ -502,7 +566,7 @@ export default function VehicleReportsPage() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Vehicle reports</h1>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Upload MOT, service history and other documents for a vehicle, then download a 6- or
-          12-month PDF with inspections, defects and matching documents.
+          12-month pack (summary PDF plus original files) for NHS or other operators.
         </p>
       </div>
 
@@ -713,46 +777,32 @@ export default function VehicleReportsPage() {
 
           <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
             <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500">
-              Generate period report
+              Download evidence pack
             </h2>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              PDF includes inspections, defects, and uploaded documents dated within the selected
-              window ({periodDocs.length} document
-              {periodDocs.length === 1 ? '' : 's'} match this period).
+              Each pack is a ZIP with the period summary PDF (inspections and defects) plus the
+              original uploaded documents dated in that window
+              ({docsLast6.length} in last 6 months, {docsLast12.length} in last 12 months). Built on
+              demand — nothing extra is stored.
             </p>
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="inline-flex rounded-lg border border-gray-300 p-1 dark:border-gray-600">
-                <button
-                  type="button"
-                  onClick={() => setMonths(6)}
-                  className={`rounded-md px-4 py-2 text-sm font-semibold ${
-                    months === 6
-                      ? 'bg-blue-500 text-white keep-light-on-dark'
-                      : 'text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800'
-                  }`}
-                >
-                  Last 6 months
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMonths(12)}
-                  className={`rounded-md px-4 py-2 text-sm font-semibold ${
-                    months === 12
-                      ? 'bg-blue-500 text-white keep-light-on-dark'
-                      : 'text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800'
-                  }`}
-                >
-                  Last 12 months
-                </button>
-              </div>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
-                disabled={pdfBusy}
-                onClick={handlePdf}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white keep-light-on-dark hover:bg-blue-600 disabled:opacity-60"
+                disabled={packBusyMonths !== null}
+                onClick={() => handleDownloadPack(6)}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white keep-light-on-dark hover:bg-blue-600 disabled:opacity-60"
               >
                 <Download className="h-4 w-4 text-white keep-light-on-dark" />
-                {pdfBusy ? 'Building PDF…' : `Download ${months}-month PDF`}
+                {packBusyMonths === 6 ? 'Building pack…' : 'Download 6 month Pack'}
+              </button>
+              <button
+                type="button"
+                disabled={packBusyMonths !== null}
+                onClick={() => handleDownloadPack(12)}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white keep-light-on-dark hover:bg-blue-600 disabled:opacity-60"
+              >
+                <Download className="h-4 w-4 text-white keep-light-on-dark" />
+                {packBusyMonths === 12 ? 'Building pack…' : 'Download 12 month Pack'}
               </button>
             </div>
           </div>

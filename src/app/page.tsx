@@ -96,7 +96,7 @@ const QUICK_FACTS = [
   ['Platform', 'iOS and Android app, plus web dashboard'],
   ['Roles', 'Drivers report; managers and fitters run My Jobs and oversight'],
   ['Fleet size', 'From 2 to 100+ vehicles'],
-  ['Pricing', 'From £8 per vehicle per month (VAT included)'],
+  ['Pricing', 'From £8 per vehicle per month'],
   ['Support', 'UK-based — email and WhatsApp'],
 ];
 

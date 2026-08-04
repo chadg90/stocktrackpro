@@ -1,6 +1,7 @@
 /**
  * Labels for Blood/Organ inspection checks — mirrored from the mobile template
- * (STP/services/inspections/bloodOrganTemplate.ts, v2026-07-blood-organ-v3).
+ * (STP/services/inspections/bloodOrganTemplate.ts, v2026-08-blood-organ-v4).
+ * Legacy check IDs are retained so older inspection proofs still label correctly.
  * Includes legacy check ids so historic inspections still render.
  */
 

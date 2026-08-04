@@ -277,14 +277,14 @@ function lastTableY(doc: jsPDF, fallback: number): number {
   return ((doc as unknown as { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY || fallback) + 7;
 }
 
-export async function exportVehiclePeriodReportPdf(args: {
+export async function buildVehiclePeriodReportPdf(args: {
   vehicle: VehiclePeriodVehicle;
   companyName?: string;
   months: PeriodMonths;
   inspections: VehiclePeriodInspection[];
   defects: VehiclePeriodDefect[];
   documents: VehiclePeriodDocument[];
-}): Promise<void> {
+}): Promise<{ blob: Blob; fileName: string }> {
   const { vehicle, companyName, months, inspections, defects, documents } = args;
   const { start, end } = getPeriodBounds(months);
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -620,5 +620,28 @@ export async function exportVehiclePeriodReportPdf(args: {
   }
 
   const safeReg = reg.replace(/[^a-zA-Z0-9_-]/g, '');
-  doc.save(`FTP-Vehicle-Report-${safeReg}-${months}m.pdf`);
+  const fileName = `FTP-Vehicle-Report-${safeReg}-${months}m.pdf`;
+  const blob = doc.output('blob');
+  return { blob, fileName };
+}
+
+/** Build and immediately download the period report PDF. */
+export async function exportVehiclePeriodReportPdf(args: {
+  vehicle: VehiclePeriodVehicle;
+  companyName?: string;
+  months: PeriodMonths;
+  inspections: VehiclePeriodInspection[];
+  defects: VehiclePeriodDefect[];
+  documents: VehiclePeriodDocument[];
+}): Promise<void> {
+  const { blob, fileName } = await buildVehiclePeriodReportPdf(args);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }

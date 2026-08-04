@@ -4,7 +4,7 @@ import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
-    '£8 per vehicle per month (VAT included), 2-vehicle minimum. 7-day free fleet trial on the web.',
+    '£8 per vehicle per month, 2-vehicle minimum. 7-day free fleet trial on the web.',
   alternates: { canonical: '/pricing' },
   openGraph: {
     title: 'Pricing | Fleet Track PRO',

@@ -4,12 +4,12 @@ import Link from 'next/link';
 import Navbar from '../components/Navbar';
 
 /** Update only when the terms text changes. */
-const LAST_UPDATED = '22 July 2026';
+const LAST_UPDATED = '4 August 2026';
 
 export const metadata: Metadata = {
   title: 'Subscription Terms',
   description:
-    'Subscription terms for Fleet Track PRO UK fleet software — 7-day trial, monthly and annual billing, cancellation, VAT, and renewal.',
+    'Subscription terms for Fleet Track PRO UK fleet software — 7-day trial, monthly and annual billing, cancellation, and renewal.',
   alternates: { canonical: '/subscription-terms' },
   openGraph: {
     title: 'Subscription Terms | Fleet Track PRO',
@@ -102,7 +102,7 @@ export default function SubscriptionTermsPage() {
                   than monthly, paid in advance).
                 </>,
                 'Minimum subscription quantity is 2 vehicles.',
-                'Displayed pricing is in GBP and includes UK VAT at 20%, unless we state otherwise.',
+                'Displayed pricing is in GBP as shown on the Pricing page. Fleet Track PRO is not VAT registered, so VAT is not charged on subscriptions.',
                 'Your subscribed vehicle count controls how many vehicles your company can manage at any one time.',
                 'Published website prices may change for new customers. Existing customers are handled as set out in Sections 8 and 9.',
               ]}
@@ -131,7 +131,7 @@ export default function SubscriptionTermsPage() {
                 'Subscriptions are billed by Stripe using the payment method you provide at checkout. You are responsible for keeping payment details current and accurate.',
                 'By starting a paid subscription, you authorise recurring charges for the selected plan and quantity until cancelled in accordance with these terms.',
                 'Managers can open the Stripe billing portal from the dashboard. Changes to billing cycle or subscribed quantity may need to be completed in the portal or via support, and usually take effect from the next billing cycle.',
-                'Invoices and receipts are provided through Stripe. You are responsible for your own accounting and tax reporting beyond the VAT included in displayed prices.',
+                'Invoices and receipts are provided through Stripe. You are responsible for your own accounting and tax reporting.',
               ]}
             />
           </Section>

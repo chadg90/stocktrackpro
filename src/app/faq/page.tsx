@@ -24,7 +24,7 @@ export default function FAQ() {
     },
     {
       question: "How much does the fleet plan cost?",
-      answer: "£8 per vehicle per month (including VAT), with a minimum of 2 vehicles. Annual billing is £84 per vehicle per year (about £7 per month equivalent). See the Pricing page for the calculator and trial options.",
+      answer: "£8 per vehicle per month, with a minimum of 2 vehicles. Annual billing is £84 per vehicle per year (about £7 per month equivalent). See the Pricing page for the calculator and trial options.",
     },
     {
       question: "Does this work on Android and iOS?",

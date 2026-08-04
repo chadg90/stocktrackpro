@@ -32,7 +32,7 @@ UK van fleet operators — trades, groundworks, logistics, construction, electri
 
 ## Pricing
 
-- £8 per vehicle per month, including VAT at 20% (minimum 2 vehicles)
+- £8 per vehicle per month (minimum 2 vehicles)
 - Annual fleet billing: £84 per vehicle per year
 - Unlimited team members on every plan (no per-user fee)
 - 7-day free trial — no card required
