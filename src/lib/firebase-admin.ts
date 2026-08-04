@@ -97,13 +97,21 @@ function getCredential(): admin.credential.Credential {
 let app: admin.app.App | null = null;
 
 export function getAdminApp(): admin.app.App {
-  if (!app) {
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-    if (!projectId) {
-      throw new Error('NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set');
-    }
-    app = admin.initializeApp({ credential: getCredential(), projectId });
+  if (app) return app;
+
+  // Next.js HMR / multi-import can clear the module cache while the Admin SDK
+  // still holds the default app — reuse it instead of re-initializing.
+  const existing = admin.apps.find((candidate) => candidate !== null);
+  if (existing) {
+    app = existing;
+    return app;
   }
+
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  if (!projectId) {
+    throw new Error('NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set');
+  }
+  app = admin.initializeApp({ credential: getCredential(), projectId });
   return app;
 }
 
