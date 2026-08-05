@@ -2,12 +2,11 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Navbar from './components/Navbar';
 import HomeHero from '@/components/HomeHero';
-import CustomerStoryCallout from '@/components/CustomerStoryCallout';
+import CustomerLogoStrip from '@/components/CustomerLogoStrip';
+import CustomerStoriesSection from '@/components/CustomerStoriesSection';
 import HomeFaqSection from '@/components/HomeFaqSection';
-import TestimonialQuote from '@/components/TestimonialQuote';
 import { HomeJsonLd } from '@/components/HomeJsonLd';
 import { HomeFaqJsonLd } from '@/components/HomeFaqJsonLd';
-import { getFeaturedTestimonial } from '@/content/testimonials';
 import { SITE_META_DESCRIPTION } from '@/content/siteSeo';
 import {
   Map,
@@ -119,7 +118,6 @@ const INCLUDED = [
 ];
 
 export default function Home() {
-  const featuredTestimonial = getFeaturedTestimonial();
   return (
     <>
       <HomeJsonLd />
@@ -129,19 +127,21 @@ export default function Home() {
 
         <HomeHero />
 
+        <CustomerLogoStrip />
+
         <MarketingBreak variant="band" />
 
-        <section className="py-12 sm:py-16 bg-white">
+        <section className="py-7 sm:py-9 bg-white">
           <div className="container mx-auto px-4 max-w-5xl">
-            <p className="text-[var(--brand-blue)] font-semibold text-sm uppercase tracking-[0.2em] mb-3">
+            <p className="text-[var(--brand-blue)] font-semibold text-xs sm:text-sm uppercase tracking-[0.2em] mb-2">
               Quick Facts
             </p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-8">Fleet Track PRO at a glance</h2>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">Fleet Track PRO at a glance</h2>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-3">
               {QUICK_FACTS.map(([term, detail]) => (
-                <div key={term} className="border-t border-slate-200 pt-4">
-                  <dt className="text-slate-900 font-semibold">{term}</dt>
-                  <dd className="text-slate-600 text-sm mt-1 leading-relaxed">{detail}</dd>
+                <div key={term} className="border-t border-slate-200 pt-2.5">
+                  <dt className="text-slate-900 font-semibold text-sm">{term}</dt>
+                  <dd className="text-slate-600 text-sm mt-0.5 leading-snug">{detail}</dd>
                 </div>
               ))}
             </dl>
@@ -196,7 +196,9 @@ export default function Home() {
 
         <MarketingBreak variant="soft" />
 
-        <CustomerStoryCallout />
+        <div id="customer-stories">
+          <CustomerStoriesSection />
+        </div>
 
         <MarketingBreak variant="band" />
 
@@ -236,10 +238,10 @@ export default function Home() {
 
         <MarketingBreak />
 
-        <section className="py-14 sm:py-24 bg-slate-100">
-          <div className="container mx-auto px-4 max-w-5xl">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center mb-12">
-              <div className="relative aspect-[4/3] overflow-hidden mkt-card-static">
+        <section className="py-14 sm:py-20 bg-slate-100">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-8 lg:gap-12 items-center mb-8 sm:mb-10">
+              <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
                 <Image
                   src="/fleet-manager-dashboard.jpg"
                   alt="Fleet manager reviewing vehicles and MOT status on a laptop"
@@ -249,47 +251,41 @@ export default function Home() {
                 />
               </div>
               <div>
-                <h2 className="text-2xl sm:text-4xl font-bold text-slate-900 mb-3">What&apos;s included</h2>
-                <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                  Core fleet tools in one subscription. See the{' '}
-                  <Link
-                    href="/features"
-                    className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
-                  >
-                    features page
-                  </Link>{' '}
-                  for the full list.
+                <p className="text-[var(--brand-blue)] font-semibold text-sm uppercase tracking-[0.2em] mb-3">
+                  Platform
                 </p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">What&apos;s included</h2>
+                <p className="text-slate-600 text-sm sm:text-base leading-relaxed mb-5">
+                  Core fleet tools in one subscription — inspections, defects, and renewals without juggling apps or
+                  paper.
+                </p>
+                <Link
+                  href="/features"
+                  className="inline-flex items-center gap-1.5 text-[var(--brand-blue)] hover:text-blue-700 text-sm font-semibold"
+                >
+                  See the full feature list →
+                </Link>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
               {INCLUDED.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.title} className="flex gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center text-[var(--brand-blue)] shrink-0">
+                  <div
+                    key={item.title}
+                    className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center text-[var(--brand-blue)] mb-4">
                       <Icon className="w-5 h-5" />
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 mb-1">{item.title}</h3>
-                      <p className="text-slate-600 text-sm leading-relaxed">{item.description}</p>
-                    </div>
+                    <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-1.5">{item.title}</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed">{item.description}</p>
                   </div>
                 );
               })}
             </div>
           </div>
         </section>
-
-        <MarketingBreak variant="soft" />
-
-        {featuredTestimonial && (
-          <section className="py-16 sm:py-20 bg-white">
-            <div className="container mx-auto px-4 max-w-3xl">
-              <TestimonialQuote testimonial={featuredTestimonial} />
-            </div>
-          </section>
-        )}
 
         <MarketingBreak variant="soft" />
 

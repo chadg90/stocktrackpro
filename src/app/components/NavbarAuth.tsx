@@ -171,6 +171,13 @@ export function NavbarNavContent({ onLinkClick }: { onLinkClick: () => void }) {
       <div className="ml-4 pl-4 border-l border-slate-200 flex items-center gap-2">
         {!authChecked || !isLoggedIn ? (
           <>
+            <Link
+              href="/book-demo"
+              className="inline-flex items-center justify-center px-3.5 py-2 rounded-xl border border-slate-300 text-slate-800 font-semibold text-sm bg-white hover:bg-slate-50 transition-colors"
+              onClick={onLinkClick}
+            >
+              Book Demo
+            </Link>
             {authChecked && (
               <Link
                 href={ONBOARDING_URL}
@@ -249,6 +256,13 @@ export function NavbarMobileNavContent({ onLinkClick }: { onLinkClick: () => voi
           </>
         ) : (
           <>
+            <Link
+              href="/book-demo"
+              className="flex items-center justify-center w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-800 font-semibold bg-white hover:bg-slate-50"
+              onClick={onLinkClick}
+            >
+              Book Demo
+            </Link>
             {authChecked && (
               <Link
                 href={ONBOARDING_URL}

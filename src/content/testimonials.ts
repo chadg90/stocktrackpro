@@ -6,8 +6,9 @@ export type Testimonial = {
 };
 
 /**
- * Phase 2: when Chris approves a quote, set `enabled: true` and paste the quote text below.
- * Testimonial then appears on the homepage and pricing page automatically.
+ * Optional single featured quote for pricing / elsewhere.
+ * Homepage customer cards are driven by `customerStories.ts`.
+ * When Chris approves a Newstreet quote, add it there (and optionally enable here).
  */
 export const FEATURED_TESTIMONIAL: (Testimonial & { enabled: boolean }) | null = {
   enabled: false,

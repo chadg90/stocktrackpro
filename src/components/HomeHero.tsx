@@ -113,7 +113,7 @@ export default function HomeHero() {
         <div className="mt-4 flex flex-col items-center gap-2 lg:items-start">
           <Link
             href="/features"
-            className="text-[var(--brand-blue)] hover:text-blue-700 text-sm font-medium inline-flex items-center gap-1 transition-colors py-1"
+            className="text-[var(--brand-blue)] hover:text-blue-700 text-base sm:text-lg font-semibold inline-flex items-center gap-1.5 transition-colors py-1"
           >
             See how it works →
           </Link>
