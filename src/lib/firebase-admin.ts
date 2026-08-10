@@ -111,7 +111,13 @@ export function getAdminApp(): admin.app.App {
   if (!projectId) {
     throw new Error('NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set');
   }
-  app = admin.initializeApp({ credential: getCredential(), projectId });
+  const storageBucket =
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_STORAGE_BUCKET;
+  app = admin.initializeApp({
+    credential: getCredential(),
+    projectId,
+    ...(storageBucket ? { storageBucket } : {}),
+  });
   return app;
 }
 

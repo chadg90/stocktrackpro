@@ -5,8 +5,7 @@
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { getImageUrlFromApp } from '@/lib/getImageUrl';
-
+import { resolveImageDataUrl } from '@/lib/resolveImageDataUrl';
 const ACCENT: [number, number, number] = [10, 132, 255]; // #0A84FF
 const BLACK: [number, number, number] = [15, 23, 42]; // slate-900
 const BANNER: [number, number, number] = [0, 0, 0];
@@ -208,22 +207,7 @@ function mutedNote(doc: jsPDF, text: string, y: number): number {
 }
 
 async function imageUrlToDataUrl(url: string): Promise<{ dataUrl: string; format: 'JPEG' | 'PNG' } | null> {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    const format: 'JPEG' | 'PNG' = blob.type.includes('png') ? 'PNG' : 'JPEG';
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-    if (!dataUrl) return null;
-    return { dataUrl, format };
-  } catch {
-    return null;
-  }
+  return resolveImageDataUrl(url);
 }
 
 async function loadBrandLogo(): Promise<{ dataUrl: string; format: 'PNG' | 'JPEG' } | null> {
@@ -236,9 +220,14 @@ async function loadBrandLogo(): Promise<{ dataUrl: string; format: 'PNG' | 'JPEG
 }
 
 export function getPeriodBounds(months: PeriodMonths, end: Date = new Date()): { start: Date; end: Date } {
+  // Inclusive calendar window: start-of-day N months ago → end-of-today.
+  // Document uploads store document_date at local noon, so using "now" as the
+  // end would exclude same-day uploads made before noon (6 and 12 month packs).
   const endDate = new Date(end);
+  endDate.setHours(23, 59, 59, 999);
   const start = new Date(endDate);
   start.setMonth(start.getMonth() - months);
+  start.setHours(0, 0, 0, 0);
   return { start, end: endDate };
 }
 
@@ -567,20 +556,15 @@ export async function buildVehiclePeriodReportPdf(args: {
           y
         );
         y += 3;
-        const url = await getImageUrlFromApp(item.storage_path);
-        if (url) {
-          const img = await imageUrlToDataUrl(url);
-          if (img) {
-            try {
-              doc.setDrawColor(226, 232, 240);
-              doc.roundedRect(MARGIN, y, 82, 47, 2, 2, 'S');
-              doc.addImage(img.dataUrl, img.format, MARGIN + 1, y + 1, 80, 45, undefined, 'FAST');
-              y += 52;
-            } catch {
-              y = mutedNote(doc, '(Preview could not be embedded)', y + 4);
-            }
-          } else {
-            y = mutedNote(doc, '(Preview unavailable)', y + 4);
+        const img = await resolveImageDataUrl(item.storage_path);
+        if (img) {
+          try {
+            doc.setDrawColor(226, 232, 240);
+            doc.roundedRect(MARGIN, y, 82, 47, 2, 2, 'S');
+            doc.addImage(img.dataUrl, img.format, MARGIN + 1, y + 1, 80, 45, undefined, 'FAST');
+            y += 52;
+          } catch {
+            y = mutedNote(doc, '(Preview could not be embedded)', y + 4);
           }
         } else {
           y = mutedNote(doc, '(Preview unavailable)', y + 4);

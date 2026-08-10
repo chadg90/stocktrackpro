@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   collection,
   query,
@@ -16,7 +16,6 @@ import {
 } from 'firebase/firestore';
 import {
   deleteObject,
-  getBytes,
   getDownloadURL,
   getStorage,
   ref,
@@ -33,6 +32,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { firebaseApp, firebaseAuth, firebaseDb } from '@/lib/firebase';
+import { fetchStorageBytes, mapPool } from '@/lib/resolveImageDataUrl';
 import {
   getCachedCompanyVehicles,
   setCachedCompanyVehicles,
@@ -101,15 +101,19 @@ function formatDateOnly(value?: Timestamp | string | Date | null): string {
   }
 }
 
-function toMillis(value?: Timestamp | string | Date | null): number {
+function toMillis(value?: Timestamp | string | Date | { seconds?: number; nanoseconds?: number } | null): number {
   if (!value) return 0;
   if (value instanceof Timestamp) return value.toMillis();
-  const d = value instanceof Date ? value : new Date(value);
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === 'object' && typeof (value as { seconds?: number }).seconds === 'number') {
+    return (value as { seconds: number }).seconds * 1000;
+  }
+  const d = new Date(value as string);
   return Number.isNaN(d.getTime()) ? 0 : d.getTime();
 }
 
 function inRange(
-  value: Timestamp | string | Date | null | undefined,
+  value: Timestamp | string | Date | { seconds?: number } | null | undefined,
   start: Date,
   end: Date
 ): boolean {
@@ -132,6 +136,7 @@ export default function VehicleReportsPage() {
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [docsLoading, setDocsLoading] = useState(false);
   const [packBusyMonths, setPackBusyMonths] = useState<PeriodMonths | null>(null);
+  const [packStatus, setPackStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -142,6 +147,7 @@ export default function VehicleReportsPage() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const uploadFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const selectedVehicle = useMemo(
     () => vehicles.find((v) => v.id === selectedVehicleId) || null,
@@ -360,6 +366,9 @@ export default function VehicleReportsPage() {
       setUploadFile(null);
       setUploadNotes('');
       setUploadTitle('');
+      if (uploadFileInputRef.current) {
+        uploadFileInputRef.current.value = '';
+      }
       await loadDocuments(selectedVehicle.id, profile.company_id);
     } catch (err) {
       console.error(err);
@@ -409,6 +418,7 @@ export default function VehicleReportsPage() {
   const handleDownloadPack = async (months: PeriodMonths) => {
     if (!firebaseApp || !firebaseDb || !profile?.company_id || !selectedVehicle) return;
     setPackBusyMonths(months);
+    setPackStatus('Collecting inspections and defects…');
     setError(null);
     setSuccess(null);
     try {
@@ -483,6 +493,7 @@ export default function VehicleReportsPage() {
         );
       }
 
+      setPackStatus('Building summary PDF…');
       const { blob: reportBlob, fileName: reportName } = await buildVehiclePeriodReportPdf({
         vehicle: selectedVehicle,
         companyName,
@@ -495,14 +506,29 @@ export default function VehicleReportsPage() {
       const zip = new JSZip();
       zip.file(reportName, reportBlob);
 
-      const storage = getStorage(firebaseApp);
       const docsFolder = zip.folder('documents');
       const usedNames = new Set<string>();
 
-      for (const row of periodDocs) {
-        if (!row.storage_path || !docsFolder) continue;
+      const docsWithPath = periodDocs.filter((row) => !!row.storage_path);
+      if (docsWithPath.length > 0) {
+        setPackStatus(`Downloading ${docsWithPath.length} document file${docsWithPath.length === 1 ? '' : 's'}…`);
+      }
+      const downloaded = await mapPool(docsWithPath, 3, async (row) => {
+        const bytes = await fetchStorageBytes(row.storage_path, { timeoutMs: 25000 });
+        return { row, bytes };
+      });
+
+      let filesAdded = 0;
+      let filesFailed = 0;
+      for (const { row, bytes } of downloaded) {
+        if (!bytes || !docsFolder) {
+          if (!bytes) {
+            filesFailed += 1;
+            console.warn('Pack document skip:', row.id, row.storage_path);
+          }
+          continue;
+        }
         try {
-          const bytes = await getBytes(ref(storage, row.storage_path));
           const datePart = formatDateOnly(row.document_date as Timestamp).replace(/\s+/g, '-');
           const typePart = String(row.type || 'other');
           const base = safeFileName(
@@ -520,12 +546,15 @@ export default function VehicleReportsPage() {
           }
           usedNames.add(name.toLowerCase());
           docsFolder.file(name, bytes);
+          filesAdded += 1;
         } catch (docErr) {
+          filesFailed += 1;
           console.warn('Pack document skip:', row.id, docErr);
         }
       }
 
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      setPackStatus('Creating ZIP…');
+      const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 5 } });
       const safeReg = (selectedVehicle.registration || 'vehicle')
         .toUpperCase()
         .replace(/[^a-zA-Z0-9_-]/g, '');
@@ -541,23 +570,35 @@ export default function VehicleReportsPage() {
       URL.revokeObjectURL(url);
 
       void trackFeatureClick(months === 6 ? 'vehicle_pack_6m' : 'vehicle_pack_12m');
-      setSuccess(
-        `${months}-month pack ready (${periodDocs.length} document${
-          periodDocs.length === 1 ? '' : 's'
-        } included). Share the ZIP with NHS as needed.`
-      );
+      if (periodDocs.length === 0) {
+        setSuccess(
+          `${months}-month pack ready (summary PDF only — no uploaded documents dated in this period).`
+        );
+      } else if (filesFailed > 0) {
+        setError(
+          `Pack downloaded with ${filesAdded} of ${periodDocs.length} file(s). ${filesFailed} could not be attached — try again or open those files individually.`
+        );
+        setSuccess(null);
+      } else {
+        setSuccess(
+          `${months}-month pack ready (${filesAdded} document file${
+            filesAdded === 1 ? '' : 's'
+          } in the documents folder).`
+        );
+      }
     } catch (err) {
       console.error(err);
       setError('Pack download failed. Please try again.');
     } finally {
       setPackBusyMonths(null);
+      setPackStatus(null);
     }
   };
 
   if (loading) {
     return (
       <div className="p-6">
-        <TableSkeleton rows={6} cols={4} />
+        <TableSkeleton rows={6} cols={4} standalone />
       </div>
     );
   }
@@ -691,6 +732,7 @@ export default function VehicleReportsPage() {
                     File (PDF or image, max 10MB)
                   </span>
                   <input
+                    ref={uploadFileInputRef}
                     type="file"
                     accept=".pdf,image/jpeg,image/png,image/webp,application/pdf"
                     onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
@@ -723,11 +765,7 @@ export default function VehicleReportsPage() {
                 </thead>
                 <tbody>
                   {docsLoading ? (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-6">
-                        <TableSkeleton rows={3} cols={5} />
-                      </td>
-                    </tr>
+                    <TableSkeleton rows={3} cols={5} />
                   ) : documents.length === 0 ? (
                     <EmptyStateTableRow
                       colSpan={5}
@@ -787,6 +825,9 @@ export default function VehicleReportsPage() {
               ({docsLast6.length} in last 6 months, {docsLast12.length} in last 12 months). Built on
               demand — nothing extra is stored.
             </p>
+            {packStatus && (
+              <p className="mt-3 text-sm font-medium text-blue-700 dark:text-blue-300">{packStatus}</p>
+            )}
             <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"

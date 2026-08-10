@@ -270,6 +270,7 @@ export default function InspectionProofPage() {
   const handlePdf = async (inspection: InspectionRow) => {
     if (!selectedVehicle) return;
     setPdfBusyId(inspection.id);
+    setError(null);
     try {
       await exportVehicleInspectionProofPdf({
         vehicle: selectedVehicle,
@@ -280,7 +281,7 @@ export default function InspectionProofPage() {
       void trackFeatureClick('inspection_proof_export');
     } catch (e) {
       console.error(e);
-      setError('PDF generation failed. Please try again.');
+      setError('PDF generation failed or timed out. Please try again.');
     } finally {
       setPdfBusyId(null);
     }
@@ -291,7 +292,7 @@ export default function InspectionProofPage() {
       <div className="p-6 space-y-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Inspection proof</h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">Loading your fleet…</p>
-        <TableSkeleton rows={6} cols={4} />
+        <TableSkeleton rows={6} cols={4} standalone />
       </div>
     );
   }
@@ -390,11 +391,7 @@ export default function InspectionProofPage() {
               </thead>
               <tbody>
                 {inspectionsLoading ? (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-6">
-                      <TableSkeleton rows={4} cols={6} />
-                    </td>
-                  </tr>
+                  <TableSkeleton rows={4} cols={6} />
                 ) : inspections.length === 0 ? (
                   <EmptyStateTableRow
                     colSpan={6}

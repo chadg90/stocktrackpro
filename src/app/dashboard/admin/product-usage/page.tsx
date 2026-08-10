@@ -153,7 +153,7 @@ export default function ProductUsageAdminPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <TableSkeleton rows={8} cols={4} />
+        <TableSkeleton rows={8} cols={4} standalone />
       </div>
     );
   }

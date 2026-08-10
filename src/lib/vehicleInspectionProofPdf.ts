@@ -5,7 +5,7 @@
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { getImageUrlFromApp } from '@/lib/getImageUrl';
+import { resolveImageDataUrl, mapPool } from '@/lib/resolveImageDataUrl';
 import {
   BLOOD_ORGAN_CHECK_LABELS,
   BLOOD_ORGAN_PHOTO_LABELS,
@@ -20,7 +20,6 @@ import {
   isSignatureStorageRef,
   signatureEncodedToPngDataUrl,
 } from '@/lib/signaturePaths';
-
 const ACCENT: [number, number, number] = [66, 133, 244];
 const BLACK: [number, number, number] = [0, 0, 0];
 const GRAY: [number, number, number] = [80, 80, 80];
@@ -101,25 +100,6 @@ function formatDateTime(d: Date | null): string {
   });
 }
 
-async function imageUrlToDataUrl(url: string): Promise<{ dataUrl: string; format: 'JPEG' | 'PNG' } | null> {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(String(reader.result || ''));
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-    if (!dataUrl) return null;
-    const format = blob.type.includes('png') ? 'PNG' : 'JPEG';
-    return { dataUrl, format };
-  } catch {
-    return null;
-  }
-}
-
 function ensureSpace(doc: jsPDF, y: number, need: number): number {
   const pageH = doc.internal.pageSize.getHeight();
   if (y + need > pageH - 18) {
@@ -127,6 +107,21 @@ function ensureSpace(doc: jsPDF, y: number, need: number): number {
     return 20;
   }
   return y;
+}
+
+/** Fit image into a box without stretching (letterbox if needed). */
+function fitInBox(
+  maxW: number,
+  maxH: number,
+  natW: number,
+  natH: number
+): { w: number; h: number; ox: number; oy: number } {
+  const aw = Math.max(1, natW);
+  const ah = Math.max(1, natH);
+  const scale = Math.min(maxW / aw, maxH / ah);
+  const w = Math.max(1, aw * scale);
+  const h = Math.max(1, ah * scale);
+  return { w, h, ox: (maxW - w) / 2, oy: (maxH - h) / 2 };
 }
 
 function sectionHeading(doc: jsPDF, title: string, y: number): number {
@@ -211,31 +206,38 @@ export async function exportVehicleInspectionProofPdf(args: {
     y += 8;
   } else {
     const colW = (pageW - 28 - 6) / 2;
-    const imgH = 42;
+    const slotH = 48;
+    // Prefetch with limited concurrency — faster and more reliable than 6 parallel getBlob calls.
+    const resolved = await mapPool(photoEntries, 3, async ([key, path]) => ({
+      key,
+      img: await resolveImageDataUrl(path as string, { timeoutMs: 20000, maxEdgePx: 640 }),
+    }));
     let col = 0;
-    for (const [key, path] of photoEntries) {
+    for (const { key, img } of resolved) {
       const label = BLOOD_ORGAN_PHOTO_LABELS[key] || key.replace(/_/g, ' ');
-      const url = await getImageUrlFromApp(path as string);
-      if (col === 0) y = ensureSpace(doc, y, imgH + 14);
+      if (col === 0) y = ensureSpace(doc, y, slotH + 14);
       const x = 14 + col * (colW + 6);
       doc.setFontSize(8);
       doc.setTextColor(...BLACK);
       doc.setFont('helvetica', 'bold');
       doc.text(label, x, y);
-      if (url) {
-        const img = await imageUrlToDataUrl(url);
-        if (img) {
-          try {
-            doc.addImage(img.dataUrl, img.format, x, y + 2, colW, imgH, undefined, 'FAST');
-          } catch {
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(...GRAY);
-            doc.text('(Photo could not be embedded)', x, y + 20);
-          }
-        } else {
+      if (img) {
+        try {
+          const fitted = fitInBox(colW, slotH, img.width, img.height);
+          doc.addImage(
+            img.dataUrl,
+            img.format,
+            x + fitted.ox,
+            y + 2 + fitted.oy,
+            fitted.w,
+            fitted.h,
+            undefined,
+            'FAST'
+          );
+        } catch {
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(...GRAY);
-          doc.text('(Photo unavailable)', x, y + 20);
+          doc.text('(Photo could not be embedded)', x, y + 20);
         }
       } else {
         doc.setFont('helvetica', 'normal');
@@ -245,10 +247,10 @@ export async function exportVehicleInspectionProofPdf(args: {
       col += 1;
       if (col >= 2) {
         col = 0;
-        y += imgH + 12;
+        y += slotH + 12;
       }
     }
-    if (col !== 0) y += imgH + 12;
+    if (col !== 0) y += slotH + 12;
   }
 
   // Checklist
@@ -322,20 +324,25 @@ export async function exportVehicleInspectionProofPdf(args: {
         doc.setFont('helvetica', 'bold');
         doc.text(item.title, 14, y);
         y += 3;
-        const url = await getImageUrlFromApp(item.path);
-        if (url) {
-          const img = await imageUrlToDataUrl(url);
-          if (img) {
-            try {
-              doc.addImage(img.dataUrl, img.format, 14, y, 80, 45, undefined, 'FAST');
-              y += 50;
-            } catch {
-              doc.setFont('helvetica', 'normal');
-              doc.setTextColor(...GRAY);
-              doc.text('(Evidence photo could not be embedded)', 14, y + 8);
-              y += 14;
-            }
+        const img = await resolveImageDataUrl(item.path);
+        if (img) {
+          try {
+            const maxW = 90;
+            const maxH = 52;
+            const fitted = fitInBox(maxW, maxH, img.width, img.height);
+            doc.addImage(img.dataUrl, img.format, 14, y, fitted.w, fitted.h, undefined, 'FAST');
+            y += fitted.h + 8;
+          } catch {
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...GRAY);
+            doc.text('(Evidence photo could not be embedded)', 14, y + 8);
+            y += 14;
           }
+        } else {
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(...GRAY);
+          doc.text('(Evidence photo unavailable)', 14, y + 8);
+          y += 14;
         }
       }
     }
@@ -427,26 +434,33 @@ export async function exportVehicleInspectionProofPdf(args: {
         doc.setFont('helvetica', 'normal');
       }
     } else if (sigRaw && isSignatureStorageRef(sigRaw)) {
-      const url = await getImageUrlFromApp(sigRaw);
-      if (url) {
-        const img = await imageUrlToDataUrl(url);
-        if (img) {
-          y = ensureSpace(doc, y, 42);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Inspector signature', 14, y);
-          y += 3;
-          try {
-            doc.setDrawColor(226, 232, 240);
-            doc.setFillColor(255, 255, 255);
-            doc.rect(14, y, 90, 34, 'FD');
-            doc.addImage(img.dataUrl, img.format, 16, y + 2, 86, 30, undefined, 'FAST');
-            signatureEmbedded = true;
-            y += 38;
-          } catch {
-            signatureEmbedded = false;
-          }
-          doc.setFont('helvetica', 'normal');
+      const img = await resolveImageDataUrl(sigRaw);
+      if (img) {
+        y = ensureSpace(doc, y, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Inspector signature', 14, y);
+        y += 3;
+        try {
+          doc.setDrawColor(226, 232, 240);
+          doc.setFillColor(255, 255, 255);
+          doc.rect(14, y, 90, 34, 'FD');
+          const fitted = fitInBox(86, 30, img.width, img.height);
+          doc.addImage(
+            img.dataUrl,
+            img.format,
+            16 + fitted.ox,
+            y + 2 + fitted.oy,
+            fitted.w,
+            fitted.h,
+            undefined,
+            'FAST'
+          );
+          signatureEmbedded = true;
+          y += 38;
+        } catch {
+          signatureEmbedded = false;
         }
+        doc.setFont('helvetica', 'normal');
       }
     }
 
