@@ -111,6 +111,15 @@ export default function DashboardLayoutClient({
   }, []);
 
   useEffect(() => {
+    if (!authorized) return;
+    const previous = document.title;
+    document.title = 'Dashboard | Fleet Track PRO';
+    return () => {
+      document.title = previous;
+    };
+  }, [authorized]);
+
+  useEffect(() => {
     if (!firebaseAuth || !firebaseDb) {
       setLoading(false);
       setAuthorized(false);

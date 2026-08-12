@@ -231,7 +231,7 @@ export function buildMileageInspectionRows(
     byVehicle[vid].push(i);
   }
 
-  const rows: MileageRow[] = [];
+  const rows: Array<MileageRow & { _ms: number }> = [];
 
   for (const vid of Object.keys(byVehicle)) {
     const list = byVehicle[vid].slice().sort((a, b) => {
@@ -258,21 +258,22 @@ export function buildMileageInspectionRows(
 
       if (m != null && prevM != null && at && prevDate) {
         const delta = m - prevM;
-        const days = Math.max(1, differenceInCalendarDays(at, prevDate));
+        const rawDays = differenceInCalendarDays(at, prevDate);
+        const days = Math.max(1, rawDays);
         deltaStr = String(delta);
-        daysStr = String(differenceInCalendarDays(at, prevDate));
+        daysStr = String(rawDays);
         prevStr = String(prevM);
 
         if (delta < ROLLBACK_THRESHOLD) {
           flag = 'Yes';
-          detail = 'Odometer decreased vs previous inspection (possible rollback or data error)';
+          detail = 'Odometer dropped vs last reading';
         } else if (delta / days > MAX_DAILY_MILES) {
           flag = 'Yes';
-          detail = `High implied daily mileage (${Math.round(delta / days)} mi/day vs cap ${MAX_DAILY_MILES})`;
+          detail = `${Math.round(delta / days)} miles/day (cap ${MAX_DAILY_MILES})`;
         }
       } else if (m == null && prevM != null) {
         flag = 'Review';
-        detail = 'Mileage missing while previous reading exists';
+        detail = 'No mileage on this check';
       }
 
       rows.push({
@@ -286,18 +287,21 @@ export function buildMileageInspectionRows(
         'Anomaly Flag': flag || 'No',
         'Anomaly Detail': detail || '—',
         Inspector: inspector,
+        _ms: at?.getTime() ?? 0,
       });
 
+      // Only move the comparison baseline when we have a valid reading.
+      // Advancing the date on a missing reading shortens the window and inflates miles/day.
       if (m != null) {
         prevM = m;
-        prevDate = at;
-      } else if (at) {
-        prevDate = at;
+        if (at) prevDate = at;
       }
     }
   }
 
-  return rows.sort((a, b) => (a['Inspected At'] < b['Inspected At'] ? 1 : -1));
+  return rows
+    .sort((a, b) => b._ms - a._ms)
+    .map(({ _ms: _unused, ...row }) => row);
 }
 
 function weekKey(date: Date): string {
@@ -576,6 +580,138 @@ export function buildMileageMonitoringRows(
     if (risk !== 0) return risk;
     return b.currentWeekMiles - a.currentWeekMiles;
   });
+}
+
+export type MileageAttentionReason = 'rollback' | 'missing_miles' | 'above_usual' | 'no_check';
+
+export type MileageAttentionRow = {
+  vehicleId: string;
+  registration: string;
+  reason: MileageAttentionReason;
+  reasonLabel: string;
+  action: string;
+  latestMileage: number | null;
+  latestInspectionAt: string;
+};
+
+const ATTENTION_COPY: Record<
+  MileageAttentionReason,
+  { reasonLabel: string; action: string }
+> = {
+  rollback: {
+    reasonLabel: 'Odometer dropped',
+    action: 'Check the last inspection photos and confirm the reading with the driver.',
+  },
+  missing_miles: {
+    reasonLabel: 'No miles on the check',
+    action: 'Ask the driver to log mileage on the next walkaround.',
+  },
+  above_usual: {
+    reasonLabel: 'Well above this van’s usual week',
+    action: 'Compare this week’s jobs with the miles and speak to the driver.',
+  },
+  no_check: {
+    reasonLabel: 'No check this week',
+    action: 'Request a walkaround on this vehicle.',
+  },
+};
+
+const ATTENTION_RANK: Record<MileageAttentionReason, number> = {
+  rollback: 0,
+  missing_miles: 1,
+  above_usual: 2,
+  no_check: 3,
+};
+
+/**
+ * Vehicles a manager should look at: latest-pair rollback, missing miles on
+ * the latest check, this week well above that van’s own pattern, or no check
+ * for 7+ days. Watch-level weekly uplift is ignored to keep the list short.
+ */
+export function buildMileageAttentionRows(
+  inspections: FleetInspection[],
+  vehicles: FleetVehicle[],
+  now: Date = new Date()
+): MileageAttentionRow[] {
+  const week = getCurrentWeekBounds(now);
+  const monitorById = Object.fromEntries(
+    buildMileageMonitoringRows(inspections, vehicles, now).map((row) => [row.vehicleId, row])
+  );
+
+  const byVehicle: Record<string, FleetInspection[]> = {};
+  for (const i of inspections) {
+    const vid = i.vehicle_id;
+    if (!vid) continue;
+    if (!byVehicle[vid]) byVehicle[vid] = [];
+    byVehicle[vid].push(i);
+  }
+
+  const rows: MileageAttentionRow[] = [];
+
+  for (const vehicle of getActiveFleetVehicles(vehicles)) {
+    const list = (byVehicle[vehicle.id] || []).slice().sort((a, b) => {
+      const da = toJsDate(a.inspected_at)?.getTime() ?? 0;
+      const db = toJsDate(b.inspected_at)?.getTime() ?? 0;
+      return da - db;
+    });
+    const latest = list[list.length - 1];
+    const latestAt = latest ? toJsDate(latest.inspected_at) : null;
+    const latestM = latest ? toMileageNumber(latest.mileage) : null;
+
+    const valid: { m: number; at: Date }[] = [];
+    for (const insp of list) {
+      const at = toJsDate(insp.inspected_at);
+      const m = toMileageNumber(insp.mileage);
+      if (at && m != null) valid.push({ m, at });
+    }
+
+    let reason: MileageAttentionReason | null = null;
+
+    if (valid.length >= 2) {
+      const last = valid[valid.length - 1];
+      const prev = valid[valid.length - 2];
+      if (last.m - prev.m < ROLLBACK_THRESHOLD) reason = 'rollback';
+    }
+
+    if (!reason && latest && latestM == null && valid.length >= 1) {
+      reason = 'missing_miles';
+    }
+
+    const monitor = monitorById[vehicle.id];
+    if (
+      !reason &&
+      monitor &&
+      (monitor.anomalyLevel === 'critical' || monitor.anomalyLevel === 'high') &&
+      monitor.anomalyReason !== 'Odometer rollback pattern detected in recent inspection history.'
+    ) {
+      reason = 'above_usual';
+    }
+
+    const checkedThisWeek = list.some((insp) => {
+      const d = toJsDate(insp.inspected_at);
+      return !!d && d >= week.start && d <= week.end;
+    });
+    const daysSince =
+      latestAt != null ? Math.max(0, differenceInCalendarDays(now, latestAt)) : null;
+    if (!reason && !checkedThisWeek && (daysSince == null || daysSince >= 7)) {
+      reason = 'no_check';
+    }
+
+    if (!reason) continue;
+
+    const copy = ATTENTION_COPY[reason];
+    rows.push({
+      vehicleId: vehicle.id,
+      registration: vehicle.registration || vehicle.id,
+      reason,
+      reasonLabel: copy.reasonLabel,
+      action: copy.action,
+      latestMileage: latestM,
+      latestInspectionAt: latest ? formatFleetDate(latest.inspected_at) : '—',
+    });
+  }
+
+  return rows.sort((a, b) => ATTENTION_RANK[a.reason] - ATTENTION_RANK[b.reason]);
 }
 
 export function filterInspectionsInWeek(

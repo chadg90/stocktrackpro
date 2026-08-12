@@ -488,6 +488,19 @@ html {
     color: #94a3b8 !important;
   }
 
+  /* Solid accent fills: keep white labels (the invert above would make them slate-on-blue) */
+  .theme-light main .bg-blue-500.text-white,
+  .theme-light main .bg-blue-600.text-white,
+  .theme-light main .bg-red-500.text-white,
+  .theme-light main .bg-emerald-600.text-white,
+  .theme-light main .bg-emerald-700.text-white,
+  .theme-light main .bg-green-600.text-white,
+  .theme-light main .bg-blue-500 .text-white,
+  .theme-light main .bg-blue-600 .text-white,
+  .theme-light main .bg-red-500 .text-white {
+    color: #ffffff !important;
+  }
+
   /* Light mode: backgrounds and borders - main content only */
   .theme-light main .bg-white\/5 {
     background-color: #f1f5f9 !important;
@@ -606,8 +619,13 @@ html {
   .theme-light main .text-amber-200,
   .theme-light main .text-amber-300,
   .theme-light main .text-amber-400,
-  .theme-light main .text-yellow-300 {
+  .theme-light main .text-yellow-300,
+  .theme-light main .text-yellow-400 {
     color: #78350f !important;
+  }
+  .theme-light main .text-orange-300,
+  .theme-light main .text-orange-400 {
+    color: #9a3412 !important;
   }
   .theme-light main .text-red-300,
   .theme-light main .text-red-400 {
@@ -650,6 +668,10 @@ html {
   .theme-light main .bg-amber-500\/10,
   .theme-light main .bg-yellow-500\/10 {
     background-color: #fef3c7 !important;
+  }
+  .theme-light main .bg-orange-500\/10,
+  .theme-light main .bg-orange-500\/20 {
+    background-color: #ffedd5 !important;
   }
   .theme-light main .bg-red-500\/10,
   .theme-light main .bg-red-500\/20 {

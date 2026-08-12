@@ -9,6 +9,8 @@ const Footer = () => {
   const pathname = usePathname();
   const isDashboardRoute = !!pathname && pathname.startsWith('/dashboard');
 
+  if (isDashboardRoute) return null;
+
   return (
     <footer className={`bg-slate-900 mt-auto border-t border-slate-800 ${isDashboardRoute ? 'lg:pl-64' : ''}`}>
       <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 space-y-6">

@@ -6,7 +6,6 @@ import {
   Users, 
   AlertTriangle, 
   History, 
-  MapPin, 
   FileText,
   Search,
   Plus,
@@ -23,7 +22,6 @@ export type EmptyStateType =
   | 'team' 
   | 'defects' 
   | 'history' 
-  | 'locations' 
   | 'notifications'
   | 'search'
   | 'analytics'
@@ -70,12 +68,6 @@ const emptyStateConfig: Record<EmptyStateType, {
     icon: History,
     title: 'No activity history',
     description: 'Activity will appear here as your team uses the fleet workflows.',
-  },
-  locations: {
-    icon: MapPin,
-    title: 'No locations added',
-    description: 'Add locations to organize where your vehicles are stored.',
-    actionLabel: 'Add Location',
   },
   notifications: {
     icon: FileText,

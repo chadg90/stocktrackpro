@@ -2,13 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, Gauge, CalendarDays, UserCheck } from 'lucide-react';
 
 const links = [
-  { href: '/dashboard/fleet-report', label: 'Overview', icon: ClipboardList },
-  { href: '/dashboard/fleet-report/mileage', label: 'Mileage & anomalies', icon: Gauge },
-  { href: '/dashboard/fleet-report/week', label: 'This week', icon: CalendarDays },
-  { href: '/dashboard/fleet-report/compliance', label: 'Who checked', icon: UserCheck },
+  { href: '/dashboard/fleet-report', label: 'Overview' },
+  { href: '/dashboard/fleet-report/mileage', label: 'Mileage' },
+  { href: '/dashboard/fleet-report/week', label: 'This week' },
+  { href: '/dashboard/fleet-report/compliance', label: 'Who checked' },
 ];
 
 export default function FleetReportSubnav() {
@@ -16,10 +15,10 @@ export default function FleetReportSubnav() {
 
   return (
     <nav
-      className="flex flex-wrap gap-2 mb-8 border-b border-zinc-200 dark:border-white/10 pb-4"
+      className="flex flex-wrap gap-x-1 mb-6 border-b border-zinc-200 dark:border-white/10"
       aria-label="Fleet report sections"
     >
-      {links.map(({ href, label, icon: Icon }) => {
+      {links.map(({ href, label }) => {
         const isOverview = href === '/dashboard/fleet-report';
         const active = isOverview
           ? pathname === '/dashboard/fleet-report' || pathname === '/dashboard/fleet-report/'
@@ -29,13 +28,12 @@ export default function FleetReportSubnav() {
           <Link
             key={href}
             href={href}
-            className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${
+            className={`-mb-px inline-flex items-center px-3 py-2.5 text-sm font-medium border-b-2 transition-colors ${
               active
-                ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/40'
-                : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 border-transparent dark:text-white/70 dark:hover:text-white dark:hover:bg-white/5'
+                ? 'border-blue-600 text-blue-700 dark:border-blue-400 dark:text-blue-400'
+                : 'border-transparent text-zinc-500 hover:text-zinc-900 hover:border-zinc-300 dark:text-white/55 dark:hover:text-white dark:hover:border-white/20'
             }`}
           >
-            <Icon className="h-4 w-4 shrink-0" aria-hidden />
             {label}
           </Link>
         );

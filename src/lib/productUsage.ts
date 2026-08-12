@@ -12,7 +12,6 @@ export type UsageKind = 'page_view' | 'feature_click';
 export const TRACKED_PAGES: Array<{ key: string; label: string; path: string }> = [
   { key: 'page:/dashboard', label: 'Dashboard home', path: '/dashboard' },
   { key: 'page:/dashboard/fleet', label: 'Fleet', path: '/dashboard/fleet' },
-  { key: 'page:/dashboard/locations', label: 'Locations', path: '/dashboard/locations' },
   { key: 'page:/dashboard/fleet-report', label: 'Fleet report', path: '/dashboard/fleet-report' },
   { key: 'page:/dashboard/mot-tax', label: 'MOT & Tax', path: '/dashboard/mot-tax' },
   { key: 'page:/dashboard/mileage-monitor', label: 'Mileage monitor', path: '/dashboard/mileage-monitor' },

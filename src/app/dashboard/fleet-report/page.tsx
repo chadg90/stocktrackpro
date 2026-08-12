@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { Download, RefreshCw, FileSpreadsheet, AlertTriangle } from 'lucide-react';
+import { RefreshCw, FileSpreadsheet, AlertTriangle } from 'lucide-react';
 import { useFleetReport } from './FleetReportContext';
+import { buildMileageAttentionRows } from '@/lib/fleetReportLogic';
 import { defectWord } from '@/lib/defectWord';
 
 export default function FleetReportOverviewPage() {
@@ -16,17 +17,17 @@ export default function FleetReportOverviewPage() {
     inspections,
     weekInspections,
     outstandingDefects,
-    mileageRows,
     vehicles,
     weekBounds,
   } = useFleetReport();
 
-  const anomalyCount = mileageRows.filter(
-    (r) => r['Anomaly Flag'] === 'Yes' || r['Anomaly Flag'] === 'Review'
-  ).length;
+  const attentionCount = useMemo(
+    () => buildMileageAttentionRows(inspections, vehicles).length,
+    [inspections, vehicles]
+  );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {error && (
         <div
           role="alert"
@@ -42,7 +43,7 @@ export default function FleetReportOverviewPage() {
           type="button"
           onClick={() => exportFullExcel()}
           disabled={loading || inspections.length === 0}
-          className="btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-emerald-500 bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 dark:border-green-500/40 dark:bg-transparent dark:text-green-400 dark:hover:bg-green-500/10"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-emerald-500 bg-emerald-600 text-white keep-light-on-dark hover:bg-emerald-700 transition-colors disabled:opacity-50 dark:border-green-500/40 dark:bg-transparent dark:text-green-400 dark:hover:bg-green-500/10"
         >
           <FileSpreadsheet className="h-4 w-4" />
           Export full Excel (all sheets)
@@ -84,13 +85,16 @@ export default function FleetReportOverviewPage() {
               {format(weekBounds.start, 'd MMM')} – {format(weekBounds.end, 'd MMM yyyy')}
             </p>
           </div>
-          <div className="dashboard-card p-5">
-            <p className={`dashboard-kpi-value ${anomalyCount > 0 ? 'text-amber-700 dark:text-amber-400' : ''}`}>
-              {anomalyCount}
+          <Link
+            href="/dashboard/fleet-report/mileage"
+            className="dashboard-card p-5 hover:bg-zinc-50 dark:hover:bg-white/[0.08] transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          >
+            <p className={`dashboard-kpi-value ${attentionCount > 0 ? 'text-amber-700 dark:text-amber-400' : ''}`}>
+              {attentionCount}
             </p>
-            <p className="dashboard-kpi-label">Mileage flags</p>
-            <p className="text-zinc-500 dark:text-white/50 text-xs mt-1">Rollback / high daily / missing</p>
-          </div>
+            <p className="dashboard-kpi-label">To review</p>
+            <p className="text-zinc-500 dark:text-white/50 text-xs mt-1">Open in Mileage &rarr;</p>
+          </Link>
           <Link
             href="/dashboard/defects?status=open"
             className="dashboard-card p-5 col-span-2 lg:col-span-4 hover:bg-zinc-50 dark:hover:bg-white/[0.08] transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
@@ -103,27 +107,6 @@ export default function FleetReportOverviewPage() {
           </Link>
         </div>
       )}
-
-      <div className="dashboard-card p-6 space-y-3">
-        <h2 className="dashboard-section-title flex items-center gap-2">
-          <Download className="h-5 w-5 text-blue-700 dark:text-blue-400" />
-          Report sections
-        </h2>
-        <ul className="text-zinc-700 dark:text-white/70 text-sm space-y-2 list-disc list-inside">
-          <li>
-            <strong className="text-zinc-900 dark:text-white">Mileage &amp; anomalies</strong> — every inspection with delta vs
-            previous read, flagged issues.
-          </li>
-          <li>
-            <strong className="text-zinc-900 dark:text-white">This week</strong> — chronological inspection log for the current
-            Monday–Sunday window.
-          </li>
-          <li>
-            <strong className="text-zinc-900 dark:text-white">Who checked</strong> — field users (user/manager roles) with inspection
-            counts for this week, the last 30 days, or a chosen month; vehicles and whether they were inspected.
-          </li>
-        </ul>
-      </div>
     </div>
   );
 }

@@ -162,24 +162,6 @@ export interface HistoryItem {
 }
 
 // ============================================
-// LOCATION TYPES
-// ============================================
-
-export interface Location {
-  id: string;
-  company_id: string;
-  name: string;
-  address?: string;
-  type?: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-  created_at?: Timestamp | string;
-  updated_at?: Timestamp | string;
-}
-
-// ============================================
 // ACCESS CODE TYPES
 // ============================================
 

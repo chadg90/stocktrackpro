@@ -1,10 +1,9 @@
 'use client';
 
-import React, { Suspense, useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Navbar from '../components/Navbar';
 import {
   onAuthStateChanged,
@@ -29,17 +28,16 @@ import {
 } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDays } from 'date-fns';
-import { activityHistoryStartFromDashboardRange, TOOL_HISTORY_ANALYTICS_CAP, INSPECTION_ANALYTICS_CAP, DEFECT_ANALYTICS_CAP } from '@/lib/dvsaRetention';
+import { activityHistoryStartFromDashboardRange, INSPECTION_ANALYTICS_CAP, DEFECT_ANALYTICS_CAP } from '@/lib/dvsaRetention';
+import { buildMileageAttentionRows } from '@/lib/fleetReportLogic';
 import ExportButton from './components/ExportButton';
 import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
 import {
   RefreshCw,
-  Users,
   Truck,
-  TrendingDown,
-  Target,
-  ArrowUpRight,
-  ArrowDownRight,
+  AlertTriangle,
+  ShieldCheck,
+  ClipboardList,
   Eye,
   EyeOff,
 } from 'lucide-react';
@@ -88,24 +86,6 @@ const DashboardAnalyticsCharts = dynamic(
   }
 );
 
-const DashboardDetailedView = dynamic(
-  () => import('./components/DashboardDetailedView'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="space-y-6" aria-busy="true">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="h-32 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
-          <div className="h-32 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
-          <div className="h-32 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
-          <div className="h-32 rounded-xl bg-white/5 border border-white/10 animate-pulse" />
-        </div>
-        <div className="h-[350px] rounded-xl bg-white/5 border border-white/10 animate-pulse" />
-      </div>
-    ),
-  }
-);
-
 // Check if Firebase is properly initialized
 const isFirebaseAvailable = firebaseAuth && firebaseDb;
 const DASHBOARD_REFRESH_COOLDOWN_MS = 8000;
@@ -141,22 +121,6 @@ type Vehicle = {
   updated_at?: Timestamp | string;
 };
 
-type Asset = {
-  id: string;
-  name?: string;
-  brand?: string;
-  model?: string;
-  serial_number?: string;
-  type?: string;
-  category?: string;
-  status?: string;
-  location?: string;
-  condition?: string;
-  notes?: string;
-  created_at?: Timestamp | string;
-  updated_at?: Timestamp | string;
-};
-
 type Inspection = {
   id: string;
   vehicle_id?: string;
@@ -180,17 +144,6 @@ type Defect = {
   status?: 'pending' | 'resolved' | 'investigating';
 };
 
-type HistoryItem = {
-  id: string;
-  tool_id?: string;
-  vehicle_id?: string;
-  action?: string;
-  user_id?: string;
-  timestamp?: Timestamp | string;
-  notes?: string;
-  location?: string;
-};
-
 const formatDate = (value?: string | Timestamp) => {
   if (!value) return '—';
   try {
@@ -203,32 +156,7 @@ const formatDate = (value?: string | Timestamp) => {
   }
 };
 
-const formatShortDate = (value?: string | Timestamp) => {
-  if (!value) return '—';
-  try {
-    const date = value && typeof value === 'object' && 'toDate' in value
-      ? value.toDate()
-      : new Date(value as string);
-    return format(date, 'MMM dd');
-  } catch {
-    return '—';
-  }
-};
-
 export default function DashboardPage() {
-  return (
-    <Suspense fallback={null}>
-      <DashboardPageInner />
-    </Suspense>
-  );
-}
-
-function DashboardPageInner() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const initialView = searchParams?.get('view') === 'detailed' ? 'detailed' : 'summary';
-
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -240,50 +168,24 @@ function DashboardPageInner() {
   const [resetBusy, setResetBusy] = useState(false);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
 
-  const [view, setView] = useState<'summary' | 'detailed'>(initialView);
-
-  useEffect(() => {
-    const v = searchParams?.get('view');
-    if (v === 'detailed' && view !== 'detailed') setView('detailed');
-    if (v !== 'detailed' && view !== 'summary') setView('summary');
-  }, [searchParams, view]);
-
-  const handleChangeView = useCallback(
-    (next: 'summary' | 'detailed') => {
-      setView(next);
-      const params = new URLSearchParams(searchParams?.toString() ?? '');
-      if (next === 'detailed') params.set('view', 'detailed');
-      else params.delete('view');
-      const qs = params.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    },
-    [pathname, router, searchParams]
-  );
-
   // Date range filter (supports up to 24 months of history)
   const [dateRange, setDateRange] = useState<'7' | '30' | '90' | '365' | '730' | 'all'>('30');
 
   // Analytics data
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [assets, setAssets] = useState<Asset[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [defects, setDefects] = useState<Defect[]>([]);
-  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
 
   // Counts
-  const [assetsCount, setAssetsCount] = useState<number | null>(null);
   const [vehiclesCount, setVehiclesCount] = useState<number | null>(null);
-  const [teamCount, setTeamCount] = useState<number | null>(null);
   const [inspectionsCount, setInspectionsCount] = useState<number | null>(null);
-  const [activeAssetsCount, setActiveAssetsCount] = useState<number | null>(null);
   const [activeVehiclesCount, setActiveVehiclesCount] = useState<number | null>(null);
   const [defectsCount, setDefectsCount] = useState<number | null>(null);
   const [resolvedDefectsCount, setResolvedDefectsCount] = useState<number | null>(null);
   
   // Company subscription info
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
-  const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
 
   const lastManualRefreshAtRef = useRef(0);
   const staticDataCompanyRef = useRef<string | null>(null);
@@ -360,29 +262,16 @@ function DashboardPageInner() {
       try {
         const rangeStart = activityHistoryStartFromDashboardRange(dateRange);
 
-        // Base queries for counts
-        const toolsQ = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId));
         const vehiclesQ = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId));
         const teamQ = query(collection(firebaseDb!, 'profiles'), where('company_id', '==', companyId));
-        const activeToolsQ = query(collection(firebaseDb!, 'tools'), where('company_id', '==', companyId), where('status', '==', 'active'));
         const activeVehiclesQ = query(collection(firebaseDb!, 'vehicles'), where('company_id', '==', companyId), where('status', '==', 'active'));
 
-        // Get counts
-        const [
-          toolsCountVal, vehiclesCountVal, teamCountVal,
-          activeToolsCountVal, activeVehiclesCountVal
-        ] = await Promise.all([
-          safeCount(toolsQ),
+        const [vehiclesCountVal, activeVehiclesCountVal] = await Promise.all([
           safeCount(vehiclesQ),
-          safeCount(teamQ),
-          safeCount(activeToolsQ),
           safeCount(activeVehiclesQ),
         ]);
 
-        setAssetsCount(toolsCountVal);
         setVehiclesCount(vehiclesCountVal);
-        setTeamCount(teamCountVal);
-        setActiveAssetsCount(activeToolsCountVal);
         setActiveVehiclesCount(activeVehiclesCountVal);
 
         // Fetch company subscription status
@@ -391,7 +280,6 @@ function DashboardPageInner() {
           if (companySnap.exists()) {
             const companyData = companySnap.data();
             setSubscriptionStatus(companyData.subscription_status || null);
-            setSubscriptionTier(companyData.subscription_tier || null);
           }
         } catch (err) {
           console.error('Error fetching company subscription:', err);
@@ -401,13 +289,11 @@ function DashboardPageInner() {
           options?.forceStaticReload || staticDataCompanyRef.current !== companyId;
         if (shouldReloadStatic) {
           // Static datasets do not depend on date range, so avoid re-reading them on every range change.
-          const [vehiclesSnap, assetsSnap, usersSnap] = await Promise.all([
+          const [vehiclesSnap, usersSnap] = await Promise.all([
             getDocs(vehiclesQ),
-            getDocs(toolsQ),
             getDocs(teamQ),
           ]);
           setVehicles(vehiclesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Vehicle)));
-          setAssets(assetsSnap.docs.map(d => ({ id: d.id, ...d.data() } as Asset)));
           setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)));
           staticDataCompanyRef.current = companyId;
         }
@@ -438,16 +324,6 @@ function DashboardPageInner() {
         setDefects(defectsData);
         setDefectsCount(defectsData.length);
         setResolvedDefectsCount(defectsData.filter((d) => d.status === 'resolved').length);
-
-        const histQuery = query(
-          collection(firebaseDb!, 'tool_history'),
-          where('company_id', '==', companyId),
-          where('timestamp', '>=', Timestamp.fromDate(rangeStart)),
-          orderBy('timestamp', 'desc'),
-          limit(TOOL_HISTORY_ANALYTICS_CAP)
-        );
-        const histSnap = await getDocs(histQuery);
-        setHistoryItems(histSnap.docs.map(d => ({ id: d.id, ...d.data() } as HistoryItem)));
 
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Unable to load data');
@@ -577,11 +453,9 @@ function DashboardPageInner() {
     await signOut(firebaseAuth!);
     setProfile(null);
     setVehicles([]);
-    setAssets([]);
     setUsers([]);
     setInspections([]);
     setDefects([]);
-    setHistoryItems([]);
   };
 
   // ============================================
@@ -589,30 +463,6 @@ function DashboardPageInner() {
   // ============================================
 
   // Vehicle Analytics
-  const vehicleStatusBreakdown = useMemo(() => {
-    const statusMap: Record<string, number> = {};
-    vehicles.forEach(v => {
-      const status = v.status || 'unknown';
-      statusMap[status] = (statusMap[status] || 0) + 1;
-    });
-    return Object.entries(statusMap).map(([name, value]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      value
-    }));
-  }, [vehicles]);
-
-  const vehiclesByMake = useMemo(() => {
-    const makeMap: Record<string, number> = {};
-    vehicles.forEach(v => {
-      const make = v.make || 'Unknown';
-      makeMap[make] = (makeMap[make] || 0) + 1;
-    });
-    return Object.entries(makeMap)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 8);
-  }, [vehicles]);
-
   const inspectionsByVehicle = useMemo(() => {
     const vehicleMap: Record<string, { count: number; defects: number; name: string }> = {};
     inspections.forEach(insp => {
@@ -634,56 +484,7 @@ function DashboardPageInner() {
       .slice(0, 10);
   }, [inspections, vehicles]);
 
-  // Asset Analytics
-  const assetStatusBreakdown = useMemo(() => {
-    const statusMap: Record<string, number> = {};
-    assets.forEach(a => {
-      const status = a.status || 'unknown';
-      statusMap[status] = (statusMap[status] || 0) + 1;
-    });
-    return Object.entries(statusMap).map(([name, value]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      value
-    }));
-  }, [assets]);
-
-  const assetsByType = useMemo(() => {
-    const typeMap: Record<string, number> = {};
-    assets.forEach(a => {
-      const type = a.type || 'Unknown';
-      typeMap[type] = (typeMap[type] || 0) + 1;
-    });
-    return Object.entries(typeMap)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 8);
-  }, [assets]);
-
-  const assetUsageByAction = useMemo(() => {
-    const actionMap: Record<string, number> = {};
-    historyItems.forEach(h => {
-      const action = h.action || 'unknown';
-      actionMap[action] = (actionMap[action] || 0) + 1;
-    });
-    return Object.entries(actionMap)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-  }, [historyItems]);
-
   // User Analytics
-  const usersByRole = useMemo(() => {
-    const roleMap: Record<string, number> = {};
-    users.forEach(u => {
-      const role = u.role || 'user';
-      roleMap[role] = (roleMap[role] || 0) + 1;
-    });
-    return Object.entries(roleMap).map(([name, value]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      value
-    }));
-  }, [users]);
-
-  // From profile: first_name + last_name > display_name > displayName > name > email prefix > fallback
   const getUserDisplayName = (u: Profile | undefined, fallback: string = 'Unknown') => {
     if (!u) return fallback;
     if (u.first_name || u.last_name) return `${u.first_name || ''} ${u.last_name || ''}`.trim();
@@ -693,41 +494,6 @@ function DashboardPageInner() {
     if (u.email) return u.email.split('@')[0];
     return fallback;
   };
-
-  const userActivity = useMemo(() => {
-    const userActionMap: Record<string, { inspections: number; actions: number; name: string }> = {};
-    
-    inspections.forEach(insp => {
-      const uId = insp.inspected_by || 'unknown';
-      if (!userActionMap[uId]) {
-        const u = users.find(u => u.id === uId);
-        userActionMap[uId] = {
-          inspections: 0,
-          actions: 0,
-          name: getUserDisplayName(u, uId)
-        };
-      }
-      userActionMap[uId].inspections++;
-    });
-
-    historyItems.forEach(h => {
-      const uId = h.user_id || 'unknown';
-      if (!userActionMap[uId]) {
-        const u = users.find(u => u.id === uId);
-        userActionMap[uId] = {
-          inspections: 0,
-          actions: 0,
-          name: getUserDisplayName(u, uId)
-        };
-      }
-      userActionMap[uId].actions++;
-    });
-
-    return Object.entries(userActionMap)
-      .map(([id, data]) => ({ id, ...data, total: data.inspections + data.actions }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 10);
-  }, [inspections, historyItems, users]);
 
   // Time-based Analytics
   const inspectionsOverTime = useMemo(() => {
@@ -782,16 +548,44 @@ function DashboardPageInner() {
       }));
   }, [defects]);
 
-  // KPI Calculations
-  const fleetUtilization = useMemo(() => {
-    if (!vehiclesCount || vehiclesCount === 0) return 0;
-    return Math.round(((activeVehiclesCount || 0) / vehiclesCount) * 100);
-  }, [vehiclesCount, activeVehiclesCount]);
+  const toExpiryDate = (value?: Timestamp | string) => {
+    if (!value) return null;
+    try {
+      if (typeof value === 'object' && 'toDate' in value) return value.toDate();
+      const d = new Date(value as string);
+      return Number.isNaN(d.getTime()) ? null : d;
+    } catch {
+      return null;
+    }
+  };
 
-  const assetUtilization = useMemo(() => {
-    if (!assetsCount || assetsCount === 0) return 0;
-    return Math.round(((activeAssetsCount || 0) / assetsCount) * 100);
-  }, [assetsCount, activeAssetsCount]);
+  const daysUntil = (value?: Timestamp | string) => {
+    const end = toExpiryDate(value);
+    if (!end) return null;
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const day = new Date(end);
+    day.setHours(0, 0, 0, 0);
+    return Math.ceil((day.getTime() - start.getTime()) / 86400000);
+  };
+
+  const openDefectsInRange = useMemo(
+    () => defects.filter((d) => d.status !== 'resolved'),
+    [defects]
+  );
+
+  const motTaxDueCount = useMemo(() => {
+    return vehicles.filter((v) => {
+      const mot = daysUntil(v.mot_expiry_date);
+      const tax = daysUntil(v.tax_expiry_date);
+      return (mot !== null && mot <= 30) || (tax !== null && tax <= 30);
+    }).length;
+  }, [vehicles]);
+
+  const mileageAttentionCount = useMemo(
+    () => buildMileageAttentionRows(inspections, vehicles).length,
+    [inspections, vehicles]
+  );
 
   const defectResolutionRate = useMemo(() => {
     if (!defectsCount || defectsCount === 0) return 100;
@@ -817,23 +611,6 @@ function DashboardPageInner() {
 
   // Export data preparation (full columns for compliance / weekly archives)
   const exportData = useMemo(() => {
-    const historyRows = historyItems.map((h) => {
-      const asset = assets.find((a) => a.id === h.tool_id);
-      const actor = users.find((u) => u.id === h.user_id);
-      return {
-        'Record ID': h.id,
-        Timestamp: formatDate(h.timestamp),
-        Action: h.action || '',
-        'Related ID': h.tool_id || '',
-        'Related Name': asset?.name || '',
-        'Related Type': asset?.type || '',
-        Location: h.location || '',
-        Notes: h.notes || '',
-        'User ID': h.user_id || '',
-        User: getUserDisplayName(actor, h.user_id || ''),
-      };
-    });
-
     return {
       vehicles: vehicles.map((v) => ({
         'Vehicle ID': v.id,
@@ -847,21 +624,6 @@ function DashboardPageInner() {
         Notes: v.notes || '',
         'Created At': formatDate(v.created_at),
         'Updated At': formatDate(v.updated_at),
-      })),
-      assets: assets.map((a) => ({
-        'Related ID': a.id,
-        Name: a.name || '',
-        Brand: a.brand || '',
-        Model: a.model || '',
-        'Serial Number': a.serial_number || '',
-        Type: a.type || '',
-        Category: a.category || '',
-        Status: a.status || '',
-        Location: a.location || '',
-        Condition: a.condition || '',
-        Notes: a.notes || '',
-        'Created At': formatDate(a.created_at),
-        'Updated At': formatDate(a.updated_at),
       })),
       users: users.map((u) => ({
         'User ID': u.id,
@@ -904,9 +666,8 @@ function DashboardPageInner() {
           'Resolution Notes': d.resolution_notes || '',
         };
       }),
-      history: historyRows,
     };
-  }, [vehicles, assets, users, inspections, defects, historyItems]);
+  }, [vehicles, users, inspections, defects]);
 
   const handleFleetHealthPdf = useCallback(() => {
     if (vehicles.length === 0 && defects.length === 0) {
@@ -967,7 +728,7 @@ function DashboardPageInner() {
                     Manager dashboard
                   </h1>
                   <p className="mt-2 max-w-sm text-sm text-slate-600 leading-relaxed">
-                    Sign in to view your organisation’s fleet analytics, defects, and compliance.
+                    Sign in to view your organisation’s fleet, defects, and compliance.
                   </p>
                 </div>
 
@@ -1103,39 +864,15 @@ function DashboardPageInner() {
                         7-Day Free Trial
                       </span>
                     )}
-                    {subscriptionStatus === 'active' && subscriptionTier && (
-                      <span className="badge-tier inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-300 border border-green-400/40">
-                        {subscriptionTier.replace('PRO_', '')}
-                      </span>
-                    )}
                   </div>
                   <p className="text-white/60 text-sm mt-1">
-                    Fleet and team performance at a glance
+                    What needs attention, plus activity for {rangeLabel}
+                  </p>
+                  <p className="text-white/40 text-xs mt-1">
+                    Export is a snapshot of this view. Full Excel is in Fleet report. 6/12 month packs are in Vehicle reports.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <div
-                    className="inline-flex items-center gap-0.5 rounded-lg border border-zinc-200 bg-white p-0.5 dark:border-white/10 dark:bg-white/5"
-                    role="tablist"
-                    aria-label="Dashboard view"
-                  >
-                    {(['summary', 'detailed'] as const).map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        role="tab"
-                        aria-selected={view === v}
-                        onClick={() => handleChangeView(v)}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
-                          view === v
-                            ? 'bg-blue-600 text-white keep-light-on-dark dark:bg-blue-500'
-                            : 'text-zinc-600 hover:text-zinc-900 dark:text-white/70 dark:hover:text-white'
-                        }`}
-                      >
-                        {v === 'summary' ? 'Summary' : 'Detailed'}
-                      </button>
-                    ))}
-                  </div>
                   <div className="flex items-center gap-2">
                     <span className="text-white/50 text-sm hidden sm:inline">Period</span>
                     <div className="flex items-center gap-0.5 bg-white/5 border border-white/10 rounded-lg p-0.5">
@@ -1197,134 +934,130 @@ function DashboardPageInner() {
               </div>
 
               {/* Loading overlay for data */}
-              {loading && vehicles.length === 0 && assets.length === 0 && (
+              {loading && vehicles.length === 0 && (
                 <div className="mb-8 flex items-center gap-3 text-white/60 text-sm">
                   <RefreshCw className="h-4 w-4 animate-spin" aria-hidden />
-                  <span>Loading analytics…</span>
+                  <span>Loading dashboard…</span>
                 </div>
               )}
 
-              {view === 'detailed' ? (
-                <DashboardDetailedView
-                  vehicles={vehicles}
-                  assets={assets}
-                  users={users}
-                  inspections={inspections}
-                  defects={defects}
-                  historyItems={historyItems}
-                  rangeSpanDays={rangeSpanDays}
-                  rangeLabel={rangeLabel}
-                />
-              ) : (
-              <>
-              {/* KPI Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                <div className="dashboard-card p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-500/15 flex items-center justify-center">
-                      <Truck className="h-5 w-5 text-blue-400" />
-                    </div>
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${fleetUtilization >= 70 ? 'text-green-300' : 'text-amber-300'}`}>
-                      {fleetUtilization >= 70 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                      {fleetUtilization}%
-                    </span>
+              <div className="dashboard-card p-5 mb-6">
+                <h2 className="text-white font-semibold text-sm mb-3">Needs attention</h2>
+                {motTaxDueCount === 0 &&
+                openDefectsInRange.length === 0 &&
+                mileageAttentionCount === 0 &&
+                inspections.length > 0 ? (
+                  <p className="text-white/60 text-sm">
+                    Nothing urgent. No MOT or tax due in the next 30 days, no open defects in this period, and no vans to review in Mileage.
+                  </p>
+                ) : (
+                  <ul className="space-y-2 text-sm">
+                    {motTaxDueCount > 0 && (
+                      <li>
+                        <Link
+                          href="/dashboard/mot-tax"
+                          className="inline-flex items-center gap-2 text-amber-700 hover:underline dark:text-amber-300"
+                        >
+                          <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
+                          {motTaxDueCount} vehicle{motTaxDueCount === 1 ? '' : 's'} with MOT or tax due within 30 days
+                        </Link>
+                      </li>
+                    )}
+                    {openDefectsInRange.length > 0 && (
+                      <li>
+                        <Link
+                          href="/dashboard/defects"
+                          className="inline-flex items-center gap-2 text-red-700 hover:underline dark:text-red-300"
+                        >
+                          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+                          {openDefectsInRange.length} open defect{openDefectsInRange.length === 1 ? '' : 's'} in this period
+                        </Link>
+                      </li>
+                    )}
+                    {mileageAttentionCount > 0 && (
+                      <li>
+                        <Link
+                          href="/dashboard/fleet-report/mileage"
+                          className="inline-flex items-center gap-2 text-amber-700 hover:underline dark:text-amber-300"
+                        >
+                          <ClipboardList className="h-4 w-4 shrink-0" aria-hidden />
+                          {mileageAttentionCount} vehicle{mileageAttentionCount === 1 ? '' : 's'} to review in Mileage
+                        </Link>
+                      </li>
+                    )}
+                    {inspections.length === 0 && (
+                      <li className="text-white/60">
+                        No inspections in {rangeLabel}. Daily checks from the app will appear here.
+                      </li>
+                    )}
+                    {motTaxDueCount === 0 && openDefectsInRange.length === 0 && inspections.length === 0 && (
+                      <li className="text-white/60">
+                        No MOT or tax due in the next 30 days.
+                      </li>
+                    )}
+                  </ul>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <Link
+                  href="/dashboard/fleet"
+                  className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/15 flex items-center justify-center mb-3">
+                    <Truck className="h-5 w-5 text-blue-400" />
                   </div>
                   <p className="dashboard-kpi-value">{vehiclesCount ?? '—'}</p>
-                  <p className="dashboard-kpi-label">Fleet vehicles</p>
+                  <p className="dashboard-kpi-label">Vehicles</p>
                   <p className="text-white/40 text-xs mt-1">{activeVehiclesCount ?? 0} active</p>
-                </div>
+                </Link>
 
-                <div className="dashboard-card p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-emerald-400" />
-                    </div>
+                <Link
+                  href="/dashboard/defects"
+                  className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-red-500/15 flex items-center justify-center mb-3">
+                    <AlertTriangle className="h-5 w-5 text-red-400" />
                   </div>
-                  <p className="dashboard-kpi-value">{teamCount ?? '—'}</p>
-                  <p className="dashboard-kpi-label">Team members</p>
-                  <p className="text-white/40 text-xs mt-1">{userActivity.length} active in period</p>
-                </div>
+                  <p className="dashboard-kpi-value">{openDefectsInRange.length}</p>
+                  <p className="dashboard-kpi-label">Open defects</p>
+                  <p className="text-white/40 text-xs mt-1">
+                    {defectsCount ? `${defectResolutionRate}% closed in period` : `in ${rangeLabel}`}
+                  </p>
+                </Link>
 
-                <div className="dashboard-card p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-cyan-500/15 flex items-center justify-center">
-                      <Target className="h-5 w-5 text-cyan-400" />
-                    </div>
-                    <span className={`inline-flex items-center gap-1 text-xs font-medium tabular-nums ${defectResolutionRate >= 70 ? 'text-green-300' : 'text-red-300'}`}>
-                      {defectResolutionRate}%
-                    </span>
+                <Link
+                  href="/dashboard/inspection-proof"
+                  className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-cyan-500/15 flex items-center justify-center mb-3">
+                    <ClipboardList className="h-5 w-5 text-cyan-400" />
                   </div>
                   <p className="dashboard-kpi-value">{inspectionsCount ?? '—'}</p>
-                  <p className="dashboard-kpi-label">Inspections in range</p>
-                  <p className="text-white/40 text-xs mt-1">~{avgInspectionsPerDay}/day avg</p>
-                </div>
+                  <p className="dashboard-kpi-label">Inspections</p>
+                  <p className="text-white/40 text-xs mt-1">~{avgInspectionsPerDay}/day in {rangeLabel}</p>
+                </Link>
+
+                <Link
+                  href="/dashboard/mot-tax"
+                  className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center mb-3">
+                    <ShieldCheck className="h-5 w-5 text-amber-400" />
+                  </div>
+                  <p className="dashboard-kpi-value">{motTaxDueCount}</p>
+                  <p className="dashboard-kpi-label">MOT &amp; tax due</p>
+                  <p className="text-white/40 text-xs mt-1">Within 30 days</p>
+                </Link>
               </div>
 
               <DashboardAnalyticsCharts
-                vehicleStatusBreakdown={vehicleStatusBreakdown}
-                vehiclesByMake={vehiclesByMake}
                 inspectionsByVehicle={inspectionsByVehicle}
-                usersByRole={usersByRole}
-                userActivity={userActivity}
                 inspectionsOverTime={inspectionsOverTime}
                 defectsTrend={defectsTrend}
                 defectsBySeverity={defectsBySeverity}
+                rangeLabel={rangeLabel}
               />
-
-              {/* Summary Statistics Table */}
-              <div className="dashboard-card p-6">
-                <h3 className="text-white font-semibold mb-4">Summary statistics</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead className="border-b border-white/10">
-                      <tr>
-                        <th className="px-4 py-3 text-white/70 text-sm font-medium">Metric</th>
-                        <th className="px-4 py-3 text-white/70 text-sm font-medium">Total</th>
-                        <th className="px-4 py-3 text-white/70 text-sm font-medium">Active</th>
-                        <th className="px-4 py-3 text-white/70 text-sm font-medium">Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      <tr>
-                        <td className="px-4 py-3 text-white">Fleet Vehicles</td>
-                        <td className="px-4 py-3 text-white">{vehiclesCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-blue-300">{activeVehiclesCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-green-300">{fleetUtilization}%</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 text-white">
-                          Inspections (
-                          {dateRange === 'all'
-                            ? 'Last 15 Months'
-                            : dateRange === '365'
-                            ? 'Last 12 Months'
-                            : dateRange === '730'
-                            ? 'Last 24 Months'
-                            : `Last ${dateRange} Days`}
-                          )
-                        </td>
-                        <td className="px-4 py-3 text-white">{inspections.length}</td>
-                        <td className="px-4 py-3 text-blue-300">—</td>
-                        <td className="px-4 py-3 text-cyan-400">{avgInspectionsPerDay}/day</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 text-white">Defects</td>
-                        <td className="px-4 py-3 text-white">{defectsCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-green-300">{resolvedDefectsCount ?? '—'} resolved</td>
-                        <td className="px-4 py-3 text-green-300">{defectResolutionRate}% resolved</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 text-white">Team Members</td>
-                        <td className="px-4 py-3 text-white">{teamCount ?? '—'}</td>
-                        <td className="px-4 py-3 text-blue-300">{userActivity.length} active in period</td>
-                        <td className="px-4 py-3 text-cyan-400">—</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              </>
-              )}
             </div>
           )}
         </div>

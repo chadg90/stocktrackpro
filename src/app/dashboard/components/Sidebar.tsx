@@ -10,9 +10,7 @@ import {
   LogOut,
   AlertTriangle,
   History,
-  MapPin,
   Building2,
-  Gauge,
   Menu,
   X,
   ClipboardList,
@@ -65,7 +63,6 @@ const navigationGroups: NavigationGroup[] = [
     label: 'Fleet',
     items: [
       { name: 'Fleet', href: '/dashboard/fleet', icon: Truck },
-      { name: 'Locations', href: '/dashboard/locations', icon: MapPin },
     ]
   },
   {
@@ -73,8 +70,12 @@ const navigationGroups: NavigationGroup[] = [
     items: [
       { name: 'Fleet report', href: '/dashboard/fleet-report', icon: ClipboardList, managerOnly: true },
       { name: 'MOT & Tax', href: '/dashboard/mot-tax', icon: ShieldCheck, managerOnly: true },
-      { name: 'Mileage monitor', href: '/dashboard/mileage-monitor', icon: Gauge, managerOnly: true },
       { name: 'Defects', href: '/dashboard/defects', icon: AlertTriangle, managerOnly: true },
+    ]
+  },
+  {
+    label: 'Evidence',
+    items: [
       { name: 'Inspection proof', href: '/dashboard/inspection-proof', icon: FileText, managerOnly: true },
       { name: 'Vehicle reports', href: '/dashboard/vehicle-reports', icon: ClipboardList, managerOnly: true },
       { name: 'Audit log', href: '/dashboard/history', icon: History },
@@ -140,20 +141,22 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Menu Button — adapts to dashboard theme */}
-      <button
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className={`lg:hidden fixed top-4 left-4 z-[100] p-2 rounded-lg shadow-lg transition-colors ${
-          theme === 'light'
-            ? 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-50'
-            : 'bg-black/90 border border-blue-500/30 text-white hover:bg-blue-500/10'
-        }`}
-        aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-        aria-expanded={mobileMenuOpen}
-        aria-controls="sidebar-navigation"
-      >
-        {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </button>
+      {/* Open menu — hidden while the drawer is open so it does not cover the logo */}
+      {!mobileMenuOpen && (
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          className={`lg:hidden fixed top-4 left-4 z-[100] p-2 rounded-lg shadow-lg transition-colors ${
+            theme === 'light'
+              ? 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-50'
+              : 'bg-black/90 border border-blue-500/30 text-white hover:bg-blue-500/10'
+          }`}
+          aria-label="Open menu"
+          aria-expanded={false}
+          aria-controls="sidebar-navigation"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+      )}
 
       {/* Mobile Overlay */}
       {mobileMenuOpen && (
@@ -176,10 +179,18 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
         e.stopPropagation();
       }}
       >
-        <div className="flex h-20 items-center justify-between px-4 border-b border-white/10 shrink-0">
+        <div className="flex h-20 items-center gap-2 px-3 border-b border-white/10 shrink-0">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(false)}
+            className="lg:hidden shrink-0 p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/60"
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <Link
             href="/"
-            className="relative h-12 w-[200px] flex items-center"
+            className="relative h-12 flex-1 min-w-0 max-w-[200px] flex items-center"
             onClick={() => setMobileMenuOpen(false)}
             aria-label="Fleet Track PRO home"
           >
@@ -193,7 +204,7 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
               className="object-left"
             />
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={onToggleTheme}
