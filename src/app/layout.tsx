@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
+import SiteChatBot from "@/components/SiteChatBot";
 import SiteWideJsonLd from "@/components/seo/SiteWideJsonLd";
 import { SITE_META_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
 import { APP_STORE_ID, SITE_LEGAL_NAME, SITE_NAME, SITE_URL } from "@/lib/brand";
@@ -120,6 +121,7 @@ export default function RootLayout({
         {children}
         <Footer />
         <CookieConsent />
+        <SiteChatBot />
         {/* Hobby-plan Web Analytics — privacy-friendly, no advertising cookies */}
         <Analytics />
       </body>

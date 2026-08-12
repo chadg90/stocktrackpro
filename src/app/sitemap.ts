@@ -25,7 +25,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...publishedArticles.map((article) => `/compliance-centre/${article.slug}`),
     '/customers/newstreet',
     '/customers/neemt',
-    '/book-demo',
     '/terms',
     '/subscription-terms',
     '/privacy',

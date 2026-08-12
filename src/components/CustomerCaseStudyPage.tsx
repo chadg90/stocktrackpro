@@ -222,10 +222,10 @@ export default function CustomerCaseStudyPage({
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link
-                href="/book-demo"
+                href="/contact"
                 className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-medium border border-slate-300 text-slate-800 bg-white hover:bg-slate-50"
               >
-                Book a 15-min demo
+                Contact us
               </Link>
             </div>
           </div>

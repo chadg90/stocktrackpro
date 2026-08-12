@@ -40,13 +40,6 @@ function NavbarNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
       ))}
       <div className="ml-4 pl-4 border-l border-slate-200 flex items-center gap-2">
         <Link
-          href="/book-demo"
-          className="inline-flex items-center justify-center px-3.5 py-2 rounded-xl border border-slate-300 text-slate-800 font-semibold text-sm bg-white hover:bg-slate-50 transition-colors"
-          onClick={onLinkClick}
-        >
-          Book Demo
-        </Link>
-        <Link
           href={ONBOARDING_URL}
           className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-white font-semibold text-sm hover:scale-[1.02] transition-all duration-200 btn-brand-blue"
           onClick={onLinkClick}
@@ -80,13 +73,6 @@ function NavbarMobileNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
         </Link>
       ))}
       <div className="pt-4 mt-4 border-t border-slate-200 space-y-2">
-        <Link
-          href="/book-demo"
-          className="flex items-center justify-center w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-800 font-semibold bg-white hover:bg-slate-50"
-          onClick={onLinkClick}
-        >
-          Book Demo
-        </Link>
         <Link
           href={ONBOARDING_URL}
           className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-white font-semibold btn-brand-blue"

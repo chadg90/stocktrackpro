@@ -31,7 +31,6 @@ export async function getMarketingUrlsForIndexNow(): Promise<string[]> {
     ...articles.map((article) => `/compliance-centre/${article.slug}`),
     '/customers/newstreet',
     '/customers/neemt',
-    '/book-demo',
     '/terms',
     '/subscription-terms',
     '/privacy',

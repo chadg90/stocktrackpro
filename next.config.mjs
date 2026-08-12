@@ -39,6 +39,16 @@ const nextConfig = {
         destination: '/compliance-centre/van-fleet-defect-records/',
         permanent: true,
       },
+      {
+        source: '/book-demo',
+        destination: '/contact/',
+        permanent: true,
+      },
+      {
+        source: '/book-demo/',
+        destination: '/contact/',
+        permanent: true,
+      },
     ];
   },
   async headers() {

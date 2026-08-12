@@ -23,6 +23,6 @@ export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   {
     question: 'Can I see a demo before I start?',
     answer:
-      'Yes. Book a free 15-minute demo and we will walk through inspections, defects, and renewals for your fleet size.',
+      'Yes. Message us on WhatsApp or use the Contact page and we will walk through inspections, defects, and renewals for your fleet size. You can also start a 7-day free trial with no card required.',
   },
 ];
