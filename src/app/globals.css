@@ -19,6 +19,7 @@
   --mkt-text: #0f172a;
   --mkt-muted: #475569;
   --mkt-border: #e2e8f0;
+  --demo-app-bg: #edf0f5;
 }
 
 /* Light mode design tokens */
@@ -180,6 +181,122 @@ html {
       animation: none !important;
       opacity: 1 !important;
       transform: none !important;
+    }
+  }
+
+  /* Interactive demo — refined tap targets */
+  @keyframes demo-focus-glow {
+    0%,
+    100% {
+      box-shadow:
+        inset 0 0 0 1px rgba(251, 191, 36, 0.7),
+        0 0 0 1px rgba(251, 191, 36, 0.35),
+        0 0 8px rgba(251, 191, 36, 0.16);
+    }
+    50% {
+      box-shadow:
+        inset 0 0 0 1px rgba(252, 211, 77, 0.95),
+        0 0 0 1px rgba(251, 191, 36, 0.55),
+        0 0 14px rgba(251, 191, 36, 0.28);
+    }
+  }
+
+  @keyframes demo-focus-ping {
+    0% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1.05);
+      opacity: 0;
+    }
+  }
+
+  @keyframes demo-hint-enter {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 6px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  .demo-hotspot-target {
+    @apply absolute inset-0 rounded-[10px] border border-amber-400/75 bg-gradient-to-br from-amber-300/10 to-amber-500/5;
+    animation: demo-focus-glow 2.6s ease-in-out infinite;
+  }
+
+  .demo-hotspot-target--static {
+    animation: none;
+    box-shadow:
+      inset 0 0 0 1px rgba(251, 191, 36, 0.55),
+      0 0 0 1px rgba(251, 191, 36, 0.25);
+  }
+
+  .demo-hotspot-ping {
+    @apply pointer-events-none absolute -inset-[2px] rounded-[11px] border border-amber-300/45;
+    animation: demo-focus-ping 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+
+  .demo-hotspot-ping--static {
+    animation: none;
+    opacity: 0;
+  }
+
+  .demo-hint {
+    @apply pointer-events-none absolute left-1/2 z-20 max-w-[min(200px,90vw)] -translate-x-1/2 rounded-lg bg-white px-3 py-1.5 text-center text-[11px] font-semibold leading-snug text-slate-800 shadow-[0_10px_28px_rgba(15,23,42,0.16)] ring-1 ring-slate-900/[0.08];
+    box-shadow:
+      inset 0 2px 0 0 rgb(251 191 36),
+      0 10px 28px rgba(15, 23, 42, 0.16);
+    animation: demo-hint-enter 0.4s ease-out both;
+  }
+
+  .demo-hint--waiting {
+    @apply text-slate-500;
+    box-shadow:
+      inset 0 2px 0 0 rgb(148 163 184),
+      0 10px 28px rgba(15, 23, 42, 0.12);
+  }
+
+  .demo-hint-chevron {
+    @apply absolute left-1/2 h-0 w-0 -translate-x-1/2 border-x-[5px] border-x-transparent;
+  }
+
+  .demo-hint-chevron--down {
+    @apply top-full border-t-[5px] border-t-white;
+    filter: drop-shadow(0 1px 0 rgba(15, 23, 42, 0.06));
+  }
+
+  .demo-hint-chevron--up {
+    @apply bottom-full border-b-[5px] border-b-white;
+    filter: drop-shadow(0 -1px 0 rgba(15, 23, 42, 0.06));
+  }
+
+  .demo-continue-btn {
+    animation: demo-focus-glow 2.6s ease-in-out infinite;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 0 0 1px rgba(251, 191, 36, 0.45),
+      0 0 10px rgba(251, 191, 36, 0.18);
+  }
+
+  .demo-hotspot-btn:hover .demo-hotspot-target {
+    border-color: rgba(252, 211, 77, 0.95);
+    background-image: linear-gradient(
+      to bottom right,
+      rgba(252, 211, 77, 0.14),
+      rgba(251, 191, 36, 0.08)
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .demo-hotspot-target,
+    .demo-hotspot-ping,
+    .demo-continue-btn,
+    .demo-hint {
+      animation: none !important;
     }
   }
 

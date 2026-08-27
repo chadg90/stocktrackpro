@@ -31,10 +31,10 @@ export const CUSTOMER_STORIES: CustomerStory[] = [
     logoSrc: '/clients/newstreet-logo.png',
     logoAlt: 'Newstreet Groundwork Services',
     location: 'County Durham',
-    fleetSize: 25,
+    fleetSize: 35,
     industry: 'Groundworks',
     summary:
-      'A 25-vehicle County Durham groundworks fleet keeping defects, MOT and tax in one shared system across active sites.',
+      'A 35-vehicle County Durham groundworks fleet keeping defects, MOT and tax in one shared system across active sites.',
     quoteName: 'Newstreet Groundwork Services',
     quoteRole: 'Groundworks fleet',
     href: '/customers/newstreet',
@@ -45,11 +45,11 @@ export const CUSTOMER_STORIES: CustomerStory[] = [
     impact: [
       'Defects reported and closed in one workflow',
       'MOT and tax tracked alongside daily checks',
-      'Clearer visibility across a 25-vehicle multi-site fleet',
+      'Clearer visibility across a 35-vehicle multi-site fleet',
     ],
     metrics: [
       {
-        label: '25 vehicles',
+        label: '35 vehicles',
         detail: 'Fleet size managed in Fleet Track PRO',
       },
       {
@@ -83,7 +83,7 @@ export const CUSTOMER_STORIES: CustomerStory[] = [
     logoSrc: '/clients/neemt-logo.webp',
     logoAlt: 'NEEMT — North-East Emergency Medical Transport',
     location: 'North East England',
-    fleetSize: 2,
+    fleetSize: 3,
     industry: 'Emergency medical transport',
     summary:
       'North-East Emergency Medical Transport keeps blue-light vehicles inspection-ready with digital VDIs and central vehicle records.',
@@ -105,7 +105,7 @@ export const CUSTOMER_STORIES: CustomerStory[] = [
     ],
     metrics: [
       {
-        label: '2 vehicles',
+        label: '3 vehicles',
         detail: 'Blue-light emergency fleet',
       },
       {

@@ -1,81 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { HOME_HERO_POSTER_SRC, HOME_HERO_VIDEO_DESCRIPTION, HOME_HERO_VIDEO_SRC } from '@/content/homeHero';
+import InteractiveAppDemo from '@/components/InteractiveAppDemo';
 import { SITE_NAME } from '@/lib/brand';
 
 const WHATSAPP_DEMO_URL =
   'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%2C%20I%27d%20like%20to%20see%20a%20quick%20demo.';
 
-const MOBILE_MEDIA_QUERY = '(max-width: 1023px)';
-
 export default function HomeHero() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [reduceMotion, setReduceMotion] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
-
-  useEffect(() => {
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const mobileQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
-
-    const updateMotion = () => setReduceMotion(motionQuery.matches);
-    const updateMobile = () => {
-      const mobile = mobileQuery.matches;
-      setIsMobile(mobile);
-      if (!mobile) setShouldLoadVideo(true);
-    };
-
-    updateMotion();
-    updateMobile();
-
-    motionQuery.addEventListener('change', updateMotion);
-    mobileQuery.addEventListener('change', updateMobile);
-
-    return () => {
-      motionQuery.removeEventListener('change', updateMotion);
-      mobileQuery.removeEventListener('change', updateMobile);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShouldLoadVideo(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '80px' }
-    );
-
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, [isMobile]);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !shouldLoadVideo || reduceMotion) return;
-
-    video.play().catch(() => {});
-  }, [shouldLoadVideo, reduceMotion]);
-
-  const showVideo = shouldLoadVideo && !reduceMotion;
-
   return (
-    <section
-      ref={sectionRef}
-      className="relative overflow-hidden pt-[4.5rem] sm:pt-24 lg:pt-20 grid grid-cols-1 lg:grid-cols-2 lg:items-center bg-[var(--mkt-bg)]"
-    >
+    <section className="relative overflow-hidden pt-[4.5rem] sm:pt-24 lg:pt-20 grid grid-cols-1 lg:grid-cols-2 lg:items-center bg-[var(--mkt-bg)]">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_15%_40%,rgba(59,130,246,0.09),transparent_55%)]" />
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
 
@@ -121,31 +56,7 @@ export default function HomeHero() {
       </div>
 
       <div className="relative order-2 w-full flex items-center justify-center px-5 pb-10 sm:px-6 sm:pb-14 lg:px-6 lg:pb-16 lg:pt-6 mkt-animate-fade-in">
-        <div className="relative w-full max-w-[280px] sm:max-w-[420px] lg:max-w-[520px] xl:max-w-[560px] aspect-square overflow-hidden mkt-card-static">
-          {showVideo ? (
-            <video
-              ref={videoRef}
-              src={HOME_HERO_VIDEO_SRC}
-              poster={HOME_HERO_POSTER_SRC}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload={isMobile ? 'none' : 'metadata'}
-              aria-label={HOME_HERO_VIDEO_DESCRIPTION}
-              className="absolute inset-0 h-full w-full object-cover object-center"
-            />
-          ) : (
-            <Image
-              src={HOME_HERO_POSTER_SRC}
-              alt="Fleet Track PRO fleet app — adding vehicle inspection photos during a daily walkaround check"
-              fill
-              sizes="(max-width: 640px) 280px, (max-width: 1024px) 420px, 560px"
-              priority
-              className="object-cover object-center"
-            />
-          )}
-        </div>
+        <InteractiveAppDemo />
       </div>
     </section>
   );

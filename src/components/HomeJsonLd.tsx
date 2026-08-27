@@ -1,8 +1,3 @@
-import {
-  HOME_HERO_POSTER_SRC,
-  HOME_HERO_VIDEO_DESCRIPTION,
-  HOME_HERO_VIDEO_SRC,
-} from '@/content/homeHero';
 import { SITE_SHORT_DESCRIPTION, SOFTWARE_FEATURE_LIST } from '@/content/siteSeo';
 import { ORGANIZATION_ID, SITE_URL, WEBSITE_ID } from '@/lib/site';
 
@@ -32,7 +27,7 @@ export function HomeJsonLd() {
         keywords:
           'fleet compliance, DVSA walkaround checks, vehicle defect reporting, MOT tracking, fleet management UK',
         url: SITE_URL,
-        screenshot: `${SITE_URL}/hero-demo-poster.jpg`,
+        screenshot: `${SITE_URL}/demo/01-login.png`,
         inLanguage: 'en-GB',
         offers: {
           '@type': 'Offer',
@@ -57,16 +52,6 @@ export function HomeJsonLd() {
         },
         provider: { '@id': ORGANIZATION_ID },
         isPartOf: { '@id': WEBSITE_ID },
-      },
-      {
-        '@type': 'VideoObject',
-        '@id': `${SITE_URL}/#hero-video`,
-        name: 'Fleet Track PRO mobile app demonstration',
-        description: HOME_HERO_VIDEO_DESCRIPTION,
-        thumbnailUrl: `${SITE_URL}${HOME_HERO_POSTER_SRC}`,
-        contentUrl: `${SITE_URL}${HOME_HERO_VIDEO_SRC}`,
-        uploadDate: '2026-07-06',
-        inLanguage: 'en-GB',
       },
     ],
   };

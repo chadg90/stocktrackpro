@@ -26,6 +26,9 @@ import {
   BLOOD_ORGAN_PHOTO_LABELS,
   BLOOD_ORGAN_SECTION_ORDER,
   BLOOD_ORGAN_SECTION_TITLES,
+  CAR_VAN_CHECK_LABELS,
+  CAR_VAN_SECTION_ORDER,
+  CAR_VAN_SECTION_TITLES,
   CAR_VAN_WALKAROUND_LABELS,
   FLUID_STATUS_LABELS,
   FUEL_LEVEL_LABELS,
@@ -479,6 +482,10 @@ function InspectionDetailModal({
   pdfBusy: boolean;
 }) {
   const isBlood = inspection.inspection_category === 'blood_organ';
+  const isCarVanTemplated =
+    !!inspection.check_results &&
+    (inspection.inspection_category === 'car_van' ||
+      String(inspection.inspection_template_id || '').startsWith('car_van'));
   const photos = Object.entries(inspection.photo_urls || {}).filter(([, v]) => !!v);
 
   return (
@@ -644,6 +651,85 @@ function InspectionDetailModal({
                 );
               })}
             </section>
+          ) : isCarVanTemplated && inspection.check_results ? (
+            <section className="space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wide text-gray-500">
+                Checklist results
+              </h3>
+              {CAR_VAN_SECTION_ORDER.map((sectionId) => {
+                const sectionChecks = Object.entries(CAR_VAN_CHECK_LABELS).filter(
+                  ([checkId, meta]) =>
+                    meta.sectionId === sectionId && !!inspection.check_results?.[checkId]
+                );
+                if (sectionChecks.length === 0) return null;
+                return (
+                  <div key={sectionId}>
+                    <h4 className="mb-2 font-semibold text-gray-900 dark:text-white">
+                      {CAR_VAN_SECTION_TITLES[sectionId]}
+                    </h4>
+                    <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                      <table className="min-w-full text-sm">
+                        <thead className="bg-gray-50 text-xs dark:bg-gray-800">
+                          <tr>
+                            <th className="px-3 py-2 text-left">Check</th>
+                            <th className="px-3 py-2 text-left">Result</th>
+                            <th className="px-3 py-2 text-left">Notes</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sectionChecks.map(([checkId, meta]) => {
+                            const r = inspection.check_results?.[checkId] as
+                              | {
+                                  result?: string;
+                                  fluid_status?: string;
+                                  reason?: string;
+                                  severity?: string;
+                                  vehicle_status?: string;
+                                  evidence?: { url?: string };
+                                }
+                              | undefined;
+                            const fluidLabel =
+                              r?.fluid_status && FLUID_STATUS_LABELS[r.fluid_status];
+                            return (
+                              <tr key={checkId} className="border-t border-gray-100 dark:border-gray-800">
+                                <td className="px-3 py-2 text-gray-900 dark:text-gray-100">{meta.title}</td>
+                                <td className="px-3 py-2 font-semibold uppercase">
+                                  {fluidLabel ? (
+                                    <ResultBadge result={r?.result} label={fluidLabel} />
+                                  ) : (
+                                    <ResultBadge result={r?.result} />
+                                  )}
+                                </td>
+                                <td className="px-3 py-2 text-gray-600 dark:text-gray-400">
+                                  {[
+                                    r?.reason,
+                                    r?.severity ? `Severity: ${r.severity}` : null,
+                                    r?.vehicle_status
+                                      ? `Vehicle: ${r.vehicle_status.replace(/_/g, ' ')}`
+                                      : null,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(' · ') || '—'}
+                                  {r?.evidence?.url ? (
+                                    <div className="mt-2 max-w-xs">
+                                      <AuthenticatedImage
+                                        src={r.evidence.url}
+                                        alt="Evidence"
+                                        className="h-24 w-full rounded object-cover"
+                                      />
+                                    </div>
+                                  ) : null}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                );
+              })}
+            </section>
           ) : inspection.walkaround_declaration?.items ? (
             <section>
               <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-gray-500">
@@ -705,6 +791,18 @@ function InspectionDetailModal({
                   <p>Signed at: {inspection.declaration.confirmed_at || '—'}</p>
                 </div>
                 <InspectionSignaturePreview signaturePaths={inspection.declaration.signature_paths} />
+              </div>
+            ) : isCarVanTemplated && inspection.declaration ? (
+              <div className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                <p>
+                  Physically completed checks:{' '}
+                  <strong>{inspection.declaration.items?.decl_physical ? 'Yes' : 'No'}</strong>
+                </p>
+                <p>
+                  Faults reported accurately:{' '}
+                  <strong>{inspection.declaration.items?.decl_accurate ? 'Yes' : 'No'}</strong>
+                </p>
+                <p>Confirmed at: {inspection.declaration.confirmed_at || '—'}</p>
               </div>
             ) : (
               <p className="text-sm text-gray-600 dark:text-gray-400">

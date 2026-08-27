@@ -6,7 +6,7 @@ import { getCustomerStory } from '@/content/customerStories';
 export const metadata: Metadata = {
   title: 'Newstreet Groundworks Case Study',
   description:
-    'How Newstreet Groundwork Services, County Durham, uses Fleet Track PRO across a 25-vehicle fleet for defects, MOT and tax.',
+    'How Newstreet Groundwork Services, County Durham, uses Fleet Track PRO across a 35-vehicle fleet for defects, MOT and tax.',
   alternates: { canonical: '/customers/newstreet' },
 };
 

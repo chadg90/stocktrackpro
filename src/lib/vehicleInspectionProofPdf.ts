@@ -11,6 +11,9 @@ import {
   BLOOD_ORGAN_PHOTO_LABELS,
   BLOOD_ORGAN_SECTION_ORDER,
   BLOOD_ORGAN_SECTION_TITLES,
+  CAR_VAN_CHECK_LABELS,
+  CAR_VAN_SECTION_ORDER,
+  CAR_VAN_SECTION_TITLES,
   CAR_VAN_WALKAROUND_LABELS,
   FLUID_STATUS_LABELS,
   FUEL_LEVEL_LABELS,
@@ -147,6 +150,10 @@ export async function exportVehicleInspectionProofPdf(args: {
   let y = 18;
 
   const isBlood = inspection.inspection_category === 'blood_organ';
+  const isCarVanTemplated =
+    !!inspection.check_results &&
+    (inspection.inspection_category === 'car_van' ||
+      String(inspection.inspection_template_id || '').startsWith('car_van'));
   const inspectedAt = formatDateTime(toDate(inspection.inspected_at));
   const reg = (vehicle.registration || 'UNKNOWN').toUpperCase();
 
@@ -346,6 +353,87 @@ export async function exportVehicleInspectionProofPdf(args: {
         }
       }
     }
+  } else if (isCarVanTemplated && inspection.check_results) {
+    y = sectionHeading(doc, 'Checklist results', y);
+    for (const sectionId of CAR_VAN_SECTION_ORDER) {
+      const rows: string[][] = [];
+      for (const [checkId, meta] of Object.entries(CAR_VAN_CHECK_LABELS)) {
+        if (meta.sectionId !== sectionId) continue;
+        const result = inspection.check_results[checkId];
+        if (!result) continue;
+        const fluidLabel =
+          result.fluid_status && FLUID_STATUS_LABELS[result.fluid_status];
+        const resultLabel = fluidLabel || (result.result || '—').toUpperCase();
+        const detailParts = [
+          result.reason ? `Reason: ${result.reason}` : '',
+          result.severity ? `Severity: ${result.severity}` : '',
+          result.vehicle_status ? `Status: ${result.vehicle_status.replace(/_/g, ' ')}` : '',
+        ].filter(Boolean);
+        rows.push([meta.title, resultLabel, detailParts.join(' | ') || '—']);
+      }
+      if (rows.length === 0) continue;
+      y = ensureSpace(doc, y, 20);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...BLACK);
+      doc.text(CAR_VAN_SECTION_TITLES[sectionId] || sectionId, 14, y);
+      y += 3;
+      autoTable(doc, {
+        startY: y,
+        theme: 'striped',
+        head: [['Check', 'Result', 'Notes']],
+        headStyles: { fillColor: [40, 40, 40], textColor: 255, fontSize: 8 },
+        bodyStyles: { fontSize: 8, textColor: BODY_SAFE },
+        margin: { left: 14, right: 14 },
+        columnStyles: {
+          0: { cellWidth: 70 },
+          1: { cellWidth: 22 },
+          2: { cellWidth: 'auto' },
+        },
+        body: rows,
+      });
+      y = ((doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable?.finalY || y) + 8;
+    }
+
+    const evidenceItems: Array<{ title: string; path: string }> = [];
+    for (const [checkId, result] of Object.entries(inspection.check_results)) {
+      if (result?.evidence?.url) {
+        evidenceItems.push({
+          title: CAR_VAN_CHECK_LABELS[checkId]?.title || checkId,
+          path: result.evidence.url,
+        });
+      }
+    }
+    if (evidenceItems.length > 0) {
+      y = sectionHeading(doc, 'Failure evidence photos', y);
+      for (const item of evidenceItems) {
+        y = ensureSpace(doc, y, 55);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text(item.title, 14, y);
+        y += 3;
+        const img = await resolveImageDataUrl(item.path);
+        if (img) {
+          try {
+            const maxW = 90;
+            const maxH = 52;
+            const fitted = fitInBox(maxW, maxH, img.width, img.height);
+            doc.addImage(img.dataUrl, img.format, 14, y, fitted.w, fitted.h, undefined, 'FAST');
+            y += fitted.h + 8;
+          } catch {
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...GRAY);
+            doc.text('(Evidence photo could not be embedded)', 14, y + 8);
+            y += 14;
+          }
+        } else {
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(...GRAY);
+          doc.text('(Evidence photo unavailable)', 14, y + 8);
+          y += 14;
+        }
+      }
+    }
   } else if (inspection.walkaround_declaration?.items) {
     y = sectionHeading(doc, 'Car / Van walkaround checks', y);
     const items = inspection.walkaround_declaration.items;
@@ -475,6 +563,17 @@ export async function exportVehicleInspectionProofPdf(args: {
       );
       y += 6;
       doc.setTextColor(...BLACK);
+    }
+  } else if (isCarVanTemplated && inspection.declaration?.items) {
+    const lines = [
+      `Physically completed checks: ${inspection.declaration.items.decl_physical ? 'Yes' : 'No'}`,
+      `Faults reported accurately: ${inspection.declaration.items.decl_accurate ? 'Yes' : 'No'}`,
+      `Confirmed at: ${inspection.declaration.confirmed_at || '—'}`,
+    ];
+    for (const line of lines) {
+      y = ensureSpace(doc, y, 6);
+      doc.text(line, 14, y);
+      y += 5;
     }
   } else {
     doc.text(

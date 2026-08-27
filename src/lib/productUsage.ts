@@ -35,6 +35,11 @@ export const TRACKED_PAGES: Array<{ key: string; label: string; path: string }> 
     label: 'Product usage (admin)',
     path: '/dashboard/admin/product-usage',
   },
+  {
+    key: 'page:/dashboard/admin/billing',
+    label: 'Billing & storage (admin)',
+    path: '/dashboard/admin/billing',
+  },
 ];
 
 /** Key feature clicks (beyond page views). */

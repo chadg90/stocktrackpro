@@ -125,6 +125,8 @@ export default function InviteAcceptPage() {
         setError(
           'This invite is no longer valid (expired, cancelled, or already used). If you already submitted this form once, sign in on the app with that password or use Forgot password. Otherwise ask your manager for a new invite.'
         );
+      } else if (message.toLowerCase().includes('password must be at least')) {
+        setError('Password must be at least 12 characters.');
       } else if (message.toLowerCase().includes('missing required metadata')) {
         setError('This invite is missing setup data. Please ask your manager to send a new invite.');
       } else {

@@ -219,3 +219,39 @@ export const CAR_VAN_WALKAROUND_LABELS: Record<string, string> = {
   in_cab_checks: 'In-Cab Checks',
   final_confirm: 'Final declaration',
 };
+
+/** New car/van Pass/Fail/N/A template — mirrored from STP/services/inspections/carVanTemplate.ts (v2) */
+export const CAR_VAN_SECTION_ORDER = ['in_cab', 'fluids', 'exterior'] as const;
+
+export const CAR_VAN_SECTION_TITLES: Record<string, string> = {
+  in_cab: 'Cab',
+  fluids: 'Under the Bonnet',
+  exterior: 'Exterior & Load',
+};
+
+export const CAR_VAN_CHECK_LABELS: Record<string, { title: string; sectionId: string }> = {
+  // Cab
+  cab_front_view: { title: 'Front view — windscreen and mirrors', sectionId: 'in_cab' },
+  cab_wipers_washers: { title: 'Wipers and washers', sectionId: 'in_cab' },
+  cab_warning_lights: { title: 'Dashboard warning lights', sectionId: 'in_cab' },
+  cab_steering: { title: 'Steering', sectionId: 'in_cab' },
+  cab_horn: { title: 'Horn', sectionId: 'in_cab' },
+  cab_brakes: { title: 'Footbrake and handbrake', sectionId: 'in_cab' },
+  cab_seatbelts: { title: 'Seats and seatbelts', sectionId: 'in_cab' },
+  // Under bonnet
+  fluid_oil: { title: 'Engine oil', sectionId: 'fluids' },
+  fluid_coolant: { title: 'Coolant', sectionId: 'fluids' },
+  fluid_leaks: { title: 'Visible leaks', sectionId: 'fluids' },
+  fluid_battery: { title: 'Battery', sectionId: 'fluids' },
+  fluid_adblue: { title: 'AdBlue', sectionId: 'fluids' },
+  // Exterior & load
+  ext_damage: { title: 'Bodywork and damage', sectionId: 'exterior' },
+  ext_doors: { title: 'Doors and shutters', sectionId: 'exterior' },
+  ext_number_plates: { title: 'Number plates', sectionId: 'exterior' },
+  ext_standard_lights: { title: 'Lights and indicators', sectionId: 'exterior' },
+  ext_tyres_wheels: { title: 'Tyres and wheels', sectionId: 'exterior' },
+  ext_exhaust: { title: 'Exhaust', sectionId: 'exterior' },
+  ext_load_security: { title: 'Load security', sectionId: 'exterior' },
+  ext_tow_bar: { title: 'Tow bar / trailer', sectionId: 'exterior' },
+  ext_other_equipment: { title: 'Other equipment (e.g. tail lift)', sectionId: 'exterior' },
+};
