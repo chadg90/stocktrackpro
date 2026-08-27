@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   INTERACTIVE_DEMO_START_ID,
   INTERACTIVE_DEMO_STEPS,
@@ -19,6 +19,13 @@ function stepById(id: string): DemoStep | undefined {
 
 const demoCtaClass =
   'rounded-xl bg-[var(--brand-blue)] font-semibold text-white shadow-[0_4px_14px_rgba(37,99,235,0.4)] ring-2 ring-amber-400 ring-offset-1 transition-[transform,background-color,box-shadow] duration-150 hover:bg-[var(--brand-blue-hover)] hover:shadow-[0_6px_18px_rgba(37,99,235,0.5)] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400';
+
+const demoPhoneShellClass =
+  'absolute inset-0 rounded-[2.35rem] bg-slate-900 shadow-[0_36px_72px_-20px_rgba(15,23,42,0.62),0_16px_32px_-12px_rgba(15,23,42,0.45),0_4px_10px_-2px_rgba(15,23,42,0.25)] ring-1 ring-slate-800/80';
+
+const DEMO_IMAGE_SOURCES = [
+  ...new Set(INTERACTIVE_DEMO_STEPS.map((demoStep) => demoStep.imageSrc)),
+];
 
 /** Covers screenshot status bars so every demo step shows the same time and icons. */
 function DemoPhoneStatusBar() {
@@ -166,8 +173,16 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
   const canBack = stepHistory.length > 0 && stepId !== INTERACTIVE_DEMO_START_ID;
   const canRestart = stepId !== INTERACTIVE_DEMO_START_ID || guideDone;
 
+  useEffect(() => {
+    DEMO_IMAGE_SOURCES.forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, []);
+
   return (
     <div className={`flex flex-col items-center gap-3 ${className}`}>
+      <div className="relative px-2 pb-5 pt-1 sm:px-3">
       <div
         className="relative w-[min(100%,260px)] sm:w-[280px] lg:w-[300px]"
         style={{ aspectRatio: '471 / 1024' }}
@@ -175,8 +190,8 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
         aria-label={`Interactive app demo — ${step.title}`}
       >
         {/* Phone shell */}
-        <div className="absolute inset-0 rounded-[2.35rem] bg-slate-900 shadow-[0_25px_50px_-12px_rgba(15,23,42,0.45)] ring-1 ring-slate-800/80">
-          <div className="absolute inset-[7px] overflow-hidden rounded-[1.95rem] bg-black">
+        <div className={demoPhoneShellClass}>
+          <div className="absolute inset-[7px] overflow-hidden rounded-[1.95rem] bg-[var(--demo-app-bg)]">
             {/* Dynamic Island */}
             <div
               className="pointer-events-none absolute left-1/2 top-[11px] z-[25] h-[22px] w-[82px] -translate-x-1/2 rounded-full bg-black"
@@ -184,14 +199,23 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
             />
 
             <div className="relative h-full w-full">
-              <Image
-                src={step.imageSrc}
-                alt={step.imageAlt}
-                fill
-                sizes="(max-width: 640px) 280px, 300px"
-                priority
-                className="object-cover object-top"
-              />
+              {DEMO_IMAGE_SOURCES.map((src) => {
+                const isActive = step.imageSrc === src;
+                return (
+                  <Image
+                    key={src}
+                    src={src}
+                    alt={isActive ? step.imageAlt : ''}
+                    aria-hidden={!isActive}
+                    fill
+                    sizes="(max-width: 640px) 280px, 300px"
+                    priority
+                    className={`object-cover object-top transition-opacity duration-150 ease-out ${
+                      isActive ? 'z-[1] opacity-100' : 'z-0 opacity-0'
+                    }`}
+                  />
+                );
+              })}
               <DemoPhoneStatusBar />
 
               {showGuide && step.guide ? (
@@ -339,6 +363,7 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       <p className="text-center text-xs text-slate-500">
