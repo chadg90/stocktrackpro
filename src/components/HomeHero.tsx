@@ -14,7 +14,7 @@ export default function HomeHero() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_15%_40%,rgba(59,130,246,0.09),transparent_55%)]" />
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
 
-      <div className="relative flex flex-col justify-center px-5 sm:px-6 lg:px-10 xl:px-16 pt-8 pb-6 sm:py-14 lg:py-20 order-1 text-center lg:text-left items-center lg:items-start mkt-animate-fade-up">
+      <div className="relative flex flex-col justify-center px-5 sm:px-6 lg:px-10 xl:px-16 pt-8 pb-4 sm:pb-6 sm:py-14 lg:py-20 order-1 text-center lg:text-left items-center lg:items-start mkt-animate-fade-up">
         <p className="text-3xl sm:text-4xl md:text-5xl lg:text-[2.75rem] xl:text-6xl font-bold tracking-tight text-slate-900 mb-3 sm:mb-4 leading-[1.1]">
           {SITE_NAME}
         </p>
@@ -55,8 +55,11 @@ export default function HomeHero() {
         </div>
       </div>
 
-      <div className="relative order-2 w-full flex items-center justify-center px-5 pb-10 sm:px-6 sm:pb-14 lg:px-6 lg:pb-16 lg:pt-6 mkt-animate-fade-in-hero-demo">
-        <InteractiveAppDemo />
+      <div
+        id="interactive-demo"
+        className="relative order-2 w-full flex items-center justify-center px-5 pt-2 pb-10 sm:px-6 sm:pb-14 lg:px-6 lg:pb-16 lg:pt-6 mkt-animate-fade-in-hero-demo"
+      >
+        <InteractiveAppDemo className="w-full max-w-[300px]" />
       </div>
     </section>
   );
