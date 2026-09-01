@@ -33,7 +33,7 @@ export default function HomeHero() {
             href="/onboarding"
             className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 px-8 py-3.5 sm:py-4 min-h-[48px] rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-slate-50 btn-brand-blue"
           >
-            Start 7-Day Free Trial
+            Start 14-Day Free Trial
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
           <a
@@ -55,7 +55,7 @@ export default function HomeHero() {
         </div>
       </div>
 
-      <div className="relative order-2 w-full flex items-center justify-center px-5 pb-10 sm:px-6 sm:pb-14 lg:px-6 lg:pb-16 lg:pt-6 mkt-animate-fade-in">
+      <div className="relative order-2 w-full flex items-center justify-center px-5 pb-10 sm:px-6 sm:pb-14 lg:px-6 lg:pb-16 lg:pt-6 mkt-animate-fade-in-hero-demo">
         <InteractiveAppDemo />
       </div>
     </section>

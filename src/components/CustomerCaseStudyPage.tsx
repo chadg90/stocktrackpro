@@ -218,7 +218,7 @@ export default function CustomerCaseStudyPage({
                 href="/onboarding"
                 className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white btn-brand-blue"
               >
-                Start 7-Day Free Trial
+                Start 14-Day Free Trial
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link

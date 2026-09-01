@@ -35,7 +35,7 @@ UK fleet operators — trades, groundworks, logistics, construction, electrical,
 - £8 per vehicle per month (minimum 2 vehicles)
 - Annual fleet billing: £84 per vehicle per year
 - Unlimited team members on every plan (no per-user fee)
-- 7-day free trial — no card required
+- 14-day free trial — no card required
 - Monthly plans can be cancelled anytime
 
 ## Key pages

@@ -299,14 +299,14 @@ export default function Home() {
               Start managing your fleet today
             </h2>
             <p className="text-slate-600 max-w-xl mx-auto mb-10 text-lg">
-              Set up your company and invite your team in minutes — no card required for the 7-day trial.
+              Set up your company and invite your team in minutes — no card required for the 14-day trial.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md sm:max-w-none mx-auto">
               <Link
                 href="/onboarding"
                 className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-4 min-h-[48px] rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white"
               >
-                Start 7-Day Free Trial
+                Start 14-Day Free Trial
               </Link>
               <Link
                 href="/pricing"

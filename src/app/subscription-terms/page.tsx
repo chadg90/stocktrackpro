@@ -9,7 +9,7 @@ const LAST_UPDATED = '4 August 2026';
 export const metadata: Metadata = {
   title: 'Subscription Terms',
   description:
-    'Subscription terms for Fleet Track PRO UK fleet software — 7-day trial, monthly and annual billing, cancellation, and renewal.',
+    'Subscription terms for Fleet Track PRO UK fleet software — 14-day trial, monthly and annual billing, cancellation, and renewal.',
   alternates: { canonical: '/subscription-terms' },
   openGraph: {
     title: 'Subscription Terms | Fleet Track PRO',
@@ -113,10 +113,10 @@ export default function SubscriptionTermsPage() {
             <BulletList
               items={[
                 <>
-                  New companies receive a <strong className="text-slate-800">7-day free trial</strong> of available
+                  New companies receive a <strong className="text-slate-800">14-day free trial</strong> of available
                   fleet product features. No payment card is required to start the trial.
                 </>,
-                'The trial ends automatically after 7 days. To continue, a manager must set up a paid subscription from the website or dashboard.',
+                'The trial ends automatically after 14 days. To continue, a manager must set up a paid subscription from the website or dashboard.',
                 'If no subscription is set up by the end of the trial, we may contact you, restrict access to paid features, or suspend access.',
                 'The trial is for evaluation only. We may refuse, shorten, or end a trial if we reasonably believe it is being misused, used for production beyond evaluation, or the company has already trialled the service.',
                 'One trial per company, unless we agree otherwise in writing.',

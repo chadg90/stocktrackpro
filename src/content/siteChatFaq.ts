@@ -16,13 +16,13 @@ export const SITE_CHAT_TOPICS: SiteChatTopic[] = [
     id: 'pricing',
     label: 'How much does it cost?',
     answer:
-      '£8 per vehicle per month (minimum 2 vehicles). Annual billing is £84 per vehicle per year. You get unlimited team members — you only pay per vehicle. New companies get a 7-day free trial with no card required.',
+      '£8 per vehicle per month (minimum 2 vehicles). Annual billing is £84 per vehicle per year. You get unlimited team members — you only pay per vehicle. New companies get a 14-day free trial with no card required.',
   },
   {
     id: 'trial',
     label: 'How does the free trial work?',
     answer:
-      'Start from “Start 7-Day Free Trial” on the website. You can set up your company, add vehicles, and invite drivers during the trial. No card is required to begin.',
+      'Start from “Start 14-Day Free Trial” on the website. You can set up your company, add vehicles, and invite drivers during the trial. No card is required to begin.',
   },
   {
     id: 'devices',

@@ -7,7 +7,7 @@ Stock Track PRO uses a single **per-vehicle product** with two recurring prices 
 - **Monthly:** £8 per vehicle per month
 - **Annual:** £84 per vehicle per year (≈ £7/month effective — ~12% saving)
 - **Minimum:** 2 vehicles
-- **Trial:** 7-day free trial for brand-new companies (no repeat trials on re-subscribe)
+- **Trial:** 14-day free trial for brand-new companies (no repeat trials on re-subscribe)
 - Quantity = number of subscribed vehicles
 
 ## Step 1: Create the product and prices in Stripe

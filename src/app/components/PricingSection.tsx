@@ -154,7 +154,7 @@ export default function PricingSection() {
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-500">
-          Minimum {MIN_VEHICLES} vehicles &bull; 7-day free trial
+          Minimum {MIN_VEHICLES} vehicles &bull; 14-day free trial
           {billingCycle === 'yearly' ? (
             <> &bull; 12-month term, paid upfront</>
           ) : (

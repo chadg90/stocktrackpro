@@ -177,7 +177,7 @@ export function NavbarNavContent({ onLinkClick }: { onLinkClick: () => void }) {
                 className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-white font-semibold text-sm hover:scale-[1.02] transition-all duration-200 btn-brand-blue"
                 onClick={onLinkClick}
               >
-                Start 7-Day Free Trial
+                Start 14-Day Free Trial
               </Link>
             )}
             <Link
@@ -255,7 +255,7 @@ export function NavbarMobileNavContent({ onLinkClick }: { onLinkClick: () => voi
                 className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-white font-semibold btn-brand-blue"
                 onClick={onLinkClick}
               >
-                Start 7-Day Free Trial
+                Start 14-Day Free Trial
               </Link>
             )}
             <Link

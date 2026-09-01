@@ -23,3 +23,9 @@ export const WEBSITE_ID = `${SITE_URL}/#website`;
 export const LOGO_WHITE = '/logo-white.png';
 export const LOGO_BLACK = '/logo-black.png';
 export const LOGO_DEFAULT = '/logo.png';
+
+/** No-card web signup trial length — keep in sync with Stripe `trial_period_days`. */
+export const FREE_TRIAL_DAYS = 14;
+export const FREE_TRIAL_CTA = 'Start 14-Day Free Trial';
+export const FREE_TRIAL_PHRASE = '14-day free trial';
+export const FREE_TRIAL_PHRASE_TITLE = '14-Day Free Trial';

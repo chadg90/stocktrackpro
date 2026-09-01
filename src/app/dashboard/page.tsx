@@ -861,7 +861,7 @@ export default function DashboardPage() {
                     <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Dashboard</h1>
                     {subscriptionStatus === 'trial' && (
                       <span className="badge-trial inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                        7-Day Free Trial
+                        14-Day Free Trial
                       </span>
                     )}
                   </div>

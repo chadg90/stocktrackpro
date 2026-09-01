@@ -20,11 +20,11 @@ import {
   Apple,
 } from 'lucide-react';
 import Link from 'next/link';
-import { APP_STORE_URL, SUPPORT_EMAIL } from '@/lib/brand';
+import { APP_STORE_URL, FREE_TRIAL_CTA, FREE_TRIAL_DAYS, SUPPORT_EMAIL } from '@/lib/brand';
 
 type OnboardingStep = 'choice' | 'account' | 'company' | 'success';
 
-const TRIAL_DAYS = 7;
+const TRIAL_DAYS = FREE_TRIAL_DAYS;
 
 function androidInviteMailto(opts: { email?: string; companyName?: string }) {
   const subject = 'Android app invite request — Fleet Track PRO';
@@ -219,8 +219,14 @@ export default function OnboardingPage() {
   return (
     <div className="marketing-shell flex flex-col items-center justify-center p-4 py-12">
       <div className="w-full max-w-md">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--brand-blue)] hover:underline mb-6"
+        >
+          ← Back to home
+        </Link>
         <div className="text-center mb-6">
-          <Link href="/" className="inline-block mb-6">
+          <Link href="/" className="inline-block mb-6 hover:opacity-90">
             <h1 className="text-3xl font-bold text-slate-900">Fleet Track PRO</h1>
           </Link>
           {step !== 'success' && step !== 'choice' && (
@@ -264,7 +270,7 @@ export default function OnboardingPage() {
                 className="flex-1 p-6 rounded-xl border-2 border-blue-500 bg-blue-500/10 hover:bg-blue-500/20 transition-colors text-left group"
               >
                 <Building2 className="h-8 w-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-slate-900 text-lg mb-2">Start 7-Day Free Trial</h3>
+                <h3 className="font-semibold text-slate-900 text-lg mb-2">{FREE_TRIAL_CTA}</h3>
                 <p className="text-slate-500 text-sm">
                   Create your account and company. {TRIAL_DAYS} days free, no card required. Subscribe later from £8 per vehicle per month.
                 </p>
@@ -563,7 +569,7 @@ export default function OnboardingPage() {
                       </>
                     ) : (
                       <>
-                        Start 7-Day Free Trial <ArrowRight className="h-4 w-4" />
+                        {FREE_TRIAL_CTA} <ArrowRight className="h-4 w-4" />
                       </>
                     )}
                   </button>

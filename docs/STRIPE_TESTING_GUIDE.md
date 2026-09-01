@@ -96,7 +96,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 
 3. **Verify trial applied**:
    - Check Stripe Dashboard → Subscriptions
-   - Subscription should show "Trial ends: [7 days from now]"
+   - Subscription should show "Trial ends: [14 days from now]"
    - First invoice should be $0.00
 
 4. **Check Firebase**:

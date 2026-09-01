@@ -132,7 +132,7 @@ export default function Pricing() {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Clock className="h-4 w-4 text-amber-400" aria-hidden />
-              7-day free trial
+              14-day free trial
             </span>
           </div>
 
@@ -291,15 +291,15 @@ export default function Pricing() {
                 href={authLoading ? '#' : (profile ? '/contact' : '/onboarding')}
                 className="block w-full py-4 px-6 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base text-center shadow-lg shadow-blue-500/25 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50"
               >
-                {authLoading ? '…' : profile ? 'Contact us' : 'Start 7-Day Free Trial'}
+                {authLoading ? '…' : profile ? 'Contact us' : 'Start 14-Day Free Trial'}
               </Link>
             )}
 
             <p className="text-center text-slate-400 text-xs mt-3">
               {billingCycle === 'yearly' ? (
-                <>New companies receive a 7-day free trial &bull; 12-month term, paid upfront &bull; Cancel renewal anytime</>
+                <>New companies receive a 14-day free trial &bull; 12-month term, paid upfront &bull; Cancel renewal anytime</>
               ) : (
-                <>New companies receive a 7-day free trial &bull; Cancel anytime &bull; No long-term contract</>
+                <>New companies receive a 14-day free trial &bull; Cancel anytime &bull; No long-term contract</>
               )}
             </p>
 
@@ -396,7 +396,7 @@ export default function Pricing() {
                   <li className="flex items-start gap-2.5">
                     <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
                     <span>
-                      New companies get a 7-day free trial of fleet features. No card required to start. The
+                      New companies get a 14-day free trial of fleet features. No card required to start. The
                       trial ends automatically; a paid subscription is required to continue.
                     </span>
                   </li>

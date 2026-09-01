@@ -8,7 +8,7 @@ export default function FAQ() {
     ...HOME_FAQ_ITEMS,
     {
       question: "How do I get an account?",
-      answer: "New companies sign up on this website by selecting Start 7-Day Free Trial — accounts and subscriptions can only be created on the web. You then set up your company and invite your team by email. Invited team members open their invite link to set a password, then sign in to the companion app on iOS or Android. Managers sign in to the web dashboard via Log in.",
+      answer: "New companies sign up on this website by selecting Start 14-Day Free Trial — accounts and subscriptions can only be created on the web. You then set up your company and invite your team by email. Invited team members open their invite link to set a password, then sign in to the companion app on iOS or Android. Managers sign in to the web dashboard via Log in.",
     },
     {
       question: "Do I need special hardware to use the app?",
@@ -32,7 +32,7 @@ export default function FAQ() {
     },
     {
       question: "How do I subscribe?",
-      answer: "Subscriptions are set up on the website only — the mobile app is a companion app and does not handle payment. Managers subscribe from the Pricing page or from the Subscription section of the web dashboard, using a card via our Stripe checkout. New companies get a 7-day free trial; no card is required to start the trial.",
+      answer: "Subscriptions are set up on the website only — the mobile app is a companion app and does not handle payment. Managers subscribe from the Pricing page or from the Subscription section of the web dashboard, using a card via our Stripe checkout. New companies get a 14-day free trial; no card is required to start the trial.",
     },
     {
       question: "Can I cancel anytime?",
@@ -48,7 +48,7 @@ export default function FAQ() {
     },
     {
       question: "How long does setup take?",
-      answer: "Most managers add vehicles and invite their first drivers within an hour. New companies get a 7-day free trial on the web — no card required — so you can test the full workflow before subscribing.",
+      answer: "Most managers add vehicles and invite their first drivers within an hour. New companies get a 14-day free trial on the web — no card required — so you can test the full workflow before subscribing.",
     },
     {
       question: "Is my data secure?",

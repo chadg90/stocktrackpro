@@ -4,12 +4,12 @@ import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
-    '£8 per vehicle per month, 2-vehicle minimum. 7-day free fleet trial on the web.',
+    '£8 per vehicle per month, 2-vehicle minimum. 14-day free fleet trial on the web.',
   alternates: { canonical: '/pricing' },
   openGraph: {
     title: 'Pricing | Fleet Track PRO',
     description:
-      'Fleet from £8 per vehicle per month. 7-day free trial.',
+      'Fleet from £8 per vehicle per month. 14-day free trial.',
     url: 'https://www.fleettrackpro.co.uk/pricing/',
     siteName: 'Fleet Track PRO',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Fleet Track PRO pricing' }],
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Pricing | Fleet Track PRO',
     description:
-      '£8 per vehicle per month — 7-day free fleet trial.',
+      '£8 per vehicle per month — 14-day free fleet trial.',
     images: ['/og-image.jpg'],
   },
 };
@@ -35,7 +35,7 @@ export default function PricingLayout({
       <MarketingWebPageJsonLd
         path="/pricing"
         title="Pricing"
-        description="£8 per vehicle per month for UK fleet management. 7-day free trial."
+        description="£8 per vehicle per month for UK fleet management. 14-day free trial."
       />
       {children}
     </>

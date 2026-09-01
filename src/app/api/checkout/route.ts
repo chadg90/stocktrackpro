@@ -3,6 +3,7 @@ import { getStripe, getStripePriceId, MIN_VEHICLES, type BillingCycle } from '@/
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import { SITE_URL } from '@/lib/site';
+import { FREE_TRIAL_DAYS } from '@/lib/brand';
 
 // Increase timeout for Vercel (max 60s on Pro, 10s on Hobby)
 export const maxDuration = 60;
@@ -245,7 +246,7 @@ export async function POST(request: NextRequest) {
             billing_cycle: cycle,
           },
           // No-card web trial is already used at onboarding — charge from day one on convert.
-          ...(!alreadyUsedWebTrial && !hasPreviousStripeSubscription && { trial_period_days: 7 }),
+          ...(!alreadyUsedWebTrial && !hasPreviousStripeSubscription && { trial_period_days: FREE_TRIAL_DAYS }),
         },
       });
     } catch (stripeError: any) {

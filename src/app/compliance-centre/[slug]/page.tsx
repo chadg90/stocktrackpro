@@ -647,7 +647,7 @@ export default async function ComplianceArticlePage({ params }: Props) {
                   href="/onboarding"
                   className="flex w-full items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white"
                 >
-                  Start free 7-day trial →
+                  Start free 14-day trial →
                 </Link>
               </div>
               {related.length > 0 && (

@@ -225,7 +225,7 @@ export default function Features() {
               href="/onboarding"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue"
             >
-              Start 7-Day Free Trial
+              Start 14-Day Free Trial
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
@@ -236,7 +236,7 @@ export default function Features() {
             </Link>
           </div>
           <p className="mt-5 text-sm text-slate-500">
-            7 days free &bull; no card required &bull;{' '}
+            14 days free &bull; no card required &bull;{' '}
             <a
               href={WHATSAPP_ENQUIRY_URL}
               target="_blank"

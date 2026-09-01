@@ -10,7 +10,7 @@ Welcome to Stock Track PRO! This guide provides a comprehensive breakdown of eve
 
 ### Subscription Status
 - **Active Subscription Required**: You must have an active subscription (Active or Trial status) to access the dashboard
-- **7-Day Free Trial**: New users get a 7-day free trial when signing up
+- **14-Day Free Trial**: New users get a 14-day free trial when signing up
 - **Subscription Lockout**: If your subscription expires or becomes inactive, you'll be locked out until you subscribe again
 
 ### User Roles
@@ -404,7 +404,7 @@ The sidebar menu is organised into five main sections:
   - QR code scanning
   - Vehicle inspections
   - Fleet and asset management
-  - 7-day free trial
+  - 14-day free trial
 
 - **Team** (£34.99/month):
   - Up to 10 users
@@ -413,7 +413,7 @@ The sidebar menu is organised into five main sections:
   - Vehicle inspections and defect workflow
   - Full company dashboard
   - Priority email support
-  - 7-day free trial
+  - 14-day free trial
 
 - **Business** (£49.99/month):
   - Up to 40 users
@@ -422,7 +422,7 @@ The sidebar menu is organised into five main sections:
   - All features included
   - Admin and manager roles
   - Full audit trail
-  - 7-day free trial
+  - 14-day free trial
 
 - **Enterprise** (£119.99/month):
   - Up to 75 users
@@ -431,7 +431,7 @@ The sidebar menu is organised into five main sections:
   - Custom onboarding
   - Dedicated support
   - All features included
-  - 7-day free trial
+  - 14-day free trial
 
 **What You Can Do:**
 
@@ -557,7 +557,7 @@ As a new user, here's what you should do first:
 1. **Complete Onboarding**
    - Sign up and create your company
    - Select your trial plan (Starter, Team, Business, or Enterprise)
-   - You'll get a 7-day free trial
+   - You'll get a 14-day free trial
 
 2. **Set Up Your Fleet**
    - Go to Fleet page

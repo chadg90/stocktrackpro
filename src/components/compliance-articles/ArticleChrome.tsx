@@ -19,7 +19,7 @@ export function ArticleCta() {
           href="/onboarding"
           className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4 font-medium"
         >
-          Try free for 7 days — no card required.
+          Try free for 14 days — no card required.
         </Link>
       </p>
     </div>
