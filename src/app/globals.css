@@ -117,7 +117,8 @@ html {
 
   /* Visible by default; animate only when motion is allowed (avoids blank hero if JS/CSS is slow). */
   .mkt-animate-fade-up,
-  .mkt-animate-fade-in {
+  .mkt-animate-fade-in,
+  .mkt-animate-fade-in-hero-demo {
     opacity: 1;
   }
 
@@ -127,6 +128,12 @@ html {
     }
 
     .mkt-animate-fade-in {
+      animation: mkt-fade-in 0.9s ease-out 0.15s both;
+    }
+  }
+
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    .mkt-animate-fade-in-hero-demo {
       animation: mkt-fade-in 0.9s ease-out 0.15s both;
     }
   }
@@ -177,7 +184,8 @@ html {
 
   @media (prefers-reduced-motion: reduce) {
     .mkt-animate-fade-up,
-    .mkt-animate-fade-in {
+    .mkt-animate-fade-in,
+    .mkt-animate-fade-in-hero-demo {
       animation: none !important;
       opacity: 1 !important;
       transform: none !important;
