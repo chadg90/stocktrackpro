@@ -7,12 +7,12 @@ import { absolutePageUrl, canonicalPath } from '@/lib/site';
 export const metadata: Metadata = {
   title: 'NEEMT Emergency Vehicle Fleet Case Study',
   description:
-    'How NEEMT (North-East Emergency Medical Transport) uses Fleet Track PRO for pre-shift VDIs, insurance, services, MOT and tax.',
+    'How NEEMT (North-East Emergency Medical Transport) uses Fleet Track PRO for pre-shift VDIs, service records, MOT and tax.',
   alternates: { canonical: canonicalPath('/customers/neemt') },
   openGraph: {
     title: 'NEEMT Emergency Vehicle Fleet Case Study | Fleet Track PRO',
     description:
-      'See how NEEMT manages pre-shift VDIs, photos, service records, insurance, MOT and tax for its emergency vehicle fleet.',
+      'See how NEEMT manages pre-shift VDIs, photos, service records, MOT and tax for its emergency vehicle fleet.',
     url: absolutePageUrl('/customers/neemt'),
     siteName: 'Fleet Track PRO',
     images: [

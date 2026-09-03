@@ -86,19 +86,19 @@ export const CUSTOMER_STORIES: CustomerStory[] = [
     summary:
       'North-East Emergency Medical Transport keeps blue-light vehicles inspection-ready with digital VDIs and central vehicle records.',
     quote:
-      'As a business with blue light emergency vehicles as the primary resource we offer our clients, we need to ensure all vehicles are fit for purpose and safe. Since using Fleet Track PRO, we have been able to manage all back-office items for our vehicles — including insurance, 6-weekly service records, tax and MOT validation — all in one place at the click of a finger. All our response drivers must ensure they conduct a VDI prior to using the vehicle for shift. Since moving to Fleet Track PRO the feedback from both the drivers completing the inspections to our maintenance team has been fantastic. Inspections allow us to take photographs of the vehicle and also record any issues that require rectifying.',
+      'As a business with blue light emergency vehicles as the primary resource we offer our clients, we need to ensure all vehicles are fit for purpose and safe. Since using Fleet Track PRO, we have been able to manage all back-office items for our vehicles — including 6-weekly service records, tax and MOT validation — all in one place at the click of a finger. All our response drivers must ensure they conduct a VDI prior to using the vehicle for shift. Since moving to Fleet Track PRO the feedback from both the drivers completing the inspections to our maintenance team has been fantastic. Inspections allow us to take photographs of the vehicle and also record any issues that require rectifying.',
     quoteName: 'NEEMT Ltd',
     quoteRole: 'North-East Emergency Medical Transport',
     cardExcerpt:
-      'Since using Fleet Track PRO we manage insurance, service records, tax and MOT validation all in one place — and driver VDI feedback has been fantastic.',
+      'Since using Fleet Track PRO we manage service records, tax and MOT validation all in one place — and driver VDI feedback has been fantastic.',
     href: '/customers/neemt',
     challenge:
-      'NEEMT provides emergency specialist transport and courier services to the NHS and private healthcare. Blue-light vehicles must be fit for purpose every shift, with VDIs, insurance, services, tax and MOT all kept under control.',
+      'NEEMT provides emergency specialist transport and courier services to the NHS and private healthcare. Blue-light vehicles must be fit for purpose every shift, with VDIs, services, tax and MOT all kept under control.',
     solution:
-      'Response drivers complete vehicle defect inspections (VDIs) in Fleet Track PRO before each shift, with photos and issue logging. Back-office vehicle items — insurance, 6-weekly service records, tax and MOT — sit in one place for the team.',
+      'Response drivers complete vehicle defect inspections (VDIs) in Fleet Track PRO before each shift, with photos and issue logging. Back-office vehicle items — 6-weekly service records, tax and MOT — sit in one place for the team.',
     impact: [
       'Mandatory pre-shift VDIs with photo evidence',
-      'Insurance, service, tax and MOT in one system',
+      'Service, tax and MOT records in one system',
       'Strong feedback from drivers and the maintenance team',
     ],
     metrics: [
@@ -112,7 +112,7 @@ export const CUSTOMER_STORIES: CustomerStory[] = [
       },
       {
         label: 'One back office',
-        detail: 'Insurance, services, tax and MOT together',
+        detail: 'Services, tax and MOT together',
       },
     ],
     howTheyUse: [
@@ -126,7 +126,7 @@ export const CUSTOMER_STORIES: CustomerStory[] = [
       },
       {
         title: 'Back office in one place',
-        body: 'Insurance, 6-weekly services, tax and MOT validation at a glance.',
+        body: '6-weekly services, tax and MOT validation at a glance.',
       },
     ],
   },
