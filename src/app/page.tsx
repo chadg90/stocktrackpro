@@ -5,7 +5,6 @@ import HomeHero from '@/components/HomeHero';
 import CustomerLogoStrip from '@/components/CustomerLogoStrip';
 import CustomerStoriesSection from '@/components/CustomerStoriesSection';
 import HomeFaqSection from '@/components/HomeFaqSection';
-import { HomeJsonLd } from '@/components/HomeJsonLd';
 import { HomeFaqJsonLd } from '@/components/HomeFaqJsonLd';
 import { SITE_META_DESCRIPTION } from '@/content/siteSeo';
 import { absolutePageUrl } from '@/lib/site';
@@ -121,7 +120,6 @@ const INCLUDED = [
 export default function Home() {
   return (
     <>
-      <HomeJsonLd />
       <HomeFaqJsonLd />
       <div className="marketing-shell">
         <Navbar />

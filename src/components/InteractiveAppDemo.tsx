@@ -78,13 +78,26 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
   ]);
 
   const step = useMemo(() => stepById(stepId) ?? INTERACTIVE_DEMO_STEPS[0], [stepId]);
-  const renderedImageSources = useMemo(
-    () =>
-      visitedImageSources.includes(step.imageSrc)
-        ? visitedImageSources
-        : [...visitedImageSources, step.imageSrc],
-    [step.imageSrc, visitedImageSources]
-  );
+
+  /** Current screen plus any next hotspot/callout screens so taps never wait on a cold fetch. */
+  const prefetchImageSources = useMemo(() => {
+    const nextIds = [
+      ...step.hotspots.map((spot) => spot.nextStepId),
+      step.callout?.nextStepId ?? null,
+    ].filter((id): id is string => Boolean(id));
+
+    return [
+      step.imageSrc,
+      ...nextIds
+        .map((id) => stepById(id)?.imageSrc)
+        .filter((src): src is string => Boolean(src)),
+    ];
+  }, [step]);
+
+  const renderedImageSources = useMemo(() => {
+    const merged = new Set([...visitedImageSources, ...prefetchImageSources]);
+    return Array.from(merged);
+  }, [prefetchImageSources, visitedImageSources]);
   const showGuide = Boolean(step.guide) && !guideDone;
   const showCallout = Boolean(step.callout) && !guideDone;
   const showHotspots = !showGuide && !showCallout;
@@ -137,6 +150,12 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
   }, [step.callout]);
 
   const goToStep = useCallback((id: string) => {
+    const next = stepById(id);
+    if (next?.imageSrc) {
+      setVisitedImageSources((sources) =>
+        sources.includes(next.imageSrc) ? sources : [...sources, next.imageSrc]
+      );
+    }
     setStepId((current) => {
       if (id !== current) {
         setStepHistory((history) => [...history, current]);
@@ -151,6 +170,12 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
     setStepHistory((history) => {
       if (history.length === 0) return history;
       const previous = history[history.length - 1];
+      const previousStep = stepById(previous);
+      if (previousStep?.imageSrc) {
+        setVisitedImageSources((sources) =>
+          sources.includes(previousStep.imageSrc) ? sources : [...sources, previousStep.imageSrc]
+        );
+      }
       setStepId(previous);
       setGuideDone(false);
       setPulse(true);
@@ -183,10 +208,18 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
   const canRestart = stepId !== INTERACTIVE_DEMO_START_ID || guideDone;
 
   useEffect(() => {
-    setVisitedImageSources((sources) =>
-      sources.includes(step.imageSrc) ? sources : [...sources, step.imageSrc]
-    );
-  }, [step.imageSrc]);
+    setVisitedImageSources((sources) => {
+      let changed = false;
+      const next = [...sources];
+      for (const src of prefetchImageSources) {
+        if (!next.includes(src)) {
+          next.push(src);
+          changed = true;
+        }
+      }
+      return changed ? next : sources;
+    });
+  }, [prefetchImageSources]);
 
   return (
     <div className={`flex flex-col items-center gap-3 ${className}`}>
@@ -208,6 +241,7 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
             <div className="relative h-full w-full">
               {renderedImageSources.map((src) => {
                 const isActive = step.imageSrc === src;
+                const isPrefetchCandidate = prefetchImageSources.includes(src);
                 return (
                   <Image
                     key={src}
@@ -216,8 +250,8 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
                     aria-hidden={!isActive}
                     fill
                     sizes="(max-width: 640px) 280px, 300px"
-                    priority={src === INITIAL_DEMO_IMAGE_SOURCE}
-                    className={`object-cover object-top transition-opacity duration-150 ease-out ${
+                    priority={isActive || src === INITIAL_DEMO_IMAGE_SOURCE || isPrefetchCandidate}
+                    className={`object-cover object-top transition-opacity duration-100 ease-out ${
                       isActive ? 'z-[1] opacity-100' : 'z-0 opacity-0'
                     }`}
                   />

@@ -1,5 +1,10 @@
-import { SITE_KNOWS_ABOUT, SITE_SHORT_DESCRIPTION, SITE_TAGLINE, SITE_BRAND_DISAMBIGUATION } from '@/content/siteSeo';
-import { getOrganizationSameAs, ORGANIZATION_ID, SITE_URL, WEBSITE_ID, absolutePageUrl } from '@/lib/site';
+import {
+  SITE_BRAND_DISAMBIGUATION,
+  SITE_KNOWS_ABOUT,
+  SITE_SHORT_DESCRIPTION,
+  SITE_TAGLINE,
+  SOFTWARE_FEATURE_LIST,
+} from '@/content/siteSeo';
 import {
   EDITORIAL_TEAM_ID,
   EDITORIAL_TEAM_NAME,
@@ -7,9 +12,14 @@ import {
   SITE_NAME,
   SUPPORT_EMAIL,
 } from '@/lib/brand';
+import { getOrganizationSameAs, ORGANIZATION_ID, SITE_URL, WEBSITE_ID, absolutePageUrl } from '@/lib/site';
+
+const SOFTWARE_ID = `${SITE_URL}/#software`;
+const priceValidUntil = `${new Date().getFullYear() + 1}-12-31`;
 
 /**
- * Organization + WebSite graph for every page (Google + AI entity consolidation).
+ * Organization + WebSite + SoftwareApplication graph for every page
+ * (Google + AI entity consolidation).
  */
 export default function SiteWideJsonLd() {
   const sameAs = getOrganizationSameAs();
@@ -60,6 +70,54 @@ export default function SiteWideJsonLd() {
     organization.sameAs = sameAs;
   }
 
+  const softwareApplication = {
+    '@type': 'SoftwareApplication',
+    '@id': SOFTWARE_ID,
+    name: SITE_NAME,
+    alternateName: [
+      `${SITE_NAME} fleet compliance software`,
+      'Stock Track PRO',
+    ],
+    applicationCategory: 'BusinessApplication',
+    applicationSubCategory: 'Fleet management and DVSA compliance software',
+    audience: {
+      '@type': 'BusinessAudience',
+      audienceType: 'UK commercial vehicle fleet operators and transport managers',
+    },
+    operatingSystem: 'iOS, Android, Web',
+    description: SITE_SHORT_DESCRIPTION,
+    featureList: SOFTWARE_FEATURE_LIST,
+    keywords:
+      'fleet compliance, DVSA walkaround checks, vehicle defect reporting, MOT tracking, fleet management UK',
+    url: homeUrl,
+    screenshot: `${SITE_URL}/demo/01-login.png`,
+    inLanguage: 'en-GB',
+    offers: {
+      '@type': 'Offer',
+      url: absolutePageUrl('/pricing'),
+      price: '8.00',
+      priceCurrency: 'GBP',
+      priceValidUntil,
+      availability: 'https://schema.org/InStock',
+      seller: { '@id': ORGANIZATION_ID },
+      eligibleQuantity: {
+        '@type': 'QuantitativeValue',
+        minValue: 2,
+        unitText: 'vehicles',
+      },
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: '8.00',
+        priceCurrency: 'GBP',
+        unitText: 'vehicle per month',
+        valueAddedTaxIncluded: false,
+      },
+    },
+    provider: { '@id': ORGANIZATION_ID },
+    publisher: { '@id': ORGANIZATION_ID },
+    isPartOf: { '@id': WEBSITE_ID },
+  };
+
   const graph = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -73,7 +131,9 @@ export default function SiteWideJsonLd() {
         description: SITE_TAGLINE,
         inLanguage: 'en-GB',
         publisher: { '@id': ORGANIZATION_ID },
+        about: { '@id': SOFTWARE_ID },
       },
+      softwareApplication,
     ],
   };
 

@@ -57,6 +57,11 @@ export function ComplianceArticleJsonLd({ article }: Props) {
       'DVSA vehicle checks',
       'Vehicle defect records',
     ],
+    mentions: {
+      '@type': 'SoftwareApplication',
+      '@id': `${SITE_URL}/#software`,
+      name: 'Fleet Track PRO',
+    },
   };
 
   const breadcrumbLd = {

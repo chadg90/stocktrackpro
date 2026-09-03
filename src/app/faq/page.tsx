@@ -75,7 +75,7 @@ export default function FAQ() {
 
   return (
     <div className="marketing-shell">
-      <HomeFaqJsonLd items={faqs} />
+      <HomeFaqJsonLd items={faqs} path="/faq" />
       <Navbar />
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="max-w-4xl mx-auto">
