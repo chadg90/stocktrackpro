@@ -8,6 +8,7 @@ import HomeFaqSection from '@/components/HomeFaqSection';
 import { HomeJsonLd } from '@/components/HomeJsonLd';
 import { HomeFaqJsonLd } from '@/components/HomeFaqJsonLd';
 import { SITE_META_DESCRIPTION } from '@/content/siteSeo';
+import { absolutePageUrl } from '@/lib/site';
 import {
   Map,
   Smartphone,
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Fleet Track PRO | UK Fleet & DVSA Compliance Software',
     description: SITE_META_DESCRIPTION,
-    url: 'https://www.fleettrackpro.co.uk',
+    url: absolutePageUrl('/'),
     siteName: 'Fleet Track PRO',
     images: [
       {

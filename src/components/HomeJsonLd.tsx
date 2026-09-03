@@ -1,9 +1,10 @@
 import { SITE_SHORT_DESCRIPTION, SOFTWARE_FEATURE_LIST } from '@/content/siteSeo';
-import { ORGANIZATION_ID, SITE_URL, WEBSITE_ID } from '@/lib/site';
+import { ORGANIZATION_ID, SITE_URL, WEBSITE_ID, absolutePageUrl } from '@/lib/site';
 
 const priceValidUntil = `${new Date().getFullYear() + 1}-12-31`;
 
 export function HomeJsonLd() {
+  const homeUrl = absolutePageUrl('/');
   const graph = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -26,12 +27,12 @@ export function HomeJsonLd() {
         featureList: SOFTWARE_FEATURE_LIST,
         keywords:
           'fleet compliance, DVSA walkaround checks, vehicle defect reporting, MOT tracking, fleet management UK',
-        url: SITE_URL,
+        url: homeUrl,
         screenshot: `${SITE_URL}/demo/01-login.png`,
         inLanguage: 'en-GB',
         offers: {
           '@type': 'Offer',
-          url: `${SITE_URL}/pricing`,
+          url: absolutePageUrl('/pricing'),
           price: '8.00',
           priceCurrency: 'GBP',
           priceValidUntil,

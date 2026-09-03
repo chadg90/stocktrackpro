@@ -110,7 +110,7 @@ export default function Pricing() {
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 px-2">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-5 leading-tight relative">
-            Simple, Transparent{' '}
+            Fleet Management Software{' '}
             <span className="text-blue-500 bg-gradient-to-r from-blue-500 to-blue-400 bg-clip-text text-transparent">
               Pricing
             </span>

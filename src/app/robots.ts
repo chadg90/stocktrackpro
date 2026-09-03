@@ -1,7 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/site';
 
-const PRIVATE_PATHS = ['/api/', '/dashboard/', '/onboarding/', '/return/', '/404', '/500'];
+// Transactional return and invite routes intentionally remain crawlable so
+// search engines can read their page-level `noindex` metadata.
+const PRIVATE_PATHS = ['/api/', '/dashboard/', '/onboarding/', '/404', '/500'];
 
 export default function robots(): MetadataRoute.Robots {
   const publicRule = {

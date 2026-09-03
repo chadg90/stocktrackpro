@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
 import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
+import { absolutePageUrl, canonicalPath } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Fleet Management Features',
   description:
-    'Fleet inspection software UK operators use daily: walkaround checks, vehicle defect reporting, MOT tracking, manager dashboards, and DVSA-ready records — Fleet Track PRO.',
-  alternates: { canonical: '/features' },
+    'UK fleet inspection software for walkaround checks, vehicle defect reporting, MOT and tax tracking, manager dashboards and clear compliance records.',
+  alternates: { canonical: canonicalPath('/features') },
   openGraph: {
     title: 'Fleet Management Features | Fleet Track PRO',
     description:
       'Daily vehicle inspections, defects, MOT and tax alerts, and manager analytics — UK fleet compliance software for commercial vehicles.',
-    url: 'https://www.fleettrackpro.co.uk/features/',
+    url: absolutePageUrl('/features'),
     siteName: 'Fleet Track PRO',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Fleet Track PRO features' }],
     locale: 'en_GB',

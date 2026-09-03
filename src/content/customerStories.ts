@@ -35,8 +35,6 @@ export const CUSTOMER_STORIES: CustomerStory[] = [
     industry: 'Groundworks',
     summary:
       'A 35-vehicle County Durham groundworks fleet keeping defects, MOT and tax in one shared system across active sites.',
-    quoteName: 'Newstreet Groundwork Services',
-    quoteRole: 'Groundworks fleet',
     href: '/customers/newstreet',
     challenge:
       'Daily checks and defect reports lived in paper packs and WhatsApp threads. With vans across multiple live sites, the office struggled to see what had been checked, what was outstanding, and which renewals were coming due.',

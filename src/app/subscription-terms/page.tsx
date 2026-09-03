@@ -2,6 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
+import { absolutePageUrl, canonicalPath } from '@/lib/site';
 
 /** Update only when the terms text changes. */
 const LAST_UPDATED = '4 August 2026';
@@ -10,11 +11,11 @@ export const metadata: Metadata = {
   title: 'Subscription Terms',
   description:
     'Subscription terms for Fleet Track PRO UK fleet software — 14-day trial, monthly and annual billing, cancellation, and renewal.',
-  alternates: { canonical: '/subscription-terms' },
+  alternates: { canonical: canonicalPath('/subscription-terms') },
   openGraph: {
     title: 'Subscription Terms | Fleet Track PRO',
     description: 'Billing, trials, and cancellation terms for Fleet Track PRO subscriptions.',
-    url: 'https://www.fleettrackpro.co.uk/subscription-terms',
+    url: absolutePageUrl('/subscription-terms'),
     siteName: 'Fleet Track PRO',
     locale: 'en_GB',
     type: 'website',

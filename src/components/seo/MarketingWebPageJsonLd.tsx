@@ -1,4 +1,4 @@
-import { ORGANIZATION_ID, SITE_URL, WEBSITE_ID } from '@/lib/site';
+import { ORGANIZATION_ID, absolutePageUrl, WEBSITE_ID } from '@/lib/site';
 
 type Props = {
   path: string;
@@ -8,7 +8,7 @@ type Props = {
 
 /** WebPage JSON-LD for marketing routes (Google + AI page understanding). */
 export default function MarketingWebPageJsonLd({ path, title, description }: Props) {
-  const pageUrl = `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  const pageUrl = absolutePageUrl(path);
 
   const webPage = {
     '@context': 'https://schema.org',

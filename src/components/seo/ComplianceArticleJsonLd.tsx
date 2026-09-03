@@ -1,6 +1,10 @@
 import type { ComplianceArticleMeta } from '@/lib/compliance-articles/types';
-import { SITE_LEGAL_NAME } from '@/lib/brand';
-import { ORGANIZATION_ID, SITE_URL } from '@/lib/site';
+import {
+  EDITORIAL_TEAM_ID,
+  EDITORIAL_TEAM_NAME,
+  SITE_LEGAL_NAME,
+} from '@/lib/brand';
+import { ORGANIZATION_ID, SITE_URL, WEBSITE_ID, absolutePageUrl } from '@/lib/site';
 
 type Props = { article: ComplianceArticleMeta };
 
@@ -8,7 +12,9 @@ type Props = { article: ComplianceArticleMeta };
  * Article + BreadcrumbList JSON-LD for compliance posts (Google rich results + clearer IA signals).
  */
 export function ComplianceArticleJsonLd({ article }: Props) {
-  const pageUrl = `${SITE_URL}/compliance-centre/${article.slug}`;
+  const pageUrl = absolutePageUrl(`/compliance-centre/${article.slug}`);
+  const hubUrl = absolutePageUrl('/compliance-centre');
+  const homeUrl = absolutePageUrl('/');
 
   const articleLd = {
     '@context': 'https://schema.org',
@@ -22,8 +28,10 @@ export function ComplianceArticleJsonLd({ article }: Props) {
     image: [`${SITE_URL}/og-image.jpg`],
     author: {
       '@type': 'Organization',
-      '@id': ORGANIZATION_ID,
-      name: SITE_LEGAL_NAME,
+      '@id': EDITORIAL_TEAM_ID,
+      name: EDITORIAL_TEAM_NAME,
+      url: `${absolutePageUrl('/about')}#editorial-team`,
+      parentOrganization: { '@id': ORGANIZATION_ID },
     },
     publisher: {
       '@type': 'Organization',
@@ -40,9 +48,9 @@ export function ComplianceArticleJsonLd({ article }: Props) {
     },
     isPartOf: {
       '@type': 'WebSite',
-      '@id': `${SITE_URL}/#website`,
+      '@id': WEBSITE_ID,
       name: 'Fleet Track PRO',
-      url: SITE_URL,
+      url: homeUrl,
     },
     about: [
       'Van fleet compliance',
@@ -59,13 +67,13 @@ export function ComplianceArticleJsonLd({ article }: Props) {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: SITE_URL,
+        item: homeUrl,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Compliance Centre',
-        item: `${SITE_URL}/compliance-centre`,
+        item: hubUrl,
       },
       {
         '@type': 'ListItem',

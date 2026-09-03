@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { getHomepageCustomerStories, type CustomerStory } from '@/content/customerStories';
 
 function StoryCard({ story }: { story: CustomerStory }) {
@@ -23,16 +23,9 @@ function StoryCard({ story }: { story: CustomerStory }) {
       </div>
 
       {hasQuote ? (
-        <>
-          <div className="mb-4 flex items-center gap-1 text-amber-400" aria-label="5 star rating">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className="h-4 w-4 fill-current" aria-hidden />
-            ))}
-          </div>
-          <blockquote className="flex-1 text-slate-800 text-base sm:text-lg leading-relaxed mb-6">
-            &ldquo;{quoteBody}&rdquo;
-          </blockquote>
-        </>
+        <blockquote className="flex-1 text-slate-800 text-base sm:text-lg leading-relaxed mb-6">
+          &ldquo;{quoteBody}&rdquo;
+        </blockquote>
       ) : (
         <div className="flex-1 mb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 mb-3">
@@ -91,7 +84,7 @@ export default function CustomerStoriesSection() {
             Trusted by fleet operators
           </p>
           <h2 id="customer-stories-heading" className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Real results from real teams
+            How UK fleets use Fleet Track PRO
           </h2>
         </div>
 

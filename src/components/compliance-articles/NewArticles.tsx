@@ -199,7 +199,14 @@ export function ClosingDefectsReturnToServiceArticle() {
       </p>
 
       <p className="compliance-disclaimer">
-        This article summarises general principles and is not legal advice. Follow current DVSA and GOV.UK guidance
+        This article summarises general principles and is not legal advice. Follow the current{' '}
+        <a
+          href="https://www.gov.uk/government/publications/guide-to-maintaining-roadworthiness"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          DVSA Guide to Maintaining Roadworthiness
+        </a>{' '}
         for defect reporting and roadworthiness decisions in your fleet.
       </p>
 

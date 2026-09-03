@@ -19,7 +19,8 @@ const nextConfig = {
   // output: 'export' removed so /api/checkout and /api/webhooks/stripe work (Stripe integration)
   trailingSlash: true,
   images: {
-    unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 31536000,
   },
   typescript: {
     ignoreBuildErrors: false,

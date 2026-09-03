@@ -748,6 +748,17 @@ function InspectionDetailModal({
             </section>
           ) : null}
 
+          {inspection.notes?.trim() ? (
+            <section>
+              <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-gray-500">
+                Additional notes
+              </h3>
+              <p className="whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-200">
+                {inspection.notes.trim()}
+              </p>
+            </section>
+          ) : null}
+
           {inspection.has_defect && (
             <section>
               <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-gray-500">Defects</h3>

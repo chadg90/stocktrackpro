@@ -1,5 +1,10 @@
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
+import {
+  EDITORIAL_TEAM_NAME,
+  SUPPORT_EMAIL,
+  SUPPORT_MAILTO,
+} from '@/lib/brand';
 
 export default function AboutPage() {
   return (
@@ -19,8 +24,8 @@ export default function AboutPage() {
         </p>
         <p className="text-slate-600 text-lg leading-relaxed mb-10">
           We built one platform that does what fleet managers actually need — DVSA walkaround checks, defect close-out,
-          and MOT visibility — without the complexity or the cost. This is fleet compliance software for cars, vans, and
-          light commercial vehicles — not warehouse inventory or stock control.
+          and MOT visibility — without the complexity or the cost. It is built for businesses operating cars, vans, and
+          light commercial vehicles.
         </p>
 
         <div className="grid gap-6">
@@ -56,17 +61,52 @@ export default function AboutPage() {
             </p>
           </section>
 
+          <section
+            id="editorial-team"
+            className="scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-6 sm:p-8"
+          >
+            <h2 className="text-2xl font-semibold mb-3">{EDITORIAL_TEAM_NAME}</h2>
+            <p className="text-slate-600 leading-relaxed mb-4">
+              Our Compliance Centre articles are prepared and maintained by the Fleet Track PRO team for UK fleet
+              operators. We prioritise primary guidance from GOV.UK, DVSA and the HSE, and clearly link to official or
+              attributable industry sources where they support an article.
+            </p>
+            <p className="text-slate-600 leading-relaxed mb-4">
+              Articles show their publication and update dates. They provide general operational information rather
+              than legal advice, and readers should check the latest official guidance for their vehicles and
+              circumstances.
+            </p>
+            <p className="text-slate-600 leading-relaxed">
+              To report an error or suggest a correction, email{' '}
+              <a
+                href={SUPPORT_MAILTO}
+                className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
+              >
+                {SUPPORT_EMAIL}
+              </a>
+              .
+            </p>
+          </section>
+
           <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-2xl font-semibold mb-3">In the field</h2>
             <p className="text-slate-600 leading-relaxed mb-4">
-              See how a groundworks contractor uses Fleet Track PRO across multiple sites.
+              See how UK operators use Fleet Track PRO across groundworks and emergency medical transport fleets.
             </p>
-            <Link
-              href="/customers/newstreet"
-              className="text-[var(--brand-blue)] hover:text-blue-700 text-sm font-medium underline underline-offset-4"
-            >
-              Newstreet Groundworks case study →
-            </Link>
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/customers/newstreet"
+                className="text-[var(--brand-blue)] hover:text-blue-700 text-sm font-medium underline underline-offset-4"
+              >
+                Newstreet Groundworks case study →
+              </Link>
+              <Link
+                href="/customers/neemt"
+                className="text-[var(--brand-blue)] hover:text-blue-700 text-sm font-medium underline underline-offset-4"
+              >
+                NEEMT emergency vehicle fleet case study →
+              </Link>
+            </div>
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-blue-500/10 p-6 sm:p-8">

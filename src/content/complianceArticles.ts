@@ -12,17 +12,17 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     slug: 'van-fleet-defect-records',
     title: 'Fleet defect records: what DVSA expects you to keep',
     metaDescription:
-      'What UK fleet operators should record when drivers report defects — walkaround checks, timestamps, photos, and close-out evidence to reduce prohibition and fine risk.',
+      'What UK fleet operators should record when drivers report defects, including checks, timestamps, photos and close-out evidence for DVSA readiness.',
     datePublished: '2026-04-15T09:00:00+01:00',
-    dateModified: '2026-08-05T00:00:00+01:00',
+    dateModified: '2026-09-03T00:00:00+01:00',
   },
   {
     slug: 'paper-vs-digital-inspection-sheets',
-    title: 'Paper vs digital: why fleet managers are ditching inspection sheets',
+    title: 'Paper vs Digital Vehicle Inspection Sheets for Fleets',
     metaDescription:
       'How digital vehicle inspection software reduces admin, prevents missed defects, and creates stronger evidence when DVSA stops a vehicle at the roadside.',
     datePublished: '2026-05-01T09:00:00+01:00',
-    dateModified: '2026-08-05T00:00:00+01:00',
+    dateModified: '2026-09-03T00:00:00+01:00',
   },
   {
     slug: 'mot-expiry-tracking-for-fleets',
@@ -34,11 +34,11 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
   },
   {
     slug: 'pre-use-checks-company-vehicles',
-    title: 'Pre-use checks: what drivers must do before using a company vehicle',
+    title: 'Pre-Use Vehicle Checks: What Company Drivers Must Do',
     metaDescription:
       'What UK drivers should check before using a company vehicle, how fleet managers should record it, and why pre-use checks matter at DVSA roadside stops.',
     datePublished: '2026-06-02T09:00:00+01:00',
-    dateModified: '2026-08-05T00:00:00+01:00',
+    dateModified: '2026-09-03T00:00:00+01:00',
   },
   {
     slug: 'digital-defect-records-dvsa-scrutiny',
@@ -60,9 +60,9 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     slug: 'how-long-to-keep-fleet-records',
     title: 'How long to keep fleet inspection and defect records (15 months)',
     metaDescription:
-      'DVSA-aligned guidance on retaining walkaround checks, defect reports and repair records for at least 15 months — and what operators should be able to produce on request.',
+      'Guidance on retaining walkaround checks, defect reports and repair records for at least 15 months, including what fleets should retrieve on request.',
     datePublished: '2026-08-05T00:00:00+01:00',
-    dateModified: '2026-08-05T00:00:00+01:00',
+    dateModified: '2026-09-03T00:00:00+01:00',
   },
   {
     slug: 'closing-defects-return-to-service',
@@ -74,11 +74,11 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
   },
   {
     slug: 'preparing-for-dvsa-roadside-check',
-    title: 'Preparing for a DVSA roadside check: evidence fleets should have ready',
+    title: 'DVSA Roadside Checks: Evidence Fleets Should Have Ready',
     metaDescription:
       'What to expect at a DVSA roadside stop, which records help most, and how to prepare your walkaround and defect history before an examiner asks.',
     datePublished: '2026-08-05T00:00:00+01:00',
-    dateModified: '2026-08-05T00:00:00+01:00',
+    dateModified: '2026-09-03T00:00:00+01:00',
   },
 ];
 

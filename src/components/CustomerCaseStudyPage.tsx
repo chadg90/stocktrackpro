@@ -14,6 +14,7 @@ import {
 import type { CustomerStory } from '@/content/customerStories';
 import Navbar from '@/app/components/Navbar';
 import MarketingBreak from '@/components/MarketingBreak';
+import CustomerCaseStudyJsonLd from '@/components/seo/CustomerCaseStudyJsonLd';
 
 const METRIC_ICONS = [Clock3, ShieldCheck, Wrench];
 const STEP_ICONS = [Smartphone, AlertCircle, CheckCircle2];
@@ -34,6 +35,7 @@ export default function CustomerCaseStudyPage({
 
   return (
     <div className="marketing-shell">
+      <CustomerCaseStudyJsonLd story={story} heroImageSrc={heroImageSrc} />
       <Navbar />
       <main>
         <section className="pt-24 sm:pt-28 pb-8 sm:pb-10">
@@ -137,9 +139,6 @@ export default function CustomerCaseStudyPage({
             ) : (
               <aside className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
                 <p className="text-slate-700 text-base sm:text-lg leading-relaxed">{story.summary}</p>
-                <p className="mt-6 text-sm text-slate-500 italic">
-                  A named quote from the Newstreet team is being added soon.
-                </p>
               </aside>
             )}
           </div>

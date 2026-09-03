@@ -6,9 +6,9 @@ export type HomeFaqItem = {
 /** Short set for the homepage — pricing and full list live on /pricing and /faq. */
 export const HOME_FAQ_ITEMS: HomeFaqItem[] = [
   {
-    question: 'Is this warehouse or stock inventory software?',
+    question: 'What does Fleet Track PRO help fleet managers do?',
     answer:
-      'No. Fleet Track PRO is UK fleet compliance software for DVSA walkaround checks, defect reporting, MOT and tax tracking, and repair close-out — not warehouse inventory.',
+      'Fleet Track PRO helps UK fleets run daily vehicle walkaround checks, report defects with photos, track repair close-out, monitor MOT and tax dates, and keep managers informed from one platform.',
   },
   {
     question: 'How many users can I add?',

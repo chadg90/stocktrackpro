@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
+import { absolutePageUrl, canonicalPath } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: {
@@ -7,12 +8,12 @@ export const metadata: Metadata = {
   },
   description:
     'Fleet Track PRO is UK fleet management software built for trades and contractors. Learn what we do, who we help, and how the platform works.',
-  alternates: { canonical: '/about' },
+  alternates: { canonical: canonicalPath('/about') },
   openGraph: {
     title: 'About Fleet Track PRO | UK Fleet Compliance Software',
     description:
       'Fleet Track PRO is UK fleet management software built for trades and contractors. Learn what we do, who we help, and how the platform works.',
-    url: 'https://www.fleettrackpro.co.uk/about/',
+    url: absolutePageUrl('/about'),
     siteName: 'Fleet Track PRO',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'About Fleet Track PRO' }],
     locale: 'en_GB',

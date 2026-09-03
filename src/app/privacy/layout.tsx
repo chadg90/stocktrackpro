@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
+import { absolutePageUrl, canonicalPath } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description:
     'Privacy policy for Fleet Track PRO — how we collect, use, and protect personal data for UK fleet management customers.',
-  alternates: { canonical: '/privacy' },
+  alternates: { canonical: canonicalPath('/privacy') },
   openGraph: {
     title: 'Privacy Policy | Fleet Track PRO',
     description: 'How Fleet Track PRO handles personal data, cookies, and security for fleet operators.',
-    url: 'https://www.fleettrackpro.co.uk/privacy',
+    url: absolutePageUrl('/privacy'),
     siteName: 'Fleet Track PRO',
     locale: 'en_GB',
     type: 'website',

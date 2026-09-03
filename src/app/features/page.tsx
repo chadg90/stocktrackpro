@@ -137,8 +137,7 @@ export default function Features() {
             </h1>
             <p className="text-lg text-slate-600 leading-relaxed">
               No bloat. One fleet subscription covers DVSA walkaround inspections, defect workflow, MOT monitoring, and team
-              management across iOS, Android, and the web dashboard. Not warehouse stock tracking — fleet compliance for
-              cars, vans, and light commercial vehicles.
+              management across iOS, Android, and the web dashboard for cars, vans, and light commercial vehicles.
             </p>
           </div>
         </div>
@@ -181,24 +180,54 @@ export default function Features() {
                         {feature.useCase}
                       </p>
                       {feature.title === 'Vehicle inspections' && (
+                        <div className="mt-4 space-y-2 text-sm">
+                          <p>
+                            <Link
+                              href="/vehicle-walkaround-check-app"
+                              className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
+                            >
+                              Explore the vehicle walkaround check app
+                            </Link>
+                          </p>
+                          <p>
+                            <Link
+                              href="/compliance-centre/paper-vs-digital-inspection-sheets"
+                              className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
+                            >
+                              Read why UK fleets are moving from paper to digital inspection sheets
+                            </Link>
+                          </p>
+                        </div>
+                      )}
+                      {feature.title === 'Defect workflow: flagged to fixed' && (
                         <p className="mt-4 text-sm">
                           <Link
-                            href="/compliance-centre/paper-vs-digital-inspection-sheets"
+                            href="/vehicle-defect-reporting-software"
                             className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
                           >
-                            Read why UK fleets are moving from paper to digital inspection sheets
+                            Explore vehicle defect reporting and close-out
                           </Link>
                         </p>
                       )}
                       {feature.title === 'MOT and tax monitoring' && (
-                        <p className="mt-4 text-sm">
-                          <Link
-                            href="/compliance-centre/mot-expiry-tracking-for-fleets"
-                            className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
-                          >
-                            Learn how MOT expiry tracking helps fleets stay ahead of renewals
-                          </Link>
-                        </p>
+                        <div className="mt-4 space-y-2 text-sm">
+                          <p>
+                            <Link
+                              href="/fleet-mot-tax-reminders"
+                              className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
+                            >
+                              Explore fleet MOT and tax reminders
+                            </Link>
+                          </p>
+                          <p>
+                            <Link
+                              href="/compliance-centre/mot-expiry-tracking-for-fleets"
+                              className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
+                            >
+                              Learn how MOT expiry tracking helps fleets stay ahead of renewals
+                            </Link>
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>

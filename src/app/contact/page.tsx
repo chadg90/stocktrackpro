@@ -73,7 +73,7 @@ export default function Contact() {
           </p>
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
-              Get in <span className="text-blue-500">touch</span>
+              Fleet software <span className="text-blue-500">sales and support</span>
             </h1>
             <p className="text-lg text-slate-600 leading-relaxed">
               Have questions about Fleet Track PRO? We&apos;re here to help with fleet setup, inspections, defects, and

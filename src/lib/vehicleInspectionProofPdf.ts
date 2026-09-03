@@ -58,6 +58,7 @@ export type InspectionProofDoc = {
   >;
   sections?: Record<string, { status?: string; confirmed_at?: string; confirmed_by?: string }>;
   recorded_values?: { mileage?: number; fuel_level?: number; fuel_or_battery?: string; temperature?: string };
+  notes?: string;
   declaration?: {
     items?: Record<string, boolean>;
     signature_paths?: string;
@@ -482,6 +483,19 @@ export async function exportVehicleInspectionProofPdf(args: {
       body: defectRows,
     });
     y = ((doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable?.finalY || y) + 8;
+  }
+
+  const extraNotes = (inspection.notes || '').trim();
+  if (extraNotes) {
+    y = sectionHeading(doc, 'Additional notes', y);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...BODY_SAFE);
+    const noteLines = doc.splitTextToSize(extraNotes, pageW - 28);
+    y = ensureSpace(doc, y, noteLines.length * 5 + 4);
+    doc.text(noteLines, 14, y);
+    y += noteLines.length * 5 + 8;
+    doc.setTextColor(...BLACK);
   }
 
   // Declaration

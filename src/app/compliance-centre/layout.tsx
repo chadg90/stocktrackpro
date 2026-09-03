@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
 import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
+import { absolutePageUrl, canonicalPath } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Compliance Centre',
   description:
     'UK fleet compliance articles — defect records, walkaround checks, retention, roadside readiness and MOT tracking for commercial vehicle operators.',
-  alternates: { canonical: '/compliance-centre' },
+  alternates: { canonical: canonicalPath('/compliance-centre') },
   openGraph: {
     title: 'Compliance Centre | Fleet Track PRO',
     description:
       'Articles on fleet defect records, walkaround checks, retention, roadside readiness and MOT tracking for UK commercial vehicle operators.',
-    url: 'https://www.fleettrackpro.co.uk/compliance-centre/',
+    url: absolutePageUrl('/compliance-centre'),
     siteName: 'Fleet Track PRO',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Fleet Track PRO Compliance Centre' }],
     locale: 'en_GB',

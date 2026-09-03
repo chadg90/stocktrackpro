@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { CUSTOMER_STORIES } from '@/content/customerStories';
 
 export default function CustomerLogoStrip() {
@@ -14,14 +15,16 @@ export default function CustomerLogoStrip() {
         <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 sm:gap-x-16">
           {CUSTOMER_STORIES.map((story) => (
             <li key={story.slug} className="relative flex h-14 w-44 sm:h-16 sm:w-52 items-center justify-center">
-              <Image
-                src={story.logoSrc}
-                alt={story.logoAlt}
-                width={208}
-                height={64}
-                className="h-12 w-auto max-h-14 sm:h-14 sm:max-h-16 object-contain"
-                sizes="208px"
-              />
+              <Link href={story.href} aria-label={`Read the ${story.shortName} customer story`}>
+                <Image
+                  src={story.logoSrc}
+                  alt={story.logoAlt}
+                  width={208}
+                  height={64}
+                  className="h-12 w-auto max-h-14 sm:h-14 sm:max-h-16 object-contain"
+                  sizes="208px"
+                />
+              </Link>
             </li>
           ))}
         </ul>

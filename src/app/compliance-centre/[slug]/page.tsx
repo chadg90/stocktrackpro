@@ -25,10 +25,56 @@ import {
   NilDefectReportsArticle,
   PreparingForDvsaRoadsideCheckArticle,
 } from '@/components/compliance-articles/NewArticles';
+import { absolutePageUrl, canonicalPath } from '@/lib/site';
+import { EDITORIAL_TEAM_NAME } from '@/lib/brand';
 
 type Props = { params: Promise<{ slug: string }> };
 
 export const revalidate = 300;
+
+const RELATED_ARTICLE_SLUGS: Record<string, string[]> = {
+  'van-fleet-defect-records': [
+    'digital-defect-records-dvsa-scrutiny',
+    'closing-defects-return-to-service',
+    'preparing-for-dvsa-roadside-check',
+    'nil-defect-reports-why-they-matter',
+  ],
+  'digital-defect-records-dvsa-scrutiny': [
+    'van-fleet-defect-records',
+    'closing-defects-return-to-service',
+    'paper-vs-digital-inspection-sheets',
+    'preparing-for-dvsa-roadside-check',
+  ],
+  'closing-defects-return-to-service': [
+    'van-fleet-defect-records',
+    'digital-defect-records-dvsa-scrutiny',
+    'preparing-for-dvsa-roadside-check',
+    'nil-defect-reports-why-they-matter',
+  ],
+  'preparing-for-dvsa-roadside-check': [
+    'van-fleet-defect-records',
+    'pre-use-checks-company-vehicles',
+    'digital-defect-records-dvsa-scrutiny',
+    'closing-defects-return-to-service',
+  ],
+  'paper-vs-digital-inspection-sheets': [
+    'pre-use-checks-company-vehicles',
+    'van-fleet-defect-records',
+    'digital-defect-records-dvsa-scrutiny',
+    'nil-defect-reports-why-they-matter',
+  ],
+  'mot-expiry-tracking-for-fleets': [
+    'pre-use-checks-company-vehicles',
+    'preparing-for-dvsa-roadside-check',
+    'van-fleet-defect-records',
+  ],
+  'new-tachograph-rules-for-vans-over-2-5-tonnes-what-fleet-operators-need-to-know-in-2026': [
+    'preparing-for-dvsa-roadside-check',
+    'pre-use-checks-company-vehicles',
+    'mot-expiry-tracking-for-fleets',
+    'van-fleet-defect-records',
+  ],
+};
 
 export function generateStaticParams() {
   return COMPLIANCE_ARTICLES.map((a) => ({ slug: a.slug }));
@@ -54,11 +100,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: article.title,
     description: article.metaDescription,
-    alternates: { canonical: `/compliance-centre/${slug}` },
+    authors: [
+      {
+        name: EDITORIAL_TEAM_NAME,
+        url: `${absolutePageUrl('/about')}#editorial-team`,
+      },
+    ],
+    alternates: { canonical: canonicalPath(`/compliance-centre/${slug}`) },
     openGraph: {
       title: `${article.title} | Fleet Track PRO`,
       description: article.metaDescription,
-      url: `https://www.fleettrackpro.co.uk/compliance-centre/${slug}`,
+      url: absolutePageUrl(`/compliance-centre/${slug}`),
       siteName: 'Fleet Track PRO',
       locale: 'en_GB',
       type: 'article',
@@ -598,7 +650,18 @@ export default async function ComplianceArticlePage({ params }: Props) {
   if (!resolved) notFound();
 
   const allArticles = await getAllPublishedComplianceArticles();
-  const related = allArticles.filter((a) => a.slug !== slug);
+  const preferredSlugs = RELATED_ARTICLE_SLUGS[slug] ?? [];
+  const preferred = preferredSlugs
+    .map((preferredSlug) => allArticles.find((article) => article.slug === preferredSlug))
+    .filter((article): article is ComplianceArticleMeta => Boolean(article));
+  const related = [
+    ...preferred,
+    ...allArticles.filter(
+      (article) =>
+        article.slug !== slug &&
+        !preferred.some((preferredArticle) => preferredArticle.slug === article.slug)
+    ),
+  ];
   const articleMeta: ComplianceArticleMeta =
     resolved.kind === 'static'
       ? { ...resolved.article, source: 'static' }
@@ -620,12 +683,22 @@ export default async function ComplianceArticlePage({ params }: Props) {
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mb-3 leading-tight">
                 {articleMeta.title}
               </h1>
-              <p className="mb-8 sm:mb-10 text-sm text-slate-500">
+              <p className="mb-2 text-sm text-slate-500">
                 Published{' '}
                 {format(new Date(articleMeta.datePublished), 'd MMMM yyyy')}
                 {articleMeta.dateModified && articleMeta.dateModified !== articleMeta.datePublished
                   ? ` · Updated ${format(new Date(articleMeta.dateModified), 'd MMMM yyyy')}`
                   : ''}
+              </p>
+              <p className="mb-8 sm:mb-10 text-sm text-slate-500">
+                By{' '}
+                <Link
+                  href="/about/#editorial-team"
+                  rel="author"
+                  className="font-medium text-slate-700 underline underline-offset-4 hover:text-[var(--brand-blue)]"
+                >
+                  {EDITORIAL_TEAM_NAME}
+                </Link>
               </p>
               {resolved.kind === 'static' ? (
                 <ArticleBody article={resolved.article} />

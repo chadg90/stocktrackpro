@@ -23,9 +23,8 @@ const demoCtaClass =
 const demoPhoneShellClass =
   'relative h-full w-full rounded-[2.35rem] bg-slate-900 shadow-[0_36px_72px_-20px_rgba(15,23,42,0.62),0_16px_32px_-12px_rgba(15,23,42,0.45),0_4px_10px_-2px_rgba(15,23,42,0.25)] ring-1 ring-slate-800/80';
 
-const DEMO_IMAGE_SOURCES = [
-  ...new Set(INTERACTIVE_DEMO_STEPS.map((demoStep) => demoStep.imageSrc)),
-];
+const INITIAL_DEMO_IMAGE_SOURCE =
+  stepById(INTERACTIVE_DEMO_START_ID)?.imageSrc ?? INTERACTIVE_DEMO_STEPS[0].imageSrc;
 
 /** Covers screenshot status bars so every demo step shows the same time and icons. */
 function DemoPhoneStatusBar() {
@@ -74,8 +73,18 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
   const [stepHistory, setStepHistory] = useState<string[]>([]);
   const [guideDone, setGuideDone] = useState(false);
   const [pulse, setPulse] = useState(true);
+  const [visitedImageSources, setVisitedImageSources] = useState<string[]>([
+    INITIAL_DEMO_IMAGE_SOURCE,
+  ]);
 
   const step = useMemo(() => stepById(stepId) ?? INTERACTIVE_DEMO_STEPS[0], [stepId]);
+  const renderedImageSources = useMemo(
+    () =>
+      visitedImageSources.includes(step.imageSrc)
+        ? visitedImageSources
+        : [...visitedImageSources, step.imageSrc],
+    [step.imageSrc, visitedImageSources]
+  );
   const showGuide = Boolean(step.guide) && !guideDone;
   const showCallout = Boolean(step.callout) && !guideDone;
   const showHotspots = !showGuide && !showCallout;
@@ -174,11 +183,10 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
   const canRestart = stepId !== INTERACTIVE_DEMO_START_ID || guideDone;
 
   useEffect(() => {
-    DEMO_IMAGE_SOURCES.forEach((src) => {
-      const img = new window.Image();
-      img.src = src;
-    });
-  }, []);
+    setVisitedImageSources((sources) =>
+      sources.includes(step.imageSrc) ? sources : [...sources, step.imageSrc]
+    );
+  }, [step.imageSrc]);
 
   return (
     <div className={`flex flex-col items-center gap-3 ${className}`}>
@@ -198,7 +206,7 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
             />
 
             <div className="relative h-full w-full">
-              {DEMO_IMAGE_SOURCES.map((src) => {
+              {renderedImageSources.map((src) => {
                 const isActive = step.imageSrc === src;
                 return (
                   <Image
@@ -208,7 +216,7 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
                     aria-hidden={!isActive}
                     fill
                     sizes="(max-width: 640px) 280px, 300px"
-                    priority={src === DEMO_IMAGE_SOURCES[0]}
+                    priority={src === INITIAL_DEMO_IMAGE_SOURCE}
                     className={`object-cover object-top transition-opacity duration-150 ease-out ${
                       isActive ? 'z-[1] opacity-100' : 'z-0 opacity-0'
                     }`}

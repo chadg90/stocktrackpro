@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
+import { absolutePageUrl, canonicalPath } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Terms and Conditions',
   description:
     'Terms and conditions for using Fleet Track PRO websites, dashboard, and companion apps — UK fleet management software.',
-  alternates: { canonical: '/terms' },
+  alternates: { canonical: canonicalPath('/terms') },
   openGraph: {
     title: 'Terms and Conditions | Fleet Track PRO',
     description: 'Legal terms governing use of Fleet Track PRO services.',
-    url: 'https://www.fleettrackpro.co.uk/terms',
+    url: absolutePageUrl('/terms'),
     siteName: 'Fleet Track PRO',
     locale: 'en_GB',
     type: 'website',

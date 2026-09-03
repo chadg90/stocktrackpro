@@ -1,4 +1,4 @@
-import { SITE_URL } from '@/lib/site';
+import { SITE_URL, absolutePageUrl } from '@/lib/site';
 import { getAllPublishedComplianceArticles } from '@/lib/compliance-articles/server';
 
 /** Public IndexNow key — must match public/{key}.txt at the site root. */
@@ -11,17 +11,13 @@ function hostFromSiteUrl(): string {
 }
 
 function toAbsoluteUrl(pathOrUrl: string): string {
-  if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
-    return pathOrUrl;
-  }
-  const path = pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`;
-  return `${SITE_URL}${path === '/' ? '' : path}`;
+  return absolutePageUrl(pathOrUrl || '/');
 }
 
 export async function getMarketingUrlsForIndexNow(): Promise<string[]> {
   const articles = await getAllPublishedComplianceArticles();
   const routes = [
-    '',
+    '/',
     '/features',
     '/about',
     '/pricing',
@@ -36,7 +32,7 @@ export async function getMarketingUrlsForIndexNow(): Promise<string[]> {
     '/privacy',
     '/cookies',
   ];
-  return routes.map((route) => toAbsoluteUrl(route || '/'));
+  return routes.map((route) => toAbsoluteUrl(route));
 }
 
 export type IndexNowResult = {

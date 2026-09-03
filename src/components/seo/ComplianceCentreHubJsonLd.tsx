@@ -1,6 +1,6 @@
 import type { ComplianceArticleMeta } from '@/lib/compliance-articles/types';
 import { SITE_SHORT_DESCRIPTION } from '@/content/siteSeo';
-import { ORGANIZATION_ID, SITE_URL, WEBSITE_ID } from '@/lib/site';
+import { ORGANIZATION_ID, WEBSITE_ID, absolutePageUrl } from '@/lib/site';
 
 type Props = {
   articles: ComplianceArticleMeta[];
@@ -8,7 +8,8 @@ type Props = {
 
 /** BreadcrumbList + ItemList for the Compliance Centre index (Google + AI discovery). */
 export default function ComplianceCentreHubJsonLd({ articles }: Props) {
-  const hubUrl = `${SITE_URL}/compliance-centre`;
+  const hubUrl = absolutePageUrl('/compliance-centre');
+  const homeUrl = absolutePageUrl('/');
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',
@@ -18,7 +19,7 @@ export default function ComplianceCentreHubJsonLd({ articles }: Props) {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: SITE_URL,
+        item: homeUrl,
       },
       {
         '@type': 'ListItem',
@@ -48,7 +49,7 @@ export default function ComplianceCentreHubJsonLd({ articles }: Props) {
       '@type': 'ListItem',
       position: index + 1,
       name: article.title,
-      url: `${SITE_URL}/compliance-centre/${article.slug}`,
+      url: absolutePageUrl(`/compliance-centre/${article.slug}`),
     })),
   };
 

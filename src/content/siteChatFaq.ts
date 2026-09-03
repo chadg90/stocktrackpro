@@ -10,7 +10,7 @@ export const SITE_CHAT_TOPICS: SiteChatTopic[] = [
     id: 'what-is',
     label: 'What is Fleet Track PRO?',
     answer:
-      'Fleet Track PRO is UK fleet compliance software for DVSA walkaround checks, defect reporting, MOT and tax tracking, and repair close-out. It is not warehouse or stock inventory software.',
+      'Fleet Track PRO is UK fleet compliance software for daily DVSA walkaround checks, photo-backed defect reporting, repair close-out, MOT and tax tracking, and manager oversight.',
   },
   {
     id: 'pricing',

@@ -1,15 +1,13 @@
-import { SITE_URL } from '@/lib/site';
+import { absolutePageUrl } from '@/lib/site';
 import { getAllPublishedComplianceArticles } from '@/lib/compliance-articles/server';
 
 const STATIC_LLMS_BODY = `# Fleet Track PRO
 
 > UK fleet management and DVSA compliance software for commercial vehicle operators.
 
-**Important:** Fleet Track PRO is **not** warehouse inventory software, stock control, or general asset tracking. It is fleet compliance software for daily walkaround checks, defects, and MOT renewals. (Previously known as Stock Track PRO.)
+Fleet Track PRO helps UK businesses run daily vehicle walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for cars, vans, and light commercial fleets.
 
-Fleet Track PRO helps UK businesses run daily vehicle walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for cars, vans, and light commercial fleets — not HGV operator licensing.
-
-Canonical website: ${SITE_URL}
+Canonical website: ${absolutePageUrl('/')}
 Support email: help@fleettrackpro.co.uk
 
 ## What it does
@@ -21,10 +19,6 @@ Support email: help@fleettrackpro.co.uk
 - Manager web dashboard for fleet oversight and team management
 - Timestamped digital records for DVSA roadside checks and audits
 - Role-based access for drivers, managers, and fitters
-
-## What it does NOT do
-
-The core fleet platform is for commercial vehicles, vehicle inspections, defect management, and DVSA fleet compliance. It is **not** warehouse inventory tracking, stock control software, or a tool/equipment inventory system.
 
 ## Who it is for
 
@@ -40,12 +34,17 @@ UK fleet operators — trades, groundworks, logistics, construction, electrical,
 
 ## Key pages
 
-- Home: ${SITE_URL}/
-- Features: ${SITE_URL}/features/
-- Pricing: ${SITE_URL}/pricing/
-- FAQ: ${SITE_URL}/faq/
-- Compliance Centre: ${SITE_URL}/compliance-centre/
-- Sign up (trial): ${SITE_URL}/onboarding/
+- Home: ${absolutePageUrl('/')}
+- Features: ${absolutePageUrl('/features')}
+- Vehicle walkaround check app: ${absolutePageUrl('/vehicle-walkaround-check-app')}
+- Vehicle defect reporting software: ${absolutePageUrl('/vehicle-defect-reporting-software')}
+- Fleet MOT and tax reminders: ${absolutePageUrl('/fleet-mot-tax-reminders')}
+- Pricing: ${absolutePageUrl('/pricing')}
+- FAQ: ${absolutePageUrl('/faq')}
+- Newstreet Groundworks case study: ${absolutePageUrl('/customers/newstreet')}
+- NEEMT emergency vehicle fleet case study: ${absolutePageUrl('/customers/neemt')}
+- Compliance Centre: ${absolutePageUrl('/compliance-centre')}
+- Sign up (trial): ${absolutePageUrl('/onboarding')}
 
 ## Compliance articles
 `;
@@ -60,7 +59,7 @@ const STATIC_LLMS_FOOTER = `
 
 ## Contact
 
-Website: ${SITE_URL}
+Website: ${absolutePageUrl('/')}
 Email: help@fleettrackpro.co.uk
 Sales: sales@fleettrackpro.co.uk
 `;
@@ -70,7 +69,7 @@ export async function buildLlmsTxt(): Promise<string> {
   const articleLines = articles
     .map((article) => {
       const label = article.title.replace(/\s+/g, ' ').trim();
-      return `- ${label}: ${SITE_URL}/compliance-centre/${article.slug}/`;
+      return `- ${label}: ${absolutePageUrl(`/compliance-centre/${article.slug}`)}`;
     })
     .join('\n');
 

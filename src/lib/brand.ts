@@ -19,6 +19,8 @@ export const SALES_MAILTO = `mailto:${SALES_EMAIL}`;
 
 export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 export const WEBSITE_ID = `${SITE_URL}/#website`;
+export const EDITORIAL_TEAM_NAME = 'Fleet Track PRO Editorial Team';
+export const EDITORIAL_TEAM_ID = `${SITE_URL}/about/#editorial-team`;
 
 export const LOGO_WHITE = '/logo-white.png';
 export const LOGO_BLACK = '/logo-black.png';
