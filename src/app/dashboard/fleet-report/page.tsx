@@ -38,7 +38,7 @@ export default function FleetReportOverviewPage() {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3" data-tour="report-export">
         <button
           type="button"
           onClick={() => exportFullExcel()}

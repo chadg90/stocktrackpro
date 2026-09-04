@@ -14,6 +14,7 @@ import {
   isWebTrialExpired,
   type SubscriptionDisplayStatus,
 } from '@/lib/trialStatus';
+import PageGuideButton from '../components/PageGuide';
 
 const PRICE_PER_VEHICLE_MONTHLY = 8;
 const PRICE_PER_VEHICLE_YEARLY = 84;
@@ -511,7 +512,10 @@ export default function SubscriptionPage() {
       )}
 
       <div className="border-b border-zinc-200 dark:border-white/10 pb-6">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Subscription Management</h1>
+        <div className="flex flex-wrap items-center gap-3 mb-2">
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">Subscription Management</h1>
+          <PageGuideButton pageId="subscription" />
+        </div>
         <p className="text-zinc-600 dark:text-white/75">
           Per-vehicle billing via Stripe. Managers can open the billing portal or contact support for plan changes.
         </p>
@@ -567,7 +571,7 @@ export default function SubscriptionPage() {
 
       {!hasAccess && showCheckout && checkoutCard(true)}
 
-      <div className="dashboard-card subscription-paid-card p-5 sm:p-8">
+      <div className="dashboard-card subscription-paid-card p-5 sm:p-8" data-tour="sub-status">
         <div className="flex items-start justify-between mb-8">
           <div className="flex-1">
             <h2 className="text-2xl font-semibold text-white mb-2 flex items-center gap-3">
@@ -618,7 +622,7 @@ export default function SubscriptionPage() {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-4" data-tour="sub-billing">
           {canManage && (
             <>
               <button

@@ -17,6 +17,7 @@ export default function FleetReportSubnav() {
     <nav
       className="flex flex-wrap gap-x-1 mb-6 border-b border-zinc-200 dark:border-white/10"
       aria-label="Fleet report sections"
+      data-tour="report-nav"
     >
       {links.map(({ href, label }) => {
         const isOverview = href === '/dashboard/fleet-report';

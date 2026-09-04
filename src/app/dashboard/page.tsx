@@ -31,6 +31,8 @@ import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDay
 import { activityHistoryStartFromDashboardRange, INSPECTION_ANALYTICS_CAP, DEFECT_ANALYTICS_CAP } from '@/lib/dvsaRetention';
 import { buildMileageAttentionRows } from '@/lib/fleetReportLogic';
 import ExportButton from './components/ExportButton';
+import PageGuideButton from './components/PageGuide';
+import SetupChecklist from './components/SetupChecklist';
 import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
 import {
   RefreshCw,
@@ -859,6 +861,7 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex items-center gap-3 mb-1">
                     <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">Dashboard</h1>
+                    <PageGuideButton pageId="home" />
                     {subscriptionStatus === 'trial' && (
                       <span className="badge-trial inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
                         14-Day Free Trial
@@ -873,7 +876,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" data-tour="home-period">
                     <span className="text-white/50 text-sm hidden sm:inline">Period</span>
                     <div className="flex items-center gap-0.5 bg-white/5 border border-white/10 rounded-lg p-0.5">
                       {['7', '30', '90', '365', '730', 'all'].map((range) => (
@@ -941,7 +944,13 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              <div className="dashboard-card p-5 mb-6">
+              <SetupChecklist
+                vehicleCount={vehiclesCount ?? 0}
+                teammateCount={users.length}
+                inspectionCount={inspectionsCount ?? 0}
+              />
+
+              <div className="dashboard-card p-5 mb-6" data-tour="home-attention">
                 <h2 className="text-white font-semibold text-sm mb-3">Needs attention</h2>
                 {motTaxDueCount === 0 &&
                 openDefectsInRange.length === 0 &&
@@ -999,7 +1008,7 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" data-tour="home-kpis">
                 <Link
                   href="/dashboard/fleet"
                   className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"

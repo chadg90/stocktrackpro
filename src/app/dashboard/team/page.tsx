@@ -23,6 +23,7 @@ import TableSkeleton from '../components/TableSkeleton';
 import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import { useDebounce } from '@/hooks/useDebounce';
 import { checkCanAddUser } from '@/lib/subscriptionLimits';
+import PageGuideButton from '../components/PageGuide';
 
 type Profile = {
   id: string; // uid
@@ -508,13 +509,17 @@ export default function TeamPage() {
       )}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Team Management</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-white">Team Management</h1>
+            <PageGuideButton pageId="team" />
+          </div>
           <p className="text-white/70 text-sm mt-1">Manage your team members and permissions</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {(isAdmin || isManager) && (
             <>
               <button
+                data-tour="team-invite"
                 onClick={() => setIsInviteModalOpen(true)}
                 className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-colors"
               >
@@ -576,7 +581,7 @@ export default function TeamPage() {
       </div>
 
       {/* Team Table */}
-      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden mb-8">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden mb-8" data-tour="team-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">

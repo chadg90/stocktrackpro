@@ -71,13 +71,15 @@ export default function CookiePolicy() {
                 </>,
                 <>
                   <strong className="text-slate-800">Privacy-friendly web analytics</strong> — we use Vercel Web
-                  Analytics to understand aggregate page traffic. It is designed not to rely on advertising cookies
-                  or cross-site trackers. We do not use Google Analytics or Meta Pixel.
+                  Analytics on marketing pages only (home, pricing, features, articles, etc.) to understand aggregate
+                  traffic. Dashboard, onboarding, and invite pages are not counted. It is designed not to rely on
+                  advertising cookies or cross-site trackers. We do not use Google Analytics or Meta Pixel.
                 </>,
                 <>
                   <strong className="text-slate-800">Dashboard product usage</strong> — when you are signed in to the
                   manager dashboard, we record first-party feature/page usage counts in our Firebase database so we
-                  can improve popular tools and simplify unused ones. These counts are not used for advertising.
+                  can improve popular tools and simplify unused ones. Platform admin/ops screens are excluded. These
+                  counts are not used for advertising.
                 </>,
               ]}
             />

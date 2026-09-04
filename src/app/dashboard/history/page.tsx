@@ -21,6 +21,7 @@ import {
   type HistoryPagePayload,
 } from '@/lib/historyFirestore';
 import { DVSA_HISTORY_MONTHS } from '@/lib/dvsaRetention';
+import PageGuideButton from '../components/PageGuide';
 import type { Timestamp } from 'firebase/firestore';
 
 type Profile = {
@@ -207,7 +208,10 @@ export default function HistoryPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Audit log</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-white">Audit log</h1>
+            <PageGuideButton pageId="history" />
+          </div>
           <p className="text-white/70 text-sm mt-1">
             Available fleet inspection records (up to the last {DVSA_HISTORY_MONTHS} months, {HISTORY_PAGE_SIZE} rows
             per page). Thumbnails load as you scroll.
@@ -223,7 +227,7 @@ export default function HistoryPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="relative flex-1">
+        <div className="relative flex-1" data-tour="history-search">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-white/30" />
           </div>
@@ -260,7 +264,7 @@ export default function HistoryPage() {
         </div>
       )}
 
-      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden" data-tour="history-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">

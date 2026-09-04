@@ -815,7 +815,7 @@ export default function AdminReportsPage() {
       a.href = downloadUrl;
       const disposition = response.headers.get('Content-Disposition');
       const filenameMatch = disposition?.match(/filename=\"?([^"]+)\"?/i);
-      a.download = filenameMatch?.[1] || 'stp-monthly-report.pdf';
+      a.download = filenameMatch?.[1] || 'ftp-monthly-report.pdf';
       document.body.appendChild(a);
       a.click();
       a.remove();

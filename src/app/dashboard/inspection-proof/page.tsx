@@ -21,6 +21,7 @@ import {
 import AuthenticatedImage from '../components/AuthenticatedImage';
 import TableSkeleton from '../components/TableSkeleton';
 import { EmptyStateTableRow } from '../components/EmptyState';
+import PageGuideButton from '../components/PageGuide';
 import {
   BLOOD_ORGAN_CHECK_LABELS,
   BLOOD_ORGAN_PHOTO_LABELS,
@@ -303,7 +304,10 @@ export default function InspectionProofPage() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Inspection proof</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Inspection proof</h1>
+          <PageGuideButton pageId="inspection-proof" />
+        </div>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Select a vehicle registration, then view or download a full PDF of any inspection —
           including photos and checklist results for clients, insurers and compliance audits.
@@ -326,7 +330,7 @@ export default function InspectionProofPage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900" data-tour="proof-vehicle">
         <label
           htmlFor="inspection-proof-vehicle"
           className="block text-sm font-semibold text-gray-800 dark:text-gray-200"

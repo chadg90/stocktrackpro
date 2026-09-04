@@ -22,24 +22,6 @@ export const TRACKED_PAGES: Array<{ key: string; label: string; path: string }> 
   { key: 'page:/dashboard/team', label: 'Team', path: '/dashboard/team' },
   { key: 'page:/dashboard/subscription', label: 'Subscription', path: '/dashboard/subscription' },
   { key: 'page:/dashboard/support', label: 'Support', path: '/dashboard/support' },
-  { key: 'page:/dashboard/companies', label: 'Companies (admin)', path: '/dashboard/companies' },
-  { key: 'page:/dashboard/admin/promo-codes', label: 'Promo codes (admin)', path: '/dashboard/admin/promo-codes' },
-  {
-    key: 'page:/dashboard/admin/compliance-articles',
-    label: 'Compliance articles (admin)',
-    path: '/dashboard/admin/compliance-articles',
-  },
-  { key: 'page:/dashboard/admin/reports', label: 'Admin reports', path: '/dashboard/admin/reports' },
-  {
-    key: 'page:/dashboard/admin/product-usage',
-    label: 'Product usage (admin)',
-    path: '/dashboard/admin/product-usage',
-  },
-  {
-    key: 'page:/dashboard/admin/billing',
-    label: 'Billing & storage (admin)',
-    path: '/dashboard/admin/billing',
-  },
 ];
 
 /** Key feature clicks (beyond page views). */
@@ -56,10 +38,13 @@ function normalizePath(pathname: string): string {
   if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
   // Collapse dynamic segments under known parents
   if (p.startsWith('/dashboard/fleet-report/')) return '/dashboard/fleet-report';
-  if (p.startsWith('/dashboard/admin/') && !TRACKED_PAGES.some((x) => x.path === p)) {
-    return '/dashboard/admin';
-  }
   return p || '/dashboard';
+}
+
+/** Platform-admin / internal ops routes — not useful product-usage signal. */
+function isAdminOpsPath(pathname: string): boolean {
+  const p = normalizePath(pathname);
+  return p === '/dashboard/companies' || p === '/dashboard/admin' || p.startsWith('/dashboard/admin/');
 }
 
 function pageKey(pathname: string): string {
@@ -120,7 +105,7 @@ async function writeUsage(kind: UsageKind, key: string): Promise<void> {
 export async function trackDashboardPageView(pathname: string): Promise<void> {
   try {
     if (!pathname.startsWith('/dashboard')) return;
-    // Skip bare login shell noise if needed later; track all authorized navigations.
+    if (isAdminOpsPath(pathname)) return;
     const key = pageKey(pathname);
     const now = Date.now();
     if (key === lastPageKey && now - lastPageAt < 4000) return;

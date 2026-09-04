@@ -239,7 +239,7 @@ export function buildRecommendedActions(input: MonthlyCompanyReportInput): strin
 }
 
 export function buildReferenceId(generatedAt: Date): string {
-  return `STP-MONTHLY-${generatedAt.toISOString().replace(/[-:.TZ]/g, '').slice(0, 12)}`;
+  return `FTP-MONTHLY-${generatedAt.toISOString().replace(/[-:.TZ]/g, '').slice(0, 12)}`;
 }
 
 export function formatGeneratedAt(generatedAt: Date): string {

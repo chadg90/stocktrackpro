@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Source_Sans_3 } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
+import MarketingAnalytics from "@/components/MarketingAnalytics";
 import SiteChatBot from "@/components/SiteChatBot";
 import SiteWideJsonLd from "@/components/seo/SiteWideJsonLd";
 import { SITE_META_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
@@ -123,8 +123,8 @@ export default function RootLayout({
         <Footer />
         <CookieConsent />
         <SiteChatBot />
-        {/* Hobby-plan Web Analytics — privacy-friendly, no advertising cookies */}
-        <Analytics />
+        {/* Hobby-plan Web Analytics — marketing pages only; dashboard/admin excluded */}
+        <MarketingAnalytics />
       </body>
     </html>
   );

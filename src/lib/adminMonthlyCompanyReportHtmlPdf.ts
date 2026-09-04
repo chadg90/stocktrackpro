@@ -446,7 +446,7 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
       <div>Prepared automatically by Fleet Track PRO</div>
       <div class="line">
         <span>Generated: ${generatedLabel} · Ref ${esc(ref)}</span>
-        <span>Confidential Business Report · stocktrackpro.co.uk</span>
+        <span>Confidential Business Report · fleettrackpro.co.uk</span>
       </div>
       <div class="line">
         <span>© ${input.generatedAt.getFullYear()} Fleet Track PRO</span>

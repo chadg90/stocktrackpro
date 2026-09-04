@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { FleetReportProvider } from './FleetReportContext';
 import FleetReportSubnav from './FleetReportSubnav';
+import PageGuideButton from '../components/PageGuide';
 
 export default function FleetReportLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -18,9 +19,12 @@ export default function FleetReportLayout({ children }: { children: React.ReactN
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
             Dashboard
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">
-            Fleet report
-          </h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">
+              Fleet report
+            </h1>
+            <PageGuideButton pageId="fleet-report" />
+          </div>
           <p className="text-zinc-500 dark:text-white/55 text-sm mt-1">
             Mileage, weekly checks, and compliance. Excel export is on Overview.
           </p>

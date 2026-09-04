@@ -102,13 +102,13 @@ type PdfRenderOptions = {
 
 function buildReferenceId(input: MonthlyCompanyReportInput): string {
   const stamp = input.generatedAt.toISOString().replace(/[-:.TZ]/g, '').slice(0, 12);
-  return `STP-MONTHLY-${stamp}`;
+  return `FTP-MONTHLY-${stamp}`;
 }
 
 function buildFilename(input: MonthlyCompanyReportInput): string {
   const filenameCompany = input.companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const filenameMonth = input.monthLabel.toLowerCase().replace(/\s+/g, '-');
-  return `stp-monthly-report-${filenameCompany}-${filenameMonth}.pdf`;
+  return `ftp-monthly-report-${filenameCompany}-${filenameMonth}.pdf`;
 }
 
 function sanitizeText(str: string | undefined | null): string {
@@ -488,7 +488,7 @@ function renderReportDoc(input: MonthlyCompanyReportInput, options: PdfRenderOpt
   doc.line(contentX, footerY - 4, contentX + contentW, footerY - 4);
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
-  doc.text('Confidential - prepared for operational review · stocktrackpro.co.uk', contentX, footerY);
+  doc.text('Confidential - prepared for operational review · fleettrackpro.co.uk', contentX, footerY);
   doc.text('© 2026 Fleet Track PRO', contentX + contentW, footerY, { align: 'right' });
 
   return doc;

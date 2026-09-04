@@ -37,8 +37,8 @@ export default function CookieConsent() {
         <div className="text-slate-600 text-sm text-center sm:text-left">
           <p>
             We use essential cookies and local storage to run this site and keep the dashboard secure. We use
-            privacy-friendly Vercel Web Analytics (no advertising cookies) for traffic, and first-party dashboard
-            usage counts for product improvement.{' '}
+            privacy-friendly Vercel Web Analytics on marketing pages only (no advertising cookies), and first-party
+            dashboard usage counts for product improvement.{' '}
             <Link
               href="/cookies"
               className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"

@@ -33,6 +33,12 @@ type Props = { params: Promise<{ slug: string }> };
 export const revalidate = 300;
 
 const RELATED_ARTICLE_SLUGS: Record<string, string[]> = {
+  'are-daily-van-checks-mandatory-uk-2026': [
+    'pre-use-checks-company-vehicles',
+    'nil-defect-reports-why-they-matter',
+    'preparing-for-dvsa-roadside-check',
+    'paper-vs-digital-inspection-sheets',
+  ],
   'van-fleet-defect-records': [
     'digital-defect-records-dvsa-scrutiny',
     'closing-defects-return-to-service',
@@ -54,19 +60,26 @@ const RELATED_ARTICLE_SLUGS: Record<string, string[]> = {
   'preparing-for-dvsa-roadside-check': [
     'van-fleet-defect-records',
     'pre-use-checks-company-vehicles',
+    'are-daily-van-checks-mandatory-uk-2026',
     'digital-defect-records-dvsa-scrutiny',
-    'closing-defects-return-to-service',
   ],
   'paper-vs-digital-inspection-sheets': [
     'pre-use-checks-company-vehicles',
+    'are-daily-van-checks-mandatory-uk-2026',
     'van-fleet-defect-records',
     'digital-defect-records-dvsa-scrutiny',
-    'nil-defect-reports-why-they-matter',
   ],
   'mot-expiry-tracking-for-fleets': [
     'pre-use-checks-company-vehicles',
+    'are-daily-van-checks-mandatory-uk-2026',
     'preparing-for-dvsa-roadside-check',
     'van-fleet-defect-records',
+  ],
+  'pre-use-checks-company-vehicles': [
+    'are-daily-van-checks-mandatory-uk-2026',
+    'nil-defect-reports-why-they-matter',
+    'preparing-for-dvsa-roadside-check',
+    'paper-vs-digital-inspection-sheets',
   ],
   'new-tachograph-rules-for-vans-over-2-5-tonnes-what-fleet-operators-need-to-know-in-2026': [
     'preparing-for-dvsa-roadside-check',

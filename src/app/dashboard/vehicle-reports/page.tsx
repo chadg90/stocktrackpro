@@ -48,6 +48,7 @@ import {
   type VehiclePeriodInspection,
 } from '@/lib/vehiclePeriodReportPdf';
 import { trackFeatureClick } from '@/lib/productUsage';
+import PageGuideButton from '../components/PageGuide';
 
 type Profile = {
   company_id?: string;
@@ -606,7 +607,10 @@ export default function VehicleReportsPage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div>
+      <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Vehicle reports</h1>
+        <PageGuideButton pageId="vehicle-reports" />
+      </div>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Upload MOT, service history and other documents for a vehicle, then download a 6- or
           12-month pack (summary PDF plus original files) for NHS or other operators.
@@ -624,7 +628,7 @@ export default function VehicleReportsPage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900" data-tour="packs-vehicle">
         <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200">
           Vehicle registration
         </label>
@@ -815,7 +819,7 @@ export default function VehicleReportsPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900" data-tour="packs-download">
             <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500">
               Download evidence pack
             </h2>

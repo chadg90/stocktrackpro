@@ -29,6 +29,7 @@ import {
   setCachedCompanyVehicles,
 } from '@/lib/companyVehiclesCache';
 import { useToast } from '@/components/Toast';
+import PageGuideButton from '../components/PageGuide';
 
 type RawVehicle = {
   id: string;
@@ -445,10 +446,13 @@ export default function MotTaxPage() {
       </Link>
 
       <div className="flex flex-col gap-2">
-        <h1 className="text-[30px] font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-          <ShieldCheck className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          MOT &amp; Tax
-        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-[30px] font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+            <ShieldCheck className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            MOT &amp; Tax
+          </h1>
+          <PageGuideButton pageId="mot-tax" />
+        </div>
         <p className="text-zinc-600 dark:text-white/65 max-w-3xl text-sm">
           Monitor MOT and road-tax expiry dates for every vehicle in your fleet. Data is
           synced from DVLA once a day automatically, and you can manually refresh a single
@@ -457,7 +461,7 @@ export default function MotTaxPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5" data-tour="mot-kpis">
         <KpiCard
           label="Fleet total"
           value={counts.total}
@@ -492,7 +496,7 @@ export default function MotTaxPage() {
 
       <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5" data-tour="mot-filters">
             {([
               { id: 'all', label: `All (${counts.total})` },
               {
@@ -635,7 +639,10 @@ export default function MotTaxPage() {
         </div>
       )}
 
-      <details className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
+      <details
+        data-tour="mot-refresh"
+        className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black"
+      >
         <summary className="cursor-pointer text-xs uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60 flex items-center gap-2">
           <HelpCircle className="h-3.5 w-3.5" aria-hidden />
           How refreshing works

@@ -28,6 +28,7 @@ import TableSkeleton from '../components/TableSkeleton';
 import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import { useDebounce } from '@/hooks/useDebounce';
 import { checkCanAddVehicle } from '@/lib/subscriptionLimits';
+import PageGuideButton from '../components/PageGuide';
 
 type Vehicle = {
   id: string;
@@ -294,7 +295,10 @@ export default function FleetPage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Fleet Management</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-white">Fleet Management</h1>
+            <PageGuideButton pageId="fleet" />
+          </div>
           <p className="text-white/70 text-sm mt-1">Manage your vehicles and inspections</p>
         </div>
         <div className="flex items-center gap-3">
@@ -324,6 +328,7 @@ export default function FleetPage() {
             }}
           />
           <button
+            data-tour="fleet-add"
             onClick={() => {
               setFormData({});
               setIsAddModalOpen(true);
@@ -337,7 +342,7 @@ export default function FleetPage() {
       </div>
 
       {/* Search */}
-      <div className="mb-6 relative">
+      <div className="mb-6 relative" data-tour="fleet-search">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-5 w-5 text-white/30" />
         </div>
@@ -351,7 +356,7 @@ export default function FleetPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden" data-tour="fleet-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">

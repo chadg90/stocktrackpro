@@ -26,6 +26,7 @@ import { EmptyStateTableRow } from '../components/EmptyState';
 import TableSkeleton from '../components/TableSkeleton';
 import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import ExportButton from '../components/ExportButton';
+import PageGuideButton from '../components/PageGuide';
 import { createNotificationForCompanyManagers } from '@/lib/notificationUtils';
 
 type Defect = {
@@ -421,7 +422,10 @@ export default function DefectsPage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Defect Management</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-white">Defect Management</h1>
+            <PageGuideButton pageId="defects" />
+          </div>
           <p className="text-white/70 text-sm mt-1">Track and resolve reported vehicle issues</p>
         </div>
         <ExportButton
@@ -474,7 +478,7 @@ export default function DefectsPage() {
             className="pl-10 w-full bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
           />
         </div>
-        <div className="flex items-center gap-2 bg-black border border-blue-500/30 rounded-lg p-1">
+        <div className="flex items-center gap-2 bg-black border border-blue-500/30 rounded-lg p-1" data-tour="defects-filters">
           <button
             onClick={() => setStatusFilter('pending')}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
@@ -509,7 +513,7 @@ export default function DefectsPage() {
       </div>
 
       {/* List */}
-      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden">
+      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden" data-tour="defects-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">

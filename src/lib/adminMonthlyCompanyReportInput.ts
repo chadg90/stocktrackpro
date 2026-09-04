@@ -42,6 +42,6 @@ export function buildReportFilename(companyName: string, monthLabel: string): st
   const [month, year] = sanitizeText(monthLabel).split(' ');
   const monthPart = (month || 'month').toLowerCase();
   const yearPart = (year || 'year').toLowerCase();
-  return `stp-monthly-report-${slugCompany}-${monthPart}-${yearPart}.pdf`;
+  return `ftp-monthly-report-${slugCompany}-${monthPart}-${yearPart}.pdf`;
 }
 
