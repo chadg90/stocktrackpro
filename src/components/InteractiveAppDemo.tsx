@@ -11,6 +11,8 @@ import {
 
 type Props = {
   className?: string;
+  /** Use lighter caption text when the demo sits on a dark hero */
+  controlsOnDark?: boolean;
 };
 
 function stepById(id: string): DemoStep | undefined {
@@ -68,7 +70,7 @@ function DemoPhoneStatusBar() {
   );
 }
 
-export default function InteractiveAppDemo({ className = '' }: Props) {
+export default function InteractiveAppDemo({ className = '', controlsOnDark = false }: Props) {
   const [stepId, setStepId] = useState(INTERACTIVE_DEMO_START_ID);
   const [stepHistory, setStepHistory] = useState<string[]>([]);
   const [guideDone, setGuideDone] = useState(false);
@@ -407,7 +409,11 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
         </div>
       </div>
 
-      <p className="text-center text-xs text-slate-500">
+      <p
+        className={`text-center text-xs ${
+          controlsOnDark ? 'text-slate-300' : 'text-slate-500'
+        }`}
+      >
         Interactive demo · {step.title}
         {canBack ? (
           <>
@@ -415,7 +421,9 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
             <button
               type="button"
               onClick={goBack}
-              className="font-medium text-[var(--brand-blue)] hover:underline"
+              className={`font-medium hover:underline ${
+                controlsOnDark ? 'text-sky-300 hover:text-sky-200' : 'text-[var(--brand-blue)]'
+              }`}
             >
               Back
             </button>
@@ -427,7 +435,9 @@ export default function InteractiveAppDemo({ className = '' }: Props) {
             <button
               type="button"
               onClick={restart}
-              className="font-medium text-[var(--brand-blue)] hover:underline"
+              className={`font-medium hover:underline ${
+                controlsOnDark ? 'text-sky-300 hover:text-sky-200' : 'text-[var(--brand-blue)]'
+              }`}
             >
               Restart
             </button>

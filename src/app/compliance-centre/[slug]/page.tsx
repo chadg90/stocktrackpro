@@ -684,31 +684,31 @@ export default async function ComplianceArticlePage({ params }: Props) {
     <div className="marketing-shell">
       <ComplianceArticleJsonLd article={articleMeta} />
       <Navbar />
-      <main className="border-t border-slate-200 bg-slate-50/80">
-        <div className="container mx-auto px-4 pt-24 sm:pt-28 pb-20 max-w-6xl">
+      <main>
+        <div className="mkt-container pt-24 sm:pt-28 pb-20 max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-8 lg:gap-10">
-            <article className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
-              <p className="text-[var(--brand-blue)] font-semibold text-xs sm:text-sm uppercase tracking-[0.18em] mb-4">
+            <article className="mkt-card-static p-6 sm:p-10">
+              <p className="mkt-eyebrow mb-4">
                 <Link href="/compliance-centre" className="hover:underline">
                   Compliance Centre
                 </Link>
               </p>
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mb-3 leading-tight">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--mkt-ink)] mb-3 leading-tight">
                 {articleMeta.title}
               </h1>
-              <p className="mb-2 text-sm text-slate-500">
+              <p className="mb-2 text-sm text-[var(--mkt-muted)]">
                 Published{' '}
                 {format(new Date(articleMeta.datePublished), 'd MMMM yyyy')}
                 {articleMeta.dateModified && articleMeta.dateModified !== articleMeta.datePublished
                   ? ` · Updated ${format(new Date(articleMeta.dateModified), 'd MMMM yyyy')}`
                   : ''}
               </p>
-              <p className="mb-8 sm:mb-10 text-sm text-slate-500">
+              <p className="mb-8 sm:mb-10 text-sm text-[var(--mkt-muted)]">
                 By{' '}
                 <Link
                   href="/about/#editorial-team"
                   rel="author"
-                  className="font-medium text-slate-700 underline underline-offset-4 hover:text-[var(--brand-blue)]"
+                  className="font-medium text-[var(--mkt-ink)] underline underline-offset-4 hover:text-[var(--brand-blue)]"
                 >
                   {EDITORIAL_TEAM_NAME}
                 </Link>

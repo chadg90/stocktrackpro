@@ -22,6 +22,7 @@ export default function SiteChatBot() {
   const pathname = usePathname();
   const panelId = useId();
   const [open, setOpen] = useState(false);
+  const [cookieBannerVisible, setCookieBannerVisible] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'bot', text: WELCOME },
   ]);
@@ -32,6 +33,14 @@ export default function SiteChatBot() {
     const el = listRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, open]);
+
+  useEffect(() => {
+    const read = () => setCookieBannerVisible(document.documentElement.dataset.cookieBanner === '1');
+    read();
+    const obs = new MutationObserver(read);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-cookie-banner'] });
+    return () => obs.disconnect();
+  }, []);
 
   if (isDashboardPath(pathname)) return null;
 
@@ -50,7 +59,13 @@ export default function SiteChatBot() {
   };
 
   return (
-    <div className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 z-[60] flex flex-col items-end gap-3 sm:right-6">
+    <div
+      className={`fixed right-4 z-[60] flex flex-col items-end gap-3 sm:right-6 ${
+        cookieBannerVisible
+          ? 'bottom-[5.75rem] sm:bottom-[4.5rem]'
+          : 'bottom-[max(1.25rem,env(safe-area-inset-bottom))]'
+      }`}
+    >
       {open && (
         <div
           id={panelId}

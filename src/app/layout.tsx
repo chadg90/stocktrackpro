@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Source_Sans_3 } from "next/font/google";
+import { Outfit, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
@@ -13,12 +13,19 @@ import { absolutePageUrl } from "@/lib/site";
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-mkt-body",
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-mkt-display",
 });
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#3b82f6",
+  themeColor: "#0a1628",
   viewportFit: "cover",
 };
 
@@ -94,7 +101,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-GB" className="scroll-smooth">
+    <html lang="en-GB" className={`scroll-smooth ${sourceSans.variable} ${outfit.variable}`}>
       <head>
         {/* iOS Smart App Banner */}
         <meta name="apple-itunes-app" content={`app-id=${APP_STORE_ID}, app-argument=${SITE_URL}`} />
@@ -103,9 +110,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#3b82f6" />
+        <meta name="msapplication-TileColor" content="#0a1628" />
         <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="theme-color" content="#3b82f6" />
+        <meta name="theme-color" content="#0a1628" />
         <meta name="application-name" content={SITE_NAME} />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
         <meta name="msapplication-tooltip" content={`${SITE_NAME} — UK fleet and DVSA compliance software`} />

@@ -77,34 +77,35 @@ export default function FAQ() {
     <div className="marketing-shell">
       <HomeFaqJsonLd items={faqs} path="/faq" />
       <Navbar />
-      <div className="container mx-auto px-4 pt-32 pb-20">
+      <div className="mkt-container pt-32 pb-20">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">Fleet Management Software FAQs</h1>
-          <p className="text-slate-600 mb-10 text-lg">
+          <p className="mkt-eyebrow mb-4">FAQ</p>
+          <h1 className="text-4xl font-bold text-[var(--mkt-ink)] mb-4">Fleet Management Software FAQs</h1>
+          <p className="text-[var(--mkt-muted)] mb-10 text-lg">
             Answers about Fleet Track PRO pricing, setup, inspections, defects and fleet management.
           </p>
           <nav aria-label="Popular product questions" className="mb-10 flex flex-wrap gap-3 text-sm">
             <Link
               href="/vehicle-walkaround-check-app"
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700 hover:border-blue-300 hover:text-[var(--brand-blue)]"
+              className="rounded-xl border border-[var(--mkt-border)] bg-white px-4 py-2 text-[var(--mkt-ink)] hover:border-[var(--brand-blue)]/40 hover:text-[var(--brand-blue)]"
             >
               Walkaround check app
             </Link>
             <Link
               href="/vehicle-defect-reporting-software"
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700 hover:border-blue-300 hover:text-[var(--brand-blue)]"
+              className="rounded-xl border border-[var(--mkt-border)] bg-white px-4 py-2 text-[var(--mkt-ink)] hover:border-[var(--brand-blue)]/40 hover:text-[var(--brand-blue)]"
             >
               Defect reporting
             </Link>
             <Link
               href="/fleet-mot-tax-reminders"
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700 hover:border-blue-300 hover:text-[var(--brand-blue)]"
+              className="rounded-xl border border-[var(--mkt-border)] bg-white px-4 py-2 text-[var(--mkt-ink)] hover:border-[var(--brand-blue)]/40 hover:text-[var(--brand-blue)]"
             >
               MOT and tax reminders
             </Link>
             <Link
               href="/pricing"
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700 hover:border-blue-300 hover:text-[var(--brand-blue)]"
+              className="rounded-xl border border-[var(--mkt-border)] bg-white px-4 py-2 text-[var(--mkt-ink)] hover:border-[var(--brand-blue)]/40 hover:text-[var(--brand-blue)]"
             >
               Pricing
             </Link>
@@ -112,9 +113,9 @@ export default function FAQ() {
 
           <div className="space-y-6">
             {faqs.map((item) => (
-              <div key={item.question} className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7">
-                <h2 className="text-xl font-semibold text-slate-900 mb-2">{item.question}</h2>
-                <p className="text-slate-600 leading-relaxed text-sm sm:text-base">{item.answer}</p>
+              <div key={item.question} className="mkt-card-static p-6 sm:p-7">
+                <h2 className="text-xl font-semibold text-[var(--mkt-ink)] mb-2">{item.question}</h2>
+                <p className="text-[var(--mkt-muted)] leading-relaxed text-sm sm:text-base">{item.answer}</p>
               </div>
             ))}
           </div>

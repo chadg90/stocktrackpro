@@ -124,18 +124,14 @@ export default function Features() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-28 sm:pt-36 pb-16 sm:pb-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(59,130,246,0.12),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
-        <div className="container relative mx-auto px-4">
-          <p className="text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4 text-center">
-            Features
-          </p>
+      <section className="relative overflow-hidden pt-28 sm:pt-36 pb-16 sm:pb-20 mkt-atmosphere">
+        <div className="mkt-container relative">
+          <p className="mkt-eyebrow mb-4 text-center">Features</p>
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[var(--mkt-ink)] mb-6 leading-tight">
               Everything a fleet manager actually needs
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed">
+            <p className="text-lg text-[var(--mkt-muted)] leading-relaxed">
               No bloat. One fleet subscription covers DVSA walkaround inspections, defect workflow, MOT monitoring, and team
               management across iOS, Android, and the web dashboard for cars, vans, and light commercial vehicles.
             </p>
@@ -144,39 +140,39 @@ export default function Features() {
       </section>
 
       {/* Feature deep dives */}
-      <section className="py-16 sm:py-20 border-t border-slate-200">
-        <div className="container mx-auto px-4">
+      <section className="mkt-section bg-white border-t border-[var(--mkt-border)]">
+        <div className="mkt-container">
           <div className="max-w-5xl mx-auto space-y-6">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
                 <article
                   key={feature.title}
-                  className="group p-7 sm:p-10 mkt-card hover:border-blue-300"
+                  className="group p-7 sm:p-10 mkt-card"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start gap-5 sm:gap-6">
-                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500/20 transition-colors flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--mkt-muted-surface)] flex items-center justify-center text-[var(--brand-blue)] group-hover:bg-blue-50 transition-colors flex-shrink-0">
                       <Icon className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mb-3">
+                      <h2 className="text-xl sm:text-2xl font-semibold text-[var(--mkt-ink)] mb-3">
                         {feature.title}
                       </h2>
-                      <p className="text-slate-600 leading-relaxed mb-5">
+                      <p className="text-[var(--mkt-muted)] leading-relaxed mb-5">
                         {feature.summary}
                       </p>
                       <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 mb-5">
                         {feature.bullets.map((b) => (
                           <li
                             key={b}
-                            className="flex items-start gap-2.5 text-sm text-slate-600"
+                            className="flex items-start gap-2.5 text-sm text-[var(--mkt-muted)]"
                           >
-                            <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                            <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] flex-shrink-0" />
                             <span className="leading-relaxed">{b}</span>
                           </li>
                         ))}
                       </ul>
-                      <p className="text-sm text-slate-500 italic border-l-2 border-blue-500/40 pl-4">
+                      <p className="text-sm text-[var(--mkt-muted)] italic border-l-2 border-[var(--brand-blue)]/40 pl-4">
                         {feature.useCase}
                       </p>
                       {feature.title === 'Vehicle inspections' && (
@@ -239,13 +235,12 @@ export default function Features() {
       </section>
 
       {/* CTA */}
-      <section className="relative py-20 sm:py-24 overflow-hidden border-t border-slate-200">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_100%,rgba(59,130,246,0.1),transparent_70%)]" />
-        <div className="container relative mx-auto px-4 text-center">
-          <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
+      <section className="relative py-20 sm:py-24 overflow-hidden border-t border-[var(--mkt-border)] mkt-atmosphere">
+        <div className="mkt-container relative text-center">
+          <h3 className="text-2xl sm:text-3xl font-bold text-[var(--mkt-ink)] mb-4">
             See how it fits your business
           </h3>
-          <p className="text-slate-600 max-w-lg mx-auto mb-8">
+          <p className="text-[var(--mkt-muted)] max-w-lg mx-auto mb-8">
             Fleet features are included in your vehicle subscription (£8 per vehicle per month, or £84 per vehicle per
             year). No long-term contract on monthly plans.
           </p>
@@ -259,18 +254,18 @@ export default function Features() {
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-slate-300 text-slate-900 hover:border-blue-400 hover:bg-slate-50 transition-all duration-200 font-medium"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-[var(--mkt-border)] text-[var(--mkt-ink)] bg-white hover:bg-slate-50 transition-all duration-200 font-medium"
             >
               View pricing
             </Link>
           </div>
-          <p className="mt-5 text-sm text-slate-500">
+          <p className="mt-5 text-sm text-[var(--mkt-muted)]">
             14 days free &bull; no card required &bull;{' '}
             <a
               href={WHATSAPP_ENQUIRY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-600 hover:text-slate-900 underline underline-offset-2"
+              className="text-[var(--brand-blue)] hover:underline underline-offset-2"
             >
               or talk to us on WhatsApp
             </a>

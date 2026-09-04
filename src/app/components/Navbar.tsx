@@ -18,7 +18,7 @@ const NavbarMobileNavContent = dynamic(
 const baseNavItems = [
   { name: 'Home', href: '/' },
   { name: 'Features', href: '/features' },
-  { name: 'Compliance Centre', href: '/compliance-centre' },
+  { name: 'Compliance', href: '/compliance-centre' },
   { name: 'Pricing', href: '/pricing' },
   { name: 'FAQ', href: '/faq' },
   { name: 'Contact', href: '/contact' },
@@ -27,32 +27,32 @@ const ONBOARDING_URL = '/onboarding';
 
 function NavbarNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
   return (
-    <div className="ml-10 flex items-center gap-1 sm:gap-2">
+    <div className="ml-4 lg:ml-8 flex items-center gap-0 lg:gap-0.5">
       {baseNavItems.map((item) => (
         <Link
           key={item.name}
           href={item.href}
-          className="relative px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-[var(--brand-blue)] after:scale-x-0 after:transition-transform hover:after:scale-x-100"
+          className="relative px-2.5 lg:px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-[var(--mkt-ink)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white"
           onClick={onLinkClick}
         >
           {item.name}
         </Link>
       ))}
-      <div className="ml-4 pl-4 border-l border-slate-200 flex items-center gap-2">
-        <Link
-          href={ONBOARDING_URL}
-          className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-white font-semibold text-sm hover:scale-[1.02] transition-all duration-200 btn-brand-blue"
-          onClick={onLinkClick}
-        >
-          Start 14-Day Free Trial
-        </Link>
+      <div className="ml-2 lg:ml-3 pl-2 lg:pl-3 border-l border-[var(--mkt-border)] flex items-center gap-1.5 lg:gap-2">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white"
+          className="inline-flex items-center gap-2 px-2.5 lg:px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-[var(--mkt-ink)] hover:bg-slate-50 transition-colors"
           onClick={onLinkClick}
         >
           <LogIn className="h-4 w-4" aria-hidden />
           Log in
+        </Link>
+        <Link
+          href={ONBOARDING_URL}
+          className="inline-flex items-center justify-center px-3 lg:px-4 py-2.5 rounded-xl text-white font-semibold text-sm transition-colors duration-200 btn-brand-blue whitespace-nowrap"
+          onClick={onLinkClick}
+        >
+          Start free trial
         </Link>
       </div>
     </div>
@@ -61,7 +61,7 @@ function NavbarNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
 
 function NavbarMobileNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
   return (
-    <div className="px-4 pt-4 pb-6 space-y-1 bg-white border-t border-slate-200">
+    <div className="px-4 pt-3 pb-6 space-y-1 bg-white border-t border-[var(--mkt-border)]">
       {baseNavItems.map((item) => (
         <Link
           key={item.name}
@@ -72,17 +72,17 @@ function NavbarMobileNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
           {item.name}
         </Link>
       ))}
-      <div className="pt-4 mt-4 border-t border-slate-200 space-y-2">
+      <div className="pt-4 mt-2 border-t border-[var(--mkt-border)] space-y-2">
         <Link
           href={ONBOARDING_URL}
-          className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-white font-semibold btn-brand-blue"
+          className="flex items-center justify-center w-full px-4 py-3.5 rounded-xl text-white font-semibold btn-brand-blue"
           onClick={onLinkClick}
         >
           Start 14-Day Free Trial
         </Link>
         <Link
           href="/dashboard"
-          className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 text-slate-800 hover:bg-slate-50"
+          className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[var(--mkt-border)] text-slate-800 hover:bg-slate-50"
           onClick={onLinkClick}
         >
           <LogIn className="h-4 w-4" aria-hidden />
@@ -98,7 +98,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    const handleScroll = () => setIsScrolled(window.scrollY > 8);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -109,20 +109,20 @@ const Navbar = () => {
     <nav
       className={`fixed w-full z-40 left-0 top-0 transition-all duration-300 pt-[env(safe-area-inset-top)] ${
         isScrolled
-          ? 'bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm'
-          : 'bg-white/90 backdrop-blur-md border-b border-slate-200/80'
+          ? 'bg-white border-b border-[var(--mkt-border)] shadow-[0_4px_20px_rgba(10,22,40,0.06)]'
+          : 'bg-white border-b border-[var(--mkt-border)]/60'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-20">
+        <div className="flex items-center justify-between h-14 sm:h-[4.5rem]">
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center" aria-label="Fleet Track PRO home">
-              <div className="relative h-12 w-[200px] sm:h-16 sm:w-[280px]">
+              <div className="relative h-10 w-[152px] sm:h-12 sm:w-[200px] lg:h-14 lg:w-[240px]">
                 <Image
                   src="/logo-black.png"
                   alt="Fleet Track PRO"
                   fill
-                  sizes="(max-width: 640px) 200px, 280px"
+                  sizes="(max-width: 640px) 152px, (max-width: 1024px) 200px, 240px"
                   style={{ objectFit: 'contain', objectPosition: 'left center' }}
                   priority
                 />
@@ -130,11 +130,11 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <NavbarNavContent onLinkClick={closeMenu} />
           </div>
 
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2.5 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -153,7 +153,7 @@ const Navbar = () => {
       </div>
 
       <div
-        className={`md:hidden transition-all duration-300 ease-in-out ${
+        className={`lg:hidden transition-all duration-300 ease-in-out ${
           isMenuOpen ? 'max-h-[calc(100vh-5rem)] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'
         }`}
       >

@@ -28,7 +28,7 @@ type Props = {
 
 export default function CustomerCaseStudyPage({
   story,
-  heroImageSrc = '/fleet-operations.jpg',
+  heroImageSrc = '/fleet-operations-2.jpg',
   heroImageAlt = 'UK fleet operations',
 }: Props) {
   const topQuote = story.quote || story.cardExcerpt;
@@ -38,11 +38,11 @@ export default function CustomerCaseStudyPage({
       <CustomerCaseStudyJsonLd story={story} heroImageSrc={heroImageSrc} />
       <Navbar />
       <main>
-        <section className="pt-24 sm:pt-28 pb-8 sm:pb-10">
-          <div className="container mx-auto px-4 max-w-6xl">
+        <section className="pt-24 sm:pt-28 pb-8 sm:pb-10 mkt-atmosphere">
+          <div className="mkt-container">
             <Link
               href="/#customer-stories"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-[var(--brand-blue)] mb-6"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--mkt-muted)] hover:text-[var(--brand-blue)] mb-6"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
               Back to customer stories
@@ -50,16 +50,14 @@ export default function CustomerCaseStudyPage({
 
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-10">
               <div className="max-w-2xl">
-                <p className="text-[var(--brand-blue)] font-semibold text-sm uppercase tracking-[0.2em] mb-3">
-                  Case study
-                </p>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
+                <p className="mkt-eyebrow mb-3">Case study</p>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--mkt-ink)] leading-tight">
                   {story.shortName}
                 </h1>
-                <p className="text-slate-600 text-lg leading-relaxed mt-4">
+                <p className="text-[var(--mkt-muted)] text-lg leading-relaxed mt-4">
                   {story.industry} · {story.fleetSize} vehicles
                 </p>
-                <p className="inline-flex items-center gap-2 text-slate-500 text-sm mt-3">
+                <p className="inline-flex items-center gap-2 text-[var(--mkt-muted)] text-sm mt-3">
                   <MapPin className="h-4 w-4 text-[var(--brand-blue)]" aria-hidden />
                   {story.location}
                 </p>
@@ -79,9 +77,9 @@ export default function CustomerCaseStudyPage({
         </section>
 
         <section className="pb-12 sm:pb-16">
-          <div className="container mx-auto px-4 max-w-6xl space-y-5 sm:space-y-6">
+          <div className="mkt-container space-y-5 sm:space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 lg:gap-6 items-stretch">
-              <div className="relative lg:col-span-3 w-full min-h-[220px] h-[240px] sm:h-[300px] lg:h-auto lg:min-h-[300px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+              <div className="relative lg:col-span-3 w-full min-h-[220px] h-[240px] sm:h-[300px] lg:h-auto lg:min-h-[300px] overflow-hidden rounded-2xl border border-[var(--mkt-border)] bg-[var(--mkt-muted-surface)]">
                 <Image
                   src={heroImageSrc}
                   alt={heroImageAlt}
@@ -92,17 +90,17 @@ export default function CustomerCaseStudyPage({
                 />
               </div>
 
-              <aside className="lg:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6 flex flex-col justify-center gap-5">
+              <aside className="lg:col-span-2 mkt-card-static p-5 sm:p-6 flex flex-col justify-center gap-5 bg-[var(--mkt-muted-surface)]">
                 {story.metrics.map((metric, i) => {
                   const Icon = METRIC_ICONS[i % METRIC_ICONS.length];
                   return (
                     <div key={metric.label} className="flex gap-3.5">
-                      <div className="h-11 w-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[var(--brand-blue)] shrink-0">
+                      <div className="h-11 w-11 rounded-xl bg-white border border-[var(--mkt-border)] flex items-center justify-center text-[var(--brand-blue)] shrink-0">
                         <Icon className="h-5 w-5" aria-hidden />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-base sm:text-lg font-bold text-slate-900">{metric.label}</p>
-                        <p className="text-sm text-slate-600 mt-0.5 leading-relaxed">{metric.detail}</p>
+                        <p className="text-base sm:text-lg font-bold text-[var(--mkt-ink)]">{metric.label}</p>
+                        <p className="text-sm text-[var(--mkt-muted)] mt-0.5 leading-relaxed">{metric.detail}</p>
                       </div>
                     </div>
                   );
@@ -111,7 +109,7 @@ export default function CustomerCaseStudyPage({
             </div>
 
             {topQuote ? (
-              <aside className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 lg:p-10">
+              <aside className="mkt-card-static p-6 sm:p-8 lg:p-10">
                 <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-8">
                   <p
                     className="text-6xl leading-none text-[var(--brand-blue)] font-serif shrink-0"
@@ -120,16 +118,16 @@ export default function CustomerCaseStudyPage({
                     &ldquo;
                   </p>
                   <div className="min-w-0 flex-1">
-                    <blockquote className="text-slate-800 text-base sm:text-lg leading-relaxed">
+                    <blockquote className="text-[var(--mkt-ink)] text-base sm:text-lg leading-relaxed">
                       {topQuote}
                     </blockquote>
                     {(story.quoteName || story.company) && (
-                      <p className="mt-5 text-sm text-slate-600">
-                        <span className="font-semibold text-slate-900">
+                      <p className="mt-5 text-sm text-[var(--mkt-muted)]">
+                        <span className="font-semibold text-[var(--mkt-ink)]">
                           {story.quoteName || story.company}
                         </span>
                         {story.quoteRole ? (
-                          <span className="text-slate-500"> — {story.quoteRole}</span>
+                          <span> — {story.quoteRole}</span>
                         ) : null}
                       </p>
                     )}
@@ -137,8 +135,8 @@ export default function CustomerCaseStudyPage({
                 </div>
               </aside>
             ) : (
-              <aside className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-                <p className="text-slate-700 text-base sm:text-lg leading-relaxed">{story.summary}</p>
+              <aside className="mkt-card-static p-6 sm:p-8">
+                <p className="text-[var(--mkt-muted)] text-base sm:text-lg leading-relaxed">{story.summary}</p>
               </aside>
             )}
           </div>
@@ -147,21 +145,21 @@ export default function CustomerCaseStudyPage({
         <MarketingBreak variant="soft" />
 
         <section className="py-12 sm:py-16 bg-white">
-          <div className="container mx-auto px-4 max-w-6xl">
+          <div className="mkt-container">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 mb-3">The challenge</h2>
-                <p className="text-slate-600 text-sm sm:text-base leading-relaxed">{story.challenge}</p>
+                <h2 className="text-lg font-semibold text-[var(--mkt-ink)] mb-3">The challenge</h2>
+                <p className="text-[var(--mkt-muted)] text-sm sm:text-base leading-relaxed">{story.challenge}</p>
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 mb-3">The solution</h2>
-                <p className="text-slate-600 text-sm sm:text-base leading-relaxed">{story.solution}</p>
+                <h2 className="text-lg font-semibold text-[var(--mkt-ink)] mb-3">The solution</h2>
+                <p className="text-[var(--mkt-muted)] text-sm sm:text-base leading-relaxed">{story.solution}</p>
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-slate-900 mb-3">The impact</h2>
+                <h2 className="text-lg font-semibold text-[var(--mkt-ink)] mb-3">The impact</h2>
                 <ul className="space-y-3">
                   {story.impact.map((item) => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm sm:text-base text-slate-700">
+                    <li key={item} className="flex items-start gap-2.5 text-sm sm:text-base text-[var(--mkt-muted)]">
                       <CheckCircle2
                         className="h-5 w-5 text-[var(--brand-blue)] shrink-0 mt-0.5"
                         aria-hidden
@@ -175,14 +173,14 @@ export default function CustomerCaseStudyPage({
           </div>
         </section>
 
-        <section className="py-12 sm:py-16 bg-white border-t border-slate-200">
-          <div className="container mx-auto px-4 max-w-6xl">
+        <section className="py-12 sm:py-16 bg-white border-t border-[var(--mkt-border)]">
+          <div className="mkt-container">
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-10 lg:gap-14 items-center">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-[var(--mkt-ink)] mb-4">
                   How they use Fleet Track PRO
                 </h2>
-                <p className="text-slate-600 text-sm sm:text-base leading-relaxed">{story.summary}</p>
+                <p className="text-[var(--mkt-muted)] text-sm sm:text-base leading-relaxed">{story.summary}</p>
               </div>
               <ol className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-4">
                 {story.howTheyUse.map((step, index) => {
@@ -222,7 +220,7 @@ export default function CustomerCaseStudyPage({
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-medium border border-slate-300 text-slate-800 bg-white hover:bg-slate-50"
+                className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-medium border border-[var(--mkt-border)] text-[var(--mkt-ink)] bg-white hover:bg-slate-50"
               >
                 Contact us
               </Link>

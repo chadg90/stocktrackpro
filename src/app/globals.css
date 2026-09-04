@@ -5,20 +5,24 @@
 :root {
   --foreground: 15, 23, 42;
   --background: 248, 250, 252;
-  --primary: #3b82f6;
-  --primary-light: #2563eb;
-  --brand-blue: #3b82f6;
-  --brand-blue-hover: #2563eb;
+  --primary: #1a6fb5;
+  --primary-light: #155a94;
+  --brand-blue: #1a6fb5;
+  --brand-blue-hover: #155a94;
   --brand-success: #059669;
   --text-dark: #000000;
   --text-light: #ffffff;
-  /* Marketing (depot daylight) */
-  --mkt-bg: #f8fafc;
+  /* Marketing — premium depot / operations (not cream, not purple) */
+  --mkt-bg: #f4f7fb;
   --mkt-surface: #ffffff;
-  --mkt-muted-surface: #f1f5f9;
-  --mkt-text: #0f172a;
-  --mkt-muted: #475569;
-  --mkt-border: #e2e8f0;
+  --mkt-muted-surface: #e7eef6;
+  --mkt-ink: #0a1628;
+  --mkt-ink-soft: #132337;
+  --mkt-text: #0a1628;
+  --mkt-muted: #5a6b7f;
+  --mkt-border: #d3dde8;
+  --mkt-steel: #1a6fb5;
+  --mkt-glow: rgba(26, 111, 181, 0.18);
   --demo-app-bg: #edf0f5;
 }
 
@@ -60,18 +64,59 @@ html {
 @layer components {
   .marketing-shell {
     @apply min-h-screen bg-[var(--mkt-bg)] text-[var(--mkt-text)] antialiased;
+    font-family: var(--font-mkt-body), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .marketing-shell h1,
+  .marketing-shell h2,
+  .marketing-shell h3,
+  .marketing-shell .mkt-display {
+    font-family: var(--font-mkt-display), var(--font-mkt-body), ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.03em;
+  }
+
+  .mkt-atmosphere {
+    background-color: var(--mkt-bg);
+    background-image:
+      radial-gradient(ellipse 90% 60% at 10% -10%, var(--mkt-glow), transparent 55%),
+      radial-gradient(ellipse 55% 40% at 95% 5%, rgba(10, 22, 40, 0.07), transparent 50%),
+      linear-gradient(180deg, #eef3f9 0%, var(--mkt-bg) 38%, #e8eef5 100%);
+  }
+
+  .mkt-hero-plane {
+    background-color: var(--mkt-ink);
+    background-image:
+      radial-gradient(ellipse 80% 70% at 85% 40%, rgba(26, 111, 181, 0.35), transparent 55%),
+      radial-gradient(ellipse 50% 45% at 10% 90%, rgba(26, 111, 181, 0.18), transparent 50%),
+      linear-gradient(160deg, #07101c 0%, #0a1628 45%, #102033 100%);
+  }
+
+  .mkt-eyebrow {
+    @apply text-[var(--brand-blue)] font-semibold text-xs sm:text-sm uppercase tracking-[0.2em];
+  }
+
+  .mkt-section {
+    @apply py-16 sm:py-24;
+  }
+
+  .mkt-container {
+    @apply container mx-auto px-5 sm:px-6 max-w-6xl;
   }
 
   .mkt-card {
-    @apply rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.07)] transition-shadow duration-200;
+    @apply rounded-2xl border border-[var(--mkt-border)] bg-white transition-[border-color,box-shadow,transform] duration-200;
+    box-shadow: 0 1px 0 rgba(10, 22, 40, 0.04);
   }
 
   .mkt-card:hover {
-    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
+    border-color: color-mix(in srgb, var(--brand-blue) 40%, var(--mkt-border));
+    box-shadow: 0 16px 40px rgba(10, 22, 40, 0.08);
+    transform: translateY(-1px);
   }
 
   .mkt-card-static {
-    @apply rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.07)];
+    @apply rounded-2xl border border-[var(--mkt-border)] bg-white;
+    box-shadow: 0 1px 0 rgba(10, 22, 40, 0.04);
   }
 
   .bg-grid-white {
@@ -88,11 +133,11 @@ html {
 
   .btn-brand-blue {
     background-color: var(--brand-blue);
-    box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.2);
+    box-shadow: 0 8px 24px rgba(26, 111, 181, 0.28);
   }
   .btn-brand-blue:hover {
     background-color: var(--brand-blue-hover);
-    box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.3);
+    box-shadow: 0 10px 28px rgba(26, 111, 181, 0.34);
   }
 
   @keyframes mkt-fade-up {
@@ -138,47 +183,45 @@ html {
     }
   }
 
-  /* Professional section breaks — slate + brand blue */
+  /* Professional section breaks — ink + steel */
   .mkt-section-break {
     width: 100%;
-    height: 8px;
+    height: 6px;
     background: linear-gradient(
       90deg,
-      #0f172a 0%,
-      #0f172a 14%,
-      var(--brand-blue) 14%,
-      var(--brand-blue) 36%,
-      #94a3b8 36%,
-      #cbd5e1 58%,
-      #e2e8f0 100%
+      var(--mkt-ink) 0%,
+      var(--mkt-ink) 18%,
+      var(--brand-blue) 18%,
+      var(--brand-blue) 42%,
+      #94a3b8 42%,
+      #cbd5e1 70%,
+      transparent 100%
     );
   }
 
   .mkt-section-break-soft {
     width: 100%;
-    height: 4px;
+    height: 1px;
     background: linear-gradient(
       90deg,
       transparent 0%,
-      #cbd5e1 12%,
-      var(--brand-blue) 40%,
-      var(--brand-blue) 52%,
-      #cbd5e1 80%,
+      var(--mkt-border) 20%,
+      var(--mkt-border) 80%,
       transparent 100%
     );
   }
 
   .mkt-section-band {
     width: 100%;
-    height: 12px;
+    height: 8px;
     background: linear-gradient(
       90deg,
-      #1e3a5f 0%,
-      #1e3a5f 22%,
-      var(--brand-blue) 22%,
-      #60a5fa 55%,
-      #e2e8f0 55%,
-      #f1f5f9 100%
+      var(--mkt-ink) 0%,
+      var(--mkt-ink) 28%,
+      var(--brand-blue) 28%,
+      var(--brand-blue) 55%,
+      #64748b 55%,
+      #94a3b8 100%
     );
   }
 

@@ -64,18 +64,16 @@ export default function Contact() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-28 sm:pt-36 pb-12 sm:pb-16">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(59,130,246,0.12),transparent)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
-        <div className="container relative mx-auto px-4">
-          <p className="text-blue-500 font-medium text-sm uppercase tracking-[0.2em] mb-4">
+      <section className="relative overflow-hidden pt-28 sm:pt-36 pb-12 sm:pb-16 mkt-atmosphere">
+        <div className="mkt-container relative">
+          <p className="mkt-eyebrow mb-4 text-center">
             Contact
           </p>
           <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
-              Fleet software <span className="text-blue-500">sales and support</span>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[var(--mkt-ink)] mb-6 leading-tight">
+              Fleet software sales and support
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed">
+            <p className="text-lg text-[var(--mkt-muted)] leading-relaxed">
               Have questions about Fleet Track PRO? We&apos;re here to help with fleet setup, inspections, defects, and
               billing.
             </p>
@@ -84,12 +82,12 @@ export default function Contact() {
       </section>
 
       {/* Form card */}
-      <section className="py-12 sm:py-16 border-t border-slate-200">
-        <div className="container mx-auto px-4">
+      <section className="py-12 sm:py-16 border-t border-[var(--mkt-border)] bg-white">
+        <div className="mkt-container">
           <div className="max-w-2xl mx-auto">
-            <div className="p-8 sm:p-10 rounded-2xl border border-slate-200 bg-slate-100/90 shadow-inner">
-              <h2 className="text-xl font-bold text-slate-900 mb-2">Send us a message</h2>
-              <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+            <div className="p-8 sm:p-10 rounded-2xl border border-[var(--mkt-border)] bg-[var(--mkt-muted-surface)]">
+              <h2 className="text-xl font-bold text-[var(--mkt-ink)] mb-2">Send us a message</h2>
+              <p className="text-sm text-[var(--mkt-muted)] mb-6 leading-relaxed">
                 Fill in the form below and we&apos;ll reply by email. Fields marked required must be completed.
               </p>
               {submitSuccess && (
@@ -202,24 +200,24 @@ export default function Contact() {
       </section>
 
       {/* Contact methods */}
-      <section className="py-12 sm:py-16 bg-slate-50 border-t border-slate-200">
-        <div className="container mx-auto px-4">
+      <section className="py-12 sm:py-16 mkt-atmosphere border-t border-[var(--mkt-border)]">
+        <div className="mkt-container">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {contactMethods.map((method, index) => (
               <div
                 key={index}
-                className="group p-8 rounded-2xl border border-slate-200 bg-white hover:border-blue-300 hover:bg-white transition-all duration-300"
+                className="group p-8 mkt-card"
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500/20 transition-colors">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--mkt-muted-surface)] flex items-center justify-center text-[var(--brand-blue)] group-hover:bg-blue-50 transition-colors">
                     <Mail className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900">{method.title}</h3>
-                    <p className="text-slate-500 text-sm">{method.description}</p>
+                    <h3 className="text-lg font-semibold text-[var(--mkt-ink)]">{method.title}</h3>
+                    <p className="text-[var(--mkt-muted)] text-sm">{method.description}</p>
                   </div>
                 </div>
-                <p className="text-slate-800 mb-6 break-all">{method.value}</p>
+                <p className="text-[var(--mkt-ink)] mb-6 break-all">{method.value}</p>
                 <Link
                   href={method.href}
                   target={method.type === 'whatsapp' ? '_blank' : undefined}
@@ -236,21 +234,21 @@ export default function Contact() {
       </section>
 
       {/* What to expect */}
-      <section className="py-12 sm:py-16 border-t border-slate-200">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto p-8 rounded-2xl border border-slate-200 bg-slate-50">
-            <h3 className="text-xl font-semibold text-slate-900 mb-6">What to expect</h3>
-            <ul className="space-y-4 text-slate-600">
+      <section className="py-12 sm:py-16 border-t border-[var(--mkt-border)] bg-white">
+        <div className="mkt-container">
+          <div className="max-w-4xl mx-auto p-8 rounded-2xl border border-[var(--mkt-border)] bg-[var(--mkt-muted-surface)]">
+            <h3 className="text-xl font-semibold text-[var(--mkt-ink)] mb-6">What to expect</h3>
+            <ul className="space-y-4 text-[var(--mkt-muted)]">
               <li className="flex items-start gap-3">
-                <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                <span className="mt-1.5 h-2 w-2 rounded-full bg-[var(--brand-blue)] flex-shrink-0" />
                 <span>We aim to respond to all inquiries within 24 hours during business days.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                <span className="mt-1.5 h-2 w-2 rounded-full bg-[var(--brand-blue)] flex-shrink-0" />
                 <span>For urgent matters, contact us via WhatsApp Business for quicker response.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                <span className="mt-1.5 h-2 w-2 rounded-full bg-[var(--brand-blue)] flex-shrink-0" />
                 <span>Business hours: Monday–Friday, 9am–5pm GMT.</span>
               </li>
             </ul>

@@ -106,37 +106,34 @@ export default function Pricing() {
     <div className="marketing-shell">
       <Navbar />
 
-      <div className="container mx-auto px-4 pt-20 sm:pt-32 pb-12 sm:pb-20">
+      <div className="mkt-container pt-20 sm:pt-32 pb-12 sm:pb-20">
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 px-2">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-blue-500/15 rounded-full blur-2xl pointer-events-none" />
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 mb-5 leading-tight relative">
-            Fleet Management Software{' '}
-            <span className="text-blue-500 bg-gradient-to-r from-blue-500 to-blue-400 bg-clip-text text-transparent">
-              Pricing
-            </span>
+          <p className="mkt-eyebrow mb-4">Pricing</p>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--mkt-ink)] mb-5 leading-tight">
+            Simple fleet software pricing
           </h1>
-          <p className="text-lg sm:text-xl text-slate-600 leading-relaxed">
+          <p className="text-lg sm:text-xl text-[var(--mkt-muted)] leading-relaxed">
             £8 per vehicle per month. Monthly billing can be cancelled anytime.
             Minimum 2 vehicles. Annual billing is £84 per vehicle per year, paid upfront.
           </p>
 
           {/* Trust strip — one-liner value anchors */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-slate-600">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-[var(--mkt-muted)]">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-[var(--brand-blue)]" aria-hidden />
               Monthly: no long-term contract
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Truck className="h-4 w-4 text-emerald-400" aria-hidden />
+              <Truck className="h-4 w-4 text-[var(--brand-blue)]" aria-hidden />
               Fleet-focused workflow
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Clock className="h-4 w-4 text-amber-400" aria-hidden />
+              <Clock className="h-4 w-4 text-[var(--brand-blue)]" aria-hidden />
               14-day free trial
             </span>
           </div>
 
-          <p className="text-sm text-slate-400 mt-3">
+          <p className="text-sm text-[var(--mkt-muted)] mt-3">
             Already subscribed? Managers can open the billing portal from the dashboard subscription page.
           </p>
         </div>
@@ -154,9 +151,9 @@ export default function Pricing() {
 
           <div className="max-w-xl mx-auto mb-8">
           {/* Fleet pricing */}
-          <div className="relative bg-white backdrop-blur-sm rounded-3xl p-8 sm:p-10 border border-blue-500 shadow-2xl shadow-slate-200/50 ring-2 ring-blue-200">
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-              <span className="bg-blue-500 text-white px-5 py-1.5 rounded-full text-sm font-bold shadow-lg whitespace-nowrap">
+          <div className="relative bg-white rounded-2xl p-6 sm:p-10 border border-[var(--mkt-border)] shadow-[0_16px_40px_rgba(10,22,40,0.08)] ring-1 ring-[var(--brand-blue)]/25">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 max-w-[calc(100%-1.5rem)]">
+              <span className="block bg-[var(--brand-blue)] text-white px-3 sm:px-5 py-1.5 rounded-xl text-xs sm:text-sm font-bold shadow-lg text-center leading-snug">
                 Fleet — all features included
               </span>
             </div>
