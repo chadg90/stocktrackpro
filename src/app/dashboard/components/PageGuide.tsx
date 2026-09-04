@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { CircleHelp, X } from 'lucide-react';
+import { HelpCircle, X } from 'lucide-react';
 import {
   DASHBOARD_PAGE_GUIDES,
   type DashboardGuidePageId,
@@ -160,7 +160,7 @@ export default function PageGuideButton({ pageId }: { pageId: DashboardGuidePage
         className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-white/20 dark:bg-transparent dark:text-white/80 dark:hover:bg-white/5 dark:hover:text-white"
         aria-haspopup="dialog"
       >
-        <CircleHelp className="h-3.5 w-3.5" aria-hidden />
+        <HelpCircle className="h-3.5 w-3.5" aria-hidden />
         Page guide
       </button>
       {open && <PageGuideOverlay pageId={pageId} onClose={() => setOpen(false)} />}
