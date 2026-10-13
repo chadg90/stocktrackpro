@@ -11,15 +11,18 @@ import { defectWord } from '@/lib/defectWord';
 export default function FleetReportOverviewPage() {
   const {
     loading,
+    historyLoading,
     error,
     refresh,
     exportFullExcel,
     inspections,
     weekInspections,
-    outstandingDefects,
+    openDefectsNowCount,
     vehicles,
     weekBounds,
   } = useFleetReport();
+
+  const outstandingCount = openDefectsNowCount;
 
   const attentionCount = useMemo(
     () => buildMileageAttentionRows(inspections, vehicles).length,
@@ -42,11 +45,11 @@ export default function FleetReportOverviewPage() {
         <button
           type="button"
           onClick={() => exportFullExcel()}
-          disabled={loading || inspections.length === 0}
+          disabled={loading || historyLoading || inspections.length === 0}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-emerald-500 bg-emerald-600 text-white keep-light-on-dark hover:bg-emerald-700 transition-colors disabled:opacity-50 dark:border-green-500/40 dark:bg-transparent dark:text-green-400 dark:hover:bg-green-500/10"
         >
           <FileSpreadsheet className="h-4 w-4" />
-          Export full Excel (all sheets)
+          {historyLoading ? 'Loading history…' : 'Export full Excel (all sheets)'}
         </button>
         <button
           type="button"
@@ -99,9 +102,9 @@ export default function FleetReportOverviewPage() {
             href="/dashboard/defects?status=open"
             className="dashboard-card p-5 col-span-2 lg:col-span-4 hover:bg-zinc-50 dark:hover:bg-white/[0.08] transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
           >
-            <p className="dashboard-kpi-value text-red-700 dark:text-red-300">{outstandingDefects.length}</p>
+            <p className="dashboard-kpi-value text-red-700 dark:text-red-300">{outstandingCount}</p>
             <p className="dashboard-kpi-label">
-              Outstanding {defectWord(outstandingDefects.length)} (not resolved)
+              Outstanding {defectWord(outstandingCount)} (not resolved)
             </p>
             <p className="text-zinc-500 dark:text-white/50 text-xs mt-1">Open in Defects &rarr;</p>
           </Link>

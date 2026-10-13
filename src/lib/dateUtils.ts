@@ -5,6 +5,14 @@
 import { Timestamp } from 'firebase/firestore';
 
 /**
+ * en-GB short months often render September as "Sept".
+ * Standardize on "Sep" everywhere in the product UI.
+ */
+export function preferSepMonth(label: string): string {
+  return label.replace(/\bSept\b/g, 'Sep');
+}
+
+/**
  * Safely converts a Timestamp or string to a Date object
  * @param value - Timestamp, string date, or undefined
  * @returns Date object or null if invalid
@@ -58,7 +66,9 @@ export function formatShortDate(value?: Timestamp | string | null, fallback: str
   if (!date) return fallback;
   
   try {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return preferSepMonth(
+      date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    );
   } catch {
     return fallback;
   }

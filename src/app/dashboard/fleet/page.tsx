@@ -28,6 +28,12 @@ import TableSkeleton from '../components/TableSkeleton';
 import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
 import { useDebounce } from '@/hooks/useDebounce';
 import { checkCanAddVehicle } from '@/lib/subscriptionLimits';
+import {
+  formatUkRegistration,
+  formatVehicleMakeModel,
+  isValidUkRegistrationShape,
+  registrationKey,
+} from '@/lib/ukVehicleRegistration';
 import PageGuideButton from '../components/PageGuide';
 
 type Vehicle = {
@@ -185,9 +191,40 @@ export default function FleetPage() {
     }
   };
 
+  const findDuplicateRegistration = (reg: string, excludeId?: string) => {
+    const key = registrationKey(reg);
+    if (!key) return null;
+    return (
+      vehicles.find((v) => {
+        if (excludeId && v.id === excludeId) return false;
+        const status = String(v.status || 'active').toLowerCase();
+        if (status === 'retired') return false;
+        return registrationKey(v.registration) === key;
+      }) || null
+    );
+  };
+
   const handleAddVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseDb || !firebaseFunctions || !profile?.company_id) return;
+
+    const registration = formatUkRegistration(formData.registration || '');
+    const make = formatVehicleMakeModel(formData.make || '');
+    const model = formatVehicleMakeModel(formData.model || '');
+    if (!make || !model) {
+      alert('Make and model are required.');
+      return;
+    }
+    if (!isValidUkRegistrationShape(registration)) {
+      alert('Enter a valid UK registration (letters and numbers only).');
+      return;
+    }
+    if (findDuplicateRegistration(registration)) {
+      alert(
+        'An active vehicle with this registration already exists. Retire or edit the existing vehicle instead of adding a duplicate.'
+      );
+      return;
+    }
 
     const limitCheck = await checkCanAddVehicle(firebaseDb, profile.company_id);
     if (!limitCheck.allowed) {
@@ -200,10 +237,10 @@ export default function FleetPage() {
       const createVehicle = httpsCallable(firebaseFunctions, 'createVehicle');
       await createVehicle({
         vehicle: {
-          make: formData.make || '',
-          model: formData.model || '',
-          registration: formData.registration || '',
-          vin: formData.vin || '',
+          make,
+          model,
+          registration,
+          vin: (formData.vin || '').toUpperCase(),
           image_url: formData.image_url || '',
           status: formData.status || 'active',
           mileage: Number(formData.mileage) || 0,
@@ -233,11 +270,31 @@ export default function FleetPage() {
     e.preventDefault();
     if (!firebaseDb || !currentVehicle) return;
 
+    const registration = formatUkRegistration(formData.registration || '');
+    const make = formatVehicleMakeModel(formData.make || '');
+    const model = formatVehicleMakeModel(formData.model || '');
+    if (!make || !model) {
+      alert('Make and model are required.');
+      return;
+    }
+    if (!isValidUkRegistrationShape(registration)) {
+      alert('Enter a valid UK registration (letters and numbers only).');
+      return;
+    }
+    if (findDuplicateRegistration(registration, currentVehicle.id)) {
+      alert('Another active vehicle already uses this registration.');
+      return;
+    }
+
     setProcessing(true);
     try {
       const vehicleRef = doc(firebaseDb!, 'vehicles', currentVehicle.id);
       await updateDoc(vehicleRef, {
         ...formData,
+        make,
+        model,
+        registration,
+        vin: formData.vin ? String(formData.vin).toUpperCase() : formData.vin,
         updated_at: serverTimestamp(),
         mileage: Number(formData.mileage) || 0,
       });
@@ -247,6 +304,7 @@ export default function FleetPage() {
       if (profile?.company_id) fetchVehicles(profile.company_id);
     } catch (error) {
       console.error('Error updating vehicle:', error);
+      alert('Could not update vehicle. Please try again.');
     } finally {
       setProcessing(false);
     }
@@ -522,10 +580,16 @@ export default function FleetPage() {
               type="text"
               required
               value={formData.registration || ''}
-              onChange={(e) => setFormData({...formData, registration: e.target.value.toUpperCase()})}
-              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
+              onChange={(e) =>
+                setFormData({ ...formData, registration: formatUkRegistration(e.target.value) })
+              }
+              onBlur={(e) =>
+                setFormData({ ...formData, registration: formatUkRegistration(e.target.value) })
+              }
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none uppercase"
               placeholder="e.g. AB12 CDE"
             />
+            <p className="text-xs text-white/40 mt-1">Capitals + UK spacing — used for DVLA lookups.</p>
           </div>
           <div>
             <label className="block text-sm text-white/70 mb-1">VIN (Optional)</label>
@@ -616,8 +680,14 @@ export default function FleetPage() {
               type="text"
               required
               value={formData.registration || ''}
-              onChange={(e) => setFormData({...formData, registration: e.target.value.toUpperCase()})}
-              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none"
+              onChange={(e) =>
+                setFormData({ ...formData, registration: formatUkRegistration(e.target.value) })
+              }
+              onBlur={(e) =>
+                setFormData({ ...formData, registration: formatUkRegistration(e.target.value) })
+              }
+              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none uppercase"
+              placeholder="e.g. AB12 CDE"
             />
           </div>
           <div>

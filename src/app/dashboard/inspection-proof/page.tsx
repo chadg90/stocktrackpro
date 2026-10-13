@@ -38,6 +38,7 @@ import {
   exportVehicleInspectionProofPdf,
   type InspectionProofDoc,
 } from '@/lib/vehicleInspectionProofPdf';
+import { preferSepMonth } from '@/lib/dateUtils';
 import {
   hasEncodedSignature,
   isSignatureStorageRef,
@@ -66,22 +67,17 @@ type InspectionRow = InspectionProofDoc & {
 function formatWhen(value?: Timestamp | string | null): string {
   if (!value) return '—';
   try {
-    if (value instanceof Timestamp) {
-      return value.toDate().toLocaleString('en-GB', {
+    const d = value instanceof Timestamp ? value.toDate() : new Date(value);
+    if (Number.isNaN(d.getTime())) return '—';
+    return preferSepMonth(
+      d.toLocaleString('en-GB', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-      });
-    }
-    return new Date(value).toLocaleString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+      })
+    );
   } catch {
     return '—';
   }

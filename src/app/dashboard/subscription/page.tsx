@@ -2,7 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getCountFromServer,
+  getDoc,
+  query,
+  where,
+} from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
 import { CreditCard, Check, ExternalLink, AlertCircle, Calendar, Sparkles, Tag } from 'lucide-react';
@@ -16,10 +23,12 @@ import {
 } from '@/lib/trialStatus';
 import PageGuideButton from '../components/PageGuide';
 
+/** Must match public pricing + Stripe per-vehicle prices. */
 const PRICE_PER_VEHICLE_MONTHLY = 8;
-const PRICE_PER_VEHICLE_YEARLY = 84;
+const PRICE_PER_VEHICLE_YEARLY = 84; // £7/vehicle/month effective (~12.5% vs monthly)
 const MIN_VEHICLES = 2;
 const MAX_VEHICLES = 100;
+const PROMO_VEHICLE_CAP = 10;
 const WHATSAPP_SUPPORT_URL = 'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%20support%2C%20I%20need%20help%20with%20billing%3A';
 
 type BillingCycle = 'monthly' | 'yearly';
@@ -33,6 +42,7 @@ type Company = {
   subscription_status?: string;
   stripe_subscription_id?: string;
   stripe_customer_id?: string;
+  /** 'stripe' | 'promotional' | etc. */
   subscription_type?: string;
   trial_end_date?: any;
   subscription_expiry_date?: unknown;
@@ -68,6 +78,7 @@ export default function SubscriptionPage() {
   const [syncing, setSyncing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [vehicleCount, setVehicleCount] = useState<number>(MIN_VEHICLES);
+  const [fleetVehicleCount, setFleetVehicleCount] = useState<number | null>(null);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [promoCode, setPromoCode] = useState('');
   const [promoLoading, setPromoLoading] = useState(false);
@@ -85,12 +96,27 @@ export default function SubscriptionPage() {
         setProfile(profileData);
 
         if (profileData.company_id) {
-          const companySnap = await getDoc(doc(firebaseDb, 'companies', profileData.company_id));
+          const companyId = profileData.company_id;
+          const [companySnap, fleetCountSnap] = await Promise.all([
+            getDoc(doc(firebaseDb, 'companies', companyId)),
+            getCountFromServer(
+              query(collection(firebaseDb, 'vehicles'), where('company_id', '==', companyId))
+            ),
+          ]);
+          setFleetVehicleCount(fleetCountSnap.data().count);
+
           if (companySnap.exists()) {
             const companyData = companySnap.data() as Company;
             setCompany(companyData);
             if (companyData.subscribed_vehicles && companyData.subscribed_vehicles >= MIN_VEHICLES) {
               setVehicleCount(Math.min(companyData.subscribed_vehicles, MAX_VEHICLES));
+            } else if (
+              companyData.subscription_type === 'promotional' &&
+              companyData.promo_vehicle_limit
+            ) {
+              setVehicleCount(
+                Math.min(Math.max(companyData.promo_vehicle_limit, MIN_VEHICLES), MAX_VEHICLES)
+              );
             } else {
               setVehicleCount(MIN_VEHICLES);
             }
@@ -98,6 +124,8 @@ export default function SubscriptionPage() {
               setBillingCycle(companyData.billing_cycle);
             }
           }
+        } else {
+          setFleetVehicleCount(null);
         }
       }
     } catch (err) {
@@ -350,22 +378,41 @@ export default function SubscriptionPage() {
     (subscriptionStatus === 'active' || subscriptionStatus === 'trial') &&
     hasAccess;
   const checkoutTier = getTier(vehicleCount);
-  const currentVehicles = company?.subscribed_vehicles || 0;
+  const isPromoAccess =
+    company?.subscription_type === 'promotional' &&
+    company.subscription_status === 'active' &&
+    (company.promo_vehicle_limit ?? 0) > 0;
+  /** Paid / promo allowance on the company record (what they are entitled to). */
+  const subscribedAllowance =
+    company?.subscribed_vehicles && company.subscribed_vehicles > 0
+      ? company.subscribed_vehicles
+      : isPromoAccess
+        ? company!.promo_vehicle_limit!
+        : 0;
   const currentPlanTier = company?.legacy
     ? { label: 'Legacy Plan', users: 'As agreed', colour: 'text-amber-700 dark:text-amber-300' }
-    : currentVehicles > 0
-      ? getTier(currentVehicles)
-      : { label: 'Not set', users: '', colour: 'text-white/60' };
+    : isPromoAccess
+      ? { label: 'Promo access', users: `Up to ${subscribedAllowance} vehicles`, colour: 'text-blue-700 dark:text-blue-300' }
+      : subscribedAllowance > 0
+        ? getTier(subscribedAllowance)
+        : { label: 'Not set', users: '', colour: 'text-white/60' };
   const currentCycle: BillingCycle = company?.billing_cycle === 'yearly' ? 'yearly' : 'monthly';
   const unitPrice = billingCycle === 'yearly' ? PRICE_PER_VEHICLE_YEARLY : PRICE_PER_VEHICLE_MONTHLY;
   const billedTotal = vehicleCount * unitPrice;
   const monthlyEquivalent = billingCycle === 'yearly' ? billedTotal / 12 : billedTotal;
-  const estimatedCurrentMonthly = currentVehicles
-    ? currentCycle === 'yearly'
-      ? (currentVehicles * PRICE_PER_VEHICLE_YEARLY) / 12
-      : currentVehicles * PRICE_PER_VEHICLE_MONTHLY
-    : 0;
+  /** Estimate only for Stripe per-vehicle plans (not Legacy Plan / promo flat access). */
+  const estimatedCurrentMonthly =
+    !company?.legacy && !isPromoAccess && subscribedAllowance > 0
+      ? currentCycle === 'yearly'
+        ? (subscribedAllowance * PRICE_PER_VEHICLE_YEARLY) / 12
+        : subscribedAllowance * PRICE_PER_VEHICLE_MONTHLY
+      : 0;
   const showCheckout = canManage && !company?.legacy && !hasStripeManagedSubscription;
+  const canOpenBillingPortal = Boolean(company?.stripe_customer_id);
+  const isBiggerAccount =
+    company?.legacy === true ||
+    subscribedAllowance > PROMO_VEHICLE_CAP ||
+    (fleetVehicleCount != null && fleetVehicleCount > PROMO_VEHICLE_CAP);
   const sliderPct =
     ((vehicleCount - MIN_VEHICLES) / (MAX_VEHICLES - MIN_VEHICLES)) * 100;
 
@@ -517,14 +564,15 @@ export default function SubscriptionPage() {
           <PageGuideButton pageId="subscription" />
         </div>
         <p className="text-zinc-600 dark:text-white/75">
-          Per-vehicle billing via Stripe. Managers can open the billing portal or contact support for plan changes.
+          Per-vehicle billing via Stripe (£{PRICE_PER_VEHICLE_MONTHLY}/vehicle monthly or £
+          {PRICE_PER_VEHICLE_YEARLY}/vehicle yearly). Managers can subscribe, sync, or contact support for plan changes.
         </p>
       </div>
 
       {company?.legacy && (
         <div className="rounded-xl border border-amber-300 bg-amber-50 px-5 py-4 dark:border-amber-500/40 dark:bg-amber-500/10">
           <p className="text-amber-900 dark:text-amber-100 font-semibold">
-            Legacy pricing: your company remains on its initial agreed price long term.
+            Legacy Plan: your company remains on its initial agreed price long term.
           </p>
           <p className="text-amber-800 dark:text-amber-200/90 text-sm mt-1">
             This account is excluded from new per-vehicle pricing, including the monthly and annual plans available to
@@ -585,29 +633,51 @@ export default function SubscriptionPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="subscription-muted-surface rounded-lg p-4 border">
-            <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Current Vehicles</p>
+            <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Vehicle allowance</p>
             <p className="text-white font-semibold text-lg">
-              {company?.legacy ? 'Legacy plan' : (currentVehicles || 'Not set')}
+              {company?.legacy
+                ? 'Legacy Plan'
+                : subscribedAllowance > 0
+                  ? subscribedAllowance
+                  : 'Not set'}
             </p>
+            {fleetVehicleCount != null && (
+              <p className="text-white/45 text-xs mt-1">
+                {fleetVehicleCount} in fleet
+                {!company?.legacy &&
+                  subscribedAllowance > 0 &&
+                  fleetVehicleCount > subscribedAllowance && (
+                    <span className="text-amber-700 dark:text-amber-300"> · over allowance</span>
+                  )}
+              </p>
+            )}
           </div>
           <div className="subscription-muted-surface rounded-lg p-4 border">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Estimated Monthly</p>
             <p className="text-white font-semibold text-lg">
               {company?.legacy
-                ? 'Legacy pricing'
-                : currentVehicles
-                  ? formatCurrency(estimatedCurrentMonthly)
-                  : '—'}
+                ? 'Legacy Plan'
+                : isPromoAccess
+                  ? 'Promo access'
+                  : subscribedAllowance > 0
+                    ? formatCurrency(estimatedCurrentMonthly)
+                    : '—'}
             </p>
-            {!company?.legacy && currentVehicles > 0 && (
+            {!company?.legacy && !isPromoAccess && subscribedAllowance > 0 && (
               <p className="text-white/45 text-xs mt-1">
-                {currentCycle === 'yearly' ? 'Billed annually' : 'Billed monthly'}
+                {subscribedAllowance} × £
+                {currentCycle === 'yearly'
+                  ? `${(PRICE_PER_VEHICLE_YEARLY / 12).toFixed(2)}/mo (annual)`
+                  : `${PRICE_PER_VEHICLE_MONTHLY}/mo`}
               </p>
             )}
           </div>
           <div className="subscription-muted-surface rounded-lg p-4 border">
             <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Feature Tier</p>
             <p className={`font-semibold text-lg ${currentPlanTier.colour}`}>{currentPlanTier.label}</p>
+            {currentPlanTier.users ? (
+              <p className="text-white/45 text-xs mt-1">{currentPlanTier.users}</p>
+            ) : null}
           </div>
           {displayStatus === 'trial' && company?.trial_end_date ? (
             <div className="subscription-muted-surface rounded-lg p-4 border">
@@ -622,17 +692,24 @@ export default function SubscriptionPage() {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-4" data-tour="sub-billing">
+        <div className="flex flex-col gap-3" data-tour="sub-billing">
           {canManage && (
-            <>
-              <button
-                onClick={handleManageBilling}
-                disabled={portalLoading || !company?.stripe_customer_id}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
-              >
-                <ExternalLink className="w-4 h-4" />
-                {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
-              </button>
+            <div className="flex flex-wrap gap-4 items-start">
+              {canOpenBillingPortal ? (
+                <button
+                  onClick={handleManageBilling}
+                  disabled={portalLoading}
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  {portalLoading ? 'Opening...' : 'Manage Billing Portal'}
+                </button>
+              ) : (
+                <p className="text-sm text-white/60 max-w-md leading-relaxed">
+                  The Stripe billing portal opens here after you subscribe online. Until then, use checkout
+                  below (or contact support for Legacy Plan accounts).
+                </p>
+              )}
               <button
                 onClick={handleSyncSubscription}
                 disabled={syncing}
@@ -650,7 +727,7 @@ export default function SubscriptionPage() {
                   </>
                 )}
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -665,12 +742,13 @@ export default function SubscriptionPage() {
             Redeem Promo Code
           </h2>
           <p className="text-white/75 mb-6">
-            Managers can apply an access promo code here. Codes are validated securely on the server — the dashboard
-            never reads promo records directly.
+            Managers can apply an access promo code here if you have been issued one.
           </p>
-          <p className="mb-6 text-sm font-semibold text-blue-700 dark:text-blue-300">
-            Includes access for up to 10 vehicles
-          </p>
+          {!isBiggerAccount && (
+            <p className="mb-6 text-sm font-semibold text-blue-700 dark:text-blue-300">
+              Includes access for up to {PROMO_VEHICLE_CAP} vehicles
+            </p>
+          )}
           <form onSubmit={handleRedeemPromo} className="max-w-xl space-y-4">
             <div>
               <label htmlFor="promo-code-input" className="block text-sm text-white/60 mb-2">

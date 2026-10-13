@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { Suspense, useEffect, useState, useMemo } from 'react';
 import {
   collection,
   query,
@@ -17,6 +17,7 @@ import {
   DocumentData,
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
+import { useSearchParams } from 'next/navigation';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { Search, AlertTriangle, CheckCircle, Clock, Filter, Truck, Trash2 } from 'lucide-react';
 import ImageViewerModal from '../components/ImageViewerModal';
@@ -116,7 +117,14 @@ const allPhotoUrls = (defect: any): string[] => {
   return out;
 };
 
-export default function DefectsPage() {
+function statusFilterFromParam(value: string | null): 'all' | 'pending' | 'resolved' {
+  if (value === 'resolved' || value === 'all') return value;
+  if (value === 'open' || value === 'pending') return 'pending';
+  return 'pending';
+}
+
+function DefectsPageInner() {
+  const searchParams = useSearchParams();
   const [defects, setDefects] = useState<Defect[]>([]);
   const [vehicles, setVehicles] = useState<Record<string, Vehicle>>({});
   const [users, setUsers] = useState<Record<string, Profile>>({});
@@ -124,10 +132,16 @@ export default function DefectsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'resolved'>('pending');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'resolved'>(() =>
+    statusFilterFromParam(searchParams.get('status'))
+  );
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [resolvedAnnouncement, setResolvedAnnouncement] = useState<string | null>(null);
+
+  useEffect(() => {
+    setStatusFilter(statusFilterFromParam(searchParams.get('status')));
+  }, [searchParams]);
   
   // Check if user is manager or admin (both can view and resolve defects)
   const isManager = profile?.role === 'manager';
@@ -365,6 +379,15 @@ export default function DefectsPage() {
     return user.displayName || user.name || user.email?.split('@')[0] || userId;
   };
 
+  const openNowCount = useMemo(
+    () => defects.filter((d) => d.status !== 'resolved').length,
+    [defects]
+  );
+  const resolvedCount = useMemo(
+    () => defects.filter((d) => d.status === 'resolved').length,
+    [defects]
+  );
+
   const filteredDefects = defects.filter(d => {
     const desc = (d.description || d.defect_description || '').toLowerCase();
     const phone = (d.reporter_contact_phone || '').toLowerCase();
@@ -487,7 +510,7 @@ export default function DefectsPage() {
                 : 'text-white/70 hover:text-white'
             }`}
           >
-            Pending
+            {loading ? 'Open Now' : `Open Now (${openNowCount})`}
           </button>
           <button
             onClick={() => setStatusFilter('resolved')}
@@ -497,7 +520,7 @@ export default function DefectsPage() {
                 : 'text-white/70 hover:text-white'
             }`}
           >
-            Resolved
+            {loading ? 'Resolved' : `Resolved (${resolvedCount})`}
           </button>
           <button
             onClick={() => setStatusFilter('all')}
@@ -507,7 +530,7 @@ export default function DefectsPage() {
                 : 'text-white/70 hover:text-white'
             }`}
           >
-            All
+            {loading ? 'All' : `All (${defects.length})`}
           </button>
         </div>
       </div>
@@ -708,5 +731,17 @@ export default function DefectsPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function DefectsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="p-6 text-sm text-white/60">Loading defects…</div>
+      }
+    >
+      <DefectsPageInner />
+    </Suspense>
   );
 }

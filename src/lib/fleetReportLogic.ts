@@ -41,6 +41,7 @@ export type FleetInspection = {
   mileage?: number;
   has_defect?: boolean;
   notes?: string;
+  photo_urls?: Record<string, string | null | undefined>;
 };
 
 export type FleetDefect = {
@@ -70,7 +71,8 @@ export function toJsDate(value?: Timestamp | string | null): Date | null {
 
 export function formatFleetDate(value?: Timestamp | string | null): string {
   const d = toJsDate(value);
-  return d ? format(d, 'yyyy-MM-dd HH:mm') : '—';
+  // date-fns MMM already uses "Sep" (not "Sept")
+  return d ? format(d, 'd MMM yyyy, HH:mm') : '—';
 }
 
 export function getUserLabel(u: FleetUser | undefined, fallbackId: string): string {
@@ -160,6 +162,7 @@ export function compliancePeriodStatusLabels(preset: CompliancePeriodPreset): {
 
 export type MileageRow = {
   'Inspection ID': string;
+  vehicleId: string;
   Registration: string;
   'Inspected At': string;
   Mileage: string | number;
@@ -169,6 +172,8 @@ export type MileageRow = {
   'Anomaly Flag': string;
   'Anomaly Detail': string;
   Inspector: string;
+  /** Storage path / URL for the odometer photo when present. */
+  odometerPhoto?: string | null;
 };
 
 export type MileageMonitorRow = {
@@ -276,8 +281,14 @@ export function buildMileageInspectionRows(
         detail = 'No mileage on this check';
       }
 
+      const odoPhoto =
+        i.photo_urls && typeof i.photo_urls === 'object'
+          ? i.photo_urls.mileage || i.photo_urls.odometer || null
+          : null;
+
       rows.push({
         'Inspection ID': i.id,
+        vehicleId: vid,
         Registration: reg,
         'Inspected At': formatFleetDate(i.inspected_at),
         Mileage: m ?? '—',
@@ -287,6 +298,7 @@ export function buildMileageInspectionRows(
         'Anomaly Flag': flag || 'No',
         'Anomaly Detail': detail || '—',
         Inspector: inspector,
+        odometerPhoto: odoPhoto || null,
         _ms: at?.getTime() ?? 0,
       });
 
@@ -827,64 +839,10 @@ export function buildStaffVehicleCheckRows(
         Registration: v?.registration || a.vehicleId,
         'Make / Model': [v?.make, v?.model].filter(Boolean).join(' ') || '—',
         'Check count': a.count,
-        'Last checked': a.lastAt ? format(a.lastAt, 'yyyy-MM-dd HH:mm') : '—',
+        'Last checked': a.lastAt ? format(a.lastAt, 'd MMM yyyy, HH:mm') : '—',
       };
     })
     .sort((a, b) => a.User.localeCompare(b.User) || a.Registration.localeCompare(b.Registration));
-}
-
-export type UserVehicleGapRow = {
-  User: string;
-  Email: string;
-  Role: string;
-  Registration: string;
-  'Make / Model': string;
-  'User did any check': string;
-  'Vehicle inspected by anyone': string;
-};
-
-/** Staff × vehicle pairs with no inspection by that user in the period. */
-export function buildUserVehicleGapRows(
-  users: FleetUser[],
-  vehicles: FleetVehicle[],
-  periodInspections: FleetInspection[]
-): UserVehicleGapRow[] {
-  const staff = getFleetStaff(users);
-  const fleet = getActiveFleetVehicles(vehicles);
-
-  const userChecked = new Set<string>();
-  const vehicleChecked = new Set<string>();
-  const pairChecked = new Set<string>();
-
-  for (const i of periodInspections) {
-    if (i.inspected_by) userChecked.add(i.inspected_by);
-    if (i.vehicle_id) vehicleChecked.add(i.vehicle_id);
-    if (i.inspected_by && i.vehicle_id) {
-      pairChecked.add(`${i.inspected_by}:${i.vehicle_id}`);
-    }
-  }
-
-  const rows: UserVehicleGapRow[] = [];
-  for (const u of staff) {
-    const userDidAny = userChecked.has(u.id);
-    for (const v of fleet) {
-      if (pairChecked.has(`${u.id}:${v.id}`)) continue;
-      rows.push({
-        User: getUserLabel(u, u.id),
-        Email: u.email || '—',
-        Role: u.role || '—',
-        Registration: v.registration || v.id,
-        'Make / Model': [v.make, v.model].filter(Boolean).join(' ') || '—',
-        'User did any check': userDidAny ? 'Yes' : 'No',
-        'Vehicle inspected by anyone': vehicleChecked.has(v.id) ? 'Yes' : 'No',
-      });
-    }
-  }
-
-  return rows.sort((a, b) => {
-    if (a.User !== b.User) return a.User.localeCompare(b.User);
-    return a.Registration.localeCompare(b.Registration);
-  });
 }
 
 export function buildVehicleWeekCompliance(
@@ -893,17 +851,30 @@ export function buildVehicleWeekCompliance(
   users: FleetUser[]
 ): VehicleWeekRow[] {
   const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
+  const byVehicle: Record<string, FleetInspection[]> = {};
+  for (const i of weekInspections) {
+    const vid = i.vehicle_id;
+    if (!vid) continue;
+    if (!byVehicle[vid]) byVehicle[vid] = [];
+    byVehicle[vid].push(i);
+  }
+
   const fleetList = vehicles.filter((v) => {
     const s = (v.status || 'active').toLowerCase();
     return s !== 'archived' && s !== 'sold';
   });
 
   return fleetList.map((v) => {
-    const vis = weekInspections.filter((i) => i.vehicle_id === v.id);
-    const sorted = vis
-      .slice()
-      .sort((a, b) => (toJsDate(b.inspected_at)?.getTime() ?? 0) - (toJsDate(a.inspected_at)?.getTime() ?? 0));
-    const last = sorted[0];
+    const vis = byVehicle[v.id] || [];
+    let last: FleetInspection | undefined;
+    let lastTs = -1;
+    for (const i of vis) {
+      const t = toJsDate(i.inspected_at)?.getTime() ?? 0;
+      if (t >= lastTs) {
+        lastTs = t;
+        last = i;
+      }
+    }
     return {
       'Vehicle ID': v.id,
       Registration: v.registration || v.id,

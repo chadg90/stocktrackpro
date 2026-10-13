@@ -8,7 +8,6 @@ import FleetReportPeriodControls from '../FleetReportPeriodControls';
 import {
   buildStaffVehicleCheckRows,
   buildUserCompliance,
-  buildUserVehicleGapRows,
   buildVehicleWeekCompliance,
   compliancePeriodStatusLabels,
   filterInspectionsInWeek,
@@ -19,13 +18,10 @@ import {
 import { exportMultipleSheetsToExcel } from '@/lib/exportUtils';
 import { trackFeatureClick } from '@/lib/productUsage';
 
-type GapFilter = 'all' | 'inactive_users' | 'unchecked_vehicles';
-
 export default function FleetReportCompliancePage() {
-  const { loading, users, inspections, vehicles } = useFleetReport();
+  const { loading, historyLoading, users, inspections, vehicles } = useFleetReport();
   const [period, setPeriod] = useState<CompliancePeriodPreset>('week');
   const [monthValue, setMonthValue] = useState(() => format(new Date(), 'yyyy-MM'));
-  const [gapFilter, setGapFilter] = useState<GapFilter>('all');
   const [exporting, setExporting] = useState(false);
 
   const periodBounds = useMemo(
@@ -52,17 +48,6 @@ export default function FleetReportCompliancePage() {
     () => buildStaffVehicleCheckRows(users, vehicles, periodInspections),
     [users, vehicles, periodInspections]
   );
-
-  const gapRows = useMemo(() => {
-    const all = buildUserVehicleGapRows(users, vehicles, periodInspections);
-    if (gapFilter === 'inactive_users') {
-      return all.filter((r) => r['User did any check'] === 'No');
-    }
-    if (gapFilter === 'unchecked_vehicles') {
-      return all.filter((r) => r['Vehicle inspected by anyone'] === 'No');
-    }
-    return all;
-  }, [users, vehicles, periodInspections, gapFilter]);
 
   const periodRangeLabel = formatCompliancePeriodRange(periodBounds, period);
   const statusLabels = compliancePeriodStatusLabels(period);
@@ -143,6 +128,10 @@ export default function FleetReportCompliancePage() {
           </button>
         </div>
       </div>
+
+      {historyLoading && period === 'month' && (
+        <p className="text-xs text-zinc-500 dark:text-white/50">Loading older history for month view…</p>
+      )}
 
       <section>
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-1">Users — who checked</h2>
@@ -244,97 +233,6 @@ export default function FleetReportCompliancePage() {
                     </td>
                     <td className="px-3 py-2 text-zinc-600 dark:text-white/60 whitespace-nowrap">
                       {row['Last checked']}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4">
-          <div>
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-1">Missing checks — staff vs vehicles</h2>
-            <p className="text-zinc-500 dark:text-white/50 text-xs">
-              Staff who did not inspect each vehicle in this period. Filter to focus on inactive users or
-              vehicles nobody checked.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(
-              [
-                { value: 'all', label: 'All gaps' },
-                { value: 'inactive_users', label: 'Inactive users only' },
-                { value: 'unchecked_vehicles', label: 'Unchecked vehicles' },
-              ] as const
-            ).map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setGapFilter(opt.value)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                  gapFilter === opt.value
-                    ? 'bg-amber-500 text-white'
-                    : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="dashboard-card overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
-            <thead>
-              <tr className="border-b border-zinc-200 dark:border-white/10 text-zinc-500 dark:text-white/50">
-                <th className="px-3 py-2 text-left font-medium">User</th>
-                <th className="px-3 py-2 text-left font-medium">Email</th>
-                <th className="px-3 py-2 text-left font-medium">Role</th>
-                <th className="px-3 py-2 text-left font-medium">Vehicle</th>
-                <th className="px-3 py-2 text-left font-medium">Make / model</th>
-                <th className="px-3 py-2 text-left font-medium">User active?</th>
-                <th className="px-3 py-2 text-left font-medium">Vehicle checked?</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading && gapRows.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-3 py-6 text-zinc-500 dark:text-white/50">
-                    Loading…
-                  </td>
-                </tr>
-              ) : gapRows.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-3 py-6 text-zinc-500 dark:text-white/50">
-                    No gaps for this filter — every staff member checked every vehicle in this period.
-                  </td>
-                </tr>
-              ) : (
-                gapRows.map((row, idx) => (
-                  <tr
-                    key={`${row.User}-${row.Registration}-${idx}`}
-                    className="border-b border-zinc-100 dark:border-white/5"
-                  >
-                    <td className="px-3 py-2 text-zinc-900 dark:text-white font-medium">{row.User}</td>
-                    <td className="px-3 py-2 text-zinc-600 dark:text-white/60">{row.Email}</td>
-                    <td className="px-3 py-2 text-zinc-700 dark:text-white/70 capitalize">{row.Role}</td>
-                    <td className="px-3 py-2 text-zinc-900 dark:text-white font-medium">{row.Registration}</td>
-                    <td className="px-3 py-2 text-zinc-700 dark:text-white/70">{row['Make / Model']}</td>
-                    <td className="px-3 py-2">
-                      {row['User did any check'] === 'Yes' ? (
-                        <span className="text-emerald-700 dark:text-green-300 text-xs font-medium">Yes</span>
-                      ) : (
-                        <span className="text-amber-800 dark:text-amber-200 text-xs font-semibold">No checks</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      {row['Vehicle inspected by anyone'] === 'Yes' ? (
-                        <span className="text-zinc-600 dark:text-white/60 text-xs">By someone else</span>
-                      ) : (
-                        <span className="text-amber-800 dark:text-amber-200 text-xs font-semibold">Not checked</span>
-                      )}
                     </td>
                   </tr>
                 ))

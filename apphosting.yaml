@@ -1,0 +1,92 @@
+# Firebase App Hosting config for the Fleet Track PRO website.
+# Secrets are stored in Google Secret Manager (not in this file).
+
+runConfig:
+  cpu: 1
+  memoryMiB: 1024
+  minInstances: 0
+  maxInstances: 20
+  concurrency: 80
+
+# Keep static marketing assets (logos, demo screenshots) in the server bundle.
+# Works with scripts/copy-public-for-apphosting.mjs after next build.
+outputFiles:
+  serverApp:
+    include:
+      - .
+
+env:
+  # Public Firebase client config (safe to expose in the browser)
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyDnzbtU34rvFT0EzpcpY5_U9PrgpjXrn6s
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: stocktrackpronew-b853b.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: stocktrackpronew-b853b
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: stocktrackpronew-b853b.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "459050969384"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:459050969384:ios:7812c2b19ba0b7c200081d
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    value: G-1234567890
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Stripe publishable key + price IDs (publishable key is meant for the browser)
+  - variable: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    value: pk_live_51SIwy0HbmFLRZL4Bi8sWqzs23M8dxUvBrUugR13Ezo8GXTq3QroK6IQneNpEzYbtVY50O7yXmaokhA57JIxNsAAZ00zrhoOtSR
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: STRIPE_PRICE_PER_VEHICLE
+    value: price_1TCg2iHbmFLRZL4BOG1IwAss
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: STRIPE_PRICE_PER_VEHICLE_YEARLY
+    value: price_1TP0RmHbmFLRZL4BV0il0aka
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Site URL — update to the Firebase preview URL first, then your real domain after cutover
+  - variable: NEXT_PUBLIC_APP_URL
+    value: https://www.fleettrackpro.co.uk
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Secrets (created separately with: firebase apphosting:secrets:set ...)
+  - variable: STRIPE_SECRET_KEY
+    secret: STRIPE_SECRET_KEY
+    availability:
+      - RUNTIME
+  - variable: STRIPE_WEBHOOK_SECRET
+    secret: STRIPE_WEBHOOK_SECRET
+    availability:
+      - RUNTIME
+  - variable: FIREBASE_SERVICE_ACCOUNT_JSON
+    secret: FIREBASE_SERVICE_ACCOUNT_JSON
+    availability:
+      - RUNTIME

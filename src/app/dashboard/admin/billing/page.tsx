@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import { HardDrive, PoundSterling, TrendingUp, Wallet } from 'lucide-react';
 import { firebaseDb } from '@/lib/firebase';
+import { preferSepMonth } from '@/lib/dateUtils';
 import TableSkeleton from '../../components/TableSkeleton';
 
 const STORAGE_INCLUDED_GB = 5;
@@ -55,13 +56,15 @@ function formatGb(bytes?: number | null): string {
 function formatWhen(ts?: Timestamp | null): string {
   if (!ts) return 'Waiting for first snapshot';
   try {
-    return ts.toDate().toLocaleString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return preferSepMonth(
+      ts.toDate().toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    );
   } catch {
     return 'Waiting for first snapshot';
   }

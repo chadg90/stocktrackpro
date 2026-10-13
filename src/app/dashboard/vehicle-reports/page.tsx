@@ -37,6 +37,7 @@ import {
   getCachedCompanyVehicles,
   setCachedCompanyVehicles,
 } from '@/lib/companyVehiclesCache';
+import { preferSepMonth } from '@/lib/dateUtils';
 import TableSkeleton from '../components/TableSkeleton';
 import { EmptyStateTableRow } from '../components/EmptyState';
 import {
@@ -92,11 +93,13 @@ function formatDateOnly(value?: Timestamp | string | Date | null): string {
   if (!value) return '—';
   try {
     const d = value instanceof Timestamp ? value.toDate() : new Date(value);
-    return d.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+    return preferSepMonth(
+      d.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+    );
   } catch {
     return '—';
   }

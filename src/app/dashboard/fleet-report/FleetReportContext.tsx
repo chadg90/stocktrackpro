@@ -7,6 +7,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  getCountFromServer,
   query,
   where,
   orderBy,
@@ -34,12 +35,18 @@ import {
   getCurrentWeekBounds,
 } from '@/lib/fleetReportLogic';
 import { exportMultipleSheetsToExcel } from '@/lib/exportUtils';
-import { format } from 'date-fns';
+import { format, startOfDay, subDays } from 'date-fns';
 
 type Profile = FleetUser & { company_id?: string };
 
+/** Fast first paint for This week / last 30 days — full DVSA window loads in the background. */
+const FLEET_REPORT_FAST_DAYS = 40;
+const FLEET_REPORT_FAST_INSP_CAP = 800;
+
 type FleetReportContextValue = {
   loading: boolean;
+  /** True while the full 15‑month history is still downloading after the fast path. */
+  historyLoading: boolean;
   error: string | null;
   authUser: User | null;
   profile: Profile | null;
@@ -54,6 +61,8 @@ type FleetReportContextValue = {
   userCompliance: ReturnType<typeof buildUserCompliance>;
   vehicleWeekRows: ReturnType<typeof buildVehicleWeekCompliance>;
   outstandingDefects: FleetDefect[];
+  /** Company-wide unresolved count (matches Defects page Pending / home Open Now). */
+  openDefectsNowCount: number;
   weekBounds: { start: Date; end: Date };
 };
 
@@ -66,11 +75,14 @@ export function FleetReportProvider({ children }: { children: React.ReactNode })
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<FleetVehicle[]>([]);
   const [users, setUsers] = useState<FleetUser[]>([]);
   const [inspections, setInspections] = useState<FleetInspection[]>([]);
   const [defects, setDefects] = useState<FleetDefect[]>([]);
+  const [openDefectsNowCount, setOpenDefectsNowCount] = useState(0);
+  const fetchGenerationRef = useRef(0);
 
   useEffect(() => {
     if (!firebaseAuth) return;
@@ -94,11 +106,14 @@ export function FleetReportProvider({ children }: { children: React.ReactNode })
     if (!firebaseDb) {
       setError('Firebase not configured');
       setLoading(false);
+      setHistoryLoading(false);
       return;
     }
+    const generation = ++fetchGenerationRef.current;
     setError(null);
     try {
-      const startDate = fifteenMonthsAgoStart();
+      const recentStart = startOfDay(subDays(new Date(), FLEET_REPORT_FAST_DAYS));
+      const fullStart = fifteenMonthsAgoStart();
 
       const vehiclesQ = query(
         collection(firebaseDb, 'vehicles'),
@@ -108,37 +123,77 @@ export function FleetReportProvider({ children }: { children: React.ReactNode })
         collection(firebaseDb, 'profiles'),
         where('company_id', '==', companyId)
       );
-      const inspQ = query(
+      const recentInspQ = query(
         collection(firebaseDb, 'vehicle_inspections'),
         where('company_id', '==', companyId),
-        where('inspected_at', '>=', Timestamp.fromDate(startDate)),
+        where('inspected_at', '>=', Timestamp.fromDate(recentStart)),
+        orderBy('inspected_at', 'desc'),
+        limit(FLEET_REPORT_FAST_INSP_CAP)
+      );
+      const allDefectsQ = query(
+        collection(firebaseDb, 'vehicle_defects'),
+        where('company_id', '==', companyId)
+      );
+      const resolvedDefectsQ = query(
+        collection(firebaseDb, 'vehicle_defects'),
+        where('company_id', '==', companyId),
+        where('status', '==', 'resolved')
+      );
+
+      // Phase 1: enough for This week / last 30 days / Who checked — unlock UI quickly
+      const [vSnap, uSnap, recentInspSnap, allDefCountSnap, resolvedDefCountSnap] =
+        await Promise.all([
+          getDocs(vehiclesQ),
+          getDocs(teamQ),
+          getDocs(recentInspQ),
+          getCountFromServer(allDefectsQ),
+          getCountFromServer(resolvedDefectsQ),
+        ]);
+
+      if (generation !== fetchGenerationRef.current) return;
+
+      setVehicles(vSnap.docs.map((d) => ({ id: d.id, ...d.data() } as FleetVehicle)));
+      setUsers(uSnap.docs.map((d) => ({ id: d.id, ...d.data() } as FleetUser)));
+      setInspections(
+        recentInspSnap.docs.map((d) => ({ id: d.id, ...d.data() } as FleetInspection))
+      );
+      setOpenDefectsNowCount(
+        Math.max(0, allDefCountSnap.data().count - resolvedDefCountSnap.data().count)
+      );
+      setLoading(false);
+      setHistoryLoading(true);
+
+      // Phase 2: full DVSA window for Mileage + month views + Excel
+      const fullInspQ = query(
+        collection(firebaseDb, 'vehicle_inspections'),
+        where('company_id', '==', companyId),
+        where('inspected_at', '>=', Timestamp.fromDate(fullStart)),
         orderBy('inspected_at', 'desc'),
         limit(INSPECTION_ANALYTICS_CAP)
       );
       const defQ = query(
         collection(firebaseDb, 'vehicle_defects'),
         where('company_id', '==', companyId),
-        where('reported_at', '>=', Timestamp.fromDate(startDate)),
+        where('reported_at', '>=', Timestamp.fromDate(fullStart)),
         orderBy('reported_at', 'desc'),
         limit(DEFECT_ANALYTICS_CAP)
       );
 
-      const [vSnap, uSnap, iSnap, dSnap] = await Promise.all([
-        getDocs(vehiclesQ),
-        getDocs(teamQ),
-        getDocs(inspQ),
-        getDocs(defQ),
-      ]);
+      const [iSnap, dSnap] = await Promise.all([getDocs(fullInspQ), getDocs(defQ)]);
+      if (generation !== fetchGenerationRef.current) return;
 
-      setVehicles(vSnap.docs.map((d) => ({ id: d.id, ...d.data() } as FleetVehicle)));
-      setUsers(uSnap.docs.map((d) => ({ id: d.id, ...d.data() } as FleetUser)));
       setInspections(iSnap.docs.map((d) => ({ id: d.id, ...d.data() } as FleetInspection)));
       setDefects(dSnap.docs.map((d) => ({ id: d.id, ...d.data() } as FleetDefect)));
     } catch (e) {
       console.error(e);
-      setError(e instanceof Error ? e.message : 'Failed to load fleet report data');
+      if (generation === fetchGenerationRef.current) {
+        setError(e instanceof Error ? e.message : 'Failed to load fleet report data');
+      }
     } finally {
-      setLoading(false);
+      if (generation === fetchGenerationRef.current) {
+        setLoading(false);
+        setHistoryLoading(false);
+      }
     }
   }, []);
 
@@ -151,6 +206,7 @@ export function FleetReportProvider({ children }: { children: React.ReactNode })
         setUsers([]);
         setInspections([]);
         setDefects([]);
+        setHistoryLoading(false);
       }
       return;
     }
@@ -228,6 +284,7 @@ export function FleetReportProvider({ children }: { children: React.ReactNode })
 
   const value: FleetReportContextValue = {
     loading,
+    historyLoading,
     error,
     authUser,
     profile,
@@ -242,6 +299,7 @@ export function FleetReportProvider({ children }: { children: React.ReactNode })
     userCompliance,
     vehicleWeekRows,
     outstandingDefects,
+    openDefectsNowCount,
     weekBounds,
   };
 

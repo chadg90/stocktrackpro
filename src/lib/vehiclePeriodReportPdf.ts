@@ -6,6 +6,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { resolveImageDataUrl } from '@/lib/resolveImageDataUrl';
+import { preferSepMonth } from '@/lib/dateUtils';
 const ACCENT: [number, number, number] = [10, 132, 255]; // #0A84FF
 const BLACK: [number, number, number] = [15, 23, 42]; // slate-900
 const BANNER: [number, number, number] = [0, 0, 0];
@@ -90,22 +91,26 @@ function toDate(val: unknown): Date | null {
 
 function formatDate(d: Date | null): string {
   if (!d) return '—';
-  return d.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  return preferSepMonth(
+    d.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  );
 }
 
 function formatDateTime(d: Date | null): string {
   if (!d) return '—';
-  return d.toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return preferSepMonth(
+    d.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  );
 }
 
 function prettyLabel(raw?: string | null): string {

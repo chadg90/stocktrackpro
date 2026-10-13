@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { useFleetReport } from '../FleetReportContext';
 import FleetReportPeriodControls from '../FleetReportPeriodControls';
+import TablePagination, { PAGE_SIZE } from '../../components/TablePagination';
 import {
   filterInspectionsInWeek,
   formatCompliancePeriodRange,
@@ -15,12 +16,16 @@ import {
 } from '@/lib/fleetReportLogic';
 
 export default function FleetReportWeekPage() {
-  const { loading, inspections, vehicles, users } = useFleetReport();
+  const { loading, historyLoading, inspections, vehicles, users } = useFleetReport();
   const [period, setPeriod] = useState<CompliancePeriodPreset>('week');
   const [monthValue, setMonthValue] = useState(() => format(new Date(), 'yyyy-MM'));
+  const [page, setPage] = useState(1);
 
-  const vehicleMap = Object.fromEntries(vehicles.map((v) => [v.id, v]));
-  const userMap = Object.fromEntries(users.map((u) => [u.id, u]));
+  const vehicleMap = useMemo(
+    () => Object.fromEntries(vehicles.map((v) => [v.id, v])),
+    [vehicles]
+  );
+  const userMap = useMemo(() => Object.fromEntries(users.map((u) => [u.id, u])), [users]);
 
   const periodBounds = useMemo(
     () => getCompliancePeriodBounds(period, monthValue),
@@ -40,6 +45,15 @@ export default function FleetReportWeekPage() {
         return tb - ta;
       }),
     [periodInspections]
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [period, monthValue]);
+
+  const pageRows = useMemo(
+    () => sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [sorted, page]
   );
 
   const periodRangeLabel = formatCompliancePeriodRange(periodBounds, period);
@@ -72,6 +86,11 @@ export default function FleetReportWeekPage() {
           onMonthChange={setMonthValue}
         />
       </div>
+
+      {historyLoading && period === 'month' && (
+        <p className="text-xs text-zinc-500 dark:text-white/50">Loading older history for month view…</p>
+      )}
+
       <div className="dashboard-card overflow-x-auto">
         <table className="w-full text-sm min-w-[720px]">
           <thead>
@@ -97,7 +116,7 @@ export default function FleetReportWeekPage() {
                 </td>
               </tr>
             ) : (
-              sorted.map((i) => (
+              pageRows.map((i) => (
                 <tr key={i.id} className="border-b border-zinc-100 dark:border-white/5">
                   <td className="px-3 py-2 text-zinc-700 dark:text-white/80 whitespace-nowrap">
                     {formatFleetDate(i.inspected_at)}
@@ -105,7 +124,9 @@ export default function FleetReportWeekPage() {
                   <td className="px-3 py-2 text-zinc-900 dark:text-white font-medium">
                     {vehicleMap[i.vehicle_id || '']?.registration || i.vehicle_id || '—'}
                   </td>
-                  <td className="px-3 py-2 text-zinc-700 dark:text-white/70 tabular-nums">{i.mileage ?? '—'}</td>
+                  <td className="px-3 py-2 text-zinc-700 dark:text-white/70 tabular-nums">
+                    {i.mileage ?? '—'}
+                  </td>
                   <td className="px-3 py-2">
                     {i.has_defect ? (
                       <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
@@ -125,6 +146,13 @@ export default function FleetReportWeekPage() {
             )}
           </tbody>
         </table>
+        {sorted.length > PAGE_SIZE && (
+          <TablePagination
+            currentPage={page}
+            totalItems={sorted.length}
+            onPageChange={setPage}
+          />
+        )}
       </div>
     </div>
   );

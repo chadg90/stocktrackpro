@@ -23,6 +23,7 @@ import {
   isSignatureStorageRef,
   signatureEncodedToPngDataUrl,
 } from '@/lib/signaturePaths';
+import { preferSepMonth } from '@/lib/dateUtils';
 const ACCENT: [number, number, number] = [66, 133, 244];
 const BLACK: [number, number, number] = [0, 0, 0];
 const GRAY: [number, number, number] = [80, 80, 80];
@@ -95,13 +96,15 @@ function toDate(val: unknown): Date | null {
 
 function formatDateTime(d: Date | null): string {
   if (!d) return '—';
-  return d.toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return preferSepMonth(
+    d.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  );
 }
 
 function ensureSpace(doc: jsPDF, y: number, need: number): number {

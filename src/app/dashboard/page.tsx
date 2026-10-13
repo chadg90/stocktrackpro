@@ -28,11 +28,18 @@ import {
 } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDays } from 'date-fns';
-import { activityHistoryStartFromDashboardRange, INSPECTION_ANALYTICS_CAP, DEFECT_ANALYTICS_CAP } from '@/lib/dvsaRetention';
+import {
+  activityHistoryStartFromDashboardRange,
+  fifteenMonthsAgoStart,
+  INSPECTION_ANALYTICS_CAP,
+  DEFECT_ANALYTICS_CAP,
+} from '@/lib/dvsaRetention';
 import { buildMileageAttentionRows } from '@/lib/fleetReportLogic';
+import { countMotTaxStatus } from '@/lib/motTaxExpiry';
 import ExportButton from './components/ExportButton';
 import PageGuideButton from './components/PageGuide';
 import SetupChecklist from './components/SetupChecklist';
+import KpiValue, { SoftSpinner } from './components/KpiValue';
 import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
 import {
   RefreshCw,
@@ -177,20 +184,24 @@ export default function DashboardPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [users, setUsers] = useState<Profile[]>([]);
   const [inspections, setInspections] = useState<Inspection[]>([]);
+  /** Same window as Fleet Report / Mileage (15 months) so “to review” matches that page. */
+  const [mileageInspections, setMileageInspections] = useState<Inspection[]>([]);
   const [defects, setDefects] = useState<Defect[]>([]);
 
   // Counts
   const [vehiclesCount, setVehiclesCount] = useState<number | null>(null);
   const [inspectionsCount, setInspectionsCount] = useState<number | null>(null);
   const [activeVehiclesCount, setActiveVehiclesCount] = useState<number | null>(null);
-  const [defectsCount, setDefectsCount] = useState<number | null>(null);
-  const [resolvedDefectsCount, setResolvedDefectsCount] = useState<number | null>(null);
+  /** All unresolved defects (not date-ranged) — matches Defects page “Pending” filter. */
+  const [openDefectsNowCount, setOpenDefectsNowCount] = useState<number | null>(null);
   
   // Company subscription info
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
 
   const lastManualRefreshAtRef = useRef(0);
   const staticDataCompanyRef = useRef<string | null>(null);
+  /** False until the first company dashboard fetch finishes — avoids flashing 0s / empty copy. */
+  const [dashboardReady, setDashboardReady] = useState(false);
 
   useEffect(() => {
     if (!isFirebaseAvailable) {
@@ -261,6 +272,9 @@ export default function DashboardPage() {
 
       setLoading(true);
       setError(null);
+      if (staticDataCompanyRef.current !== companyId) {
+        setDashboardReady(false);
+      }
       try {
         const rangeStart = activityHistoryStartFromDashboardRange(dateRange);
 
@@ -291,12 +305,42 @@ export default function DashboardPage() {
           options?.forceStaticReload || staticDataCompanyRef.current !== companyId;
         if (shouldReloadStatic) {
           // Static datasets do not depend on date range, so avoid re-reading them on every range change.
-          const [vehiclesSnap, usersSnap] = await Promise.all([
-            getDocs(vehiclesQ),
-            getDocs(teamQ),
-          ]);
+          const mileageStart = fifteenMonthsAgoStart();
+          const mileageInspQ = query(
+            collection(firebaseDb!, 'vehicle_inspections'),
+            where('company_id', '==', companyId),
+            where('inspected_at', '>=', Timestamp.fromDate(mileageStart)),
+            orderBy('inspected_at', 'desc'),
+            limit(INSPECTION_ANALYTICS_CAP)
+          );
+          const allDefectsQ = query(
+            collection(firebaseDb!, 'vehicle_defects'),
+            where('company_id', '==', companyId)
+          );
+          const resolvedDefectsQ = query(
+            collection(firebaseDb!, 'vehicle_defects'),
+            where('company_id', '==', companyId),
+            where('status', '==', 'resolved')
+          );
+
+          const [vehiclesSnap, usersSnap, mileageInspSnap, allDefectsCountVal, resolvedAllCountVal] =
+            await Promise.all([
+              getDocs(vehiclesQ),
+              getDocs(teamQ),
+              getDocs(mileageInspQ),
+              safeCount(allDefectsQ),
+              safeCount(resolvedDefectsQ),
+            ]);
           setVehicles(vehiclesSnap.docs.map(d => ({ id: d.id, ...d.data() } as Vehicle)));
           setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() } as Profile)));
+          setMileageInspections(
+            mileageInspSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Inspection))
+          );
+          if (allDefectsCountVal != null && resolvedAllCountVal != null) {
+            setOpenDefectsNowCount(Math.max(0, allDefectsCountVal - resolvedAllCountVal));
+          } else {
+            setOpenDefectsNowCount(null);
+          }
           staticDataCompanyRef.current = companyId;
         }
 
@@ -324,12 +368,11 @@ export default function DashboardPage() {
         const defSnap = await getDocs(defQuery);
         const defectsData = defSnap.docs.map(d => ({ id: d.id, ...d.data() } as Defect));
         setDefects(defectsData);
-        setDefectsCount(defectsData.length);
-        setResolvedDefectsCount(defectsData.filter((d) => d.status === 'resolved').length);
 
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Unable to load data');
       } finally {
+        setDashboardReady(true);
         setLoading(false);
       }
     },
@@ -457,7 +500,14 @@ export default function DashboardPage() {
     setVehicles([]);
     setUsers([]);
     setInspections([]);
+    setMileageInspections([]);
     setDefects([]);
+    setOpenDefectsNowCount(null);
+    setVehiclesCount(null);
+    setInspectionsCount(null);
+    setActiveVehiclesCount(null);
+    setDashboardReady(false);
+    staticDataCompanyRef.current = null;
   };
 
   // ============================================
@@ -550,49 +600,25 @@ export default function DashboardPage() {
       }));
   }, [defects]);
 
-  const toExpiryDate = (value?: Timestamp | string) => {
-    if (!value) return null;
-    try {
-      if (typeof value === 'object' && 'toDate' in value) return value.toDate();
-      const d = new Date(value as string);
-      return Number.isNaN(d.getTime()) ? null : d;
-    } catch {
-      return null;
-    }
-  };
+  /** Prefer company-wide open count; fall back to date-ranged open only after first load. */
+  const openDefectsNow = useMemo(() => {
+    if (openDefectsNowCount != null) return openDefectsNowCount;
+    if (!dashboardReady) return null;
+    return defects.filter((d) => d.status !== 'resolved').length;
+  }, [openDefectsNowCount, defects, dashboardReady]);
 
-  const daysUntil = (value?: Timestamp | string) => {
-    const end = toExpiryDate(value);
-    if (!end) return null;
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const day = new Date(end);
-    day.setHours(0, 0, 0, 0);
-    return Math.ceil((day.getTime() - start.getTime()) / 86400000);
-  };
-
-  const openDefectsInRange = useMemo(
-    () => defects.filter((d) => d.status !== 'resolved'),
-    [defects]
-  );
-
-  const motTaxDueCount = useMemo(() => {
-    return vehicles.filter((v) => {
-      const mot = daysUntil(v.mot_expiry_date);
-      const tax = daysUntil(v.tax_expiry_date);
-      return (mot !== null && mot <= 30) || (tax !== null && tax <= 30);
-    }).length;
+  const { motTaxExpiredCount, motTaxDueSoonCount } = useMemo(() => {
+    const counts = countMotTaxStatus(vehicles);
+    return {
+      motTaxExpiredCount: counts.expired,
+      motTaxDueSoonCount: counts.dueSoon,
+    };
   }, [vehicles]);
 
   const mileageAttentionCount = useMemo(
-    () => buildMileageAttentionRows(inspections, vehicles).length,
-    [inspections, vehicles]
+    () => buildMileageAttentionRows(mileageInspections, vehicles).length,
+    [mileageInspections, vehicles]
   );
-
-  const defectResolutionRate = useMemo(() => {
-    if (!defectsCount || defectsCount === 0) return 100;
-    return Math.round(((resolvedDefectsCount || 0) / defectsCount) * 100);
-  }, [defectsCount, resolvedDefectsCount]);
 
   const rangeSpanDays = useMemo(() => {
     const rangeStart = activityHistoryStartFromDashboardRange(dateRange);
@@ -936,50 +962,64 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Loading overlay for data */}
-              {loading && vehicles.length === 0 && (
-                <div className="mb-8 flex items-center gap-3 text-white/60 text-sm">
-                  <RefreshCw className="h-4 w-4 animate-spin" aria-hidden />
-                  <span>Loading dashboard…</span>
+              {!dashboardReady && (
+                <div className="mb-8">
+                  <SoftSpinner label="Loading dashboard…" />
                 </div>
               )}
 
-              <SetupChecklist
-                vehicleCount={vehiclesCount ?? 0}
-                teammateCount={users.length}
-                inspectionCount={inspectionsCount ?? 0}
-              />
+              {dashboardReady && (
+                <SetupChecklist
+                  vehicleCount={vehiclesCount ?? 0}
+                  teammateCount={users.length}
+                  inspectionCount={inspectionsCount ?? 0}
+                />
+              )}
 
               <div className="dashboard-card p-5 mb-6" data-tour="home-attention">
                 <h2 className="text-white font-semibold text-sm mb-3">Needs attention</h2>
-                {motTaxDueCount === 0 &&
-                openDefectsInRange.length === 0 &&
-                mileageAttentionCount === 0 &&
-                inspections.length > 0 ? (
+                {!dashboardReady ? (
+                  <SoftSpinner label="Checking fleet status…" />
+                ) : motTaxExpiredCount === 0 &&
+                  motTaxDueSoonCount === 0 &&
+                  (openDefectsNow ?? 0) === 0 &&
+                  mileageAttentionCount === 0 &&
+                  inspections.length > 0 ? (
                   <p className="text-white/60 text-sm">
-                    Nothing urgent. No MOT or tax due in the next 30 days, no open defects in this period, and no vans to review in Mileage.
+                    Nothing urgent. No expired MOT or tax, nothing due in the next 30 days, no open defects, and no vans to review in Mileage.
                   </p>
-                ) : (
+                ) : dashboardReady ? (
                   <ul className="space-y-2 text-sm">
-                    {motTaxDueCount > 0 && (
+                    {motTaxExpiredCount > 0 && (
                       <li>
                         <Link
-                          href="/dashboard/mot-tax"
-                          className="inline-flex items-center gap-2 text-amber-700 hover:underline dark:text-amber-300"
-                        >
-                          <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
-                          {motTaxDueCount} vehicle{motTaxDueCount === 1 ? '' : 's'} with MOT or tax due within 30 days
-                        </Link>
-                      </li>
-                    )}
-                    {openDefectsInRange.length > 0 && (
-                      <li>
-                        <Link
-                          href="/dashboard/defects"
+                          href="/dashboard/mot-tax?filter=expired"
                           className="inline-flex items-center gap-2 text-red-700 hover:underline dark:text-red-300"
                         >
                           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
-                          {openDefectsInRange.length} open defect{openDefectsInRange.length === 1 ? '' : 's'} in this period
+                          {motTaxExpiredCount} vehicle{motTaxExpiredCount === 1 ? '' : 's'} with MOT or tax already expired
+                        </Link>
+                      </li>
+                    )}
+                    {motTaxDueSoonCount > 0 && (
+                      <li>
+                        <Link
+                          href="/dashboard/mot-tax?filter=due_soon"
+                          className="inline-flex items-center gap-2 text-amber-700 hover:underline dark:text-amber-300"
+                        >
+                          <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
+                          {motTaxDueSoonCount} vehicle{motTaxDueSoonCount === 1 ? '' : 's'} with MOT or tax due within 30 days
+                        </Link>
+                      </li>
+                    )}
+                    {(openDefectsNow ?? 0) > 0 && (
+                      <li>
+                        <Link
+                          href="/dashboard/defects?status=open"
+                          className="inline-flex items-center gap-2 text-red-700 hover:underline dark:text-red-300"
+                        >
+                          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+                          {openDefectsNow} open now
                         </Link>
                       </li>
                     )}
@@ -999,16 +1039,25 @@ export default function DashboardPage() {
                         No inspections in {rangeLabel}. Daily checks from the app will appear here.
                       </li>
                     )}
-                    {motTaxDueCount === 0 && openDefectsInRange.length === 0 && inspections.length === 0 && (
+                    {motTaxExpiredCount === 0 &&
+                      motTaxDueSoonCount === 0 &&
+                      (openDefectsNow ?? 0) === 0 &&
+                      inspections.length === 0 && (
                       <li className="text-white/60">
-                        No MOT or tax due in the next 30 days.
+                        No expired MOT or tax, and nothing due in the next 30 days.
                       </li>
                     )}
                   </ul>
+                ) : null}
+                {dashboardReady && (
+                  <p className="mt-3 text-xs text-white/45 leading-relaxed">
+                    Odd mileage readings are often mistyped numbers. Ask drivers to photograph the
+                    odometer; managers can Correct a reading from Fleet report → Mileage using that photo.
+                  </p>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" data-tour="home-kpis">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8" data-tour="home-kpis">
                 <Link
                   href="/dashboard/fleet"
                   className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
@@ -1016,23 +1065,23 @@ export default function DashboardPage() {
                   <div className="w-10 h-10 rounded-lg bg-blue-500/15 flex items-center justify-center mb-3">
                     <Truck className="h-5 w-5 text-blue-400" />
                   </div>
-                  <p className="dashboard-kpi-value">{vehiclesCount ?? '—'}</p>
+                  <KpiValue ready={dashboardReady}>{vehiclesCount ?? 0}</KpiValue>
                   <p className="dashboard-kpi-label">Vehicles</p>
-                  <p className="text-white/40 text-xs mt-1">{activeVehiclesCount ?? 0} active</p>
+                  <p className="text-white/40 text-xs mt-1">
+                    {dashboardReady ? `${activeVehiclesCount ?? 0} active` : '—'}
+                  </p>
                 </Link>
 
                 <Link
-                  href="/dashboard/defects"
+                  href="/dashboard/defects?status=open"
                   className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 >
                   <div className="w-10 h-10 rounded-lg bg-red-500/15 flex items-center justify-center mb-3">
                     <AlertTriangle className="h-5 w-5 text-red-400" />
                   </div>
-                  <p className="dashboard-kpi-value">{openDefectsInRange.length}</p>
-                  <p className="dashboard-kpi-label">Open defects</p>
-                  <p className="text-white/40 text-xs mt-1">
-                    {defectsCount ? `${defectResolutionRate}% closed in period` : `in ${rangeLabel}`}
-                  </p>
+                  <KpiValue ready={dashboardReady}>{openDefectsNow ?? 0}</KpiValue>
+                  <p className="dashboard-kpi-label">Open Now</p>
+                  <p className="text-white/40 text-xs mt-1">Unresolved defects</p>
                 </Link>
 
                 <Link
@@ -1042,31 +1091,51 @@ export default function DashboardPage() {
                   <div className="w-10 h-10 rounded-lg bg-cyan-500/15 flex items-center justify-center mb-3">
                     <ClipboardList className="h-5 w-5 text-cyan-400" />
                   </div>
-                  <p className="dashboard-kpi-value">{inspectionsCount ?? '—'}</p>
+                  <KpiValue ready={dashboardReady}>{inspectionsCount ?? 0}</KpiValue>
                   <p className="dashboard-kpi-label">Inspections</p>
-                  <p className="text-white/40 text-xs mt-1">~{avgInspectionsPerDay}/day in {rangeLabel}</p>
+                  <p className="text-white/40 text-xs mt-1">
+                    {dashboardReady ? `~${avgInspectionsPerDay}/day in ${rangeLabel}` : '—'}
+                  </p>
                 </Link>
 
                 <Link
-                  href="/dashboard/mot-tax"
+                  href="/dashboard/mot-tax?filter=expired"
+                  className="dashboard-card p-5 block hover:border-red-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/40"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-red-500/15 flex items-center justify-center mb-3">
+                    <AlertTriangle className="h-5 w-5 text-red-400" />
+                  </div>
+                  <KpiValue ready={dashboardReady}>{motTaxExpiredCount}</KpiValue>
+                  <p className="dashboard-kpi-label">MOT &amp; tax expired</p>
+                  <p className="text-white/40 text-xs mt-1">Past due date</p>
+                </Link>
+
+                <Link
+                  href="/dashboard/mot-tax?filter=due_soon"
                   className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 >
                   <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center mb-3">
                     <ShieldCheck className="h-5 w-5 text-amber-400" />
                   </div>
-                  <p className="dashboard-kpi-value">{motTaxDueCount}</p>
+                  <KpiValue ready={dashboardReady}>{motTaxDueSoonCount}</KpiValue>
                   <p className="dashboard-kpi-label">MOT &amp; tax due</p>
                   <p className="text-white/40 text-xs mt-1">Within 30 days</p>
                 </Link>
               </div>
 
-              <DashboardAnalyticsCharts
-                inspectionsByVehicle={inspectionsByVehicle}
-                inspectionsOverTime={inspectionsOverTime}
-                defectsTrend={defectsTrend}
-                defectsBySeverity={defectsBySeverity}
-                rangeLabel={rangeLabel}
-              />
+              {dashboardReady ? (
+                <DashboardAnalyticsCharts
+                  inspectionsByVehicle={inspectionsByVehicle}
+                  inspectionsOverTime={inspectionsOverTime}
+                  defectsTrend={defectsTrend}
+                  defectsBySeverity={defectsBySeverity}
+                  rangeLabel={rangeLabel}
+                />
+              ) : (
+                <div className="dashboard-card p-8 mb-8">
+                  <SoftSpinner label="Loading charts…" />
+                </div>
+              )}
             </div>
           )}
         </div>

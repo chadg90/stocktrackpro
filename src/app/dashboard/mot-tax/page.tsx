@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowLeft,
   ShieldCheck,
@@ -30,6 +31,13 @@ import {
 } from '@/lib/companyVehiclesCache';
 import { useToast } from '@/components/Toast';
 import PageGuideButton from '../components/PageGuide';
+import {
+  classifyMotTaxVehicle,
+  countMotTaxStatus,
+  parseMotTaxDate,
+  type MotTaxExpiryBucket,
+} from '@/lib/motTaxExpiry';
+import { preferSepMonth } from '@/lib/dateUtils';
 
 type RawVehicle = {
   id: string;
@@ -46,7 +54,7 @@ type RawVehicle = {
   dvla_sync_error?: string | null;
 };
 
-type ExpiryBucket = 'expired' | 'urgent' | 'warning' | 'ok' | 'not_due' | 'unknown' | 'unverified';
+type ExpiryBucket = MotTaxExpiryBucket;
 
 type VehicleRow = RawVehicle & {
   motDaysRemaining: number | null;
@@ -59,61 +67,19 @@ type VehicleRow = RawVehicle & {
 
 type FilterOption = 'all' | 'attention' | 'expired' | 'due_soon' | 'unknown';
 
-const URGENT_DAYS = 7;
-const WARNING_DAYS = 30;
-
 function tsToDate(value: Timestamp | null | undefined): Date | null {
-  if (!value) return null;
-  try {
-    return value.toDate ? value.toDate() : null;
-  } catch {
-    return null;
-  }
-}
-
-function daysBetween(target: Date | null): number | null {
-  if (!target) return null;
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(target);
-  end.setHours(0, 0, 0, 0);
-  return Math.ceil((end.getTime() - start.getTime()) / 86400000);
-}
-
-function bucketFor(days: number | null, type: 'mot' | 'tax'): ExpiryBucket {
-  if (days === null) {
-    return type === 'mot' ? 'not_due' : 'unknown';
-  }
-  if (days < 0) return 'expired';
-  if (days <= URGENT_DAYS) return 'urgent';
-  if (days <= WARNING_DAYS) return 'warning';
-  return 'ok';
-}
-
-function worstOf(a: ExpiryBucket, b: ExpiryBucket): ExpiryBucket {
-  const order: ExpiryBucket[] = [
-    'expired',
-    'urgent',
-    'warning',
-    'unverified',
-    'unknown',
-    'not_due',
-    'ok',
-  ];
-  return order.indexOf(a) <= order.indexOf(b) ? a : b;
-}
-
-function isDvlaUnverified(vehicle: RawVehicle): boolean {
-  return Boolean(vehicle.dvla_sync_error && String(vehicle.dvla_sync_error).trim());
+  return parseMotTaxDate(value ?? null);
 }
 
 function formatDate(date: Date | null): string {
   if (!date) return '—';
-  return date.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  return preferSepMonth(
+    date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  );
 }
 
 function formatRelative(date: Date | null): string {
@@ -126,11 +92,13 @@ function formatRelative(date: Date | null): string {
   if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
   const diffDays = Math.floor(diffHours / 24);
   if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
-  return date.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  return preferSepMonth(
+    date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  );
 }
 
 function daysLabel(days: number | null, bucket: ExpiryBucket): string {
@@ -215,16 +183,51 @@ function rowAccent(bucket: ExpiryBucket): string {
   }
 }
 
-export default function MotTaxPage() {
+function filterFromSearchParam(value: string | null): FilterOption {
+  if (
+    value === 'attention' ||
+    value === 'expired' ||
+    value === 'due_soon' ||
+    value === 'unknown' ||
+    value === 'all'
+  ) {
+    return value;
+  }
+  return 'all';
+}
+
+function MotTaxPageInner() {
   const toast = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [companyLoading, setCompanyLoading] = useState(true);
   const [vehicles, setVehicles] = useState<RawVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<FilterOption>('all');
+  const [filter, setFilter] = useState<FilterOption>(() =>
+    filterFromSearchParam(searchParams.get('filter'))
+  );
   const [refreshingVehicleId, setRefreshingVehicleId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFilter(filterFromSearchParam(searchParams.get('filter')));
+  }, [searchParams]);
+
+  const setFilterAndUrl = useCallback(
+    (next: FilterOption) => {
+      setFilter(next);
+      const params = new URLSearchParams(searchParams.toString());
+      if (next === 'all') params.delete('filter');
+      else params.set('filter', next);
+      const qs = params.toString();
+      router.replace(qs ? `/dashboard/mot-tax?${qs}` : '/dashboard/mot-tax', {
+        scroll: false,
+      });
+    },
+    [router, searchParams]
+  );
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) {
@@ -306,26 +309,15 @@ export default function MotTaxPage() {
   const rows: VehicleRow[] = useMemo(() => {
     return vehicles
       .map((vehicle) => {
-        const motDate = tsToDate(vehicle.mot_expiry_date || null);
-        const taxDate = tsToDate(vehicle.tax_expiry_date || null);
-        const motDays = daysBetween(motDate);
-        const taxDays = daysBetween(taxDate);
-        const unverified = isDvlaUnverified(vehicle);
-        const motBucket: ExpiryBucket = unverified ? 'unverified' : bucketFor(motDays, 'mot');
-        const taxBucket: ExpiryBucket = unverified ? 'unverified' : bucketFor(taxDays, 'tax');
-        const worst = worstOf(motBucket, taxBucket);
-        const soonest = Math.min(
-          motDate ? motDate.getTime() : Number.POSITIVE_INFINITY,
-          taxDate ? taxDate.getTime() : Number.POSITIVE_INFINITY
-        );
+        const classified = classifyMotTaxVehicle(vehicle);
         return {
           ...vehicle,
-          motDaysRemaining: motDays,
-          taxDaysRemaining: taxDays,
-          motBucket,
-          taxBucket,
-          worstBucket: worst,
-          soonestExpiryMs: Number.isFinite(soonest) ? soonest : Number.POSITIVE_INFINITY,
+          motDaysRemaining: classified.motDaysRemaining,
+          taxDaysRemaining: classified.taxDaysRemaining,
+          motBucket: classified.motBucket,
+          taxBucket: classified.taxBucket,
+          worstBucket: classified.worstBucket,
+          soonestExpiryMs: classified.soonestExpiryMs,
         } as VehicleRow;
       })
       .sort((a, b) => {
@@ -347,26 +339,7 @@ export default function MotTaxPage() {
       });
   }, [vehicles]);
 
-  const counts = useMemo(() => {
-    const expired = rows.filter(
-      (r) => r.motBucket === 'expired' || r.taxBucket === 'expired'
-    ).length;
-    const urgent = rows.filter(
-      (r) =>
-        (r.motBucket === 'urgent' || r.taxBucket === 'urgent') &&
-        r.motBucket !== 'expired' &&
-        r.taxBucket !== 'expired'
-    ).length;
-    const warning = rows.filter(
-      (r) => r.worstBucket === 'warning'
-    ).length;
-    const ok = rows.filter(
-      (r) => r.worstBucket === 'ok' || r.worstBucket === 'not_due'
-    ).length;
-    const unverified = rows.filter((r) => r.worstBucket === 'unverified').length;
-    const unknown = rows.filter((r) => r.worstBucket === 'unknown').length;
-    return { expired, urgent, warning, ok, unverified, unknown, total: rows.length };
-  }, [rows]);
+  const counts = useMemo(() => countMotTaxStatus(vehicles), [vehicles]);
 
   const filteredRows = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -434,6 +407,8 @@ export default function MotTaxPage() {
   );
 
   const isBusy = loading || companyLoading;
+  /** Show KPI numbers only once we have vehicle data (or load finished empty). */
+  const metricsReady = !isBusy || vehicles.length > 0;
 
   return (
     <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 space-y-5 text-zinc-900 dark:text-white">
@@ -467,30 +442,35 @@ export default function MotTaxPage() {
           value={counts.total}
           hint="Vehicles in this company."
           valueClass="text-zinc-900 dark:text-white"
+          ready={metricsReady}
         />
         <KpiCard
           label="Expired"
           value={counts.expired}
           hint="MOT or Tax has passed."
           valueClass="text-red-700 dark:text-red-200"
+          ready={metricsReady}
         />
         <KpiCard
           label="Urgent (≤7d)"
           value={counts.urgent}
           hint="Due within a week."
           valueClass="text-red-600 dark:text-red-200"
+          ready={metricsReady}
         />
         <KpiCard
           label="Due soon (8-30d)"
           value={counts.warning}
           hint="Plan ahead."
           valueClass="text-amber-700 dark:text-amber-200"
+          ready={metricsReady}
         />
         <KpiCard
           label="OK"
           value={counts.ok}
           hint="More than 30 days away."
           valueClass="text-emerald-700 dark:text-emerald-200"
+          ready={metricsReady}
         />
       </div>
 
@@ -498,22 +478,37 @@ export default function MotTaxPage() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
           <div className="flex flex-wrap gap-1.5" data-tour="mot-filters">
             {([
-              { id: 'all', label: `All (${counts.total})` },
+              {
+                id: 'all',
+                label: metricsReady ? `All (${counts.total})` : 'All',
+              },
               {
                 id: 'attention',
-                label: `Needs attention (${counts.expired + counts.urgent + counts.warning + counts.unverified})`,
+                label: metricsReady
+                  ? `Needs attention (${counts.expired + counts.urgent + counts.warning + counts.unverified})`
+                  : 'Needs attention',
               },
-              { id: 'expired', label: `Expired (${counts.expired})` },
-              { id: 'due_soon', label: `Due soon (${counts.urgent + counts.warning})` },
+              {
+                id: 'expired',
+                label: metricsReady ? `Expired (${counts.expired})` : 'Expired',
+              },
+              {
+                id: 'due_soon',
+                label: metricsReady
+                  ? `Due soon (${counts.urgent + counts.warning})`
+                  : 'Due soon',
+              },
               {
                 id: 'unknown',
-                label: `Unable to verify / unknown (${counts.unverified + counts.unknown})`,
+                label: metricsReady
+                  ? `Unable to verify / unknown (${counts.unverified + counts.unknown})`
+                  : 'Unable to verify / unknown',
               },
             ] as Array<{ id: FilterOption; label: string }>).map((opt) => (
               <button
                 key={opt.id}
                 type="button"
-                onClick={() => setFilter(opt.id)}
+                onClick={() => setFilterAndUrl(opt.id)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                   filter === opt.id
                     ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500 dark:border-blue-500'
@@ -628,9 +623,10 @@ export default function MotTaxPage() {
                 </div>
 
                 {row.dvla_sync_error && (
-                  <p className="px-4 pb-2.5 text-xs text-red-800 dark:text-red-200 flex items-center gap-1.5">
+                  <p className="px-4 pb-2.5 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-1.5">
                     <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden />
-                    Sync issue: {row.dvla_sync_error}
+                    We couldn&apos;t verify this vehicle with the DVLA. Last known dates are
+                    shown.
                   </p>
                 )}
               </div>
@@ -643,7 +639,7 @@ export default function MotTaxPage() {
         data-tour="mot-refresh"
         className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black"
       >
-        <summary className="cursor-pointer text-xs uppercase tracking-wide font-semibold text-zinc-600 dark:text-white/60 flex items-center gap-2">
+        <summary className="cursor-pointer text-xs tracking-wide font-semibold text-zinc-600 dark:text-white/60 flex items-center gap-2">
           <HelpCircle className="h-3.5 w-3.5" aria-hidden />
           How refreshing works
         </summary>
@@ -671,23 +667,46 @@ export default function MotTaxPage() {
   );
 }
 
+export default function MotTaxPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 text-sm text-zinc-600 dark:text-white/60">
+          Loading MOT &amp; Tax…
+        </div>
+      }
+    >
+      <MotTaxPageInner />
+    </React.Suspense>
+  );
+}
+
 function KpiCard({
   label,
   value,
   hint,
   valueClass,
+  ready = true,
 }: {
   label: string;
   value: number;
   hint: string;
   valueClass: string;
+  ready?: boolean;
 }) {
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
       <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">
         {label}
       </p>
-      <p className={`text-xl font-semibold mt-1 ${valueClass}`}>{value}</p>
+      {ready ? (
+        <p className={`text-xl font-semibold mt-1 ${valueClass}`}>{value}</p>
+      ) : (
+        <span
+          className="mt-1 inline-block h-7 w-12 rounded-md bg-zinc-200 dark:bg-white/10 animate-pulse"
+          aria-hidden
+        />
+      )}
       <p className="text-[11px] text-zinc-500 dark:text-white/55 mt-1">{hint}</p>
     </div>
   );

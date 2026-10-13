@@ -9,6 +9,7 @@
     "dev": "next dev",
     "dev:https": "NODE_ENV=development HTTPS=true SSL_CRT_FILE=localhost.crt SSL_KEY_FILE=localhost.key next dev",
     "build": "next build",
+    "postbuild": "node scripts/copy-public-for-apphosting.mjs",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "npx tailwindcss init -p",

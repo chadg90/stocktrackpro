@@ -1,8 +1,12 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { useFleetReport } from '../FleetReportContext';
-import { buildMileageAttentionRows } from '@/lib/fleetReportLogic';
+import { buildMileageAttentionRows, type MileageRow } from '@/lib/fleetReportLogic';
+import { preferSepMonth } from '@/lib/dateUtils';
+import { firebaseDb } from '@/lib/firebase';
+import AuthenticatedImage from '../../components/AuthenticatedImage';
 
 type PageTab = 'review' | 'readings';
 type FlagFilter = 'all' | 'flagged';
@@ -20,15 +24,19 @@ function flagLabel(flag: string, detail: string) {
 
 function formatInspected(value: string) {
   if (!value || value === '—') return '—';
+  // Already friendly from formatFleetDate (e.g. "12 Oct 2026, 14:30")
+  if (/[A-Za-z]{3}/.test(value)) return preferSepMonth(value);
   const parsed = new Date(value.includes('T') ? value : value.replace(' ', 'T'));
-  if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  if (Number.isNaN(parsed.getTime())) return preferSepMonth(value);
+  return preferSepMonth(
+    parsed.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  );
 }
 
 function formatMiles(value: string | number | null) {
@@ -54,12 +62,16 @@ function displayRegistration(reg: string) {
 }
 
 export default function FleetReportMileagePage() {
-  const { loading, mileageRows, inspections, vehicles } = useFleetReport();
+  const { loading, historyLoading, mileageRows, inspections, vehicles, refresh } = useFleetReport();
   const [tab, setTab] = useState<PageTab>('review');
   const [filter, setFilter] = useState<FlagFilter>('all');
   const [vehicleFilter, setVehicleFilter] = useState<{ vehicleId: string; registration: string } | null>(
     null
   );
+  const [correcting, setCorrecting] = useState<MileageRow | null>(null);
+  const [correctMiles, setCorrectMiles] = useState('');
+  const [correctSaving, setCorrectSaving] = useState(false);
+  const [correctError, setCorrectError] = useState<string | null>(null);
 
   const attentionRows = useMemo(
     () => buildMileageAttentionRows(inspections, vehicles),
@@ -91,6 +103,48 @@ export default function FleetReportMileagePage() {
     setTab('readings');
   };
 
+  const openCorrect = (row: MileageRow) => {
+    setCorrecting(row);
+    setCorrectMiles(
+      typeof row.Mileage === 'number' ? String(row.Mileage) : row.Mileage === '—' ? '' : String(row.Mileage)
+    );
+    setCorrectError(null);
+  };
+
+  const saveCorrectedMileage = async () => {
+    if (!correcting || !firebaseDb) return;
+    const next = Number(String(correctMiles).replace(/,/g, '').trim());
+    if (!Number.isFinite(next) || next < 0 || next > 100_000_000 || !Number.isInteger(next)) {
+      setCorrectError('Enter a whole number of miles (0 or more).');
+      return;
+    }
+    setCorrectSaving(true);
+    setCorrectError(null);
+    try {
+      await updateDoc(doc(firebaseDb, 'vehicle_inspections', correcting['Inspection ID']), {
+        mileage: next,
+        mileage_corrected_at: serverTimestamp(),
+        mileage_corrected_note: 'Corrected by manager from fleet report (odometer photo check)',
+        updated_at: serverTimestamp(),
+      });
+      // Keep vehicle card in sync when correcting the latest reading for that van
+      const vehicleRows = mileageRows.filter((r) => r.vehicleId === correcting.vehicleId);
+      if (vehicleRows[0]?.['Inspection ID'] === correcting['Inspection ID'] && correcting.vehicleId) {
+        await updateDoc(doc(firebaseDb, 'vehicles', correcting.vehicleId), {
+          mileage: next,
+          updated_at: serverTimestamp(),
+        });
+      }
+      setCorrecting(null);
+      refresh();
+    } catch (err) {
+      console.error(err);
+      setCorrectError(err instanceof Error ? err.message : 'Could not save correction.');
+    } finally {
+      setCorrectSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -100,7 +154,13 @@ export default function FleetReportMileagePage() {
           aria-label="Mileage view"
         >
           {([
-            { id: 'review', label: `To review (${attentionRows.length})` },
+            {
+              id: 'review',
+              label:
+                loading || historyLoading
+                  ? 'To review'
+                  : `To review (${attentionRows.length})`,
+            },
             { id: 'readings', label: 'Readings' },
           ] as const).map((option) => (
             <button
@@ -159,6 +219,12 @@ export default function FleetReportMileagePage() {
         )}
       </div>
 
+      {historyLoading && (
+        <p className="text-xs text-zinc-500 dark:text-white/50">
+          Loading full mileage history…
+        </p>
+      )}
+
       {loading && inspections.length === 0 ? (
         <p className="text-zinc-600 dark:text-white/60 text-sm">Loading…</p>
       ) : tab === 'review' ? (
@@ -166,7 +232,8 @@ export default function FleetReportMileagePage() {
           {attentionRows.length === 0 ? (
             <p className="text-zinc-600 dark:text-white/60 text-sm p-6">
               No vehicles need a look. Odometer drops, missing miles, a quiet week with no check,
-              or a week well above that van’s usual miles will show here.
+              or a week well above that van’s usual miles will show here. For flagged readings, open
+              Readings and use Correct while checking the odometer photo.
             </p>
           ) : (
             <table className="w-full text-sm text-left min-w-[720px]">
@@ -233,6 +300,7 @@ export default function FleetReportMileagePage() {
                 <th className="px-3 py-2 font-medium">Status</th>
                 <th className="px-3 py-2 font-medium">Why</th>
                 <th className="px-3 py-2 font-medium">Inspector</th>
+                <th className="px-3 py-2 font-medium">Fix</th>
               </tr>
             </thead>
             <tbody>
@@ -283,6 +351,15 @@ export default function FleetReportMileagePage() {
                     <td className="px-3 py-1.5 text-zinc-700 dark:text-white/70 whitespace-nowrap">
                       {row.Inspector}
                     </td>
+                    <td className="px-3 py-1.5 whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => openCorrect(row)}
+                        className="text-xs font-semibold text-blue-700 hover:underline dark:text-blue-400"
+                      >
+                        Correct
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -300,6 +377,72 @@ export default function FleetReportMileagePage() {
                 : 'No inspections in the loaded period.'}
             </p>
           )}
+        </div>
+      )}
+
+      {correcting && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="correct-mileage-title"
+        >
+          <div className="w-full max-w-lg rounded-xl border border-zinc-200 bg-white p-5 shadow-xl dark:border-white/15 dark:bg-zinc-950">
+            <h3 id="correct-mileage-title" className="text-lg font-semibold text-zinc-900 dark:text-white">
+              Correct mileage — {displayRegistration(correcting.Registration)}
+            </h3>
+            <p className="mt-1 text-sm text-zinc-600 dark:text-white/60">
+              Check the odometer photo, then enter the reading shown. Logged{' '}
+              {formatInspected(correcting['Inspected At'])}.
+            </p>
+            <div className="mt-4 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 dark:border-white/10 dark:bg-white/5">
+              {correcting.odometerPhoto ? (
+                <AuthenticatedImage
+                  src={correcting.odometerPhoto}
+                  alt="Odometer photo"
+                  className="max-h-64 w-full object-contain"
+                />
+              ) : (
+                <p className="p-6 text-sm text-zinc-500 dark:text-white/50">
+                  No odometer photo on this inspection. Confirm the correct miles with the driver if needed.
+                </p>
+              )}
+            </div>
+            <label className="mt-4 block text-sm font-medium text-zinc-700 dark:text-white/80">
+              Miles
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={correctMiles}
+                onChange={(e) => setCorrectMiles(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 dark:border-white/20 dark:bg-black dark:text-white"
+              />
+            </label>
+            {correctError && (
+              <p className="mt-2 text-sm text-red-700 dark:text-red-300" role="alert">
+                {correctError}
+              </p>
+            )}
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setCorrecting(null)}
+                disabled={correctSaving}
+                className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 dark:border-white/20 dark:text-white/80"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void saveCorrectedMileage()}
+                disabled={correctSaving}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                {correctSaving ? 'Saving…' : 'Save correction'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

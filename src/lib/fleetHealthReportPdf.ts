@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Timestamp } from 'firebase/firestore';
 import { applyEvidenceRecordFooters } from '@/lib/exportUtils';
+import { preferSepMonth } from '@/lib/dateUtils';
 
 const ACCENT: [number, number, number] = [66, 133, 244]; // #4285F4
 const BLACK: [number, number, number] = [0, 0, 0];
@@ -47,7 +48,9 @@ function toDate(val: unknown): Date | null {
 
 function formatDateShort(d: Date | null): string {
   if (!d) return '—';
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return preferSepMonth(
+    d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  );
 }
 
 function daysUntil(d: Date | null): number | null {

@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { Activity, BarChart3, EyeOff } from 'lucide-react';
 import { firebaseDb } from '@/lib/firebase';
+import { preferSepMonth } from '@/lib/dateUtils';
 import {
   TRACKED_FEATURES,
   TRACKED_PAGES,
@@ -36,13 +37,15 @@ type DayRow = {
 function formatWhen(ts?: Timestamp | null): string {
   if (!ts) return '—';
   try {
-    return ts.toDate().toLocaleString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return preferSepMonth(
+      ts.toDate().toLocaleString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    );
   } catch {
     return '—';
   }
