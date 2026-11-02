@@ -3,7 +3,7 @@ import { APP_STORE_URL } from '@/lib/brand';
 
 type AppStoreBadgeProps = {
   className?: string;
-  /** Hide the “Android app coming soon” line when the surrounding copy already says it. */
+  /** Hide the Android note when surrounding copy already covers it. */
   showAndroidNote?: boolean;
 };
 
@@ -29,7 +29,9 @@ export default function AppStoreBadge({
         />
       </a>
       {showAndroidNote ? (
-        <p className="text-xs text-slate-500 leading-snug">Android app coming soon</p>
+        <p className="text-xs text-slate-500 leading-snug">
+          Android is invite-only — we assist with onboarding
+        </p>
       ) : null}
     </div>
   );
