@@ -208,9 +208,9 @@ export default function FleetPage() {
   };
 
   const lookupRegistration = async (rawReg?: string) => {
-    if (!firebaseFunctions) return;
     const registration = formatUkRegistration(rawReg ?? formData.registration ?? '');
-    if (!registrationKey(registration)) {
+    const regKey = registrationKey(registration);
+    if (!regKey) {
       setDvlaStatus('idle');
       setDvlaMessage('');
       return;
@@ -219,9 +219,23 @@ export default function FleetPage() {
     setDvlaStatus('loading');
     setDvlaMessage('Checking with DVLA…');
     try {
-      const lookupDvlaVehicle = httpsCallable(firebaseFunctions, 'lookupDvlaVehicle');
-      const result = await lookupDvlaVehicle({ registration: registrationKey(registration) });
-      const data = (result.data || {}) as {
+      const user = firebaseAuth?.currentUser;
+      if (!user) {
+        setDvlaStatus('fail');
+        setDvlaMessage('Sign in to look up a registration, or fill in the details yourself.');
+        return;
+      }
+      const idToken = await user.getIdToken();
+      const res = await fetch('/api/vehicles/dvla-lookup', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+        // Always send uppercased, no spaces.
+        body: JSON.stringify({ registration: regKey }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
         make?: string | null;
         model?: string | null;
@@ -229,6 +243,8 @@ export default function FleetPage() {
         colour?: string | null;
         registration?: string;
         message?: string;
+        statusCode?: number | null;
+        error?: string;
       };
       if (data.ok) {
         setFormData((prev) => ({
@@ -241,12 +257,18 @@ export default function FleetPage() {
         setDvlaMessage('Checked with DVLA');
       } else {
         setDvlaStatus('fail');
-        setDvlaMessage(data.message || "Couldn't check this reg. Fill in the details yourself");
+        const detail =
+          data.message ||
+          data.error ||
+          (data.statusCode != null
+            ? `Couldn't check this reg (DVLA ${data.statusCode}). Fill in the details yourself.`
+            : "Couldn't check this reg. Fill in the details yourself.");
+        setDvlaMessage(detail);
       }
     } catch (error) {
       console.warn('DVLA lookup failed:', error);
       setDvlaStatus('fail');
-      setDvlaMessage("Couldn't check this reg. Fill in the details yourself");
+      setDvlaMessage("Couldn't reach DVLA lookup. Fill in the details yourself.");
     }
   };
 

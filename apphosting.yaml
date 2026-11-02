@@ -96,3 +96,8 @@ env:
     secret: FIREBASE_SERVICE_ACCOUNT_JSON
     availability:
       - RUNTIME
+  # DVLA Vehicle Enquiry Service — used by /api/vehicles/dvla-lookup
+  - variable: DVLA_API_KEY
+    secret: DVLA_API_KEY
+    availability:
+      - RUNTIME
