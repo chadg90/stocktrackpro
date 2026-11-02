@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SITE_LEGAL_NAME, SITE_NAME, SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
 import { OPEN_COOKIE_SETTINGS_EVENT } from '@/lib/analytics';
+import { ONBOARDING_START_URL } from '@/lib/site';
 
 const Footer = () => {
   const pathname = usePathname();
@@ -83,6 +84,11 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link href="/getting-started/" className="hover:text-white">
+                  Getting started
+                </Link>
+              </li>
+              <li>
                 <Link href="/about" className="hover:text-white">
                   About
                 </Link>
@@ -99,7 +105,7 @@ const Footer = () => {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 mb-4">Account</p>
             <ul className="space-y-2.5 text-sm text-slate-300">
               <li>
-                <Link href="/onboarding" className="hover:text-white">
+                <Link href={ONBOARDING_START_URL} className="hover:text-white">
                   Start free trial
                 </Link>
               </li>

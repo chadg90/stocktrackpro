@@ -212,7 +212,7 @@ export default function CustomerCaseStudyPage({
 
             <div className="mt-12 flex flex-col sm:flex-row gap-3">
               <Link
-                href="/onboarding"
+                href="/onboarding/?start=1"
                 className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white btn-brand-blue"
               >
                 Start 14-Day Free Trial

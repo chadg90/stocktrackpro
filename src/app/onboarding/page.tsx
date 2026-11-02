@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
   updateProfile,
@@ -17,56 +17,87 @@ import {
   LogIn,
   Smartphone,
   CreditCard,
-  Apple,
 } from 'lucide-react';
 import Link from 'next/link';
-import { APP_STORE_URL, FREE_TRIAL_CTA, FREE_TRIAL_DAYS, SUPPORT_EMAIL } from '@/lib/brand';
+import { useSearchParams } from 'next/navigation';
+import { APP_STORE_URL, FREE_TRIAL_CTA, FREE_TRIAL_DAYS } from '@/lib/brand';
+import AppStoreBadge from '@/components/AppStoreBadge';
 
 type OnboardingStep = 'choice' | 'account' | 'company' | 'success';
 
 const TRIAL_DAYS = FREE_TRIAL_DAYS;
 
-function androidInviteMailto(opts: { email?: string; companyName?: string }) {
-  const subject = 'Android app invite request — Fleet Track PRO';
-  const lines = [
-    'Hi Fleet Track PRO team,',
-    '',
-    'Please add me to the Android (Google Play) testing / invite list.',
-    '',
-    opts.email ? `Account email: ${opts.email}` : null,
-    opts.companyName ? `Company: ${opts.companyName}` : null,
-    '',
-    'Thanks,',
-  ].filter(Boolean);
-  return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`;
+function WhatHappensNextPanel() {
+  return (
+    <aside className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm w-full min-w-0">
+      <h3 className="text-base font-semibold text-slate-900 mb-4">What happens next</h3>
+      <ol className="space-y-4 text-sm text-slate-600">
+        <li className="flex gap-3">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500/15 text-[var(--brand-blue)] text-xs font-semibold">
+            1
+          </span>
+          <span className="leading-relaxed min-w-0">
+            Create your account and company (2 minutes, no card).
+          </span>
+        </li>
+        <li className="flex gap-3">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500/15 text-[var(--brand-blue)] text-xs font-semibold">
+            2
+          </span>
+          <span className="leading-relaxed min-w-0">Add your vehicles in the web dashboard.</span>
+        </li>
+        <li className="flex gap-3">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500/15 text-[var(--brand-blue)] text-xs font-semibold">
+            3
+          </span>
+          <div className="min-w-0 space-y-3">
+            <p className="leading-relaxed">
+              Your drivers download the Fleet Track PRO app and pick a vehicle from the list to start their daily
+              check.
+            </p>
+            <AppStoreBadge />
+          </div>
+        </li>
+      </ol>
+      <p className="mt-5 pt-4 border-t border-slate-100 text-sm">
+        <Link
+          href="/getting-started/"
+          className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"
+        >
+          Read the getting-started guide
+        </Link>
+      </p>
+    </aside>
+  );
 }
 
-export default function OnboardingPage() {
-  // Account creation
+function OnboardingPageInner() {
+  const searchParams = useSearchParams();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Company creation
   const [step, setStep] = useState<OnboardingStep>('choice');
   const [companyName, setCompanyName] = useState('');
 
-  // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdCompanyName, setCreatedCompanyName] = useState('');
 
-  const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
+  useEffect(() => {
+    if (searchParams.get('start') === '1') {
+      setStep((prev) => (prev === 'choice' ? 'account' : prev));
+    }
+  }, [searchParams]);
+
+  const validateEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const MIN_PASSWORD_LENGTH = 12;
 
-  const validatePassword = (password: string) => {
-    return password.length >= MIN_PASSWORD_LENGTH;
-  };
+  const validatePassword = (value: string) => value.length >= MIN_PASSWORD_LENGTH;
 
   const handleAccountCreation = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +131,6 @@ export default function OnboardingPage() {
     setLoading(true);
 
     try {
-      // Create Firebase Auth user
       const userCredential = await createUserWithEmailAndPassword(
         firebaseAuth,
         email.trim(),
@@ -109,12 +139,10 @@ export default function OnboardingPage() {
 
       const user = userCredential.user;
 
-      // Update display name
       await updateProfile(user, {
         displayName: `${firstName.trim()} ${lastName.trim()}`.trim(),
       });
 
-      // Create profile document (company + manager role set in the next step)
       await setDoc(doc(firebaseDb, 'profiles', user.uid), {
         email: email.trim(),
         first_name: firstName.trim(),
@@ -125,7 +153,6 @@ export default function OnboardingPage() {
         updated_at: serverTimestamp(),
       });
 
-      // Move to company selection step
       setStep('company');
     } catch (err: any) {
       console.error('Account creation error:', err);
@@ -175,13 +202,11 @@ export default function OnboardingPage() {
         subscription_status: 'trial',
         trial_start_date: serverTimestamp(),
         trial_end_date: trialEnd.toISOString(),
-        // Kept in sync for mobile access checks (companySubscription.js).
         subscription_expiry_date: trialEnd.toISOString(),
         created_at: serverTimestamp(),
         created_by: user.uid,
       });
 
-      // Update user profile with company and manager role
       await setDoc(
         doc(firebaseDb, 'profiles', user.uid),
         {
@@ -192,8 +217,6 @@ export default function OnboardingPage() {
         { merge: true }
       );
 
-      // Claims sync runs in Cloud Functions; refresh the ID token so dashboard
-      // vehicle/inspection reads work immediately when custom claims are ready.
       try {
         await user.getIdToken(true);
       } catch {
@@ -214,11 +237,14 @@ export default function OnboardingPage() {
     { key: 'account' as const, label: 'Account' },
     { key: 'company' as const, label: 'Company' },
   ];
-  const currentStepIndex = step === 'success' ? 2 : step === 'company' ? 1 : step === 'account' ? 0 : -1;
+  const currentStepIndex =
+    step === 'success' ? 2 : step === 'company' ? 1 : step === 'account' ? 0 : -1;
+
+  const contentMaxWidth = step === 'account' ? 'max-w-4xl' : 'max-w-md';
 
   return (
-    <div className="marketing-shell flex flex-col items-center justify-center p-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="marketing-shell flex flex-col items-center justify-center p-4 py-12 overflow-x-hidden">
+      <div className={`w-full ${contentMaxWidth} min-w-0`}>
         <Link
           href="/"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--brand-blue)] hover:underline mb-6"
@@ -272,7 +298,8 @@ export default function OnboardingPage() {
                 <Building2 className="h-8 w-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
                 <h3 className="font-semibold text-slate-900 text-lg mb-2">{FREE_TRIAL_CTA}</h3>
                 <p className="text-slate-500 text-sm">
-                  Create your account and company. {TRIAL_DAYS} days free, no card required. Subscribe later from £8 per vehicle per month.
+                  Create your account and company. {TRIAL_DAYS} days free, no card required. Subscribe later from £8 per
+                  vehicle per month.
                 </p>
                 <span className="inline-flex items-center gap-1 text-blue-500 font-medium text-sm mt-3">
                   Get started <ArrowRight className="w-4 h-4" />
@@ -292,8 +319,17 @@ export default function OnboardingPage() {
                 </span>
               </Link>
             </div>
-            <p className="text-slate-500 text-center text-xs">
-              Joining an existing company? Open the invite email from your manager and follow the link, then sign in using the Fleet Track PRO app.
+            <p className="text-slate-500 text-center text-xs leading-relaxed">
+              Joining an existing company? Open the invite email from your manager to set your password, then{' '}
+              <a
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--brand-blue)] underline underline-offset-2"
+              >
+                download the Fleet Track PRO app
+              </a>{' '}
+              and sign in.
             </p>
           </div>
         ) : step === 'success' ? (
@@ -320,24 +356,27 @@ export default function OnboardingPage() {
                   {
                     icon: LayoutDashboard,
                     title: 'Add your fleet',
-                    detail: 'Vehicles auto-fill from DVLA on registration. Start with active vehicles first, then set inspection habits.',
+                    detail:
+                      'Vehicles auto-fill from DVLA on registration. Start with active vehicles first, then set inspection habits.',
                   },
                   {
                     icon: Users,
                     title: 'Invite your team by email',
-                    detail: 'From the Team page, send email invites as Manager or User. Staff click the link, set a password, and sign in on the app.',
+                    detail:
+                      'From the Team page, send email invites as Manager or User. Staff click the link, set a password, and sign in on the app.',
                   },
                   {
                     icon: Smartphone,
                     title: 'Install the mobile app',
-                    detail: 'You and your team use the app for vehicle inspections, defect logging, and job progress updates on the road.',
+                    detail:
+                      'You and your team use the app for vehicle inspections, defect logging, and job progress updates on the road.',
                   },
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <div className="w-7 h-7 rounded-lg bg-blue-500/15 text-[var(--brand-blue)] flex items-center justify-center flex-shrink-0 mt-0.5 font-semibold text-sm">
                       {i + 1}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 text-slate-900 text-sm font-medium">
                         <item.icon className="w-4 h-4 text-[var(--brand-blue)]" />
                         {item.title}
@@ -354,31 +393,7 @@ export default function OnboardingPage() {
                 <Smartphone className="w-4 h-4 text-[var(--brand-blue)]" />
                 Get the mobile app
               </p>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <a
-                  href={APP_STORE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-slate-50 py-2.5 px-3 text-sm text-slate-900 hover:border-blue-400 transition-colors"
-                >
-                  <Apple className="w-4 h-4" />
-                  App Store (iOS)
-                </a>
-                <a
-                  href={androidInviteMailto({
-                    email: email.trim() || undefined,
-                    companyName: createdCompanyName || undefined,
-                  })}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-slate-50 py-2.5 px-3 text-sm text-slate-900 hover:border-blue-400 transition-colors"
-                >
-                  <Smartphone className="w-4 h-4" />
-                  Request Android invite
-                </a>
-              </div>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Android is invite-only while we roll out Google Play testing. Tap Request Android invite to email us —
-                we&apos;ll send your Play testing link.
-              </p>
+              <AppStoreBadge />
             </div>
 
             <Link
@@ -398,182 +413,210 @@ export default function OnboardingPage() {
               . No charge until your trial ends.
             </p>
           </div>
-        ) : (
-        <div className="dashboard-card p-8 shadow-xl">
-          {step === 'account' ? (
-            <form onSubmit={handleAccountCreation} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="onboarding-first-name" className="block text-sm font-medium text-slate-600 mb-1.5">
-                    First Name
-                  </label>
-                  <input
-                    id="onboarding-first-name"
-                    name="given-name"
-                    type="text"
-                    autoComplete="given-name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="onboarding-last-name" className="block text-sm font-medium text-slate-600 mb-1.5">
-                    Last Name
-                  </label>
-                  <input
-                    id="onboarding-last-name"
-                    name="family-name"
-                    type="text"
-                    autoComplete="family-name"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="onboarding-email" className="block text-sm font-medium text-slate-600 mb-1.5">
-                  Email
-                </label>
-                <input
-                  id="onboarding-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="onboarding-password" className="block text-sm font-medium text-slate-600 mb-1.5">
-                  Password
-                </label>
-                <input
-                  id="onboarding-password"
-                  name="new-password"
-                  type="password"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
-                  required
-                  minLength={12}
-                />
-                <p className="text-slate-500 text-xs mt-1">
-                  Must be at least 12 characters
-                </p>
-              </div>
-
-              <div>
-                <label htmlFor="onboarding-confirm-password" className="block text-sm font-medium text-slate-600 mb-1.5">
-                  Confirm Password
-                </label>
-                <input
-                  id="onboarding-confirm-password"
-                  name="confirm-password"
-                  type="password"
-                  autoComplete="new-password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
-                  required
-                  minLength={12}
-                />
-              </div>
-
-              {error && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                  <p className="text-red-400 text-sm">{error}</p>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="w-full text-white font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50 flex items-center justify-center gap-2 btn-brand-blue"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Creating Account...
-                  </>
-                ) : (
-                  <>
-                    Continue <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-            </form>
-          ) : (
-            <div className="space-y-6">
-              <form onSubmit={handleCreateCompany} className="space-y-5">
+        ) : step === 'account' ? (
+          <div className="flex flex-col lg:flex-row gap-6 items-stretch lg:items-start min-w-0">
+            <div className="dashboard-card p-6 sm:p-8 shadow-xl flex-1 min-w-0 w-full">
+              <form onSubmit={handleAccountCreation} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="onboarding-company-name" className="block text-sm font-medium text-slate-600 mb-1.5">
-                      Company name
+                    <label htmlFor="onboarding-first-name" className="block text-sm font-medium text-slate-600 mb-1.5">
+                      First Name
                     </label>
                     <input
-                      id="onboarding-company-name"
-                      name="organization"
+                      id="onboarding-first-name"
+                      name="given-name"
                       type="text"
-                      autoComplete="organization"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
+                      autoComplete="given-name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
                       className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
-                      placeholder="Your company name"
                       required
                     />
-                    <p className="text-slate-500 text-xs mt-1">
-                      You&apos;ll become the manager of this company.
-                    </p>
                   </div>
-
-                  <div className="rounded-lg border border-slate-200 bg-blue-500/5 p-4 space-y-3">
-                    <div className="flex items-start gap-3">
-                      <CreditCard className="w-4 h-4 text-[var(--brand-blue)] flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-slate-600">
-                        <p className="font-medium text-slate-900 mb-0.5">
-                          {TRIAL_DAYS}-day free trial — no card required
-                        </p>
-                        <p className="text-slate-500 text-xs leading-relaxed">
-                          Explore the available product features with your real fleet and team.
-                          When you&apos;re ready, subscribe from the dashboard: £8 per vehicle per
-                          month, or £84 per vehicle per year (save ~12%).
-                          Minimum 2 vehicles. Cancel anytime on monthly plans.
-                        </p>
-                      </div>
-                    </div>
+                  <div>
+                    <label htmlFor="onboarding-last-name" className="block text-sm font-medium text-slate-600 mb-1.5">
+                      Last Name
+                    </label>
+                    <input
+                      id="onboarding-last-name"
+                      name="family-name"
+                      type="text"
+                      autoComplete="family-name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                      required
+                    />
                   </div>
+                </div>
 
-                  {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                      <p className="text-red-400 text-sm">{error}</p>
-                    </div>
-                  )}
+                <div>
+                  <label htmlFor="onboarding-email" className="block text-sm font-medium text-slate-600 mb-1.5">
+                    Email
+                  </label>
+                  <input
+                    id="onboarding-email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                    required
+                  />
+                </div>
 
-                  <button
-                    type="submit"
-                    className="w-full text-white font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50 flex items-center justify-center gap-2 btn-brand-blue"
-                    disabled={loading}
+                <div>
+                  <label htmlFor="onboarding-password" className="block text-sm font-medium text-slate-600 mb-1.5">
+                    Password
+                  </label>
+                  <input
+                    id="onboarding-password"
+                    name="new-password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                    required
+                    minLength={12}
+                  />
+                  <p className="text-slate-500 text-xs mt-1">Must be at least 12 characters</p>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="onboarding-confirm-password"
+                    className="block text-sm font-medium text-slate-600 mb-1.5"
                   >
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Creating company...
-                      </>
-                    ) : (
-                      <>
-                        {FREE_TRIAL_CTA} <ArrowRight className="h-4 w-4" />
-                      </>
-                    )}
-                  </button>
-                </form>
+                    Confirm Password
+                  </label>
+                  <input
+                    id="onboarding-confirm-password"
+                    name="confirm-password"
+                    type="password"
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                    required
+                    minLength={12}
+                  />
+                </div>
+
+                {error && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                    <p className="text-red-400 text-sm">{error}</p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full text-white font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50 flex items-center justify-center gap-2 btn-brand-blue"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : (
+                    <>
+                      Continue <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+
+                <p className="text-slate-500 text-xs text-center leading-relaxed">
+                  By creating an account you agree to our{' '}
+                  <Link href="/terms/" className="text-[var(--brand-blue)] underline underline-offset-2">
+                    Terms
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    href="/subscription-terms/"
+                    className="text-[var(--brand-blue)] underline underline-offset-2"
+                  >
+                    Subscription Terms
+                  </Link>
+                  .
+                </p>
+              </form>
+
+              <div className="mt-6 pt-6 border-t border-slate-200">
+                <p className="text-slate-500 text-center text-xs">
+                  Already have an account?{' '}
+                  <Link href="/dashboard" className="text-blue-500 hover:underline">
+                    Sign in
+                  </Link>
+                </p>
+              </div>
+            </div>
+            <div className="w-full lg:w-[20.5rem] shrink-0 min-w-0">
+              <WhatHappensNextPanel />
+            </div>
+          </div>
+        ) : (
+          <div className="dashboard-card p-8 shadow-xl">
+            <div className="space-y-6">
+              <form onSubmit={handleCreateCompany} className="space-y-5">
+                <div>
+                  <label htmlFor="onboarding-company-name" className="block text-sm font-medium text-slate-600 mb-1.5">
+                    Company name
+                  </label>
+                  <input
+                    id="onboarding-company-name"
+                    name="organization"
+                    type="text"
+                    autoComplete="organization"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                    placeholder="Your company name"
+                    required
+                  />
+                  <p className="text-slate-500 text-xs mt-1">You&apos;ll become the manager of this company.</p>
+                </div>
+
+                <div className="rounded-lg border border-slate-200 bg-blue-500/5 p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <CreditCard className="w-4 h-4 text-[var(--brand-blue)] flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-slate-600">
+                      <p className="font-medium text-slate-900 mb-0.5">
+                        {TRIAL_DAYS}-day free trial — no card required
+                      </p>
+                      <p className="text-slate-500 text-xs leading-relaxed">
+                        Explore the available product features with your real fleet and team. When you&apos;re ready,
+                        subscribe from the dashboard: £8 per vehicle per month, or £84 per vehicle per year (save ~12%).
+                        Minimum 2 vehicles. Cancel anytime on monthly plans.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                    <p className="text-red-400 text-sm">{error}</p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full text-white font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50 flex items-center justify-center gap-2 btn-brand-blue"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Creating company...
+                    </>
+                  ) : (
+                    <>
+                      {FREE_TRIAL_CTA} <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </form>
 
               <button
                 type="button"
@@ -583,19 +626,30 @@ export default function OnboardingPage() {
                 ← Back to account details
               </button>
             </div>
-          )}
 
-          <div className="mt-6 pt-6 border-t border-slate-200">
-            <p className="text-slate-500 text-center text-xs">
-              Already have an account?{' '}
-              <Link href="/dashboard" className="text-blue-500 hover:underline">
-                Sign in
-              </Link>
-            </p>
+            <div className="mt-6 pt-6 border-t border-slate-200">
+              <p className="text-slate-500 text-center text-xs">
+                Already have an account?{' '}
+                <Link href="/dashboard" className="text-blue-500 hover:underline">
+                  Sign in
+                </Link>
+              </p>
+            </div>
           </div>
-        </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="marketing-shell flex items-center justify-center p-12 text-slate-500 text-sm">Loading…</div>
+      }
+    >
+      <OnboardingPageInner />
+    </Suspense>
   );
 }

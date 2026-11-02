@@ -44,7 +44,7 @@ UK fleet operators — trades, groundworks, logistics, construction, electrical,
 - Newstreet Groundworks case study: ${absolutePageUrl('/customers/newstreet')}
 - NEEMT emergency vehicle fleet case study: ${absolutePageUrl('/customers/neemt')}
 - Compliance Centre: ${absolutePageUrl('/compliance-centre')}
-- Sign up (trial): ${absolutePageUrl('/onboarding')}
+- Sign up (trial): ${absolutePageUrl('/onboarding/?start=1')}
 
 ## Compliance articles
 `;

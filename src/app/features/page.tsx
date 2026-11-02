@@ -246,7 +246,7 @@ export default function Features() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/onboarding"
+              href="/onboarding/?start=1"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] btn-brand-blue"
             >
               Start 14-Day Free Trial

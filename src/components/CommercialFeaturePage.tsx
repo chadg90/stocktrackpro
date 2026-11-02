@@ -98,7 +98,7 @@ export default function CommercialFeaturePage({
               <p className="text-lg text-[var(--mkt-muted)] leading-relaxed max-w-3xl mx-auto mb-8">{intro}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/onboarding"
+                  href="/onboarding/?start=1"
                   className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-white font-semibold btn-brand-blue"
                 >
                   Start 14-Day Free Trial
@@ -193,7 +193,7 @@ export default function CommercialFeaturePage({
               Fleet Track PRO costs £8 per vehicle per month, with a minimum of two vehicles and unlimited team members.
             </p>
             <Link
-              href="/onboarding"
+              href="/onboarding/?start=1"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-white font-semibold btn-brand-blue"
             >
               Start your free trial

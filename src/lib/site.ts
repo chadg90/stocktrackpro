@@ -6,6 +6,7 @@ import {
   SITE_LEGAL_NAME,
   SUPPORT_EMAIL,
   SALES_EMAIL,
+  APP_STORE_URL,
 } from '@/lib/brand';
 
 /** Canonical marketing site origin — use for JSON-LD, sitemap, and AI-facing URLs. */
@@ -17,7 +18,12 @@ export {
   SITE_LEGAL_NAME,
   SUPPORT_EMAIL,
   SALES_EMAIL,
+  APP_STORE_URL,
 };
+
+/** Free-trial CTAs skip the onboarding chooser and open the account form. */
+export const ONBOARDING_START_URL = '/onboarding/?start=1';
+
 
 /**
  * Optional comma-separated profile URLs for Organization `sameAs` (e.g. LinkedIn company page).

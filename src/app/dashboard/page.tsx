@@ -853,7 +853,7 @@ export default function DashboardPage() {
                 <p className="mt-6 text-center text-sm text-slate-500">
                   New organisation?{' '}
                   <Link
-                    href="/onboarding"
+                    href="/onboarding/?start=1"
                     className="font-medium text-[var(--brand-blue)] hover:text-blue-700 hover:underline"
                   >
                     Start free trial

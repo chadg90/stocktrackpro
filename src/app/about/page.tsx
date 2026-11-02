@@ -120,7 +120,7 @@ export default function AboutPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                href="/onboarding"
+                href="/onboarding/?start=1"
                 className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white btn-brand-blue"
               >
                 Try free for 14 days

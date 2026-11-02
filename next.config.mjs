@@ -50,6 +50,16 @@ const nextConfig = {
         destination: '/contact/',
         permanent: true,
       },
+      {
+        source: '/help',
+        destination: '/getting-started/',
+        permanent: true,
+      },
+      {
+        source: '/help/',
+        destination: '/getting-started/',
+        permanent: true,
+      },
     ];
   },
   async headers() {

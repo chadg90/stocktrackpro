@@ -14,8 +14,6 @@ const baseNavigation = [
   { name: 'FAQ', href: '/faq' },
   { name: 'Contact', href: '/contact' },
 ];
-const ONBOARDING_URL = '/onboarding';
-
 export type NavbarAuthResult = {
   navigation: typeof baseNavigation;
   isLoggedIn: boolean;
@@ -181,7 +179,7 @@ export function NavbarNavContent({ onLinkClick }: { onLinkClick: () => void }) {
             </Link>
             {authChecked && (
               <Link
-                href={ONBOARDING_URL}
+                href="/onboarding/?start=1"
                 className="inline-flex items-center justify-center px-3 lg:px-4 py-2.5 rounded-xl text-white font-semibold text-sm transition-colors duration-200 btn-brand-blue whitespace-nowrap"
                 onClick={onLinkClick}
               >
@@ -251,7 +249,7 @@ export function NavbarMobileNavContent({ onLinkClick }: { onLinkClick: () => voi
           <>
             {authChecked && (
               <Link
-                href={ONBOARDING_URL}
+                href="/onboarding/?start=1"
                 className="flex items-center justify-center w-full px-4 py-3 rounded-lg text-white font-semibold btn-brand-blue"
                 onClick={onLinkClick}
               >

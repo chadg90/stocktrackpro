@@ -285,7 +285,7 @@ export default function Pricing() {
               </button>
             ) : (
               <Link
-                href={authLoading ? '#' : (profile ? '/contact' : '/onboarding')}
+                href={authLoading ? '#' : (profile ? '/contact' : '/onboarding/?start=1')}
                 className="block w-full py-4 px-6 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base text-center shadow-lg shadow-blue-500/25 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50"
               >
                 {authLoading ? '…' : profile ? 'Contact us' : 'Start 14-Day Free Trial'}

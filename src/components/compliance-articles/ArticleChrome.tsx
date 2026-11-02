@@ -16,7 +16,7 @@ export function ArticleCta() {
       <p className="text-base leading-relaxed text-slate-700">
         <span className="font-semibold text-slate-900">Fleet Track PRO</span> helps automate this process for UK fleets.{' '}
         <Link
-          href="/onboarding"
+          href="/onboarding/?start=1"
           className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4 font-medium"
         >
           Try free for 14 days — no card required.

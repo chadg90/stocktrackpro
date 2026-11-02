@@ -23,8 +23,6 @@ const baseNavItems = [
   { name: 'FAQ', href: '/faq' },
   { name: 'Contact', href: '/contact' },
 ];
-const ONBOARDING_URL = '/onboarding';
-
 function NavbarNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
   return (
     <div className="ml-4 lg:ml-8 flex items-center gap-0 lg:gap-0.5">
@@ -48,7 +46,7 @@ function NavbarNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
           Log in
         </Link>
         <Link
-          href={ONBOARDING_URL}
+          href="/onboarding/?start=1"
           className="inline-flex items-center justify-center px-3 lg:px-4 py-2.5 rounded-xl text-white font-semibold text-sm transition-colors duration-200 btn-brand-blue whitespace-nowrap"
           onClick={onLinkClick}
         >
@@ -74,7 +72,7 @@ function NavbarMobileNavFallback({ onLinkClick }: { onLinkClick: () => void }) {
       ))}
       <div className="pt-4 mt-2 border-t border-[var(--mkt-border)] space-y-2">
         <Link
-          href={ONBOARDING_URL}
+          href="/onboarding/?start=1"
           className="flex items-center justify-center w-full px-4 py-3.5 rounded-xl text-white font-semibold btn-brand-blue"
           onClick={onLinkClick}
         >

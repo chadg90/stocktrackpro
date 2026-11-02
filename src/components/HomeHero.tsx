@@ -38,7 +38,7 @@ export default function HomeHero() {
           </p>
           <div className="flex w-full max-w-sm md:max-w-none flex-col md:flex-row gap-3 md:gap-4 lg:w-auto md:justify-center lg:justify-start">
             <Link
-              href="/onboarding"
+              href="/onboarding/?start=1"
               className="group inline-flex w-full md:w-auto items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 min-h-[48px] rounded-xl text-white font-semibold transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-sky-300 focus:ring-offset-2 focus:ring-offset-[var(--mkt-ink)] btn-brand-blue"
             >
               {FREE_TRIAL_CTA}

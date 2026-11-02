@@ -8,7 +8,7 @@ export default function ArticleBottomCta() {
         Inspections, defects, and MOT visibility in one platform — 14-day free trial, no card required.
       </p>
       <Link
-        href="/onboarding"
+        href="/onboarding/?start=1"
         className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-slate-50"
       >
         Start 14-Day Free Trial →

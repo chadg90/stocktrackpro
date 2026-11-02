@@ -380,7 +380,7 @@ export const INTERACTIVE_DEMO_STEPS: DemoStep[] = [
       },
       note: 'Inspection Complete',
       continueLabel: 'Start Free Trial',
-      continueHref: '/onboarding',
+      continueHref: '/onboarding/?start=1',
       nextStepId: null,
     },
     hotspots: [],

@@ -16,21 +16,30 @@ No DNS change is required for the www 301 / noindex work if apex and www already
 
 If apex ever stops resolving to App Hosting, Chad would need DNS A/AAAA or ALIAS records as shown in the Firebase Console domain setup wizard — **only then**.
 
-## App Hosting Console — apex → www as 301 (Chad)
+## App Hosting — apex → www as 301
 
-If external checks show the apex returning **302** (or wrong Location) before Next.js runs, fix the domain mapping in Console (not DNS):
+Apex `fleettrackpro.co.uk` is a **redirect** custom domain to `https://www.fleettrackpro.co.uk`.
 
-1. Open [Firebase Console → App Hosting](https://console.firebase.google.com/project/stocktrackpronew-b853b/apphosting).
-2. Select backend **fleettrackpro-web**.
-3. Open **Domains**.
-4. For **fleettrackpro.co.uk** (apex):
-   - Set it as a **redirect** custom domain (not a primary serving domain).
-   - Redirect target: `https://www.fleettrackpro.co.uk`
-   - Prefer **301** (permanent) so Search Console shows “Page with redirect” and link equity consolidates on www.
-5. Keep **www.fleettrackpro.co.uk** as the serving custom domain (cert ACTIVE).
-6. Wait for status to show ACTIVE, then re-check with curl from an outside machine.
+App Hosting defaults redirect status to **302** if `serve.redirect.status` is omitted. Set it to **301** (no DNS change):
 
-Middleware also issues a one-hop **301** to `https://www.fleettrackpro.co.uk` for apex and HTTP requests, so behaviour stays correct even if the edge redirect is missing — Console 301 avoids a double hop when both fire.
+```bash
+# Requires gcloud auth with access to project stocktrackpronew-b853b
+ACCESS_TOKEN=$(gcloud auth print-access-token)
+DOMAIN='projects/stocktrackpronew-b853b/locations/europe-west4/backends/fleettrackpro-web/domains/fleettrackpro.co.uk'
+curl -sS -X PATCH \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  "https://firebaseapphosting.googleapis.com/v1beta/${DOMAIN}?updateMask=serve.redirect.status" \
+  -d '{"serve":{"redirect":{"uri":"https://www.fleettrackpro.co.uk","status":301}}}'
+```
+
+**Done 2 Nov 2026:** apex redirect status set to **301**. Verify:
+
+`curl -sI 'https://fleettrackpro.co.uk/pricing/?a=1'` → `301` + `Location: https://www.fleettrackpro.co.uk/pricing/?a=1`
+
+In Console (Settings → Domains) the apex should still show as redirect → www; the status code is on the API domain resource.
+
+Middleware also 301s apex/HTTP to www as a safety net if the edge redirect were removed.
 
 ## Code behaviour (summary)
 
