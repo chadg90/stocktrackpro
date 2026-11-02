@@ -70,7 +70,13 @@ env:
       - BUILD
       - RUNTIME
 
-  # Site URL — update to the Firebase preview URL first, then your real domain after cutover
+  # Canonical marketing origin (canonicals, OG, sitemap). Keep www.
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://www.fleettrackpro.co.uk
+    availability:
+      - BUILD
+      - RUNTIME
+  # Site URL used by Stripe redirects / app links (same as canonical)
   - variable: NEXT_PUBLIC_APP_URL
     value: https://www.fleettrackpro.co.uk
     availability:

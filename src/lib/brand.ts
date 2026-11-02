@@ -5,8 +5,17 @@
 export const SITE_NAME = 'Fleet Track PRO';
 /** Trading / operator name (not a registered limited company). */
 export const SITE_LEGAL_NAME = 'Fleet Track PRO';
-export const SITE_URL = 'https://www.fleettrackpro.co.uk';
-export const SITE_DOMAIN = 'www.fleettrackpro.co.uk';
+
+const DEFAULT_SITE_URL = 'https://www.fleettrackpro.co.uk';
+
+/** Canonical marketing origin — prefer NEXT_PUBLIC_SITE_URL at build time. */
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  DEFAULT_SITE_URL
+).replace(/\/$/, '');
+
+export const SITE_DOMAIN = SITE_URL.replace(/^https?:\/\//, '');
 
 /** iOS App Store listing (name is Fleet Track PRO; avoid old stock-track-pro slug in URLs). */
 export const APP_STORE_URL = 'https://apps.apple.com/gb/app/fleet-track-pro/id6744621973';
