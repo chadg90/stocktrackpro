@@ -677,6 +677,10 @@ export function buildMileageAttentionRows(
       if (at && m != null) valid.push({ m, at });
     }
 
+    // New vehicles with 0 miles and no completed checks must not appear in Mileage attention.
+    // Only flag once there is at least one completed check with a mileage reading.
+    if (valid.length === 0) continue;
+
     let reason: MileageAttentionReason | null = null;
 
     if (valid.length >= 2) {
@@ -705,7 +709,7 @@ export function buildMileageAttentionRows(
     });
     const daysSince =
       latestAt != null ? Math.max(0, differenceInCalendarDays(now, latestAt)) : null;
-    if (!reason && !checkedThisWeek && (daysSince == null || daysSince >= 7)) {
+    if (!reason && !checkedThisWeek && daysSince != null && daysSince >= 7) {
       reason = 'no_check';
     }
 

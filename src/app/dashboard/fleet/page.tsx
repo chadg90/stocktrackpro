@@ -17,7 +17,7 @@ import {
 import { httpsCallable } from 'firebase/functions';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
-import { Plus, Pencil, Trash2, Search, Truck, AlertTriangle, Image as ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Truck, AlertTriangle, Image as ImageIcon, Loader2 } from 'lucide-react';
 import Modal from '../components/Modal';
 import ExportButton from '../components/ExportButton';
 import ImageViewerModal from '../components/ImageViewerModal';
@@ -75,6 +75,9 @@ export default function FleetPage() {
   const [currentVehicle, setCurrentVehicle] = useState<Vehicle | null>(null);
   const [formData, setFormData] = useState<Partial<Vehicle>>({});
   const [processing, setProcessing] = useState(false);
+  const [saveSlow, setSaveSlow] = useState(false);
+  const [dvlaStatus, setDvlaStatus] = useState<'idle' | 'loading' | 'ok' | 'fail'>('idle');
+  const [dvlaMessage, setDvlaMessage] = useState('');
 
   // Image viewer state
   const [viewingImage, setViewingImage] = useState<string | null>(null);
@@ -204,9 +207,52 @@ export default function FleetPage() {
     );
   };
 
+  const lookupRegistration = async (rawReg?: string) => {
+    if (!firebaseFunctions) return;
+    const registration = formatUkRegistration(rawReg ?? formData.registration ?? '');
+    if (!registrationKey(registration)) {
+      setDvlaStatus('idle');
+      setDvlaMessage('');
+      return;
+    }
+    setFormData((prev) => ({ ...prev, registration }));
+    setDvlaStatus('loading');
+    setDvlaMessage('Checking with DVLA…');
+    try {
+      const lookupDvlaVehicle = httpsCallable(firebaseFunctions, 'lookupDvlaVehicle');
+      const result = await lookupDvlaVehicle({ registration: registrationKey(registration) });
+      const data = (result.data || {}) as {
+        ok?: boolean;
+        make?: string | null;
+        model?: string | null;
+        year?: number | null;
+        colour?: string | null;
+        registration?: string;
+        message?: string;
+      };
+      if (data.ok) {
+        setFormData((prev) => ({
+          ...prev,
+          registration: data.registration || registration,
+          make: data.make ? formatVehicleMakeModel(data.make) : prev.make,
+          model: data.model ? formatVehicleMakeModel(data.model) : prev.model,
+        }));
+        setDvlaStatus('ok');
+        setDvlaMessage('Checked with DVLA');
+      } else {
+        setDvlaStatus('fail');
+        setDvlaMessage(data.message || "Couldn't check this reg. Fill in the details yourself");
+      }
+    } catch (error) {
+      console.warn('DVLA lookup failed:', error);
+      setDvlaStatus('fail');
+      setDvlaMessage("Couldn't check this reg. Fill in the details yourself");
+    }
+  };
+
   const handleAddVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firebaseDb || !firebaseFunctions || !profile?.company_id) return;
+    if (!firebaseDb || !firebaseFunctions || !profile?.company_id || processing) return;
 
     const registration = formatUkRegistration(formData.registration || '');
     const make = formatVehicleMakeModel(formData.make || '');
@@ -233,6 +279,8 @@ export default function FleetPage() {
     }
 
     setProcessing(true);
+    setSaveSlow(false);
+    const slowTimer = window.setTimeout(() => setSaveSlow(true), 15000);
     try {
       const createVehicle = httpsCallable(firebaseFunctions, 'createVehicle');
       await createVehicle({
@@ -248,6 +296,8 @@ export default function FleetPage() {
       });
       setIsAddModalOpen(false);
       setFormData({});
+      setDvlaStatus('idle');
+      setDvlaMessage('');
       fetchVehicles(profile.company_id);
     } catch (error) {
       console.error('Error adding vehicle:', error);
@@ -259,10 +309,14 @@ export default function FleetPage() {
             ? 'Your company has reached its vehicle limit.'
             : code.includes('permission-denied')
               ? 'Only company managers can add vehicles.'
-              : 'The vehicle could not be added. Please check the details and try again.'
+              : saveSlow
+                ? 'This is taking longer than usual. Please try again in a moment.'
+                : 'The vehicle could not be added. Please check the details and try again.'
       );
     } finally {
+      window.clearTimeout(slowTimer);
       setProcessing(false);
+      setSaveSlow(false);
     }
   };
 
@@ -536,10 +590,52 @@ export default function FleetPage() {
       {/* Add Modal */}
       <Modal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          if (processing) return;
+          setIsAddModalOpen(false);
+          setDvlaStatus('idle');
+          setDvlaMessage('');
+        }}
         title="Add New Vehicle"
       >
         <form onSubmit={handleAddVehicle} className="space-y-4">
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Registration</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                required
+                value={formData.registration || ''}
+                onChange={(e) => {
+                  setDvlaStatus('idle');
+                  setFormData({ ...formData, registration: formatUkRegistration(e.target.value) });
+                }}
+                onBlur={(e) => lookupRegistration(e.target.value)}
+                className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none uppercase"
+                placeholder="e.g. TE57 TST"
+                autoComplete="off"
+              />
+              <button
+                type="button"
+                onClick={() => lookupRegistration()}
+                disabled={dvlaStatus === 'loading' || !registrationKey(formData.registration || '')}
+                className="shrink-0 rounded-lg border border-blue-500/40 px-3 py-2 text-sm text-white/90 hover:bg-white/5 disabled:opacity-50"
+              >
+                {dvlaStatus === 'loading' ? '…' : 'Look up'}
+              </button>
+            </div>
+            <p
+              className={`text-xs mt-1 ${
+                dvlaStatus === 'ok'
+                  ? 'text-emerald-400'
+                  : dvlaStatus === 'fail'
+                    ? 'text-amber-300'
+                    : 'text-white/40'
+              }`}
+            >
+              {dvlaMessage || 'Capitals + UK spacing. Look up fills make when DVLA has it.'}
+            </p>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-white/70 mb-1">Make</label>
@@ -575,23 +671,6 @@ export default function FleetPage() {
             />
           </div>
           <div>
-            <label className="block text-sm text-white/70 mb-1">Registration</label>
-            <input
-              type="text"
-              required
-              value={formData.registration || ''}
-              onChange={(e) =>
-                setFormData({ ...formData, registration: formatUkRegistration(e.target.value) })
-              }
-              onBlur={(e) =>
-                setFormData({ ...formData, registration: formatUkRegistration(e.target.value) })
-              }
-              className="w-full bg-black border border-blue-500/30 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none uppercase"
-              placeholder="e.g. AB12 CDE"
-            />
-            <p className="text-xs text-white/40 mt-1">Capitals + UK spacing — used for DVLA lookups.</p>
-          </div>
-          <div>
             <label className="block text-sm text-white/70 mb-1">VIN (Optional)</label>
             <input
               type="text"
@@ -624,14 +703,26 @@ export default function FleetPage() {
               </select>
             </div>
           </div>
-          <div className="pt-4">
+          <div className="pt-4 space-y-2">
             <button
               type="submit"
               disabled={processing}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg py-3 transition-colors disabled:opacity-50"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg py-3 transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
-              {processing ? 'Adding Vehicle...' : 'Add Vehicle'}
+              {processing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Adding vehicle…
+                </>
+              ) : (
+                'Add Vehicle'
+              )}
             </button>
+            {processing && saveSlow ? (
+              <p className="text-xs text-amber-300 text-center">
+                This is taking longer than usual. You can wait a moment longer, or close and try again.
+              </p>
+            ) : null}
           </div>
         </form>
       </Modal>

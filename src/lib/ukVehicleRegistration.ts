@@ -18,22 +18,21 @@ export function formatUkRegistration(value: string | null | undefined): string {
   const raw = registrationKey(value);
   if (!raw) return '';
 
+  let formatted = raw;
   // Current style (2001+): AA99 AAA
   if (/^[A-Z]{2}[0-9]{2}[A-Z]{3}$/.test(raw)) {
-    return `${raw.slice(0, 4)} ${raw.slice(4)}`;
-  }
-  // Prefix (1983–2001): A123 AAA / A12 AAA / A1 AAA
-  if (/^[A-Z][0-9]{1,3}[A-Z]{3}$/.test(raw)) {
+    formatted = `${raw.slice(0, 4)} ${raw.slice(4)}`;
+  } else if (/^[A-Z][0-9]{1,3}[A-Z]{3}$/.test(raw)) {
+    // Prefix (1983–2001): A123 AAA / A12 AAA / A1 AAA
     const letters = raw.slice(-3);
     const rest = raw.slice(0, -3);
-    return `${rest} ${letters}`;
+    formatted = `${rest} ${letters}`;
+  } else if (/^[A-Z]{3}[0-9]{1,3}[A-Z]$/.test(raw)) {
+    // Suffix (1963–1983): AAA 123A / AAA 12A / AAA 1A
+    formatted = `${raw.slice(0, 3)} ${raw.slice(3)}`;
   }
-  // Suffix (1963–1983): AAA 123A / AAA 12A / AAA 1A
-  if (/^[A-Z]{3}[0-9]{1,3}[A-Z]$/.test(raw)) {
-    return `${raw.slice(0, 3)} ${raw.slice(3)}`;
-  }
-  // Incomplete / unusual plates: keep compact uppercase (no guessed space while typing)
-  return raw;
+  // Always a single space between groups — never double spaces (e.g. TE57 TST).
+  return formatted.replace(/\s+/g, ' ').trim();
 }
 
 export function isValidUkRegistrationShape(value: string | null | undefined): boolean {

@@ -39,6 +39,7 @@ import { countMotTaxStatus } from '@/lib/motTaxExpiry';
 import ExportButton from './components/ExportButton';
 import PageGuideButton from './components/PageGuide';
 import SetupChecklist from './components/SetupChecklist';
+import GetDriverAppCard from './components/GetDriverAppCard';
 import KpiValue, { SoftSpinner } from './components/KpiValue';
 import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
 import {
@@ -969,11 +970,16 @@ export default function DashboardPage() {
               )}
 
               {dashboardReady && (
-                <SetupChecklist
-                  vehicleCount={vehiclesCount ?? 0}
-                  teammateCount={users.length}
-                  inspectionCount={inspectionsCount ?? 0}
-                />
+                <>
+                  <GetDriverAppCard />
+                  <SetupChecklist
+                    vehicleCount={vehiclesCount ?? 0}
+                    teammateCount={users.length}
+                    inspectionCount={inspectionsCount ?? 0}
+                    email={authUser?.email || undefined}
+                    companyName={profile?.company_name}
+                  />
+                </>
               )}
 
               <div className="dashboard-card p-5 mb-6" data-tour="home-attention">

@@ -3,9 +3,10 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
   updateProfile,
 } from 'firebase/auth';
-import { collection, addDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import {
   Building2,
@@ -19,9 +20,10 @@ import {
   CreditCard,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { APP_STORE_URL, FREE_TRIAL_CTA, FREE_TRIAL_DAYS } from '@/lib/brand';
 import AppStoreBadge from '@/components/AppStoreBadge';
+import DriverAppLinks from '@/components/DriverAppLinks';
 
 type OnboardingStep = 'choice' | 'account' | 'company' | 'success';
 
@@ -73,6 +75,7 @@ function WhatHappensNextPanel() {
 
 function OnboardingPageInner() {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -84,6 +87,7 @@ function OnboardingPageInner() {
   const [companyName, setCompanyName] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [saveSlow, setSaveSlow] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdCompanyName, setCreatedCompanyName] = useState('');
 
@@ -92,6 +96,23 @@ function OnboardingPageInner() {
       setStep((prev) => (prev === 'choice' ? 'account' : prev));
     }
   }, [searchParams]);
+
+  // Signed-in users who already have a company skip the chooser / start form.
+  useEffect(() => {
+    if (!firebaseAuth || !firebaseDb) return;
+    const unsub = onAuthStateChanged(firebaseAuth, async (user) => {
+      if (!user || !firebaseDb) return;
+      try {
+        const snap = await getDoc(doc(firebaseDb, 'profiles', user.uid));
+        if (snap.exists() && snap.data()?.company_id) {
+          router.replace('/dashboard/');
+        }
+      } catch {
+        // stay on onboarding
+      }
+    });
+    return () => unsub();
+  }, [router]);
 
   const validateEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
@@ -129,6 +150,8 @@ function OnboardingPageInner() {
     }
 
     setLoading(true);
+    setSaveSlow(false);
+    const slowTimer = window.setTimeout(() => setSaveSlow(true), 15000);
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -163,10 +186,16 @@ function OnboardingPageInner() {
       } else if (err.code === 'permission-denied') {
         setError('Account setup was blocked. Please try again, or contact support if this continues.');
       } else {
-        setError(err.message || 'Failed to create account. Please try again.');
+        setError(
+          saveSlow
+            ? 'This is taking longer than usual. Please try again in a moment.'
+            : err.message || 'Failed to create account. Please try again.'
+        );
       }
     } finally {
+      window.clearTimeout(slowTimer);
       setLoading(false);
+      setSaveSlow(false);
     }
   };
 
@@ -393,7 +422,11 @@ function OnboardingPageInner() {
                 <Smartphone className="w-4 h-4 text-[var(--brand-blue)]" />
                 Get the mobile app
               </p>
-              <AppStoreBadge />
+              <DriverAppLinks
+                variant="light"
+                email={email.trim() || undefined}
+                companyName={createdCompanyName || undefined}
+              />
             </div>
 
             <Link
@@ -515,17 +548,22 @@ function OnboardingPageInner() {
                   className="w-full text-white font-semibold rounded-lg py-2.5 transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-50 flex items-center justify-center gap-2 btn-brand-blue"
                   disabled={loading}
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    <>
-                      Continue <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
-                </button>
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Creating account…
+                  </>
+                ) : (
+                  <>
+                    Continue <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+              {loading && saveSlow ? (
+                <p className="text-xs text-amber-600 text-center">
+                  This is taking longer than usual. Please wait a moment longer, or try again.
+                </p>
+              ) : null}
 
                 <p className="text-slate-500 text-xs text-center leading-relaxed">
                   By creating an account you agree to our{' '}
