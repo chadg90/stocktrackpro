@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { SITE_LEGAL_NAME, SITE_NAME, SITE_URL, SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
 
 /** Update only when the policy text changes. */
-const LAST_UPDATED = '4 August 2026';
+const LAST_UPDATED = '2 November 2026';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -210,12 +210,27 @@ export default function PrivacyPolicy() {
           </Section>
 
           <Section title="9. Cookies and similar technologies">
-            <p className="text-slate-600 leading-relaxed">
+            <p className="text-slate-600 leading-relaxed mb-4">
               We use essential cookies and local storage to run the website, keep sessions secure, and remember
-              cookie preferences. We use privacy-friendly Vercel Web Analytics for aggregate traffic (not
-              advertising cookies) and first-party dashboard usage counts in Firebase to understand which manager
-              tools are used. We do not use Google Analytics or advertising pixels. Details are in our{' '}
-              <Link href="/cookies" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
+              your analytics preference. On marketing pages only, and only after you accept, we use Google Analytics
+              4 to understand which pages help. The cookies involved are{' '}
+              <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">_ga</code> and{' '}
+              <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">_ga_&lt;container-id&gt;</code>, lasting up
+              to 13 months (GA4 data retention is set to match, 14 months maximum). IP addresses are not stored by
+              GA4. We do not use advertising or remarketing cookies. You can change your choice at any time via{' '}
+              <strong className="text-slate-800">Cookie settings</strong> in the footer. Google acts as a processor;
+              see{' '}
+              <a
+                href="https://policies.google.com/privacy"
+                className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Google’s Privacy Policy
+              </a>
+              . We also keep first-party dashboard usage counts in Firebase to understand which manager tools are
+              used. Full details are in our{' '}
+              <Link href="/cookies/" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Cookie Policy
               </Link>
               .
@@ -226,8 +241,19 @@ export default function PrivacyPolicy() {
             <p className="text-slate-600 leading-relaxed mb-4">Key processors / service providers include:</p>
             <BulletList
               items={[
-                'Firebase / Google LLC (authentication, database, storage, hosting-related services)',
-                'Vercel Inc. (website hosting and privacy-friendly Web Analytics)',
+                'Firebase / Google LLC (authentication, database, storage, App Hosting)',
+                <>
+                  Google LLC (Google Analytics 4 on marketing pages after consent —{' '}
+                  <a
+                    href="https://policies.google.com/privacy"
+                    className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Google’s Privacy Policy
+                  </a>
+                  )
+                </>,
                 'Stripe Payments Europe Ltd / Stripe, Inc. (payments and billing)',
                 'Email delivery providers (transactional messages)',
                 'Apple / Google (app distribution and, where used, push notification infrastructure)',

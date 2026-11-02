@@ -1,13 +1,16 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Outfit, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
-import MarketingAnalytics from "@/components/MarketingAnalytics";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import GaPageViews from "@/components/analytics/GaPageViews";
 import SiteChatBot from "@/components/SiteChatBot";
 import SiteWideJsonLd from "@/components/seo/SiteWideJsonLd";
 import { SITE_META_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
 import { APP_STORE_ID, SITE_LEGAL_NAME, SITE_NAME, SITE_URL } from "@/lib/brand";
+import { getGaId, isAnalyticsExcludedPath } from "@/lib/analytics";
 import { absolutePageUrl } from "@/lib/site";
 
 const sourceSans = Source_Sans_3({
@@ -95,11 +98,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const headerList = await headers();
+  const pathname = headerList.get('x-ftp-pathname') ?? '';
+  const gaId = getGaId();
+  const loadGa = Boolean(gaId) && !isAnalyticsExcludedPath(pathname);
+
   return (
     <html lang="en-GB" className={`scroll-smooth ${sourceSans.variable} ${outfit.variable}`}>
       <head>
@@ -126,12 +134,12 @@ export default function RootLayout({
         <SiteWideJsonLd />
       </head>
       <body className={`${sourceSans.className} antialiased bg-slate-50 text-slate-900 min-h-screen flex flex-col`}>
+        {loadGa && gaId ? <GoogleAnalytics measurementId={gaId} /> : null}
         {children}
         <Footer />
         <CookieConsent />
         <SiteChatBot />
-        {/* Hobby-plan Web Analytics — marketing pages only; dashboard/admin excluded */}
-        <MarketingAnalytics />
+        {loadGa ? <GaPageViews /> : null}
       </body>
     </html>
   );

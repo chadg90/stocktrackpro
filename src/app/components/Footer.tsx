@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SITE_LEGAL_NAME, SITE_NAME, SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
+import { OPEN_COOKIE_SETTINGS_EVENT } from '@/lib/analytics';
 
 const Footer = () => {
   const pathname = usePathname();
@@ -118,9 +119,20 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/cookies" className="hover:text-white">
+                <Link href="/cookies/" className="hover:text-white">
                   Cookies
                 </Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(new Event(OPEN_COOKIE_SETTINGS_EVENT));
+                  }}
+                  className="hover:text-white text-left"
+                >
+                  Cookie settings
+                </button>
               </li>
             </ul>
           </div>

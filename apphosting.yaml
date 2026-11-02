@@ -47,8 +47,8 @@ env:
     availability:
       - BUILD
       - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
-    value: G-1234567890
+  - variable: NEXT_PUBLIC_GA_ID
+    value: G-JBYSKP5L0B
     availability:
       - BUILD
       - RUNTIME

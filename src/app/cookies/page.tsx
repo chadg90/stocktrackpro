@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
 
 /** Update only when the policy text changes. */
-const LAST_UPDATED = '4 August 2026';
+const LAST_UPDATED = '2 November 2026';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -43,8 +43,8 @@ export default function CookiePolicy() {
           <Section title="1. What are cookies?">
             <p className="text-slate-600 leading-relaxed">
               Cookies are small text files stored on your device. We also use similar technologies such as local
-              storage (for example to remember that you have seen our cookie notice, or to keep you signed in to the
-              dashboard). This policy explains what we use on www.fleettrackpro.co.uk.
+              storage (for example to remember your cookie choice, or to keep you signed in to the dashboard). This
+              policy explains what we use on www.fleettrackpro.co.uk.
             </p>
           </Section>
 
@@ -57,8 +57,8 @@ export default function CookiePolicy() {
                 <>
                   <strong className="text-slate-800">Essential / strictly necessary</strong> — required to operate
                   the site and Service: security, load balancing where applicable, authentication sessions for the
-                  dashboard, and storing your cookie-notice choice in local storage (
-                  <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">cookieConsent</code>).
+                  dashboard, and storing your analytics preference in local storage (
+                  <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">ftp_consent</code>).
                 </>,
                 <>
                   <strong className="text-slate-800">Payment (Stripe)</strong> — when you start checkout or open the
@@ -66,14 +66,28 @@ export default function CookiePolicy() {
                   securely and prevent fraud. Those cookies are governed by Stripe’s policies.
                 </>,
                 <>
-                  <strong className="text-slate-800">No advertising cookies</strong> — we do not use third-party
-                  advertising or tracking pixels on the marketing site.
+                  <strong className="text-slate-800">Google Analytics 4 (marketing pages only, opt-in)</strong> — after
+                  you choose <em>Accept analytics</em>, we use Google Analytics 4 on marketing pages (for example home,
+                  pricing, features, and articles) to see which pages help. We do not load Analytics on the manager
+                  dashboard or other signed-in product areas. The cookies used are{' '}
+                  <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">_ga</code> and{' '}
+                  <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">_ga_&lt;container-id&gt;</code>, which
+                  may last up to 13 months. We configure GA4 data retention to match (14 months maximum). IP addresses
+                  are not stored by GA4. There are no advertising or remarketing cookies. Google acts as a processor;
+                  see{' '}
+                  <a
+                    href="https://policies.google.com/privacy"
+                    className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Google’s Privacy Policy
+                  </a>
+                  .
                 </>,
                 <>
-                  <strong className="text-slate-800">Privacy-friendly web analytics</strong> — we use Vercel Web
-                  Analytics on marketing pages only (home, pricing, features, articles, etc.) to understand aggregate
-                  traffic. Dashboard, onboarding, and invite pages are not counted. It is designed not to rely on
-                  advertising cookies or cross-site trackers. We do not use Google Analytics or Meta Pixel.
+                  <strong className="text-slate-800">No advertising cookies</strong> — we do not use third-party
+                  advertising, remarketing, or tracking pixels on the marketing site.
                 </>,
                 <>
                   <strong className="text-slate-800">Dashboard product usage</strong> — when you are signed in to the
@@ -89,7 +103,7 @@ export default function CookiePolicy() {
             <p className="text-slate-600 leading-relaxed">
               The companion mobile app uses device storage, secure storage, and push notification tokens as needed
               to provide the Service. That is described in our{' '}
-              <Link href="/privacy" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
+              <Link href="/privacy/" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Privacy Policy
               </Link>
               ; it is separate from website cookies.
@@ -100,7 +114,10 @@ export default function CookiePolicy() {
             <BulletList
               items={[
                 'Essential technologies are required for the Service to work. You can block cookies in your browser, but sign-in and some features may fail.',
-                'Our site banner records whether you have acknowledged this notice.',
+                <>
+                  Analytics cookies are optional. You can Accept or Reject them in our banner, and change your mind
+                  later via <strong className="text-slate-800">Cookie settings</strong> in the website footer.
+                </>,
                 'If we introduce non-essential advertising cookies in future, we will update this policy and, where required by law, ask for consent before setting them.',
               ]}
             />
@@ -109,11 +126,11 @@ export default function CookiePolicy() {
           <Section title="5. Related policies">
             <p className="text-slate-600 leading-relaxed">
               Personal data processing is explained in our{' '}
-              <Link href="/privacy" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
+              <Link href="/privacy/" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Privacy Policy
               </Link>
               . Use of the Service is governed by our{' '}
-              <Link href="/terms" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
+              <Link href="/terms/" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Terms and Conditions
               </Link>
               .
