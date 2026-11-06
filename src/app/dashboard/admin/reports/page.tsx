@@ -28,6 +28,12 @@ import {
   titleCaseName,
 } from '@/lib/adminMonthlyCompanyReportHelpers';
 import { ADMIN_REPORT_QUERY_CAP, fifteenMonthsAgoStart } from '@/lib/dvsaRetention';
+import { formatAdminDate } from '@/lib/adminDateFormat';
+import {
+  isLegacyOnlyCompany,
+  isPaidStripeCompany,
+  isPromoCompany,
+} from '@/lib/adminCompanyMetrics';
 
 type Profile = {
   role?: string;
@@ -44,6 +50,9 @@ type Company = {
   id: string;
   name?: string;
   subscription_status?: string;
+  subscription_type?: string;
+  stripe_subscription_id?: string;
+  legacy?: boolean;
 };
 
 type Inspection = {
@@ -82,6 +91,8 @@ type CompanySnapshot = {
   activeCompanies: number;
   trialCompanies: number;
   paidCompanies: number;
+  promoCompanies: number;
+  legacyCompanies: number;
   highDefectCompanies: Array<{ id: string; name: string; defectsReported: number }>;
   inactivityAlerts: Array<{ id: string; name: string; daysSinceLastCheck: number | null }>;
   billingRiskCompanies: Array<{ id: string; name: string; subscriptionStatus: string }>;
@@ -223,66 +234,108 @@ export default function AdminReportsPage() {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    const highDefectCompanies: Array<{ id: string; name: string; defectsReported: number }> = [];
-    const inactivityAlerts: Array<{ id: string; name: string; daysSinceLastCheck: number | null }> = [];
-
-    await Promise.all(
-      companyList.map(async (company) => {
-        const [defectsCountSnap, latestInspectionSnap] = await Promise.all([
-          getCountFromServer(
-            query(
-              collection(firebaseDb!, 'vehicle_defects'),
-              where('company_id', '==', company.id),
-              where('reported_at', '>=', Timestamp.fromDate(monthStart)),
-              where('reported_at', '<', Timestamp.fromDate(monthEnd))
-            )
-          ),
-          getDocs(
-            query(
-              collection(firebaseDb!, 'vehicle_inspections'),
-              where('company_id', '==', company.id),
-              orderBy('inspected_at', 'desc'),
-              limit(1)
-            )
-          ),
-        ]);
-
-        const defectsReported = defectsCountSnap.data().count;
-        if (defectsReported >= HIGH_DEFECT_THRESHOLD) {
-          highDefectCompanies.push({
-            id: company.id,
-            name: company.name || company.id,
-            defectsReported,
-          });
-        }
-
-        const latestRaw = latestInspectionSnap.docs[0]
-          ? ((latestInspectionSnap.docs[0].data() as Inspection).inspected_at)
-          : undefined;
-        const latestDate = toDate(latestRaw);
-        const daysSinceLastCheck = latestDate
-          ? Math.floor((Date.now() - latestDate.getTime()) / 86400000)
-          : null;
-        if (daysSinceLastCheck === null || daysSinceLastCheck >= INACTIVITY_ALERT_DAYS) {
-          inactivityAlerts.push({
-            id: company.id,
-            name: company.name || company.id,
-            daysSinceLastCheck,
-          });
-        }
-      })
-    );
-
-    const trialCompanies = companyList.filter((company) => company.subscription_status === 'trial').length;
-    const paidCompanies = companyList.filter((company) => company.subscription_status === 'active').length;
-    const activeCompanies = trialCompanies + paidCompanies;
+    const trialCompanies = companyList.filter(
+      (company) =>
+        company.subscription_status === 'trial' || company.subscription_status === 'trialing'
+    ).length;
+    const paidCompanies = companyList.filter((company) => isPaidStripeCompany(company)).length;
+    const promoCompanies = companyList.filter(
+      (company) => isPromoCompany(company) && !isPaidStripeCompany(company) && !isLegacyOnlyCompany(company)
+    ).length;
+    const legacyCompanies = companyList.filter((company) => isLegacyOnlyCompany(company)).length;
+    const activeCompanies = paidCompanies;
     const billingRiskCompanies = companyList
-      .filter((company) => company.subscription_status !== 'trial' && company.subscription_status !== 'active')
+      .filter(
+        (company) =>
+          company.subscription_status !== 'trial' &&
+          company.subscription_status !== 'trialing' &&
+          company.subscription_status !== 'active'
+      )
       .map((company) => ({
         id: company.id,
         name: company.name || company.id,
         subscriptionStatus: company.subscription_status || 'inactive',
       }));
+
+    // Set counts immediately so the three cards never stay as "—" if later queries fail.
+    setSnapshot({
+      activeCompanies,
+      trialCompanies,
+      paidCompanies,
+      promoCompanies,
+      legacyCompanies,
+      highDefectCompanies: [],
+      inactivityAlerts: [],
+      billingRiskCompanies,
+    });
+
+    const highDefectCompanies: Array<{ id: string; name: string; defectsReported: number }> = [];
+    const inactivityAlerts: Array<{ id: string; name: string; daysSinceLastCheck: number | null }> =
+      [];
+
+    await Promise.all(
+      companyList.map(async (company) => {
+        try {
+          let defectsReported = 0;
+          try {
+            const defectsCountSnap = await getCountFromServer(
+              query(
+                collection(firebaseDb!, 'vehicle_defects'),
+                where('company_id', '==', company.id),
+                where('reported_at', '>=', Timestamp.fromDate(monthStart)),
+                where('reported_at', '<', Timestamp.fromDate(monthEnd))
+              )
+            );
+            defectsReported = defectsCountSnap.data().count;
+          } catch {
+            defectsReported = 0;
+          }
+          if (defectsReported >= HIGH_DEFECT_THRESHOLD) {
+            highDefectCompanies.push({
+              id: company.id,
+              name: company.name || company.id,
+              defectsReported,
+            });
+          }
+
+          let daysSinceLastCheck: number | null = null;
+          try {
+            const latestInspectionSnap = await getDocs(
+              query(
+                collection(firebaseDb!, 'vehicle_inspections'),
+                where('company_id', '==', company.id),
+                orderBy('inspected_at', 'desc'),
+                limit(1)
+              )
+            );
+            const latestRaw = latestInspectionSnap.docs[0]
+              ? ((latestInspectionSnap.docs[0].data() as Inspection).inspected_at)
+              : undefined;
+            const latestDate = toDate(latestRaw);
+            daysSinceLastCheck = latestDate
+              ? Math.floor((Date.now() - latestDate.getTime()) / 86400000)
+              : null;
+          } catch {
+            daysSinceLastCheck = null;
+          }
+
+          if (daysSinceLastCheck === null || daysSinceLastCheck >= INACTIVITY_ALERT_DAYS) {
+            inactivityAlerts.push({
+              id: company.id,
+              name: company.name || company.id,
+              daysSinceLastCheck,
+            });
+          }
+        } catch (err) {
+          console.warn('Admin snapshot company failed', company.id, err);
+          inactivityAlerts.push({
+            id: company.id,
+            name: company.name || company.id,
+            daysSinceLastCheck: null,
+          });
+        }
+      })
+    );
 
     highDefectCompanies.sort((a, b) => b.defectsReported - a.defectsReported);
     inactivityAlerts.sort((a, b) => {
@@ -295,9 +348,11 @@ export default function AdminReportsPage() {
       activeCompanies,
       trialCompanies,
       paidCompanies,
+      promoCompanies,
+      legacyCompanies,
       highDefectCompanies: highDefectCompanies.slice(0, 8),
-      inactivityAlerts: inactivityAlerts.slice(0, 8),
-      billingRiskCompanies: billingRiskCompanies.slice(0, 8),
+      inactivityAlerts,
+      billingRiskCompanies,
     });
   }, []);
 
@@ -544,7 +599,7 @@ export default function AdminReportsPage() {
         const description = polishDescription(
           reporterName ? `${rawDescription} (reported by ${reporterName})` : rawDescription
         );
-        const raised = raisedDate ? raisedDate.toLocaleDateString('en-GB') : 'Unknown date';
+        const raised = raisedDate ? formatAdminDate(raisedDate) : 'Unknown date';
         return {
           vehicle: vehicleName,
           description,
@@ -592,7 +647,7 @@ export default function AdminReportsPage() {
             checksCompleted: checksCount,
             defectsRaised: defectsByUser[profileDoc.id] || 0,
             lastInspection: lastInspectionByUser[profileDoc.id]
-              ? lastInspectionByUser[profileDoc.id].toLocaleDateString('en-GB')
+              ? formatAdminDate(lastInspectionByUser[profileDoc.id])
               : '—',
           });
         } else {
@@ -872,16 +927,23 @@ export default function AdminReportsPage() {
         <p className="text-white/60">Generate company monthly PDFs and monitor admin-level risk signals.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="dashboard-card p-5">
-          <p className="text-white/60 text-xs uppercase tracking-wide">Active companies</p>
-          <p className="text-white text-3xl font-semibold mt-2">{snapshot?.activeCompanies ?? '—'}</p>
+          <p className="text-white/60 text-xs uppercase tracking-wide">Paid</p>
+          <p className="text-white text-3xl font-semibold mt-2">{snapshot?.paidCompanies ?? '—'}</p>
+          <p className="text-white/40 text-xs mt-1">Active Stripe subscription</p>
         </div>
         <div className="dashboard-card p-5">
-          <p className="text-white/60 text-xs uppercase tracking-wide">Trials / paid</p>
-          <p className="text-white text-3xl font-semibold mt-2">
-            {snapshot ? `${snapshot.trialCompanies} / ${snapshot.paidCompanies}` : '—'}
-          </p>
+          <p className="text-white/60 text-xs uppercase tracking-wide">Promo</p>
+          <p className="text-white text-3xl font-semibold mt-2">{snapshot?.promoCompanies ?? '—'}</p>
+        </div>
+        <div className="dashboard-card p-5">
+          <p className="text-white/60 text-xs uppercase tracking-wide">Legacy</p>
+          <p className="text-white text-3xl font-semibold mt-2">{snapshot?.legacyCompanies ?? '—'}</p>
+        </div>
+        <div className="dashboard-card p-5">
+          <p className="text-white/60 text-xs uppercase tracking-wide">Trials</p>
+          <p className="text-white text-3xl font-semibold mt-2">{snapshot?.trialCompanies ?? '—'}</p>
         </div>
         <div className="dashboard-card p-5">
           <p className="text-white/60 text-xs uppercase tracking-wide">Billing risk companies</p>
@@ -1165,13 +1227,13 @@ export default function AdminReportsPage() {
           Admin actions
         </h3>
         <div className="flex flex-wrap gap-3 text-sm">
-          <Link href="/dashboard/companies" className="text-blue-300 hover:underline">
+          <Link href="/dashboard/companies/" className="text-blue-300 hover:underline">
             Manage companies
           </Link>
-          <Link href="/dashboard/subscription" className="text-blue-300 hover:underline">
+          <Link href="/dashboard/subscription/" className="text-blue-300 hover:underline">
             Review subscription controls
           </Link>
-          <Link href="/dashboard/defects" className="text-blue-300 hover:underline">
+          <Link href="/dashboard/defects/" className="text-blue-300 hover:underline">
             Inspect defect workflows
           </Link>
         </div>

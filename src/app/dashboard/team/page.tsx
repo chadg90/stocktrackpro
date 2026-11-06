@@ -1,5 +1,7 @@
 'use client';
 
+import DashboardPageTitle from '../components/DashboardPageTitle';
+
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   collection,
@@ -16,7 +18,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Trash2, Search, Mail, User as UserIcon, Pencil, ShieldOff, Link2, Check as CheckIcon } from 'lucide-react';
+import { Trash2, Search, Mail, User as UserIcon, Pencil, Link2, Check as CheckIcon } from 'lucide-react';
 import Modal from '../components/Modal';
 import { EmptyStateTableRow } from '../components/EmptyState';
 import TableSkeleton from '../components/TableSkeleton';
@@ -93,7 +95,8 @@ export default function TeamPage() {
   const [companyName, setCompanyName] = useState<string | undefined>(undefined);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [companiesMap, setCompaniesMap] = useState<Record<string, string>>({});
-  const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>('all'); // For admin filtering
+  /** Admins scope Team to one company (default: their own). No "all companies" list. */
+  const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
 
   // Check permissions
@@ -119,7 +122,13 @@ export default function TeamPage() {
           }
           if (data.role === 'admin') {
             await fetchCompanies();
-            fetchAllUsers(); // Admins see all users
+            const initialCompanyId = data.company_id || '';
+            setSelectedCompanyFilter(initialCompanyId);
+            if (initialCompanyId) fetchTeam(initialCompanyId);
+            else {
+              setTeam([]);
+              setLoading(false);
+            }
           } else if (data.company_id) {
             fetchTeam(data.company_id);
           }
@@ -163,23 +172,6 @@ export default function TeamPage() {
       setInvites(inviteData);
     } catch (error) {
       console.error('Error fetching invites:', error);
-    }
-  };
-
-  const fetchAllUsers = async () => {
-    if (!firebaseDb) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const q = query(collection(firebaseDb!, 'profiles'));
-      const snapshot = await getDocs(q);
-      const allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Profile));
-      setTeam(allUsers);
-    } catch (err) {
-      console.error('Error fetching all users:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load team');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -241,12 +233,9 @@ export default function TeamPage() {
 
       await updateDoc(doc(firebaseDb!, 'profiles', editingUser.id), updateData);
 
-      // Refresh team list
-      if (isAdmin) {
-        fetchAllUsers();
-      } else if (currentUserProfile?.company_id) {
-        fetchTeam(currentUserProfile.company_id);
-      }
+      // Refresh team list for the scoped company
+      const scopeId = isAdmin ? selectedCompanyFilter : currentUserProfile?.company_id;
+      if (scopeId) fetchTeam(scopeId);
       setIsEditModalOpen(false);
       setEditingUser(null);
     } catch (error) {
@@ -256,21 +245,6 @@ export default function TeamPage() {
       setProcessing(false);
     }
   };
-
-  const handleDeleteCompany = async () => {
-    if (!firebaseDb || !isAdmin || !currentUserProfile?.company_id) return;
-    const companyId = currentUserProfile.company_id;
-    if (!confirm(`Delete company "${companyName || companyId}"? This cannot be undone and will orphan related data.`)) return;
-    try {
-      await deleteDoc(doc(firebaseDb!, 'companies', companyId));
-      alert('Company deleted. Please sign out.');
-      setCompanyName(undefined);
-    } catch (error) {
-      console.error('Error deleting company:', error);
-      alert('Failed to delete company.');
-    }
-  };
-
 
   const handleRemoveUser = async (userId: string) => {
     if (userId === currentUserProfile?.id) {
@@ -283,12 +257,8 @@ export default function TeamPage() {
     try {
       // Deleting profile triggers cloud function to delete Auth user
       await deleteDoc(doc(firebaseDb!, 'profiles', userId));
-      // Refresh team list
-      if (isAdmin) {
-        fetchAllUsers();
-      } else if (currentUserProfile?.company_id) {
-        fetchTeam(currentUserProfile.company_id);
-      }
+      const scopeId = isAdmin ? selectedCompanyFilter : currentUserProfile?.company_id;
+      if (scopeId) fetchTeam(scopeId);
     } catch (error) {
       console.error('Error removing user:', error);
       alert('Failed to remove user.');
@@ -469,22 +439,25 @@ export default function TeamPage() {
     }
   };
 
-  // Filter team by search term and company (if admin)
-  const filteredTeam = team.filter(member => {
-    const matchesSearch = displayNameFor(member).toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-      member.email?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-    
-    // If admin and company filter is set, also filter by company
-    if (isAdmin && selectedCompanyFilter !== 'all') {
-      return matchesSearch && member.company_id === selectedCompanyFilter;
-    }
-    
-    return matchesSearch;
+  // Search within the scoped company only; hide profiles with no company.
+  const filteredTeam = team.filter((member) => {
+    if (!member.company_id) return false;
+    return (
+      displayNameFor(member).toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+      member.email?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+    );
   });
 
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchTerm, selectedCompanyFilter]);
+
+  useEffect(() => {
+    if (!isAdmin || !selectedCompanyFilter) return;
+    fetchTeam(selectedCompanyFilter);
+    fetchInvites(selectedCompanyFilter);
+    fetchCompany(selectedCompanyFilter);
+  }, [isAdmin, selectedCompanyFilter]);
 
   const paginatedTeam = useMemo(
     () => filteredTeam.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
@@ -493,12 +466,13 @@ export default function TeamPage() {
 
   const handleRetry = () => {
     setError(null);
-    if (isAdmin) fetchAllUsers();
-    else if (currentUserProfile?.company_id) fetchTeam(currentUserProfile.company_id);
+    const scopeId = isAdmin ? selectedCompanyFilter : currentUserProfile?.company_id;
+    if (scopeId) fetchTeam(scopeId);
   };
 
   return (
     <div>
+      <DashboardPageTitle title="Team" />
       {error && (
         <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100 flex flex-wrap items-center justify-between gap-2" role="alert">
           <span>{error}</span>
@@ -535,16 +509,6 @@ export default function TeamPage() {
               </button>
             </>
           )}
-          {isAdmin && (
-            <button
-              onClick={handleDeleteCompany}
-                className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-red-400/40 text-red-200 hover:border-red-300 hover:text-red-100 transition-colors"
-                title="Admin only: delete this company record"
-              >
-                <ShieldOff className="h-4 w-4" />
-              Delete Company
-            </button>
-          )}
         </div>
       </div>
 
@@ -568,8 +532,8 @@ export default function TeamPage() {
               value={selectedCompanyFilter}
               onChange={(e) => setSelectedCompanyFilter(e.target.value)}
               className="w-full bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
+              aria-label="Company"
             >
-              <option value="all">All Companies</option>
               {companies.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name || c.id}

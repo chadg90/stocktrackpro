@@ -58,13 +58,13 @@ function SubscriptionPaywall({ trialExpired }: { trialExpired: boolean }) {
         </div>
         <div className="space-y-3">
           <Link
-            href="/dashboard/subscription"
+            href="/dashboard/subscription/"
             className="block w-full btn-brand-blue text-white font-semibold rounded-xl py-3 px-6 transition-colors"
           >
             Subscribe &amp; pay
           </Link>
           <Link
-            href="/pricing"
+            href="/pricing/"
             className="block w-full rounded-xl border border-slate-300 bg-slate-50 text-slate-800 font-medium py-3 px-6 hover:bg-slate-100 transition-colors"
           >
             View pricing
@@ -109,15 +109,6 @@ export default function DashboardLayoutClient({
       }
     }
   }, []);
-
-  useEffect(() => {
-    if (!authorized) return;
-    const previous = document.title;
-    document.title = 'Dashboard | Fleet Track PRO';
-    return () => {
-      document.title = previous;
-    };
-  }, [authorized]);
 
   useEffect(() => {
     if (!firebaseAuth || !firebaseDb) {
@@ -274,7 +265,7 @@ export default function DashboardLayoutClient({
                   : 'Please sign in to open the manager dashboard.'}
               </p>
               <Link
-                href="/dashboard"
+                href="/dashboard/"
                 className="inline-flex w-full items-center justify-center rounded-xl btn-brand-blue px-6 py-3 text-sm font-semibold text-white"
               >
                 Go to dashboard login

@@ -48,18 +48,18 @@ export default function PrivacyPolicy() {
             </p>
             <p className="text-slate-600 leading-relaxed">
               Read this together with our{' '}
-              <Link href="/terms" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
+              <Link href="/terms/" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Terms and Conditions
               </Link>
               ,{' '}
               <Link
-                href="/subscription-terms"
+                href="/subscription-terms/"
                 className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"
               >
                 Subscription Terms
               </Link>
               , and{' '}
-              <Link href="/cookies" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
+              <Link href="/cookies/" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Cookie Policy
               </Link>
               .
@@ -200,7 +200,7 @@ export default function PrivacyPolicy() {
             <p className="text-slate-600 leading-relaxed mt-4">
               Contractual billing rules are in our{' '}
               <Link
-                href="/subscription-terms"
+                href="/subscription-terms/"
                 className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"
               >
                 Subscription Terms
@@ -269,7 +269,7 @@ export default function PrivacyPolicy() {
             <p className="text-slate-600 leading-relaxed mb-4">
               Access periods, trials, and suspension are described in our{' '}
               <Link
-                href="/subscription-terms"
+                href="/subscription-terms/"
                 className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"
               >
                 Subscription Terms
@@ -318,7 +318,7 @@ export default function PrivacyPolicy() {
                 need first. Subscription cancellation is managed through the Stripe billing portal linked from your
                 dashboard (see{' '}
                 <Link
-                  href="/subscription-terms"
+                  href="/subscription-terms/"
                   className="underline underline-offset-2 hover:text-amber-800"
                 >
                   Subscription Terms

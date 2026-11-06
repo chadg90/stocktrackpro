@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
+import FirebaseClientProvider from '@/components/FirebaseClientProvider';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Sign up',
@@ -18,5 +21,5 @@ export const metadata: Metadata = {
 };
 
 export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <FirebaseClientProvider>{children}</FirebaseClientProvider>;
 }

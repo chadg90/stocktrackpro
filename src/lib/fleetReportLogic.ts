@@ -12,6 +12,7 @@ import {
   subWeeks,
 } from 'date-fns';
 import type { Timestamp } from 'firebase/firestore';
+import { fifteenMonthsAgoStart } from '@/lib/dvsaRetention';
 
 export type FleetVehicle = {
   id: string;
@@ -109,7 +110,7 @@ export function getMonthBounds(year: number, month: number): { start: Date; end:
   return { start, end: endOfMonth(start) };
 }
 
-export type CompliancePeriodPreset = 'week' | 'last_30_days' | 'month';
+export type CompliancePeriodPreset = 'week' | 'last_30_days' | 'month' | 'last_15_months';
 
 export function getCompliancePeriodBounds(
   preset: CompliancePeriodPreset,
@@ -117,6 +118,9 @@ export function getCompliancePeriodBounds(
   now = new Date()
 ): { start: Date; end: Date } {
   if (preset === 'last_30_days') return getLast30DaysBounds(now);
+  if (preset === 'last_15_months') {
+    return { start: fifteenMonthsAgoStart(), end: endOfDay(now) };
+  }
   if (preset === 'month') {
     const [y, m] = (monthValue || format(now, 'yyyy-MM')).split('-').map(Number);
     if (y && m >= 1 && m <= 12) return getMonthBounds(y, m);
@@ -127,6 +131,7 @@ export function getCompliancePeriodBounds(
 
 export function formatCompliancePeriodRange(bounds: { start: Date; end: Date }, preset: CompliancePeriodPreset): string {
   if (preset === 'month') return format(bounds.start, 'MMMM yyyy');
+  if (preset === 'last_15_months') return 'Up to 15 months';
   return `${format(bounds.start, 'd MMM')} – ${format(bounds.end, 'd MMM yyyy')}`;
 }
 
@@ -148,6 +153,14 @@ export function compliancePeriodStatusLabels(preset: CompliancePeriodPreset): {
     return {
       checked: 'Checked',
       notChecked: 'No inspection this month',
+      inspected: 'Yes',
+      notInspected: 'No',
+    };
+  }
+  if (preset === 'last_15_months') {
+    return {
+      checked: 'Checked',
+      notChecked: 'No inspection in last 15 months',
       inspected: 'Yes',
       notInspected: 'No',
     };
@@ -790,7 +803,7 @@ export type VehicleWeekRow = {
 export function getActiveFleetVehicles(vehicles: FleetVehicle[]): FleetVehicle[] {
   return vehicles.filter((v) => {
     const s = (v.status || 'active').toLowerCase();
-    return s !== 'archived' && s !== 'sold';
+    return s !== 'archived' && s !== 'sold' && s !== 'retired';
   });
 }
 

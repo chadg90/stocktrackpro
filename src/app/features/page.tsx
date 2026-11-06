@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from '../components/Navbar';
 import Link from 'next/link';
 import { Car, Users, Wrench, Shield, Gauge, FileCheck, ArrowRight, Smartphone } from 'lucide-react';
+import { PLATFORM_AVAILABILITY } from '@/lib/brand';
 
 const WHATSAPP_ENQUIRY_URL =
   'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
@@ -133,7 +134,7 @@ export default function Features() {
             </h1>
             <p className="text-lg text-[var(--mkt-muted)] leading-relaxed">
               No bloat. One fleet subscription covers DVSA walkaround inspections, defect workflow, MOT monitoring, and team
-              management across iOS, Android, and the web dashboard for cars, vans, and light commercial vehicles.
+              management — {PLATFORM_AVAILABILITY}, plus the web dashboard — for cars, vans, and light commercial vehicles.
             </p>
           </div>
         </div>
@@ -179,7 +180,7 @@ export default function Features() {
                         <div className="mt-4 space-y-2 text-sm">
                           <p>
                             <Link
-                              href="/vehicle-walkaround-check-app"
+                              href="/vehicle-walkaround-check-app/"
                               className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
                             >
                               Explore the vehicle walkaround check app
@@ -187,7 +188,7 @@ export default function Features() {
                           </p>
                           <p>
                             <Link
-                              href="/compliance-centre/paper-vs-digital-inspection-sheets"
+                              href="/compliance-centre/paper-vs-digital-inspection-sheets/"
                               className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
                             >
                               Read why UK fleets are moving from paper to digital inspection sheets
@@ -198,7 +199,7 @@ export default function Features() {
                       {feature.title === 'Defect workflow: flagged to fixed' && (
                         <p className="mt-4 text-sm">
                           <Link
-                            href="/vehicle-defect-reporting-software"
+                            href="/vehicle-defect-reporting-software/"
                             className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
                           >
                             Explore vehicle defect reporting and close-out
@@ -209,7 +210,7 @@ export default function Features() {
                         <div className="mt-4 space-y-2 text-sm">
                           <p>
                             <Link
-                              href="/fleet-mot-tax-reminders"
+                              href="/fleet-mot-tax-reminders/"
                               className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
                             >
                               Explore fleet MOT and tax reminders
@@ -217,7 +218,7 @@ export default function Features() {
                           </p>
                           <p>
                             <Link
-                              href="/compliance-centre/mot-expiry-tracking-for-fleets"
+                              href="/compliance-centre/mot-expiry-tracking-for-fleets/"
                               className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
                             >
                               Learn how MOT expiry tracking helps fleets stay ahead of renewals
@@ -253,7 +254,7 @@ export default function Features() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href="/pricing"
+              href="/pricing/"
               className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-[var(--mkt-border)] text-[var(--mkt-ink)] bg-white hover:bg-slate-50 transition-all duration-200 font-medium"
             >
               View pricing

@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { HardDrive, PoundSterling, TrendingUp, Wallet } from 'lucide-react';
 import { firebaseDb } from '@/lib/firebase';
-import { preferSepMonth } from '@/lib/dateUtils';
+import { formatAdminDateTime, formatAdminDayId } from '@/lib/adminDateFormat';
 import TableSkeleton from '../../components/TableSkeleton';
 
 const STORAGE_INCLUDED_GB = 5;
@@ -55,19 +55,7 @@ function formatGb(bytes?: number | null): string {
 
 function formatWhen(ts?: Timestamp | null): string {
   if (!ts) return 'Waiting for first snapshot';
-  try {
-    return preferSepMonth(
-      ts.toDate().toLocaleString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    );
-  } catch {
-    return 'Waiting for first snapshot';
-  }
+  return formatAdminDateTime(ts, 'Waiting for first snapshot');
 }
 
 function clampPercent(value: number): number {
@@ -329,7 +317,7 @@ export default function BillingAdminPage() {
                   <div
                     className="w-full rounded-t-md bg-blue-500/80 dark:bg-blue-400/80"
                     style={{ height: `${height}%` }}
-                    title={`${row.date}: ${formatGbp(row.dayCostGbp)} (MTD ${formatGbp(row.monthCostGbp)})`}
+                    title={`${formatAdminDayId(row.date, row.date)}: ${formatGbp(row.dayCostGbp)} (MTD ${formatGbp(row.monthCostGbp)})`}
                   />
                   <div className="mt-1 text-[10px] text-gray-500">
                     {row.date.slice(8)}

@@ -36,12 +36,11 @@ import {
 } from '@/lib/dvsaRetention';
 import { buildMileageAttentionRows } from '@/lib/fleetReportLogic';
 import { countMotTaxStatus } from '@/lib/motTaxExpiry';
-import ExportButton from './components/ExportButton';
+import DashboardPageTitle from './components/DashboardPageTitle';
 import PageGuideButton from './components/PageGuide';
 import SetupChecklist from './components/SetupChecklist';
 import GetDriverAppCard from './components/GetDriverAppCard';
 import KpiValue, { SoftSpinner } from './components/KpiValue';
-import { exportFleetHealthReportPDF } from '@/lib/fleetHealthReportPdf';
 import {
   RefreshCw,
   Truck,
@@ -638,96 +637,13 @@ export default function DashboardPage() {
     return `last ${dateRange} days`;
   }, [dateRange]);
 
-  // Export data preparation (full columns for compliance / weekly archives)
-  const exportData = useMemo(() => {
-    return {
-      vehicles: vehicles.map((v) => ({
-        'Vehicle ID': v.id,
-        Registration: v.registration || '',
-        Make: v.make || '',
-        Model: v.model || '',
-        Year: v.year ?? '',
-        VIN: v.vin || '',
-        Mileage: v.mileage ?? '',
-        Status: v.status || '',
-        Notes: v.notes || '',
-        'Created At': formatDate(v.created_at),
-        'Updated At': formatDate(v.updated_at),
-      })),
-      users: users.map((u) => ({
-        'User ID': u.id,
-        Name: getUserDisplayName(u, ''),
-        Email: u.email || '',
-        Role: u.role || '',
-        'Created At': formatDate(u.created_at),
-        'Last Login': formatDate(u.last_login),
-      })),
-      inspections: inspections.map((i) => {
-        const v = vehicles.find((x) => x.id === i.vehicle_id);
-        const inspector = users.find((u) => u.id === i.inspected_by);
-        return {
-          'Inspection ID': i.id,
-          'Vehicle ID': i.vehicle_id || '',
-          Registration: v?.registration || '',
-          'Inspected At': formatDate(i.inspected_at),
-          Mileage: i.mileage ?? '',
-          'Has Defect': i.has_defect ? 'Yes' : 'No',
-          'Inspector ID': i.inspected_by || '',
-          Inspector: getUserDisplayName(inspector, i.inspected_by || ''),
-          Notes: i.notes || '',
-        };
-      }),
-      defects: defects.map((d) => {
-        const v = vehicles.find((x) => x.id === d.vehicle_id);
-        const reporter = users.find((u) => u.id === d.reported_by);
-        return {
-          'Defect ID': d.id,
-          'Vehicle ID': d.vehicle_id || '',
-          Registration: v?.registration || '',
-          Description: d.description || '',
-          Severity: d.severity || '',
-          Status: d.status || '',
-          'Reported At': formatDate(d.reported_at),
-          'Reported By ID': d.reported_by || '',
-          'Reported By': getUserDisplayName(reporter, d.reported_by || ''),
-          'Resolved At': formatDate(d.resolved_at),
-          'Resolved By': d.resolved_by || '',
-          'Resolution Notes': d.resolution_notes || '',
-        };
-      }),
-    };
-  }, [vehicles, users, inspections, defects]);
-
-  const handleFleetHealthPdf = useCallback(() => {
-    if (vehicles.length === 0 && defects.length === 0) {
-      alert('No fleet data loaded yet. Refresh the dashboard or add vehicles/defects first.');
-      return;
-    }
-    const nameFor = (userId: string | undefined) => {
-      if (!userId) return '—';
-      const u = users.find((x) => x.id === userId);
-      if (!u) return userId;
-      if (u.first_name || u.last_name) return `${u.first_name || ''} ${u.last_name || ''}`.trim();
-      if (u.display_name) return u.display_name.trim();
-      if (u.displayName) return u.displayName;
-      if (u.name) return u.name;
-      if (u.email) return u.email.split('@')[0];
-      return userId;
-    };
-    exportFleetHealthReportPDF({
-      companyName: profile?.company_name,
-      vehicles,
-      defects,
-      getUserDisplayName: nameFor,
-    });
-  }, [vehicles, defects, users, profile]);
-
   const isAuthedManager = useMemo(() => {
     return !!authUser && profile && (profile.role === 'manager' || profile.role === 'admin') && profile.company_id;
   }, [authUser, profile]);
 
   return (
     <div className="min-h-screen">
+      <DashboardPageTitle title="Dashboard" />
       {!authUser && <Navbar />}
       {!authUser ? (
             <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 pb-16 pt-28 sm:px-6">
@@ -898,9 +814,6 @@ export default function DashboardPage() {
                   <p className="text-white/60 text-sm mt-1">
                     What needs attention, plus activity for {rangeLabel}
                   </p>
-                  <p className="text-white/40 text-xs mt-1">
-                    Export is a snapshot of this view. Full Excel is in Fleet report. 6/12 month packs are in Vehicle reports.
-                  </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center gap-2" data-tour="home-period">
@@ -936,19 +849,12 @@ export default function DashboardPage() {
                       ))}
                     </div>
                   </div>
-                  <ExportButton
-                    data={exportData.vehicles}
-                    filename={`stp-dashboard-export-${format(new Date(), 'yyyy-MM-dd')}`}
-                    reportTitle={`Fleet Track PRO — Dashboard data export (${format(new Date(), 'PPP')})`}
-                    fleetHealthPdf={{ onExport: handleFleetHealthPdf }}
-                    pdfMeta={{ organization: profile?.company_name }}
-                    multiSheetData={[
-                      { name: 'Vehicles', data: exportData.vehicles },
-                      { name: 'Users', data: exportData.users },
-                      { name: 'Inspections', data: exportData.inspections },
-                      { name: 'Defects', data: exportData.defects },
-                    ]}
-                  />
+                  <Link
+                    href="/dashboard/fleet-report/"
+                    className="btn-dashboard-action inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10 transition-colors"
+                  >
+                    Export full Excel
+                  </Link>
                   <button
                     type="button"
                     onClick={handleManualRefresh}
@@ -992,14 +898,14 @@ export default function DashboardPage() {
                   mileageAttentionCount === 0 &&
                   inspections.length > 0 ? (
                   <p className="text-white/60 text-sm">
-                    Nothing urgent. No expired MOT or tax, nothing due in the next 30 days, no open defects, and no vans to review in Mileage.
+                    Nothing urgent. No expired MOT or tax, nothing due in the next 30 days, no open defects, and no vehicles to review in Mileage.
                   </p>
                 ) : dashboardReady ? (
                   <ul className="space-y-2 text-sm">
                     {motTaxExpiredCount > 0 && (
                       <li>
                         <Link
-                          href="/dashboard/mot-tax?filter=expired"
+                          href="/dashboard/mot-tax/?filter=expired"
                           className="inline-flex items-center gap-2 text-red-700 hover:underline dark:text-red-300"
                         >
                           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
@@ -1010,7 +916,7 @@ export default function DashboardPage() {
                     {motTaxDueSoonCount > 0 && (
                       <li>
                         <Link
-                          href="/dashboard/mot-tax?filter=due_soon"
+                          href="/dashboard/mot-tax/?filter=due_soon"
                           className="inline-flex items-center gap-2 text-amber-700 hover:underline dark:text-amber-300"
                         >
                           <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
@@ -1021,7 +927,7 @@ export default function DashboardPage() {
                     {(openDefectsNow ?? 0) > 0 && (
                       <li>
                         <Link
-                          href="/dashboard/defects?status=open"
+                          href="/dashboard/defects/?status=open"
                           className="inline-flex items-center gap-2 text-red-700 hover:underline dark:text-red-300"
                         >
                           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
@@ -1032,7 +938,7 @@ export default function DashboardPage() {
                     {mileageAttentionCount > 0 && (
                       <li>
                         <Link
-                          href="/dashboard/fleet-report/mileage"
+                          href="/dashboard/mileage/"
                           className="inline-flex items-center gap-2 text-amber-700 hover:underline dark:text-amber-300"
                         >
                           <ClipboardList className="h-4 w-4 shrink-0" aria-hidden />
@@ -1058,14 +964,14 @@ export default function DashboardPage() {
                 {dashboardReady && (
                   <p className="mt-3 text-xs text-white/45 leading-relaxed">
                     Odd mileage readings are often mistyped numbers. Ask drivers to photograph the
-                    odometer; managers can Correct a reading from Fleet report → Mileage using that photo.
+                    odometer; managers can Correct a reading from Mileage using that photo.
                   </p>
                 )}
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8" data-tour="home-kpis">
                 <Link
-                  href="/dashboard/fleet"
+                  href="/dashboard/fleet/"
                   className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 >
                   <div className="w-10 h-10 rounded-lg bg-blue-500/15 flex items-center justify-center mb-3">
@@ -1079,7 +985,7 @@ export default function DashboardPage() {
                 </Link>
 
                 <Link
-                  href="/dashboard/defects?status=open"
+                  href="/dashboard/defects/?status=open"
                   className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 >
                   <div className="w-10 h-10 rounded-lg bg-red-500/15 flex items-center justify-center mb-3">
@@ -1091,7 +997,7 @@ export default function DashboardPage() {
                 </Link>
 
                 <Link
-                  href="/dashboard/inspection-proof"
+                  href="/dashboard/inspections/"
                   className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 >
                   <div className="w-10 h-10 rounded-lg bg-cyan-500/15 flex items-center justify-center mb-3">
@@ -1105,7 +1011,7 @@ export default function DashboardPage() {
                 </Link>
 
                 <Link
-                  href="/dashboard/mot-tax?filter=expired"
+                  href="/dashboard/mot-tax/?filter=expired"
                   className="dashboard-card p-5 block hover:border-red-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/40"
                 >
                   <div className="w-10 h-10 rounded-lg bg-red-500/15 flex items-center justify-center mb-3">
@@ -1117,7 +1023,7 @@ export default function DashboardPage() {
                 </Link>
 
                 <Link
-                  href="/dashboard/mot-tax?filter=due_soon"
+                  href="/dashboard/mot-tax/?filter=due_soon"
                   className="dashboard-card p-5 block hover:border-blue-500/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                 >
                   <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center mb-3">

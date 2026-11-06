@@ -1,10 +1,10 @@
 'use client';
 
+import DashboardPageTitle from '../components/DashboardPageTitle';
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  ArrowLeft,
   ShieldCheck,
   RefreshCw,
   AlertTriangle,
@@ -412,14 +412,6 @@ function MotTaxPageInner() {
 
   return (
     <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 space-y-5 text-zinc-900 dark:text-white">
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 transition-colors dark:text-white/60 dark:hover:text-white"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden />
-        Back to dashboard
-      </Link>
-
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-[30px] font-bold text-zinc-900 dark:text-white flex items-center gap-2">
@@ -696,6 +688,7 @@ function KpiCard({
 }) {
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-blue-500/25 dark:bg-black">
+      <DashboardPageTitle title="MOT & Tax" />
       <p className="text-zinc-500 dark:text-white/60 text-xs uppercase tracking-wider">
         {label}
       </p>

@@ -28,15 +28,14 @@ const demoPhoneShellClass =
 const INITIAL_DEMO_IMAGE_SOURCE =
   stepById(INTERACTIVE_DEMO_START_ID)?.imageSrc ?? INTERACTIVE_DEMO_STEPS[0].imageSrc;
 
-/** Covers screenshot status bars so every demo step shows the same time and icons. */
+/** Covers screenshot status bars so every demo step shows the same icons (no clock). */
 function DemoPhoneStatusBar() {
   return (
     <div
       className="pointer-events-none absolute inset-x-0 top-0 z-[18] h-[5.5%] bg-[var(--demo-app-bg)]"
       aria-hidden
     >
-      <div className="flex h-full items-end justify-between px-[7.5%] pb-[5%] text-[11px] font-semibold leading-none text-slate-900">
-        <span className="tracking-tight">07:00</span>
+      <div className="flex h-full items-end justify-end px-[7.5%] pb-[5%] text-[11px] font-semibold leading-none text-slate-900">
         <div className="flex items-center gap-1">
           <svg viewBox="0 0 18 12" className="h-[11px] w-[16px]" aria-hidden>
             <rect x="0" y="8" width="3" height="4" rx="0.5" fill="currentColor" />
@@ -229,7 +228,7 @@ export default function InteractiveAppDemo({ className = '', controlsOnDark = fa
         <div
           className="relative w-[min(100%,260px)] sm:w-[280px] lg:w-[300px] aspect-[471/1024] shrink-0"
           role="region"
-          aria-label={`Interactive app demo — ${step.title}`}
+          aria-label="Interactive demo of the driver app"
         >
         {/* Phone shell */}
         <div className={demoPhoneShellClass}>
@@ -241,24 +240,30 @@ export default function InteractiveAppDemo({ className = '', controlsOnDark = fa
             />
 
             <div className="relative h-full w-full">
-              {renderedImageSources.map((src) => {
-                const isActive = step.imageSrc === src;
-                const isPrefetchCandidate = prefetchImageSources.includes(src);
-                return (
-                  <Image
-                    key={src}
-                    src={src}
-                    alt={isActive ? step.imageAlt : ''}
-                    aria-hidden={!isActive}
-                    fill
-                    sizes="(max-width: 640px) 280px, 300px"
-                    priority={isActive || src === INITIAL_DEMO_IMAGE_SOURCE || isPrefetchCandidate}
-                    className={`object-cover object-top transition-opacity duration-100 ease-out ${
-                      isActive ? 'z-[1] opacity-100' : 'z-0 opacity-0'
-                    }`}
-                  />
-                );
-              })}
+              {/* Screenshot layer announced as an image; not interactive. */}
+              <div className="absolute inset-0">
+                {renderedImageSources.map((src) => {
+                  const isActive = step.imageSrc === src;
+                  // Navbar logo is the LCP element — do not priority-load demo screenshots.
+                  const isFirstFrame = src === INITIAL_DEMO_IMAGE_SOURCE;
+                  return (
+                    <Image
+                      key={src}
+                      src={src}
+                      alt={isActive ? step.imageAlt : ''}
+                      aria-hidden={!isActive}
+                      tabIndex={-1}
+                      draggable={false}
+                      fill
+                      sizes="(max-width: 640px) 280px, 300px"
+                      loading={isFirstFrame ? 'eager' : 'lazy'}
+                      className={`pointer-events-none select-none object-cover object-top transition-opacity duration-100 ease-out ${
+                        isActive ? 'z-[1] opacity-100' : 'z-0 opacity-0'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
               <DemoPhoneStatusBar />
 
               {showGuide && step.guide ? (
@@ -282,7 +287,6 @@ export default function InteractiveAppDemo({ className = '', controlsOnDark = fa
                         setPulse(true);
                       }}
                       className={`mt-3.5 w-full px-3 py-2.5 text-[13px] ${demoCtaClass}`}
-                      aria-label={`${step.guide.continueLabel} — continue the demo`}
                     >
                       {step.guide.continueLabel}
                       <span className="ml-1.5 opacity-90" aria-hidden>
@@ -323,7 +327,6 @@ export default function InteractiveAppDemo({ className = '', controlsOnDark = fa
                       href={step.callout.continueHref}
                       className={`absolute z-30 left-1/2 w-[84%] -translate-x-1/2 px-3 py-2 text-center text-[12px] ${demoCtaClass}`}
                       style={{ top: `${calloutLayout!.continueTop}%` }}
-                      aria-label={`${step.callout.continueLabel} — start your free trial`}
                     >
                       {step.callout.continueLabel}
                     </Link>
@@ -340,7 +343,6 @@ export default function InteractiveAppDemo({ className = '', controlsOnDark = fa
                       }}
                       className={`absolute z-30 left-1/2 w-[84%] -translate-x-1/2 px-3 py-2 text-[12px] ${demoCtaClass}`}
                       style={{ top: `${calloutLayout!.continueTop}%` }}
-                      aria-label={`${step.callout.continueLabel} — continue the demo`}
                     >
                       {step.callout.continueLabel}
                       {!step.callout.continueHref ? (
@@ -370,11 +372,6 @@ export default function InteractiveAppDemo({ className = '', controlsOnDark = fa
                         width: `${spot.width}%`,
                         height: `${spot.height}%`,
                       }}
-                      aria-label={
-                        waiting
-                          ? `${spot.label} — next screen coming soon`
-                          : `Tap ${spot.label} to continue the demo`
-                      }
                     >
                       <span
                         className={`absolute inset-0 ${cornerClass} ring-2 ring-amber-400 bg-amber-300/15 ${
@@ -382,8 +379,9 @@ export default function InteractiveAppDemo({ className = '', controlsOnDark = fa
                         }`}
                         aria-hidden
                       />
+                      {/* Desktop/tablet: hint beside the hotspot. Narrow phones: shown below the phone. */}
                       <span
-                        className={`pointer-events-none absolute left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-amber-400 px-3 py-1.5 text-xs font-bold tracking-wide text-slate-900 shadow-md ${
+                        className={`pointer-events-none absolute left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-amber-400 px-3 py-1.5 text-xs font-bold tracking-wide text-slate-900 shadow-md max-[430px]:hidden ${
                           hintAbove
                             ? 'bottom-[calc(100%+8px)]'
                             : 'top-[calc(100%+8px)]'
@@ -409,19 +407,34 @@ export default function InteractiveAppDemo({ className = '', controlsOnDark = fa
         </div>
       </div>
 
+      {showHotspots && step.hotspots.length > 0 ? (
+        <div className="min-[431px]:hidden w-full max-w-[280px] px-2 -mt-2 mb-1 flex flex-col items-center gap-2">
+          {step.hotspots.map((spot) => (
+            <p
+              key={`hint-${spot.id}`}
+              className={`rounded-full bg-amber-400 px-3 py-1.5 text-center text-xs font-bold tracking-wide text-slate-900 shadow-md ${
+                pulse ? 'animate-pulse' : ''
+              }`}
+            >
+              {spot.nextStepId ? spot.hint : 'Next screen soon'}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
       <p
         className={`text-center text-xs ${
           controlsOnDark ? 'text-slate-300' : 'text-slate-500'
         }`}
       >
-        Interactive demo · {step.title}
+        Interactive demo of the driver app
         {canBack ? (
           <>
             {' · '}
             <button
               type="button"
               onClick={goBack}
-              className={`font-medium hover:underline ${
+              className={`font-medium hover:underline min-h-[44px] sm:min-h-0 inline-flex items-center ${
                 controlsOnDark ? 'text-sky-300 hover:text-sky-200' : 'text-[var(--brand-blue)]'
               }`}
             >
@@ -435,7 +448,7 @@ export default function InteractiveAppDemo({ className = '', controlsOnDark = fa
             <button
               type="button"
               onClick={restart}
-              className={`font-medium hover:underline ${
+              className={`font-medium hover:underline min-h-[44px] sm:min-h-0 inline-flex items-center ${
                 controlsOnDark ? 'text-sky-300 hover:text-sky-200' : 'text-[var(--brand-blue)]'
               }`}
             >

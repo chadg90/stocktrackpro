@@ -5,14 +5,15 @@ import { LogIn, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { firebaseAuth } from '@/lib/firebase';
+import { FREE_TRIAL_CTA } from '@/lib/brand';
 
 const baseNavigation = [
   { name: 'Home', href: '/' },
-  { name: 'Features', href: '/features' },
-  { name: 'Compliance', href: '/compliance-centre' },
-  { name: 'Pricing', href: '/pricing' },
-  { name: 'FAQ', href: '/faq' },
-  { name: 'Contact', href: '/contact' },
+  { name: 'Features', href: '/features/' },
+  { name: 'Compliance', href: '/compliance-centre/' },
+  { name: 'Pricing', href: '/pricing/' },
+  { name: 'FAQ', href: '/faq/' },
+  { name: 'Contact', href: '/contact/' },
 ];
 export type NavbarAuthResult = {
   navigation: typeof baseNavigation;
@@ -67,7 +68,7 @@ export function NavbarAuthButtons({
   if (!authChecked) {
     return (
       <Link
-        href="/dashboard"
+        href="/dashboard/"
         className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:text-[var(--brand-blue)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white"
       >
         <LogIn className="h-4 w-4" aria-hidden />
@@ -92,7 +93,7 @@ export function NavbarAuthButtons({
   }
   return (
     <Link
-      href="/dashboard"
+      href="/dashboard/"
       className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:text-[var(--brand-blue)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white"
       onClick={onLinkClick}
     >
@@ -116,7 +117,7 @@ export function NavbarAuthButtonsMobile({
   if (!authChecked) {
     return (
       <Link
-        href="/dashboard"
+        href="/dashboard/"
         className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-slate-800 hover:text-[var(--brand-blue)] focus:outline-none focus:ring-2 focus:ring-blue-500"
         onClick={onLinkClick}
       >
@@ -142,7 +143,7 @@ export function NavbarAuthButtonsMobile({
   }
   return (
     <Link
-      href="/dashboard"
+      href="/dashboard/"
       className="flex w-full items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-slate-800 hover:text-[var(--brand-blue)] focus:outline-none focus:ring-2 focus:ring-blue-500"
       onClick={onLinkClick}
     >
@@ -166,11 +167,11 @@ export function NavbarNavContent({ onLinkClick }: { onLinkClick: () => void }) {
           {item.name}
         </Link>
       ))}
-      <div className="ml-2 lg:ml-3 pl-2 lg:pl-3 border-l border-[var(--mkt-border)] flex items-center gap-1.5 lg:gap-2">
+      <div className="ml-2 lg:ml-3 pl-2 lg:pl-3 border-l border-[var(--mkt-border)] flex items-center gap-2">
         {!authChecked || !isLoggedIn ? (
           <>
             <Link
-              href="/dashboard"
+              href="/dashboard/"
               className="inline-flex items-center gap-2 px-2.5 lg:px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-[var(--mkt-ink)] hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white"
               onClick={onLinkClick}
             >
@@ -180,17 +181,17 @@ export function NavbarNavContent({ onLinkClick }: { onLinkClick: () => void }) {
             {authChecked && (
               <Link
                 href="/onboarding/?start=1"
-                className="inline-flex items-center justify-center px-3 lg:px-4 py-2.5 rounded-xl text-white font-semibold text-sm transition-colors duration-200 btn-brand-blue whitespace-nowrap"
+                className="inline-flex items-center justify-center px-3 lg:px-4 py-2.5 min-h-[44px] rounded-xl text-white font-semibold text-sm transition-colors duration-200 btn-brand-blue whitespace-nowrap"
                 onClick={onLinkClick}
               >
-                Start free trial
+                {FREE_TRIAL_CTA}
               </Link>
             )}
           </>
         ) : (
           <>
             <Link
-              href="/dashboard"
+              href="/dashboard/"
               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50"
               onClick={onLinkClick}
             >
@@ -227,7 +228,7 @@ export function NavbarMobileNavContent({ onLinkClick }: { onLinkClick: () => voi
         {authChecked && isLoggedIn ? (
           <>
             <Link
-              href="/dashboard"
+              href="/dashboard/"
               className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-lg border border-[var(--mkt-border)] text-slate-800 hover:bg-slate-50"
               onClick={onLinkClick}
             >
@@ -257,7 +258,7 @@ export function NavbarMobileNavContent({ onLinkClick }: { onLinkClick: () => voi
               </Link>
             )}
             <Link
-              href="/dashboard"
+              href="/dashboard/"
               className="flex w-full items-center justify-center gap-2 px-4 py-3 rounded-lg border border-[var(--mkt-border)] text-slate-800 hover:bg-slate-50"
               onClick={onLinkClick}
             >

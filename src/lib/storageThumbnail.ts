@@ -19,3 +19,25 @@ export function toStorageThumbnailUrl(fullUrl: string, size: string = THUMB_SIZE
 
   return base.replace(re, `_${size}.$1`) + query;
 }
+
+/**
+ * Extract a Storage object path from a Firebase download URL, or null if not parseable.
+ * Used so thumbnail existence can be checked via getDownloadURL (no img 404).
+ */
+export function storageObjectPathFromDownloadUrl(url: string): string | null {
+  if (!url || typeof url !== 'string') return null;
+  try {
+    const u = new URL(url);
+    // https://firebasestorage.googleapis.com/v0/b/<bucket>/o/<encodedPath>?...
+    const legacy = u.pathname.match(/\/v0\/b\/[^/]+\/o\/(.+)$/);
+    if (legacy?.[1]) return decodeURIComponent(legacy[1]);
+    // https://storage.googleapis.com/<bucket>/<path>
+    if (u.hostname === 'storage.googleapis.com') {
+      const parts = u.pathname.replace(/^\//, '').split('/');
+      if (parts.length >= 2) return decodeURIComponent(parts.slice(1).join('/'));
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}

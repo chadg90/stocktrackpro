@@ -11,6 +11,7 @@ import {
   SITE_LEGAL_NAME,
   SITE_NAME,
   SUPPORT_EMAIL,
+  APP_STORE_URL,
 } from '@/lib/brand';
 import { getOrganizationSameAs, ORGANIZATION_ID, SITE_URL, WEBSITE_ID, absolutePageUrl } from '@/lib/site';
 
@@ -22,21 +23,17 @@ const priceValidUntil = `${new Date().getFullYear() + 1}-12-31`;
  * (Google + AI entity consolidation).
  */
 export default function SiteWideJsonLd() {
-  const sameAs = getOrganizationSameAs();
+  const sameAs = Array.from(new Set([APP_STORE_URL, ...getOrganizationSameAs()]));
   const homeUrl = absolutePageUrl('/');
 
   const organization: Record<string, unknown> = {
     '@type': 'Organization',
     '@id': ORGANIZATION_ID,
     name: SITE_LEGAL_NAME,
-    alternateName: [
-      `${SITE_NAME} fleet software`,
-      `${SITE_NAME} DVSA compliance software`,
-      'Stock Track PRO',
-    ],
     url: homeUrl,
     description: `${SITE_SHORT_DESCRIPTION} ${SITE_BRAND_DISAMBIGUATION}`,
     knowsAbout: SITE_KNOWS_ABOUT,
+    sameAs,
     logo: {
       '@type': 'ImageObject',
       url: `${SITE_URL}/logo.png`,
@@ -66,25 +63,17 @@ export default function SiteWideJsonLd() {
     },
   };
 
-  if (sameAs.length > 0) {
-    organization.sameAs = sameAs;
-  }
-
   const softwareApplication = {
     '@type': 'SoftwareApplication',
     '@id': SOFTWARE_ID,
     name: SITE_NAME,
-    alternateName: [
-      `${SITE_NAME} fleet compliance software`,
-      'Stock Track PRO',
-    ],
     applicationCategory: 'BusinessApplication',
     applicationSubCategory: 'Fleet management and DVSA compliance software',
     audience: {
       '@type': 'BusinessAudience',
       audienceType: 'UK commercial vehicle fleet operators and transport managers',
     },
-    operatingSystem: 'iOS, Android, Web',
+    operatingSystem: 'iOS, Web',
     description: SITE_SHORT_DESCRIPTION,
     featureList: SOFTWARE_FEATURE_LIST,
     keywords:

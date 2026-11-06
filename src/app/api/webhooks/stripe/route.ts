@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe-server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { resolveSubscribedVehicleQuantity } from '@/lib/stripeVehicleQuantity';
 
 const WEBHOOK_WINDOW_MS = 60 * 1000;
 const WEBHOOK_MAX_REQUESTS = 120; // Stripe may retry
@@ -93,7 +94,18 @@ export async function POST(request: NextRequest) {
         const expiryDate = periodEnd ? new Date(periodEnd * 1000).toISOString().split('T')[0] : null;
         const trialEnd = subscription.trial_end;
         const trialEndDate = trialEnd ? new Date(trialEnd * 1000) : null;
-        const subscribedVehicles = vehicleCountRaw ? parseInt(vehicleCountRaw, 10) : null;
+        // Prefer Stripe line quantity (what is billed); session metadata is fallback only.
+        const subscribedVehicles = resolveSubscribedVehicleQuantity(subscription, session.metadata);
+        if (vehicleCountRaw && subscribedVehicles != null) {
+          const metaCount = parseInt(vehicleCountRaw, 10);
+          if (Number.isInteger(metaCount) && metaCount !== subscribedVehicles) {
+            console.warn('Stripe webhook: checkout vehicle_count metadata differs from line quantity', {
+              companyId,
+              metadata: metaCount,
+              lineQuantity: subscribedVehicles,
+            });
+          }
+        }
 
         await db.collection('companies').doc(companyId).set(
           {
@@ -120,7 +132,6 @@ export async function POST(request: NextRequest) {
 
         const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
         const companyId = subscription.metadata?.company_id;
-        const vehicleCountRaw = subscription.metadata?.vehicle_count;
         if (!companyId) {
           console.warn('Stripe webhook: invoice.paid missing company_id in subscription metadata');
           break;
@@ -129,7 +140,7 @@ export async function POST(request: NextRequest) {
         const periodEnd = subscription.current_period_end;
         const expiryDate = periodEnd ? new Date(periodEnd * 1000).toISOString().split('T')[0] : null;
         const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
-        const subscribedVehicles = vehicleCountRaw ? parseInt(vehicleCountRaw, 10) : null;
+        const subscribedVehicles = resolveSubscribedVehicleQuantity(subscription);
 
         await db.collection('companies').doc(companyId).set(
           {
@@ -155,7 +166,6 @@ export async function POST(request: NextRequest) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         const companyId = subscription.metadata?.company_id;
-        const vehicleCountRaw = subscription.metadata?.vehicle_count;
         if (!companyId) break;
 
         const status = subscription.status;
@@ -186,7 +196,8 @@ export async function POST(request: NextRequest) {
           : null;
         
         const customerId = typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id;
-        const subscribedVehicles = vehicleCountRaw ? parseInt(vehicleCountRaw, 10) : null;
+        // Line quantity wins so Dashboard quantity edits sync without metadata edits.
+        const subscribedVehicles = resolveSubscribedVehicleQuantity(subscription);
 
         await db.collection('companies').doc(companyId).set(
           {

@@ -3,7 +3,7 @@
  * Writes lightweight counters to Firestore for admin review.
  */
 
-import { doc, increment, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc, increment, serverTimestamp, setDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 
 export type UsageKind = 'page_view' | 'feature_click';
@@ -21,7 +21,7 @@ export const TRACKED_PAGES: Array<{ key: string; label: string; path: string }> 
   { key: 'page:/dashboard/history', label: 'Audit log', path: '/dashboard/history' },
   { key: 'page:/dashboard/team', label: 'Team', path: '/dashboard/team' },
   { key: 'page:/dashboard/subscription', label: 'Subscription', path: '/dashboard/subscription' },
-  { key: 'page:/dashboard/support', label: 'Support', path: '/dashboard/support' },
+  { key: 'page:/dashboard/support', label: 'Help', path: '/dashboard/support' },
 ];
 
 /** Key feature clicks (beyond page views). */
@@ -36,7 +36,6 @@ function normalizePath(pathname: string): string {
   if (!pathname) return '/dashboard';
   let p = pathname.split('?')[0].split('#')[0];
   if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
-  // Collapse dynamic segments under known parents
   if (p.startsWith('/dashboard/fleet-report/')) return '/dashboard/fleet-report';
   return p || '/dashboard';
 }
@@ -68,6 +67,24 @@ function labelFor(key: string, kind: UsageKind): string {
 
 let lastPageKey = '';
 let lastPageAt = 0;
+let cachedCompanyId: string | null | undefined;
+
+async function resolveCompanyId(): Promise<string | null> {
+  if (cachedCompanyId !== undefined) return cachedCompanyId;
+  const user = firebaseAuth?.currentUser;
+  if (!user || !firebaseDb) {
+    cachedCompanyId = null;
+    return null;
+  }
+  try {
+    const snap = await getDoc(doc(firebaseDb, 'profiles', user.uid));
+    const companyId = snap.exists() ? String(snap.data().company_id || '') : '';
+    cachedCompanyId = companyId || null;
+  } catch {
+    cachedCompanyId = null;
+  }
+  return cachedCompanyId;
+}
 
 async function writeUsage(kind: UsageKind, key: string): Promise<void> {
   if (!firebaseDb || !firebaseAuth?.currentUser) return;
@@ -77,7 +94,7 @@ async function writeUsage(kind: UsageKind, key: string): Promise<void> {
   const dayRef = doc(firebaseDb, 'product_usage_daily', dayId);
   const totalRef = doc(firebaseDb, 'product_usage_totals', totalDocId(key));
 
-  await Promise.all([
+  const writes: Promise<unknown>[] = [
     setDoc(
       dayRef,
       {
@@ -98,7 +115,27 @@ async function writeUsage(kind: UsageKind, key: string): Promise<void> {
       },
       { merge: true }
     ),
-  ]);
+  ];
+
+  const companyId = await resolveCompanyId();
+  if (companyId && /^[a-zA-Z0-9_-]{1,128}$/.test(companyId)) {
+    const companyRef = doc(firebaseDb, 'product_usage_by_company', companyId);
+    const field = kind === 'page_view' ? 'views' : 'checks';
+    writes.push(
+      setDoc(
+        companyRef,
+        {
+          company_id: companyId,
+          [field]: increment(1),
+          last_seen: serverTimestamp(),
+          updated_at: serverTimestamp(),
+        },
+        { merge: true }
+      )
+    );
+  }
+
+  await Promise.all(writes);
 }
 
 /** Track a dashboard page view (debounced per path). */

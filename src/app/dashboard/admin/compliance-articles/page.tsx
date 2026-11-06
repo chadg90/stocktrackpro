@@ -12,10 +12,13 @@ import {
 } from '@/lib/compliance-articles/validate';
 import type { CmsComplianceArticle } from '@/lib/compliance-articles/types';
 import CmsComplianceArticleBody from '@/components/CmsComplianceArticleBody';
-import { Plus, Trash2, ExternalLink, Pencil, EyeOff, Eye } from 'lucide-react';
+import { Plus, ExternalLink, Pencil, EyeOff, Eye } from 'lucide-react';
 import Modal from '../../components/Modal';
 import { EmptyStateTableRow } from '../../components/EmptyState';
 import TableSkeleton from '../../components/TableSkeleton';
+import TypeToConfirmDelete from '../../components/TypeToConfirmDelete';
+import AdminRowMenu from '../../components/AdminRowMenu';
+import { formatAdminDate } from '@/lib/adminDateFormat';
 import Link from 'next/link';
 
 function slugFromTitle(title: string): string {
@@ -58,6 +61,7 @@ export default function AdminComplianceArticlesPage() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [deleteTarget, setDeleteTarget] = useState<CmsComplianceArticle | null>(null);
 
   const validationIssues = useMemo(
     () =>
@@ -183,19 +187,22 @@ export default function AdminComplianceArticlesPage() {
     }
   };
 
-  const handleDelete = async (slug: string) => {
-    if (!firebaseAuth?.currentUser) return;
-    if (!window.confirm(`Delete article "${slug}"? This cannot be undone.`)) return;
+  const handleDelete = async () => {
+    if (!firebaseAuth?.currentUser || !deleteTarget) return;
     setProcessing(true);
     setError(null);
     try {
       const token = await firebaseAuth.currentUser.getIdToken();
-      const res = await fetch(`/api/admin/compliance-articles/${encodeURIComponent(slug)}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `/api/admin/compliance-articles/${encodeURIComponent(deleteTarget.slug)}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete article');
+      setDeleteTarget(null);
       await fetchArticles();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to delete article');
@@ -250,7 +257,7 @@ export default function AdminComplianceArticlesPage() {
                 <p className="text-xs text-zinc-500 dark:text-white/50">/compliance-centre/{article.slug}</p>
               </div>
               <Link
-                href={`/compliance-centre/${article.slug}`}
+                href={`/compliance-centre/${article.slug}/`}
                 target="_blank"
                 className="inline-flex items-center gap-1 text-sm text-blue-500 hover:underline"
               >
@@ -298,13 +305,13 @@ export default function AdminComplianceArticlesPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-zinc-600 dark:text-white/70">
-                    {new Date(article.datePublished).toLocaleDateString('en-GB')}
+                    {formatAdminDate(article.datePublished)}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
                       {article.published && (
                         <Link
-                          href={`/compliance-centre/${article.slug}`}
+                          href={`/compliance-centre/${article.slug}/`}
                           target="_blank"
                           className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/10 text-zinc-600 dark:text-white/70"
                           title="View live"
@@ -320,15 +327,10 @@ export default function AdminComplianceArticlesPage() {
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(article.slug)}
+                      <AdminRowMenu
+                        onDelete={() => setDeleteTarget(article)}
                         disabled={processing}
-                        className="p-2 rounded-lg hover:bg-red-500/10 text-red-600 dark:text-red-400 disabled:opacity-50"
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      />
                     </div>
                   </td>
                 </tr>
@@ -485,6 +487,17 @@ export default function AdminComplianceArticlesPage() {
         </form>
         )}
       </Modal>
+
+      <TypeToConfirmDelete
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete article"
+        confirmValue={deleteTarget?.title || deleteTarget?.slug || ''}
+        confirmLabel="article title"
+        warning="This permanently deletes the CMS article. This cannot be undone."
+        processing={processing}
+      />
     </div>
   );
 }

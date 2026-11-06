@@ -6,6 +6,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import DriverAppLinks from '@/components/DriverAppLinks';
+import { PLATFORM_AVAILABILITY } from '@/lib/brand';
 
 const storageKeyForUser = (uid: string) => `ftp_driver_app_card_dismissed_${uid}`;
 
@@ -61,7 +62,8 @@ export default function GetDriverAppCard() {
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-white">Get the driver app</h2>
           <p className="mt-0.5 text-xs text-white/55">
-            Drivers complete daily checks in the mobile app. Share the App Store link or QR code with your team.
+            Drivers complete daily checks in the mobile app — {PLATFORM_AVAILABILITY}. Share the App Store link or QR
+            code with your team.
           </p>
         </div>
         <button

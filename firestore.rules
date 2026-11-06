@@ -204,6 +204,11 @@ service cloud.firestore {
         && request.resource.data.get('legacy', null) == resource.data.get('legacy', null);
     }
 
+    // Referral field is Admin SDK only (POST /api/referrals/attach).
+    function companyUpdateDoesNotTouchReferral() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['referral']);
+    }
+
     match /companies/{companyId} {
       // Users in the company can read their company
       // Admins can read any company
@@ -217,20 +222,38 @@ service cloud.firestore {
       // Web onboarding creates a company with created_by = uid; mobile self-serve company signup
       // is removed in the app. Admins can create for support flows.
       // Create is intentionally separate from update — do not broaden this path.
+      // Clients must never set referral on create (Admin SDK attaches it after).
       allow create: if isSignedIn() && (
-        isAdmin() ||
-        request.resource.data.created_by == request.auth.uid
+        (isAdmin() && !('referral' in request.resource.data)) ||
+        (
+          request.resource.data.created_by == request.auth.uid &&
+          !('referral' in request.resource.data)
+        )
       );
       
-      // Global admins retain full update access.
+      // Admins retain update access except referral (Admin SDK only).
       // Tenant managers may only change allowlisted settings fields.
-      allow update: if isSignedIn() && (
+      allow update: if isSignedIn() && companyUpdateDoesNotTouchReferral() && (
         isAdmin() ||
         (isManager() && userCompanyId() == companyId && managerCompanyUpdateAllowed())
       );
       
       // Companies should not be deleted (archive instead)
       allow delete: if false;
+    }
+
+    // ============================================
+    // REFERRALS (capture + admin monitor)
+    // ============================================
+    // Writes only via Admin SDK (/api/referrals/attach and future payout tools).
+    match /referralCodes/{codeId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /referrals/{companyId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     // ============================================
@@ -576,6 +599,18 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /product_usage_by_company/{companyId} {
+      allow read: if isAdmin();
+      allow create, update: if isSignedIn()
+        && isManagerOrAdmin()
+        && companyId == userCompanyId()
+        && request.resource.data.company_id == companyId
+        && request.resource.data.keys().hasOnly(['company_id', 'views', 'checks', 'last_seen', 'updated_at'])
+        && (!('views' in request.resource.data) || request.resource.data.views is number)
+        && (!('checks' in request.resource.data) || request.resource.data.checks is number);
+      allow delete: if isAdmin();
+    }
+
     // ============================================
     // GLOBAL ADMIN OVERRIDE
     // ============================================
@@ -584,10 +619,14 @@ service cloud.firestore {
       allow create: if isAdmin() &&
         collection != 'vehicles' &&
         collection != 'promotionalSubscriptions' &&
-        collection != 'vehicleCreationLocks';
+        collection != 'vehicleCreationLocks' &&
+        collection != 'referralCodes' &&
+        collection != 'referrals';
       allow update, delete: if isAdmin() &&
         collection != 'promotionalSubscriptions' &&
-        collection != 'vehicleCreationLocks';
+        collection != 'vehicleCreationLocks' &&
+        collection != 'referralCodes' &&
+        collection != 'referrals';
     }
   }
 }

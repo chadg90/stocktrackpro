@@ -1,15 +1,22 @@
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import ComplianceCentreHubJsonLd from '@/components/seo/ComplianceCentreHubJsonLd';
+import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
 import { getAllPublishedComplianceArticles } from '@/lib/compliance-articles/server';
 
-export const revalidate = 300;
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 export default async function ComplianceCentreHubPage() {
   const articles = await getAllPublishedComplianceArticles();
 
   return (
     <div className="marketing-shell">
+      <MarketingWebPageJsonLd
+        path="/compliance-centre"
+        title="Compliance Centre"
+        description="UK fleet compliance guidance — defect records, walkaround checks, retention and MOT tracking."
+      />
       <ComplianceCentreHubJsonLd articles={articles} />
       <Navbar />
       <main>
@@ -32,7 +39,7 @@ export default async function ComplianceCentreHubPage() {
               {articles.map((article) => (
                 <li key={article.slug}>
                   <Link
-                    href={`/compliance-centre/${article.slug}`}
+                    href={`/compliance-centre/${article.slug}/`}
                     className="block mkt-card p-6"
                   >
                     <h2 className="text-xl font-semibold text-[var(--mkt-ink)] mb-2">{article.title}</h2>

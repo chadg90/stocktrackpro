@@ -2,9 +2,11 @@ import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import {
   EDITORIAL_TEAM_NAME,
+  PLATFORM_AVAILABILITY,
   SUPPORT_EMAIL,
   SUPPORT_MAILTO,
 } from '@/lib/brand';
+import AppStoreBadge from '@/components/AppStoreBadge';
 
 export default function AboutPage() {
   return (
@@ -55,10 +57,12 @@ export default function AboutPage() {
               Managers use the web dashboard to add vehicles, review inspections, manage defects, monitor MOT and tax
               status, invite team members, and handle billing.
             </p>
-            <p className="text-[var(--mkt-muted)] leading-relaxed">
-              Drivers (user role) and fitters (manager role) use the iOS and Android app for daily inspections,
-              photo-evidenced defect reports, My Jobs, and close-out when work is complete.
+            <p className="text-[var(--mkt-muted)] leading-relaxed mb-4">
+              Drivers (user role) and fitters (manager role) use the mobile app for daily inspections,
+              photo-evidenced defect reports, My Jobs, and close-out when work is complete —{' '}
+              {PLATFORM_AVAILABILITY}.
             </p>
+            <AppStoreBadge analyticsLocation="about" />
           </section>
 
           <section
@@ -95,13 +99,13 @@ export default function AboutPage() {
             </p>
             <div className="flex flex-col gap-2">
               <Link
-                href="/customers/newstreet"
+                href="/customers/newstreet/"
                 className="text-[var(--brand-blue)] hover:text-[var(--brand-blue-hover)] text-sm font-medium underline underline-offset-4"
               >
                 Newstreet Groundworks case study →
               </Link>
               <Link
-                href="/customers/neemt"
+                href="/customers/neemt/"
                 className="text-[var(--brand-blue)] hover:text-[var(--brand-blue-hover)] text-sm font-medium underline underline-offset-4"
               >
                 NEEMT emergency vehicle fleet case study →
@@ -113,7 +117,7 @@ export default function AboutPage() {
             <h2 className="text-2xl font-semibold text-[var(--mkt-ink)] mb-3">Pricing and support</h2>
             <p className="text-[var(--mkt-muted)] leading-relaxed mb-5">
               Fleet is £8 per vehicle per month (min 2 vehicles). Full detail and the 14-day free trial are on our{' '}
-              <Link href="/pricing" className="text-[var(--brand-blue)] hover:underline underline-offset-4">
+              <Link href="/pricing/" className="text-[var(--brand-blue)] hover:underline underline-offset-4">
                 pricing page
               </Link>
               . Support is UK-based via email and WhatsApp.
@@ -126,7 +130,7 @@ export default function AboutPage() {
                 Try free for 14 days
               </Link>
               <Link
-                href="/contact"
+                href="/contact/"
                 className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-medium border border-[var(--mkt-border)] bg-white hover:bg-slate-50"
               >
                 Contact us

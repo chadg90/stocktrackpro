@@ -86,7 +86,7 @@ export function CompaniesShowcaseStrip({ logos, className = '' }: Props) {
 
         <div className="text-center mt-8">
           <Link
-            href="/contact"
+            href="/contact/"
             className="inline-flex items-center justify-center rounded-lg bg-slate-900 text-white text-sm font-semibold px-5 py-2.5 hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-50"
           >
             Become a customer

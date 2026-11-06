@@ -8,6 +8,7 @@ export const FLEET_REPORT_PERIOD_OPTIONS: { value: CompliancePeriodPreset; label
   { value: 'week', label: 'This week' },
   { value: 'last_30_days', label: 'Last 30 days' },
   { value: 'month', label: 'Choose month' },
+  { value: 'last_15_months', label: 'Up to 15 months' },
 ];
 
 type FleetReportPeriodControlsProps = {

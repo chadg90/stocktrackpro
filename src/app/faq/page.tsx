@@ -3,13 +3,14 @@ import Navbar from '../components/Navbar';
 import { HomeFaqJsonLd } from '@/components/HomeFaqJsonLd';
 import { HOME_FAQ_ITEMS } from '@/content/homeFaq';
 import Link from 'next/link';
+import { PLATFORM_AVAILABILITY, SUPPORT_EMAIL } from '@/lib/brand';
 
 export default function FAQ() {
   const faqs = [
     ...HOME_FAQ_ITEMS,
     {
       question: "How do I get an account?",
-      answer: "New companies sign up on this website by selecting Start 14-Day Free Trial — accounts and subscriptions can only be created on the web. You then set up your company and invite your team by email. Invited team members open their invite link to set a password, then sign in to the companion app on iOS or Android. Managers sign in to the web dashboard via Log in.",
+      answer: `New companies sign up on this website by selecting Start 14-Day Free Trial — accounts and subscriptions can only be created on the web. You then set up your company and invite your team by email. Invited team members open their invite link to set a password, then sign in to the companion app (${PLATFORM_AVAILABILITY}). Managers sign in to the web dashboard via Log in.`,
     },
     {
       question: "Do I need special hardware to use the app?",
@@ -25,7 +26,7 @@ export default function FAQ() {
     },
     {
       question: "How do digital vehicle walkaround checks work?",
-      answer: "Drivers use the iOS or Android app to complete a structured pre-use checklist and provide six walkaround photos covering the front, rear, both sides, interior and odometer. Each submitted inspection is timestamped and linked to the user and vehicle.",
+      answer: `Drivers use the companion app (${PLATFORM_AVAILABILITY}) to complete a structured pre-use checklist and provide six walkaround photos covering the front, rear, both sides, interior and odometer. Each submitted inspection is timestamped and linked to the user and vehicle.`,
     },
     {
       question: "What happens when a driver reports a vehicle defect?",
@@ -41,7 +42,7 @@ export default function FAQ() {
     },
     {
       question: "Does this work on Android and iOS?",
-      answer: "Yes. The companion app runs on both Android and iOS and is used by your team day-to-day for vehicle inspections, defect logging, and workflow updates. Managers also get a web dashboard for analytics, team management, and billing.",
+      answer: `Yes. ${PLATFORM_AVAILABILITY} — email ${SUPPORT_EMAIL} and we'll send you an Android invite. Drivers use the app for vehicle inspections, defect logging, and workflow updates. Managers also get a web dashboard for analytics, team management, and billing.`,
     },
     {
       question: "How do I subscribe?",
@@ -69,7 +70,7 @@ export default function FAQ() {
     },
     {
       question: "Can Fleet Track PRO support a large fleet or team?",
-      answer: "Yes. Every plan includes unlimited team members, and we can provide tailored onboarding for larger fleet deployments. Contact sales@fleettrackpro.co.uk or use the Contact page to discuss your requirements.",
+      answer: "Yes. Every plan includes unlimited team members, and we can provide tailored onboarding for larger fleet deployments. Email help@fleettrackpro.co.uk or use the Contact page to discuss your requirements.",
     },
   ];
 
@@ -86,25 +87,25 @@ export default function FAQ() {
           </p>
           <nav aria-label="Popular product questions" className="mb-10 flex flex-wrap gap-3 text-sm">
             <Link
-              href="/vehicle-walkaround-check-app"
+              href="/vehicle-walkaround-check-app/"
               className="rounded-xl border border-[var(--mkt-border)] bg-white px-4 py-2 text-[var(--mkt-ink)] hover:border-[var(--brand-blue)]/40 hover:text-[var(--brand-blue)]"
             >
               Walkaround check app
             </Link>
             <Link
-              href="/vehicle-defect-reporting-software"
+              href="/vehicle-defect-reporting-software/"
               className="rounded-xl border border-[var(--mkt-border)] bg-white px-4 py-2 text-[var(--mkt-ink)] hover:border-[var(--brand-blue)]/40 hover:text-[var(--brand-blue)]"
             >
               Defect reporting
             </Link>
             <Link
-              href="/fleet-mot-tax-reminders"
+              href="/fleet-mot-tax-reminders/"
               className="rounded-xl border border-[var(--mkt-border)] bg-white px-4 py-2 text-[var(--mkt-ink)] hover:border-[var(--brand-blue)]/40 hover:text-[var(--brand-blue)]"
             >
               MOT and tax reminders
             </Link>
             <Link
-              href="/pricing"
+              href="/pricing/"
               className="rounded-xl border border-[var(--mkt-border)] bg-white px-4 py-2 text-[var(--mkt-ink)] hover:border-[var(--brand-blue)]/40 hover:text-[var(--brand-blue)]"
             >
               Pricing

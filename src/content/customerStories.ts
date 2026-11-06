@@ -35,7 +35,7 @@ export const CUSTOMER_STORIES: CustomerStory[] = [
     industry: 'Groundworks',
     summary:
       'A 35-vehicle County Durham groundworks fleet keeping defects, MOT and tax in one shared system across active sites.',
-    href: '/customers/newstreet',
+    href: '/customers/newstreet/',
     challenge:
       'Daily checks and defect reports lived in paper packs and WhatsApp threads. With vans across multiple live sites, the office struggled to see what had been checked, what was outstanding, and which renewals were coming due.',
     solution:
@@ -91,7 +91,7 @@ export const CUSTOMER_STORIES: CustomerStory[] = [
     quoteRole: 'North-East Emergency Medical Transport',
     cardExcerpt:
       'Since using Fleet Track PRO we manage service records, tax and MOT validation all in one place — and driver VDI feedback has been fantastic.',
-    href: '/customers/neemt',
+    href: '/customers/neemt/',
     challenge:
       'NEEMT provides emergency specialist transport and courier services to the NHS and private healthcare. Blue-light vehicles must be fit for purpose every shift, with VDIs, services, tax and MOT all kept under control.',
     solution:

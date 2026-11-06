@@ -87,6 +87,16 @@ async function getCount(db: Firestore, collectionName: string, companyId: string
   return snap.data().count;
 }
 
+/** Active/inactive/etc. count toward the slot; retired does not. */
+async function getBillableVehicleCount(db: Firestore, companyId: string): Promise<number> {
+  const q = query(collection(db, 'vehicles'), where('company_id', '==', companyId));
+  const snap = await getDocs(q);
+  return snap.docs.filter((docSnap) => {
+    const status = String(docSnap.data()?.status || 'active').toLowerCase();
+    return status !== 'retired';
+  }).length;
+}
+
 function getLimitsFromCompany(company: CompanyDoc): { users: number | null; assets: number | null; vehicles: number | null } {
   if (company.legacy) {
     return { users: MAX_TEAM_USERS_LEGACY, assets: null, vehicles: null };
@@ -147,7 +157,7 @@ async function getActivePendingInviteCount(db: Firestore, companyId: string): Pr
 export async function checkCanAddVehicle(db: Firestore, companyId: string): Promise<LimitCheckResult> {
   const company = await getCompanyDoc(db, companyId);
   const limits = getLimitsFromCompany(company);
-  const current = await getCount(db, 'vehicles', companyId);
+  const current = await getBillableVehicleCount(db, companyId);
   const limit = limits.vehicles;
   const allowed = limit === null || current < limit;
   return {
@@ -207,7 +217,7 @@ export async function getUsage(db: Firestore, companyId: string): Promise<{
   const [users, assets, vehicles] = await Promise.all([
     getCount(db, 'profiles', companyId),
     getCount(db, 'tools', companyId),
-    getCount(db, 'vehicles', companyId),
+    getBillableVehicleCount(db, companyId),
   ]);
   return {
     legacy: Boolean(company.legacy),

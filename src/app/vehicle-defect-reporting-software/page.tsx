@@ -1,18 +1,25 @@
 import type { Metadata } from 'next';
 import CommercialFeaturePage from '@/components/CommercialFeaturePage';
+import { getCommercialFeatureFaqs } from '@/content/commercialFeatureFaqs';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
 
+export const dynamic = 'force-static';
+export const revalidate = 3600;
+
 const path = '/vehicle-defect-reporting-software';
+/** Visible H1 — unchanged for on-page copy. */
 const title = 'Vehicle Defect Reporting Software for UK Fleets';
+/** <title> segment (≤42 chars) so template stays ≤60 with brand suffix. */
+const documentTitle = 'Vehicle Defect Reporting Software';
 const description =
   'Report vehicle defects with photos, severity and timestamps, notify managers and track repair work through to recorded close-out.';
 
 export const metadata: Metadata = {
-  title,
+  title: documentTitle,
   description,
   alternates: { canonical: canonicalPath(path) },
   openGraph: {
-    title: `${title} | Fleet Track PRO`,
+    title: `${documentTitle} | Fleet Track PRO`,
     description,
     url: absolutePageUrl(path),
     type: 'website',
@@ -22,7 +29,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${title} | Fleet Track PRO`,
+    title: `${documentTitle} | Fleet Track PRO`,
     description,
     images: ['/og-image.jpg'],
   },
@@ -64,39 +71,23 @@ export default function VehicleDefectReportingSoftwarePage() {
       evidence="A useful defect record should show what was reported, when it was seen, who assessed it and what happened before the vehicle returned to service. Fleet Track PRO keeps those operational records together, while responsibility for competent assessment and safe release remains with the business."
       related={[
         {
-          href: '/compliance-centre/closing-defects-return-to-service',
+          href: '/compliance-centre/closing-defects-return-to-service/',
           label: 'Closing defects before return to service',
         },
         {
-          href: '/compliance-centre/van-fleet-defect-records',
+          href: '/compliance-centre/van-fleet-defect-records/',
           label: 'Vehicle defect records and DVSA readiness',
         },
         {
-          href: '/vehicle-walkaround-check-app',
+          href: '/vehicle-walkaround-check-app/',
           label: 'Vehicle walkaround check app',
         },
         {
-          href: '/features',
+          href: '/features/',
           label: 'Explore every Fleet Track PRO feature',
         },
       ]}
-      faqs={[
-        {
-          question: 'Who is notified when a driver reports a defect?',
-          answer:
-            'Fleet Track PRO notifies managers and makes the defect visible in the fleet workflow so it can be reviewed and assigned appropriately.',
-        },
-        {
-          question: 'Can a fitter update repair progress?',
-          answer:
-            'Yes. A fitter using the manager role can use My Jobs and update the defect through scheduled, waiting-for-parts and completed stages.',
-        },
-        {
-          question: 'Does closing a defect automatically make the vehicle active?',
-          answer:
-            'The vehicle can return to active when the defect is resolved, but Fleet Track PRO prevents that automatic return if another open defect still exists.',
-        },
-      ]}
+      faqs={getCommercialFeatureFaqs()}
     />
   );
 }

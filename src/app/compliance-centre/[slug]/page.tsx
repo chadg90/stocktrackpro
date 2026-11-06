@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import Navbar from '@/app/components/Navbar';
 import ArticleBottomCta from '@/components/ArticleBottomCta';
 import ComplianceArticleContent from '@/components/ComplianceArticleContent';
+import WalkaroundPhoneCta from '@/components/compliance-articles/WalkaroundPhoneCta';
+import DefectReportingLink from '@/components/compliance-articles/DefectReportingLink';
 import { ComplianceArticleJsonLd } from '@/components/seo/ComplianceArticleJsonLd';
 import { format } from 'date-fns';
 import {
@@ -14,6 +16,7 @@ import { getStaticComplianceArticle } from '@/lib/compliance-articles/static';
 import {
   getAllPublishedComplianceArticles,
   getCmsArticleBySlug,
+  getPublishedCmsArticles,
 } from '@/lib/compliance-articles/server';
 import { polishComplianceMarkdown } from '@/lib/compliance-articles/polish';
 import type { ComplianceArticleMeta } from '@/lib/compliance-articles/types';
@@ -27,10 +30,15 @@ import {
 } from '@/components/compliance-articles/NewArticles';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
 import { EDITORIAL_TEAM_NAME } from '@/lib/brand';
+import {
+  complianceMetadataTitle,
+  resolveFullDocumentTitle,
+} from '@/lib/seo/documentTitles';
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const revalidate = 300;
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 const RELATED_ARTICLE_SLUGS: Record<string, string[]> = {
   'are-daily-van-checks-mandatory-uk-2026': [
@@ -89,8 +97,17 @@ const RELATED_ARTICLE_SLUGS: Record<string, string[]> = {
   ],
 };
 
-export function generateStaticParams() {
-  return COMPLIANCE_ARTICLES.map((a) => ({ slug: a.slug }));
+export async function generateStaticParams() {
+  const slugs = new Set(COMPLIANCE_ARTICLES.map((a) => a.slug));
+  try {
+    const cms = await getPublishedCmsArticles();
+    for (const article of cms) {
+      if (article.slug) slugs.add(article.slug);
+    }
+  } catch {
+    // App Hosting build has Admin credentials; local/CI without them still ships static articles.
+  }
+  return [...slugs].map((slug) => ({ slug }));
 }
 
 async function resolveArticle(slug: string) {
@@ -110,8 +127,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolved = await resolveArticle(slug);
   if (!resolved) return {};
   const article = resolved.article;
+  const title = complianceMetadataTitle(slug, article.title);
+  const ogTitle = resolveFullDocumentTitle(title);
   return {
-    title: article.title,
+    // Short SEO <title>; H1 stays article.title in the page body.
+    title,
     description: article.metaDescription,
     authors: [
       {
@@ -121,7 +141,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ],
     alternates: { canonical: canonicalPath(`/compliance-centre/${slug}`) },
     openGraph: {
-      title: `${article.title} | Fleet Track PRO`,
+      title: ogTitle,
       description: article.metaDescription,
       url: absolutePageUrl(`/compliance-centre/${slug}`),
       siteName: 'Fleet Track PRO',
@@ -129,10 +149,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       publishedTime: article.datePublished,
       modifiedTime: article.dateModified ?? article.datePublished,
+      // og:image comes from opengraph-image.tsx (do not set images here or it overrides).
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${article.title} | Fleet Track PRO`,
+      title: ogTitle,
       description: article.metaDescription,
     },
   };
@@ -151,9 +172,9 @@ function VanFleetDefectRecordsArticle() {
         >
           daily walkaround checks
         </a>{' '}
-        makes that duty clear for van operators, and the same discipline applies across mixed fleets. A defect record
-        is your evidence that faults were spotted, reported, assessed and dealt with before the vehicle went back on
-        the road.
+        makes that duty clear for van operators, and the same discipline applies across mixed fleets. A{' '}
+        <DefectReportingLink>defect record</DefectReportingLink> is your evidence that faults were spotted, reported,
+        assessed and dealt with before the vehicle went back on the road.
       </p>
 
       <h2>Why defect records matter for fleets</h2>
@@ -278,7 +299,10 @@ function PaperVsDigitalArticle() {
   return (
     <ComplianceArticleContent>
       <p>
-        Paper inspection sheets have been used by UK fleets for decades, but they are increasingly out of step with how modern operators work. Fleet managers need fast defect reporting, named accountability, photo evidence and searchable records. A paper sheet can capture a tick-box check, but it struggles to prove what happened, when it happened and who saw it in time to act.
+        Paper inspection sheets have been used by UK fleets for decades, but they are increasingly out of step with how
+        modern operators work. Fleet managers need fast <DefectReportingLink>defect reporting</DefectReportingLink>,
+        named accountability, photo evidence and searchable records. A paper sheet can capture a tick-box check, but it
+        struggles to prove what happened, when it happened and who saw it in time to act.
       </p>
 
       <h2>The everyday problems with paper inspection sheets</h2>
@@ -377,73 +401,155 @@ function MotExpiryTrackingArticle() {
     <ComplianceArticleContent>
       <p>
         MOT expiry tracking is one of the simplest fleet compliance tasks to understand and one of the easiest to get
-        wrong at scale. A single missed MOT can take a vehicle off the road, create customer disruption and expose the
-        business to enforcement action. When a company runs multiple vehicles — cars, vans or light commercials —
-        relying on memory or a spreadsheet becomes a risk.
+        wrong once a company runs more than a handful of cars and vans. A single missed test can take a vehicle off the
+        road, disrupt jobs and leave the business open to enforcement. This guide covers how MOT due dates work under
+        GOV.UK rules, what happens when a certificate lapses, how to check status online, and a simple monthly routine
+        that works for a small fleet.
       </p>
 
-      <h2>Why expired MOTs are high risk</h2>
+      <h2>How MOT due dates work for vans and cars</h2>
       <p>
-        In the UK, driving a vehicle without a valid MOT can lead to a fine of up to £1,000. If the vehicle is also in a dangerous condition, the consequences can be more serious. An expired MOT may also affect insurance, especially if a vehicle involved in an incident was not legally roadworthy or should not have been used.
+        The MOT test checks that a vehicle meets road safety and environmental standards. For most cars and vans
+        registered in Great Britain, GOV.UK states that you must get an MOT by either the third anniversary of the
+        vehicle&apos;s registration, or the anniversary of its last MOT once the vehicle is over three years old. After
+        the first test, an MOT lasts for a year.
       </p>
       <p>
-        For fleet operators, the risk goes beyond the single vehicle. A roadside stop, customer complaint or collision
-        can trigger wider scrutiny of maintenance records. If a fleet manager cannot show that renewals are monitored
-        and vehicles are kept roadworthy, DVSA may ask harder questions about the business&apos;s compliance culture.
-      </p>
-
-      <h2>Potential prohibition notices and downtime</h2>
-      <p>
-        DVSA examiners can issue prohibition notices where a vehicle is unroadworthy or presents a serious defect. An expired MOT is not the same as a mechanical defect, but it can be part of a wider compliance failure if the vehicle should not have been on the road or if maintenance records are weak. Even where the vehicle is otherwise safe, arranging an urgent MOT at short notice can disrupt jobs, deliveries and customer commitments.
-      </p>
-
-      <h2>Why spreadsheets fail at scale</h2>
-      <p>
-        A spreadsheet can work for a very small fleet if one person updates it perfectly. The problem is that fleets change. Vehicles are added, sold, hired, replaced, assigned to different drivers and moved between sites. MOT dates change after tests. Tax status can change. A spreadsheet only stays accurate if someone checks every record and updates every cell at the right time.
+        Light vans follow the same calendar rules as cars for when the first test is due and how often renewals fall.
+        For the test itself, GOV.UK classes many vans as class 4 (up to 3,000kg design gross weight, including car-type
+        vans) or class 7 (over 3,000kg up to 3,500kg). Maximum fees differ by class, but the due-date logic for a typical
+        company car or van is the same: first test by three years from registration, then annually.
       </p>
       <p>
-        The risk increases when several people rely on the same sheet. One manager may sort a column and break a formula. Another may keep a local copy. A reminder may be set in a calendar but not updated when a booking changes. By the time the error is noticed, the renewal window may already have passed.
-      </p>
-
-      <h2>How DVLA data integration works</h2>
-      <p>
-        Modern MOT tracking software can reduce manual checking by using DVLA data. In a typical workflow, the software stores the vehicle registration plate and queries official vehicle data to return current MOT and tax status. The result is displayed against the vehicle record so managers can see upcoming expiry dates without manually searching each registration on a public checker.
+        A small number of vehicle types need testing from one year old — GOV.UK tells you to check the MOT fees table if
+        you are unsure. Northern Ireland has different MOT rules and processes for vehicles registered there, so treat
+        NI fleets as a separate checklist.
       </p>
       <p>
-        This does not remove the operator&apos;s responsibility to keep vehicles legal and roadworthy, but it reduces the chance that an outdated spreadsheet becomes the only source of truth. It also makes checks easier to repeat across the fleet, which matters when vehicles are added or changed regularly.
+        You can book an MOT up to a month (minus a day) before the current certificate runs out and keep the same renewal
+        date for the following year. If you test earlier than that window, the next expiry moves to one year (minus a
+        day) from the new pass date. That matters for fleets: booking inside the keep-same-date window avoids drifting
+        renewal months and keeps planning predictable.
       </p>
 
-      <h2>Why 7-day advance warnings matter</h2>
+      <h2>The first-MOT-at-3-years rule</h2>
       <p>
-        A reminder on the day an MOT expires is often too late. Fleet managers need time to book a test, arrange cover, move jobs, notify drivers and handle repairs if the vehicle fails. A 7-day advance warning gives the business a practical window to act before the vehicle becomes unavailable or non-compliant.
+        New cars and most new vans do not need an MOT until the third anniversary of registration. Until then there is
+        no annual MOT certificate to track — but the first due date still needs a diary entry as soon as the vehicle
+        joins the fleet. Missing that first anniversary is a common way a nearly-new company van ends up on the road
+        without a valid test.
       </p>
       <p>
-        For larger fleets, reminders should go to people who can act. If a warning sits in one person&apos;s inbox while they are away, the system still fails. A better approach is to show expiry risk on the vehicle card, in the manager dashboard and through alerts that fit the team&apos;s daily workflow.
-      </p>
-
-      <h2>How Fleet Track PRO handles MOT and tax tracking</h2>
-      <p>
-        Fleet Track PRO displays MOT and tax status on every vehicle card so managers can review compliance while looking at the fleet. The platform uses DVLA data to support automatic MOT and tax status visibility by registration plate. It also sends automatic alerts before expiry, including 7-day advance warnings, so managers have time to book renewals instead of reacting after the deadline.
-      </p>
-      <p>
-        The benefit is that MOT and tax tracking sit alongside inspections, defects and vehicle status. A manager can see whether a vehicle is active, in maintenance, due for renewal or affected by an open defect without moving between separate spreadsheets and browser tabs.
+        In practice, record the registration date (or first registration from the V5C) when you add the vehicle, calculate
+        the third anniversary, and set reminders well before that day. Once the first MOT is passed, switch the tracking
+        target to the certificate expiry shown on GOV.UK and on the MOT certificate. Do not assume &quot;it is new, so it
+        is fine&quot; without a dated first-test plan.
       </p>
 
-      <h2>Build renewals into the weekly fleet routine</h2>
+      <h2>What happens if an MOT lapses</h2>
       <p>
-        The best systems combine automation with routine. Managers should still review upcoming renewals weekly, confirm bookings, and check that failed MOTs or advisory items are followed up. Software reduces missed dates, but accountability remains with the operator.
+        GOV.UK is clear: you cannot drive or park the vehicle on the road once the MOT has run out, and you can be
+        prosecuted if caught. The fine for driving without a valid MOT is up to £1,000. The only exceptions GOV.UK lists
+        are driving to or from somewhere to be repaired, and driving to a pre-arranged MOT test.
       </p>
       <p>
-        For any commercial fleet, this routine is part of the wider maintenance system. MOT tracking, daily inspections
-        and defect close-out should support each other. If a vehicle fails an MOT because of a defect that should have
-        been picked up earlier, the issue is not just the missed test; it is the process that allowed the fault to
-        continue.
+        There is a tax knock-on as well. You cannot renew vehicle tax while the MOT has expired. If tax is due to run out
+        at the same time, GOV.UK says to register the vehicle as off the road (SORN), book an MOT, then tax it once it
+        has passed. That sequence matters for fleets that keep vehicles parked between jobs — an expired MOT still blocks
+        normal taxing.
+      </p>
+      <p>
+        Today the no-MOT offence is fine-only, with no licence points under current rules. A 2026 government consultation
+        asked whether points or seizure should be added; until any change becomes law, the GOV.UK position remains the
+        fine and the ban on using the vehicle on the road. For fleet managers who need the latest on penalties and
+        employer liability, see our separate guide on{' '}
+        <Link href="/compliance-centre/penalty-points-for-no-mot/">
+          penalty points for no MOT
+        </Link>
+        .
+      </p>
+      <p>
+        Downtime is often the bigger commercial cost. An urgent test after a lapse can disrupt deliveries and customer
+        work even when the vehicle would otherwise pass. If the test finds a dangerous defect, GOV.UK rules on driving
+        after a fail are stricter still — so keeping dates ahead of expiry is cheaper than recovering from a lapse.
+      </p>
+
+      <h2>Checking MOT status on GOV.UK</h2>
+      <p>
+        For any registration plate you can use the free GOV.UK services. Use{' '}
+        <a
+          href="https://www.gov.uk/check-mot-status"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Check the MOT status of a vehicle
+        </a>{' '}
+        to see whether there is a current MOT and when it runs out. Use{' '}
+        <a
+          href="https://www.gov.uk/check-mot-history"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Check the MOT history of a vehicle
+        </a>{' '}
+        for past results, mileage recorded at test, advisories and when the next MOT is due. You only need the number
+        plate.
+      </p>
+      <p>
+        GOV.UK also offers free MOT reminders by text or email about a month before a car or van MOT is due. Those
+        personal reminders help drivers and sole traders; a fleet still needs one shared view of every plate so cover and
+        bookings are not left to individual inboxes.
+      </p>
+      <p>
+        Software does not replace those official checks. It reduces the chance that a spreadsheet or memory is the only
+        record. Fleet Track PRO&apos;s{' '}
+        <Link href="/fleet-mot-tax-reminders/">MOT and tax reminders</Link> surface DVLA-backed MOT and tax status on
+        each vehicle record and send advance warnings so managers can book inside the keep-same-date window instead of
+        reacting after expiry.
+      </p>
+
+      <h2>A simple monthly routine for a small fleet</h2>
+      <p>
+        For a small fleet — say under twenty cars and vans — a light monthly rhythm beats a complex process nobody
+        follows. Once a month, on a fixed day, open your vehicle list and work through every registration that has an MOT
+        due in the next 60 days. Confirm each date against GOV.UK if anything looks stale (new purchase, recent test, or a
+        vehicle that failed and was retested). Book tests inside the month-minus-a-day window where you want to keep the
+        renewal date. Note any advisories from the last certificate and fold them into maintenance before they become
+        fails.
+      </p>
+      <p>
+        In the same pass, check tax status for the same vehicles, because MOT and tax often collide. If a vehicle will
+        not be used and the MOT has already lapsed, follow the GOV.UK sequence: SORN if needed, book the test, tax after
+        a pass. Keep one named owner for renewals so cover is arranged when someone is away.
+      </p>
+      <p>
+        Between MOT dates, daily walkaround checks and{' '}
+        <DefectReportingLink>defect</DefectReportingLink> close-out still matter. An MOT is a point-in-time test; it does
+        not cover the whole year. If a van fails because of a fault that should have been reported earlier, the missed
+        process is as serious as the missed booking.
+      </p>
+
+      <h2>Why spreadsheets fail once the fleet grows</h2>
+      <p>
+        A spreadsheet can work for a very small fleet if one person updates it every time. Vehicles are added, sold,
+        hired and replaced; MOT dates change after early or late tests; tax status changes. Shared sheets drift when
+        someone keeps a local copy or a calendar reminder is not updated after a retest. By the time the error is
+        noticed, the vehicle may already be outside the legal window.
+      </p>
+
+      <h2>How Fleet Track PRO supports the routine</h2>
+      <p>
+        Fleet Track PRO shows MOT and tax status on every vehicle card and sends automatic alerts before expiry,
+        including 7-day advance warnings, so there is time to book and arrange cover. Renewals sit beside inspections and
+        defects, so managers see whether a vehicle is active, in maintenance, due for renewal or blocked by an open
+        defect without jumping between tools.
       </p>
 
       <p className="compliance-disclaimer">
-        This article summarises general principles and is not legal advice. Always check current MOT and tax rules on{' '}
+        This article summarises general principles based on GOV.UK guidance current at the time of writing and is not
+        legal advice. Always check current MOT and tax rules on{' '}
         <a
-          href="https://www.gov.uk/check-mot-history"
+          href="https://www.gov.uk/getting-an-mot"
           className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
           rel="noopener noreferrer"
           target="_blank"
@@ -454,11 +560,16 @@ function MotExpiryTrackingArticle() {
       </p>
 
       <KeyTakeaways>
-        <li>Driving without a valid MOT can lead to a fine of up to £1,000 and may affect insurance.</li>
-        <li>Spreadsheets become risky when vehicles, dates and responsibilities change across a fleet.</li>
-        <li>DVLA data integration helps keep MOT and tax status visible by registration plate.</li>
-        <li>7-day advance warnings give managers time to book renewals before vehicles become non-compliant.</li>
-        <li>Fleet Track PRO shows MOT and tax status on every vehicle card and sends automatic alerts before expiry.</li>
+        <li>Most cars and vans need a first MOT by the third anniversary of registration, then every year.</li>
+        <li>
+          You can test up to a month (minus a day) early and keep the same renewal date; earlier tests move the expiry.
+        </li>
+        <li>
+          Driving or parking on the road without a valid MOT can mean a fine of up to £1,000; tax cannot be renewed while
+          the MOT is expired.
+        </li>
+        <li>Check status and history on GOV.UK with the registration plate, and run a monthly 60-day renewal review.</li>
+        <li>Fleet Track PRO surfaces MOT and tax status per vehicle with advance warnings so bookings stay ahead of expiry.</li>
       </KeyTakeaways>
       <ArticleCta />
     </ComplianceArticleContent>
@@ -505,14 +616,11 @@ function PreUseChecksArticle() {
 
       <h2>What records should you keep?</h2>
       <p>
-        A useful record identifies the driver, date and time, vehicle registration, checklist responses, and any defects
-        reported. Photos help where there is damage, tyre wear, or a lighting fault. If the record only says
-        &quot;all OK&quot; with no name and no timestamp, it is weak evidence when something goes wrong later. For the
-        full defect trail after a fault is found, see{' '}
-        <Link href="/compliance-centre/van-fleet-defect-records">
-          fleet defect records
-        </Link>
-        .
+        A useful record identifies the driver, date and time, vehicle registration, checklist responses, and any{' '}
+        <DefectReportingLink>defects</DefectReportingLink> reported. Photos help where there is damage, tyre wear, or a
+        lighting fault. If the record only says &quot;all OK&quot; with no name and no timestamp, it is weak evidence
+        when something goes wrong later. For the full defect trail after a fault is found, see{' '}
+        <Link href="/compliance-centre/van-fleet-defect-records/">fleet defect records</Link>.
       </p>
 
       <h2>How often should checks happen?</h2>
@@ -555,8 +663,9 @@ function DigitalDefectRecordsDvsaArticle() {
       <p>
         When DVSA examines an operator&apos;s maintenance system, they are not only looking at whether a single vehicle
         was roadworthy on one day. They want evidence of a working process: checks are completed, defects are reported,
-        repairs are recorded, and unsafe vehicles are taken out of use until resolved. Digital defect records can
-        support that story — but only if they are accurate, consistent, and used as part of a real workflow.
+        repairs are recorded, and unsafe vehicles are taken out of use until resolved.{' '}
+        <DefectReportingLink>Digital defect records</DefectReportingLink> can support that story — but only if they are
+        accurate, consistent, and used as part of a real workflow.
       </p>
 
       <h2>What examiners look for in the trail</h2>
@@ -568,7 +677,7 @@ function DigitalDefectRecordsDvsaArticle() {
       </p>
       <p>
         For more on what to capture day to day, see our guide on{' '}
-        <Link href="/compliance-centre/van-fleet-defect-records">
+        <Link href="/compliance-centre/van-fleet-defect-records/">
           fleet defect records
         </Link>
         . This article focuses on how that trail holds up when an examiner asks harder questions.
@@ -689,7 +798,7 @@ export default async function ComplianceArticlePage({ params }: Props) {
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-8 lg:gap-10">
             <article className="mkt-card-static p-6 sm:p-10">
               <p className="mkt-eyebrow mb-4">
-                <Link href="/compliance-centre" className="hover:underline">
+                <Link href="/compliance-centre/" className="hover:underline">
                   Compliance Centre
                 </Link>
               </p>
@@ -720,6 +829,7 @@ export default async function ComplianceArticlePage({ params }: Props) {
                   markdown={polishComplianceMarkdown(resolved.article.bodyMarkdown, true)}
                 />
               )}
+              <WalkaroundPhoneCta />
               <ArticleBottomCta />
             </article>
 
@@ -743,7 +853,7 @@ export default async function ComplianceArticlePage({ params }: Props) {
                     {related.slice(0, 4).map((r) => (
                       <li key={r.slug}>
                         <Link
-                          href={`/compliance-centre/${r.slug}`}
+                          href={`/compliance-centre/${r.slug}/`}
                           className="text-sm text-slate-700 hover:text-[var(--brand-blue)] leading-snug block"
                         >
                           {r.title}

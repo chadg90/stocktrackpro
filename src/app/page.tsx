@@ -6,25 +6,30 @@ import CustomerLogoStrip from '@/components/CustomerLogoStrip';
 import CustomerStoriesSection from '@/components/CustomerStoriesSection';
 import HomeFaqSection from '@/components/HomeFaqSection';
 import { HomeFaqJsonLd } from '@/components/HomeFaqJsonLd';
-import { SITE_META_DESCRIPTION } from '@/content/siteSeo';
+import { HomeVideoJsonLd } from '@/components/HomeVideoJsonLd';
 import { absolutePageUrl } from '@/lib/site';
-import { FREE_TRIAL_CTA } from '@/lib/brand';
+import { FREE_TRIAL_CTA, PLATFORM_AVAILABILITY, WHATSAPP_DEMO_CTA, WHATSAPP_DEMO_URL } from '@/lib/brand';
 import { ClipboardList, ArrowRight, ShieldCheck, Camera } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import WhatsAppIcon from '@/components/WhatsAppIcon';
 
-const WHATSAPP_ENQUIRY_URL =
-  'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%2C%20I%27d%20like%20to%20get%20started%20with%20your%20service.';
+export const dynamic = 'force-static';
+export const revalidate = 3600;
+
+const HOME_TITLE = 'Fleet Track PRO | Daily Vehicle Checks App & DVSA';
+const HOME_DESCRIPTION =
+  'Daily vehicle checks app for UK fleets. DVSA walkaround inspections, defect photos, MOT tracking and repair close-out in one platform. Free trial.';
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Fleet Track PRO | UK Fleet & DVSA Compliance Software',
+    absolute: HOME_TITLE,
   },
-  description: SITE_META_DESCRIPTION,
+  description: HOME_DESCRIPTION,
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Fleet Track PRO | UK Fleet & DVSA Compliance Software',
-    description: SITE_META_DESCRIPTION,
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     url: absolutePageUrl('/'),
     siteName: 'Fleet Track PRO',
     images: [
@@ -40,8 +45,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fleet Track PRO | UK Fleet & DVSA Compliance Software',
-    description: SITE_META_DESCRIPTION,
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
     images: ['/og-image.jpg'],
   },
 };
@@ -74,22 +79,22 @@ const OUTCOMES = [
     icon: Camera,
     title: 'Photo-led walkaround checks',
     description:
-      'Structured daily vehicle inspections on iOS and Android with required photos so steps cannot be skipped.',
-    href: '/vehicle-walkaround-check-app',
+      `Structured daily vehicle inspections — ${PLATFORM_AVAILABILITY} — with required photos so steps cannot be skipped.`,
+    href: '/vehicle-walkaround-check-app/',
   },
   {
     icon: ClipboardList,
     title: 'Defects from report to close-out',
     description:
       'Open defects stay visible until repaired and signed off — not lost in WhatsApp or paper pads.',
-    href: '/vehicle-defect-reporting-software',
+    href: '/vehicle-defect-reporting-software/',
   },
   {
     icon: ShieldCheck,
     title: 'MOT and tax visibility',
     description:
       'DVLA-backed MOT and tax status on every vehicle, with advance warnings for managers.',
-    href: '/fleet-mot-tax-reminders',
+    href: '/fleet-mot-tax-reminders/',
   },
 ];
 
@@ -97,6 +102,7 @@ export default function Home() {
   return (
     <>
       <HomeFaqJsonLd />
+      <HomeVideoJsonLd />
       <div className="marketing-shell">
         <Navbar />
         <HomeHero />
@@ -120,7 +126,7 @@ export default function Home() {
               {[
                 ['From £8', 'per vehicle / month'],
                 ['14 days', 'free trial, no card'],
-                ['iOS & Android', 'plus web dashboard'],
+                ['iPhone & Android', 'App Store · invite · web'],
                 ['Unlimited', 'team members'],
               ].map(([value, label]) => (
                 <div key={label} className="min-w-0">
@@ -181,7 +187,7 @@ export default function Home() {
                   Four clear steps — with every update in one place for managers, fitters, and DVSA roadside readiness.
                 </p>
                 <Link
-                  href="/compliance-centre/van-fleet-defect-records"
+                  href="/compliance-centre/van-fleet-defect-records/"
                   className="inline-flex items-center gap-1.5 text-[var(--brand-blue)] font-semibold text-sm hover:underline underline-offset-4"
                 >
                   Read: fleet defect records guidance
@@ -195,6 +201,7 @@ export default function Home() {
                   fill
                   className="object-cover object-center"
                   sizes="(max-width: 1024px) 100vw, 50vw"
+                  loading="lazy"
                 />
               </div>
             </div>
@@ -223,17 +230,17 @@ export default function Home() {
           <div className="mkt-container relative">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
               <div>
-                <p className="text-sky-300/90 font-semibold text-xs uppercase tracking-[0.2em] mb-3">
+                <p className="text-sky-200 font-semibold text-xs uppercase tracking-[0.2em] mb-3">
                   Manager dashboard
                 </p>
                 <h2 className="text-3xl sm:text-4xl font-bold mb-4 leading-tight">
                   See open defects, checks, and renewals in one view
                 </h2>
-                <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-8">
+                <p className="text-slate-200 text-base sm:text-lg leading-relaxed mb-8">
                   Mobile for drivers in the yard. Web dashboard for managers who need fleet status without chasing
                   paper.
                 </p>
-                <ul className="space-y-3 text-sm text-slate-200 mb-8">
+                <ul className="space-y-3 text-sm text-slate-100 mb-8">
                   {[
                     'Fleet list with status and inspection history',
                     'Defect workflow through to return to service',
@@ -247,7 +254,7 @@ export default function Home() {
                   ))}
                 </ul>
                 <Link
-                  href="/features"
+                  href="/features/"
                   className="inline-flex items-center gap-2 rounded-xl bg-white text-[var(--mkt-ink)] px-6 py-3.5 font-semibold text-sm hover:bg-slate-100 transition-colors"
                 >
                   Explore features
@@ -261,6 +268,7 @@ export default function Home() {
                   fill
                   className="object-cover object-center"
                   sizes="(max-width: 1024px) 100vw, 50vw"
+                  loading="lazy"
                 />
               </div>
             </div>
@@ -282,19 +290,20 @@ export default function Home() {
                   fill
                   className="object-cover object-center"
                   sizes="(max-width: 1024px) 100vw, 50vw"
+                  loading="lazy"
                 />
               </div>
               <div>
                 <p className="mkt-eyebrow mb-3">Who it is for</p>
                 <h2 className="text-3xl sm:text-4xl font-bold text-[var(--mkt-ink)] mb-4 leading-tight">
-                  Cars, vans, and light commercial fleets across UK trades
+                  Cars and light commercial vehicles across UK trades
                 </h2>
                 <p className="text-[var(--mkt-muted)] text-base sm:text-lg leading-relaxed mb-6">
                   Built for groundworks, construction, electrical, plumbing, logistics, haulage support vans, and
                   specialist transport teams that need daily checks without HGV-only complexity.
                 </p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--mkt-muted)] mb-8">
-                  {['Groundworks', 'Construction', 'Electrical', 'Plumbing', 'Logistics', 'Haulage vans'].map(
+                  {['Groundworks', 'Construction', 'Electrical', 'Plumbing', 'Logistics', 'Haulage vehicles'].map(
                     (label) => (
                       <span
                         key={label}
@@ -306,10 +315,10 @@ export default function Home() {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm font-semibold">
-                  <Link href="/customers/newstreet" className="text-[var(--brand-blue)] hover:underline underline-offset-4">
+                  <Link href="/customers/newstreet/" className="text-[var(--brand-blue)] hover:underline underline-offset-4">
                     Newstreet case study →
                   </Link>
-                  <Link href="/customers/neemt" className="text-[var(--brand-blue)] hover:underline underline-offset-4">
+                  <Link href="/customers/neemt/" className="text-[var(--brand-blue)] hover:underline underline-offset-4">
                     NEEMT case study →
                   </Link>
                 </div>
@@ -337,23 +346,23 @@ export default function Home() {
               >
                 {FREE_TRIAL_CTA}
               </Link>
-              <Link
-                href="/pricing"
-                className="inline-flex w-full sm:w-auto items-center justify-center px-8 py-4 min-h-[48px] rounded-xl border border-[var(--mkt-border)] text-[var(--mkt-ink)] bg-white hover:bg-slate-50 transition-colors font-medium"
-              >
-                View pricing
-              </Link>
-            </div>
-            <p className="mt-6 text-[var(--mkt-muted)] text-sm">
-              Prefer to talk first?{' '}
               <a
-                href={WHATSAPP_ENQUIRY_URL}
+                href={WHATSAPP_DEMO_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[var(--brand-blue)] hover:underline font-medium"
+                data-analytics-location="footer"
+                data-analytics-intent="demo"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-8 py-4 min-h-[48px] rounded-xl border border-[var(--mkt-border)] text-[var(--mkt-ink)] bg-white hover:bg-slate-50 transition-colors font-medium"
               >
-                Message us on WhatsApp
+                <WhatsAppIcon className="h-4 w-4 shrink-0 text-emerald-600" />
+                {WHATSAPP_DEMO_CTA}
               </a>
+            </div>
+            <p className="mt-6 text-[var(--mkt-muted)] text-sm">
+              Or{' '}
+              <Link href="/pricing/" className="text-[var(--brand-blue)] hover:underline font-medium">
+                view pricing
+              </Link>
             </p>
           </div>
         </section>

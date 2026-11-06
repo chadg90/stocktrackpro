@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
@@ -10,7 +11,10 @@ type LinkItem = {
 
 type FaqItem = {
   question: string;
+  /** Plain-text answer for FAQPage JSON-LD. */
   answer: string;
+  /** Optional rich answer for the visible section; falls back to `answer`. */
+  answerNode?: ReactNode;
 };
 
 type Props = {
@@ -46,6 +50,8 @@ export default function CommercialFeaturePage({
   const faqLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
+    '@id': `${pageUrl}#faq`,
+    url: pageUrl,
     mainEntity: faqs.map((item) => ({
       '@type': 'Question',
       name: item.question,
@@ -104,7 +110,7 @@ export default function CommercialFeaturePage({
                   Start 14-Day Free Trial
                 </Link>
                 <Link
-                  href="/pricing"
+                  href="/pricing/"
                   className="inline-flex items-center justify-center px-8 py-4 rounded-xl border border-[var(--mkt-border)] text-[var(--mkt-ink)] bg-white hover:border-[var(--brand-blue)]/40 hover:bg-slate-50 transition-colors font-medium"
                 >
                   View pricing
@@ -172,14 +178,20 @@ export default function CommercialFeaturePage({
           </div>
         </section>
 
-        <section className="mkt-section bg-white border-t border-[var(--mkt-border)]">
+        <section
+          id="faq"
+          className="mkt-section bg-white border-t border-[var(--mkt-border)]"
+          aria-labelledby="commercial-faq-heading"
+        >
           <div className="mkt-container max-w-4xl">
-            <h2 className="text-3xl font-bold text-[var(--mkt-ink)] mb-8">Frequently asked questions</h2>
+            <h2 id="commercial-faq-heading" className="text-3xl font-bold text-[var(--mkt-ink)] mb-8">
+              Common questions
+            </h2>
             <div className="space-y-4">
               {faqs.map((item) => (
                 <section key={item.question} className="rounded-2xl border border-[var(--mkt-border)] bg-white p-6">
                   <h3 className="text-lg font-semibold text-[var(--mkt-ink)] mb-2">{item.question}</h3>
-                  <p className="text-[var(--mkt-muted)] leading-relaxed">{item.answer}</p>
+                  <p className="text-[var(--mkt-muted)] leading-relaxed">{item.answerNode ?? item.answer}</p>
                 </section>
               ))}
             </div>

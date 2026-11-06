@@ -2,12 +2,20 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
 import InteractiveAppDemo from '@/components/InteractiveAppDemo';
-import { SITE_NAME } from '@/lib/brand';
+import { absolutePageUrl, canonicalPath } from '@/lib/site';
+
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: `App demo preview | ${SITE_NAME}`,
+  // Root title template appends "| Fleet Track PRO" once.
+  title: 'App demo preview',
   description: 'Preview the interactive Fleet Track PRO app demo while we build it screen by screen.',
   robots: { index: false, follow: false },
+  alternates: { canonical: canonicalPath('/demo') },
+  openGraph: {
+    url: absolutePageUrl('/demo'),
+  },
 };
 
 export default function DemoPreviewPage() {

@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import FirebaseClientProvider from '@/components/FirebaseClientProvider';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   robots: {
@@ -13,5 +16,5 @@ export const metadata: Metadata = {
 };
 
 export default function InviteLayout({ children }: { children: ReactNode }) {
-  return children;
+  return <FirebaseClientProvider>{children}</FirebaseClientProvider>;
 }

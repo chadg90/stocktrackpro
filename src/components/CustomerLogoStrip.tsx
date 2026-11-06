@@ -26,6 +26,7 @@ export default function CustomerLogoStrip() {
                   height={64}
                   className="h-10 w-auto max-h-12 sm:h-14 sm:max-h-16 object-contain opacity-90 hover:opacity-100 transition-opacity"
                   sizes="(max-width: 640px) 144px, 208px"
+                  loading="lazy"
                 />
               </Link>
             </li>

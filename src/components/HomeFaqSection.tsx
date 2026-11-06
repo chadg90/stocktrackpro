@@ -33,7 +33,7 @@ export default function HomeFaqSection() {
 
         <p className="mt-8">
           <Link
-            href="/faq"
+            href="/faq/"
             className="text-[var(--brand-blue)] hover:text-[var(--brand-blue-hover)] text-sm font-semibold underline underline-offset-4"
           >
             View all FAQs — pricing and setup

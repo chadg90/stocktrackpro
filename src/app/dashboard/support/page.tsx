@@ -1,5 +1,7 @@
 'use client';
 
+import DashboardPageTitle from '../components/DashboardPageTitle';
+
 import React from 'react';
 import { MessageCircle, ExternalLink } from 'lucide-react';
 
@@ -12,9 +14,10 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_TEXT}`;
 export default function SupportPage() {
   return (
     <div className="space-y-6">
+      <DashboardPageTitle title="Help" />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">WhatsApp Support</h1>
+          <h1 className="text-3xl font-bold text-white">Help</h1>
           <p className="text-white/60 text-sm mt-1">
             We now handle dashboard support through WhatsApp Business for faster responses.
           </p>

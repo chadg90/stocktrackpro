@@ -1,12 +1,14 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getFunctions } from 'firebase/functions';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getFunctions, type Functions } from 'firebase/functions';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
-// Check if we're in a browser environment and have required config
-const isBrowser = typeof window !== 'undefined';
-const hasConfig = process.env.NEXT_PUBLIC_FIREBASE_API_KEY && process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+/**
+ * Client Firebase SDK.
+ * Only initialise when this module is imported in the browser.
+ * Marketing pages must not import this file — dashboard / onboarding / invite do via providers or pages.
+ */
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,13 +19,19 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Only initialize Firebase if we have config and are in browser
-let app: any = null;
-if (hasConfig && isBrowser) {
+const isBrowser = typeof window !== 'undefined';
+const hasConfig = Boolean(
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY && process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+);
+
+let app: FirebaseApp | null = null;
+
+export function ensureFirebase(): FirebaseApp | null {
+  if (!isBrowser || !hasConfig) return null;
+  if (app) return app;
+
   app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-  // App Check monitor-only when a reCAPTCHA site key is configured.
-  // Do NOT enable Firebase Console enforcement while legacy mobile clients remain.
   const recaptchaSiteKey = process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_RECAPTCHA_SITE_KEY;
   if (recaptchaSiteKey) {
     try {
@@ -35,10 +43,16 @@ if (hasConfig && isBrowser) {
       console.warn('Firebase App Check init skipped:', err);
     }
   }
+
+  return app;
 }
 
-export const firebaseApp = app;
-export const firebaseAuth = app ? getAuth(app) : null;
-export const firebaseDb = app ? getFirestore(app) : null;
-export const firebaseFunctions = app ? getFunctions(app) : null;
+// Eager init for any browser bundle that imports this module (dashboard / onboarding / invite).
+if (isBrowser && hasConfig) {
+  ensureFirebase();
+}
 
+export const firebaseApp: FirebaseApp | null = app;
+export const firebaseAuth: Auth | null = app ? getAuth(app) : null;
+export const firebaseDb: Firestore | null = app ? getFirestore(app) : null;
+export const firebaseFunctions: Functions | null = app ? getFunctions(app) : null;

@@ -1,33 +1,48 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { isAnalyticsExcludedPath, stripPiiFromUrl } from '@/lib/analytics';
+import {
+  FTP_ANALYTICS_READY_EVENT,
+  hasAnalyticsConsent,
+  isAnalyticsExcludedPath,
+  sendCurrentPageView,
+} from '@/lib/analytics';
 
-/** Module-level guard so React Strict Mode remounts do not double-fire. */
-let lastPageViewKey: string | null = null;
-
+/**
+ * Route-change page_views after gtag is ready.
+ * The Accept / first-load hit is sent from GoogleAnalytics (consent update → page_view).
+ */
 function GaPageViewsInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const gtagReadyRef = useRef(false);
+  const lastKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const onReady = () => {
+      gtagReadyRef.current = true;
+      // Record current route so we do not re-send the Accept landing page_view.
+      if (pathname) {
+        const qs = searchParams?.toString() ?? '';
+        lastKeyRef.current = `${pathname}${qs ? `?${qs}` : ''}`;
+      }
+    };
+    window.addEventListener(FTP_ANALYTICS_READY_EVENT, onReady);
+    return () => window.removeEventListener(FTP_ANALYTICS_READY_EVENT, onReady);
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     if (!pathname || isAnalyticsExcludedPath(pathname)) return;
-    if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
+    if (!hasAnalyticsConsent()) return;
+    if (!gtagReadyRef.current) return;
+    if (typeof window.gtag !== 'function') return;
 
     const qs = searchParams?.toString() ?? '';
     const key = `${pathname}${qs ? `?${qs}` : ''}`;
-    if (lastPageViewKey === key) return;
-    lastPageViewKey = key;
-
-    const page_location = stripPiiFromUrl(window.location.href);
-    const page_path = `${pathname}${qs ? `?${qs}` : ''}`;
-
-    window.gtag('event', 'page_view', {
-      page_location,
-      page_path,
-      page_title: document.title,
-    });
+    if (lastKeyRef.current === key) return;
+    lastKeyRef.current = key;
+    sendCurrentPageView();
   }, [pathname, searchParams]);
 
   return null;

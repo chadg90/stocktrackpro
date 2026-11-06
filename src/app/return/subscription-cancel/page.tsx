@@ -21,14 +21,14 @@ export default function SubscriptionCancelPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/pricing"
+              href="/pricing/"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-light text-black font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-slate-50"
             >
               Back to pricing
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <Link
-              href="/dashboard"
+              href="/dashboard/"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-primary/40 text-slate-900 hover:bg-primary/10 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-slate-50"
             >
               Dashboard

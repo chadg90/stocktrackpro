@@ -5,6 +5,9 @@ import AppStoreBadge from '@/components/AppStoreBadge';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
 import { SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
 
+export const dynamic = 'force-static';
+export const revalidate = 3600;
+
 const path = '/getting-started';
 const title = 'Getting started with Fleet Track PRO';
 const description =
@@ -82,8 +85,8 @@ export default function GettingStartedPage() {
           <Section title="For drivers">
             <ol className="space-y-4 text-slate-600 list-decimal list-inside leading-relaxed mb-6">
               <li>
-                <strong className="text-slate-800">Download the Fleet Track PRO app</strong> from the App Store and sign
-                in with the email and password from your invite.
+                <strong className="text-slate-800">Download the Fleet Track PRO app</strong> — iPhone app on the App
+                Store, Android app available by invite — then sign in with the email and password from your invite.
               </li>
               <li>
                 <strong className="text-slate-800">Accept the invite</strong> if you have not finished setup yet — open
@@ -103,7 +106,7 @@ export default function GettingStartedPage() {
                 describe it, attach photos where needed, and send it to your manager for close-out.
               </li>
             </ol>
-            <AppStoreBadge />
+            <AppStoreBadge analyticsLocation="getting-started" />
           </Section>
 
           <Section title="Need help?">

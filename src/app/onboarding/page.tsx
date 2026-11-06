@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -21,9 +21,27 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { APP_STORE_URL, FREE_TRIAL_CTA, FREE_TRIAL_DAYS } from '@/lib/brand';
+import { APP_STORE_URL, FREE_TRIAL_CTA, FREE_TRIAL_DAYS, PLATFORM_AVAILABILITY } from '@/lib/brand';
 import AppStoreBadge from '@/components/AppStoreBadge';
 import DriverAppLinks from '@/components/DriverAppLinks';
+import {
+  GA_SIGN_UP_SESSION_KEY,
+  hasAnalyticsConsent,
+  isGtagReady,
+  queueBeginSignup,
+  referrerSourcePath,
+  pageLocationForGa,
+  track,
+} from '@/lib/analytics';
+import {
+  clearStoredReferral,
+  isReferralCodeFormatValid,
+  normalizeReferralCode,
+  readStoredReferral,
+  referralCodeFromSearch,
+  saveReferralIfFirst,
+  stripReferralParamsFromLocation,
+} from '@/lib/referralCode';
 
 type OnboardingStep = 'choice' | 'account' | 'company' | 'success';
 
@@ -55,9 +73,9 @@ function WhatHappensNextPanel() {
           <div className="min-w-0 space-y-3">
             <p className="leading-relaxed">
               Your drivers download the Fleet Track PRO app and pick a vehicle from the list to start their daily
-              check.
+              check — {PLATFORM_AVAILABILITY}.
             </p>
-            <AppStoreBadge />
+            <AppStoreBadge analyticsLocation="onboarding" />
           </div>
         </li>
       </ol>
@@ -82,6 +100,8 @@ function OnboardingPageInner() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [referralCode, setReferralCode] = useState('');
+  const [referralHint, setReferralHint] = useState<string | null>(null);
 
   const [step, setStep] = useState<OnboardingStep>('choice');
   const [companyName, setCompanyName] = useState('');
@@ -90,12 +110,43 @@ function OnboardingPageInner() {
   const [saveSlow, setSaveSlow] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdCompanyName, setCreatedCompanyName] = useState('');
+  const [referralMessage, setReferralMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (searchParams.get('start') === '1') {
       setStep((prev) => (prev === 'choice' ? 'account' : prev));
     }
   }, [searchParams]);
+
+  // Prefill referral from ?ref= / ?referral= (first wins into ftp_ref) or existing ftp_ref.
+  // Strip ref/referral from the address bar in layout effect so it runs before gtag useEffect.
+  useLayoutEffect(() => {
+    const fromUrl = referralCodeFromSearch(searchParams);
+    if (fromUrl) {
+      const stored = saveReferralIfFirst(fromUrl);
+      setReferralCode(stored || fromUrl);
+      stripReferralParamsFromLocation();
+      return;
+    }
+    const existing = readStoredReferral();
+    if (existing?.code) {
+      setReferralCode(existing.code);
+    }
+  }, [searchParams]);
+
+  // begin_signup when step 1 (account) is shown — no personal fields.
+  // Before Accept / gtag ready: queue only. After Reject: never send.
+  useEffect(() => {
+    if (step !== 'account') return;
+    if (!hasAnalyticsConsent() || !isGtagReady()) {
+      queueBeginSignup();
+      return;
+    }
+    track('begin_signup', {
+      source_path: referrerSourcePath(),
+      page_location: pageLocationForGa(window.location.href),
+    });
+  }, [step]);
 
   // Signed-in users who already have a company skip the chooser / start form.
   useEffect(() => {
@@ -252,8 +303,63 @@ function OnboardingPageInner() {
         // Non-fatal — rules also allow profile/company fallback for trial users.
       }
 
+      const codeForAttach = normalizeReferralCode(referralCode);
+
+      // Attach referral after company exists — never block signup.
+      if (codeForAttach) {
+        try {
+          const token = await user.getIdToken();
+          const res = await fetch('/api/referrals/attach', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ companyId: companyRef.id, code: codeForAttach }),
+          });
+          const data = (await res.json().catch(() => ({}))) as {
+            ok?: boolean;
+            status?: string;
+            recognised?: boolean;
+          };
+          if (res.ok && data.ok) {
+            if (data.status === 'unrecognised' || data.recognised === false) {
+              setReferralMessage(
+                "We don't recognise that code, but we've saved it and will check it."
+              );
+            } else {
+              setReferralMessage('Referral code saved ✓');
+            }
+            clearStoredReferral();
+          }
+        } catch (attachErr) {
+          console.warn('Referral attach skipped', attachErr);
+        }
+      }
+
       setCreatedCompanyName(companyName.trim());
       setStep('success');
+
+      const hasReferral = Boolean(codeForAttach);
+      const page_location = pageLocationForGa(window.location.href);
+      try {
+        if (sessionStorage.getItem(GA_SIGN_UP_SESSION_KEY) !== '1') {
+          sessionStorage.setItem(GA_SIGN_UP_SESSION_KEY, '1');
+          track('sign_up', {
+            method: 'email',
+            has_referral: hasReferral,
+            plan: 'trial',
+            page_location,
+          });
+        }
+      } catch {
+        track('sign_up', {
+          method: 'email',
+          has_referral: hasReferral,
+          plan: 'trial',
+          page_location,
+        });
+      }
     } catch (err: any) {
       console.error('Company creation error:', err);
       setError(err.message || 'Failed to create company. Please try again.');
@@ -282,7 +388,7 @@ function OnboardingPageInner() {
         </Link>
         <div className="text-center mb-6">
           <Link href="/" className="inline-block mb-6 hover:opacity-90">
-            <h1 className="text-3xl font-bold text-slate-900">Fleet Track PRO</h1>
+            <h1 className="text-3xl font-bold text-slate-900">Start your free Fleet Track PRO trial</h1>
           </Link>
           {step !== 'success' && step !== 'choice' && (
             <div className="flex items-center justify-center gap-2 mb-6">
@@ -335,7 +441,7 @@ function OnboardingPageInner() {
                 </span>
               </button>
               <Link
-                href="/dashboard"
+                href="/dashboard/"
                 className="flex-1 p-6 rounded-xl border-2 border-slate-300 bg-white/5 hover:border-blue-400 hover:bg-slate-100 transition-colors text-left group flex flex-col"
               >
                 <LogIn className="h-8 w-8 text-blue-500 mb-4 group-hover:scale-110 transition-transform" />
@@ -354,6 +460,7 @@ function OnboardingPageInner() {
                 href={APP_STORE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
+                data-analytics-location="onboarding"
                 className="text-[var(--brand-blue)] underline underline-offset-2"
               >
                 download the Fleet Track PRO app
@@ -367,6 +474,9 @@ function OnboardingPageInner() {
               <CheckCircle className="w-8 h-8 text-blue-500 flex-shrink-0" />
               <div>
                 <p className="font-semibold text-slate-900">{createdCompanyName}</p>
+                {referralMessage ? (
+                  <p className="text-sm text-slate-600 mt-1">{referralMessage}</p>
+                ) : null}
                 <p className="text-slate-500 text-sm">
                   Company created. You&apos;re the manager. Your {TRIAL_DAYS}-day free trial starts now.
                 </p>
@@ -397,8 +507,7 @@ function OnboardingPageInner() {
                   {
                     icon: Smartphone,
                     title: 'Install the mobile app',
-                    detail:
-                      'You and your team use the app for vehicle inspections, defect logging, and job progress updates on the road.',
+                    detail: `You and your team use the app for vehicle inspections, defect logging, and job progress updates on the road — ${PLATFORM_AVAILABILITY}.`,
                   },
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
@@ -430,7 +539,7 @@ function OnboardingPageInner() {
             </div>
 
             <Link
-              href="/dashboard"
+              href="/dashboard/"
               className="flex items-center justify-center gap-2 w-full text-white font-semibold rounded-xl py-3.5 transition-all btn-brand-blue"
             >
               <LayoutDashboard className="w-4 h-4" />
@@ -440,7 +549,7 @@ function OnboardingPageInner() {
 
             <p className="text-slate-400 text-xs text-center">
               Want to subscribe straight away?{' '}
-              <Link href="/dashboard/subscription" className="text-[var(--brand-blue)] hover:underline">
+              <Link href="/dashboard/subscription/" className="text-[var(--brand-blue)] hover:underline">
                 Set up billing from the dashboard
               </Link>
               . No charge until your trial ends.
@@ -537,6 +646,40 @@ function OnboardingPageInner() {
                   />
                 </div>
 
+                <div>
+                  <label htmlFor="onboarding-referral-code" className="block text-sm font-medium text-slate-600 mb-1.5">
+                    Referral code (optional)
+                  </label>
+                  <input
+                    id="onboarding-referral-code"
+                    name="referralCode"
+                    type="text"
+                    autoComplete="off"
+                    autoCapitalize="characters"
+                    maxLength={20}
+                    value={referralCode}
+                    onChange={(e) => {
+                      const next = normalizeReferralCode(e.target.value);
+                      setReferralCode(next);
+                      if (!next) {
+                        setReferralHint(null);
+                      } else if (!isReferralCodeFormatValid(next)) {
+                        setReferralHint('Use 3–20 characters: letters, numbers, or hyphens.');
+                      } else {
+                        setReferralHint(null);
+                      }
+                    }}
+                    className="w-full rounded-lg bg-white/5 border border-slate-300 px-3 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors uppercase"
+                    placeholder="e.g. CHAD-01"
+                  />
+                  <p className="text-slate-500 text-xs mt-1">
+                    Got a code from someone who recommended us? Enter it here.
+                  </p>
+                  {referralHint ? (
+                    <p className="text-amber-700 text-xs mt-1">{referralHint}</p>
+                  ) : null}
+                </div>
+
                 {error && (
                   <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
                     <p className="text-red-400 text-sm">{error}</p>
@@ -584,7 +727,7 @@ function OnboardingPageInner() {
               <div className="mt-6 pt-6 border-t border-slate-200">
                 <p className="text-slate-500 text-center text-xs">
                   Already have an account?{' '}
-                  <Link href="/dashboard" className="text-blue-500 hover:underline">
+                  <Link href="/dashboard/" className="text-blue-500 hover:underline">
                     Sign in
                   </Link>
                 </p>
@@ -668,7 +811,7 @@ function OnboardingPageInner() {
             <div className="mt-6 pt-6 border-t border-slate-200">
               <p className="text-slate-500 text-center text-xs">
                 Already have an account?{' '}
-                <Link href="/dashboard" className="text-blue-500 hover:underline">
+                <Link href="/dashboard/" className="text-blue-500 hover:underline">
                   Sign in
                 </Link>
               </p>

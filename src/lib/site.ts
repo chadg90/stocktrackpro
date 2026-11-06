@@ -5,7 +5,6 @@ import {
   SITE_NAME,
   SITE_LEGAL_NAME,
   SUPPORT_EMAIL,
-  SALES_EMAIL,
   APP_STORE_URL,
 } from '@/lib/brand';
 
@@ -17,7 +16,6 @@ export {
   SITE_NAME,
   SITE_LEGAL_NAME,
   SUPPORT_EMAIL,
-  SALES_EMAIL,
   APP_STORE_URL,
 };
 

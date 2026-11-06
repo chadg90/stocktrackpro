@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
-import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
+
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Compliance Centre',
@@ -26,15 +28,7 @@ export const metadata: Metadata = {
   },
 };
 
+/** Hub WebPage JSON-LD lives on the index page only — article routes emit their own WebPage. */
 export default function ComplianceCentreLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <MarketingWebPageJsonLd
-        path="/compliance-centre"
-        title="Compliance Centre"
-        description="UK fleet compliance guidance — defect records, walkaround checks, retention and MOT tracking."
-      />
-      {children}
-    </>
-  );
+  return children;
 }

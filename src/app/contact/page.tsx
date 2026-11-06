@@ -2,12 +2,19 @@
 
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
-import { Mail, Send, Loader2, MessageCircle } from 'lucide-react';
-import Link from 'next/link';
-import { SALES_EMAIL, SALES_MAILTO } from '@/lib/brand';
+import { Mail, Send, Loader2 } from 'lucide-react';
+import WhatsAppIcon from '@/components/WhatsAppIcon';
+import {
+  SUPPORT_EMAIL,
+  SUPPORT_MAILTO,
+  WHATSAPP_DEMO_CTA,
+  WHATSAPP_DEMO_URL,
+  WHATSAPP_SUPPORT_CTA,
+  WHATSAPP_SUPPORT_URL,
+} from '@/lib/brand';
+import { track } from '@/lib/analytics';
 
 const HONEYPOT_FIELD = 'website_url';
-const WHATSAPP_SUPPORT_URL = 'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%2C%20I%20need%20help%20with%3A';
 
 export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -33,6 +40,7 @@ export default function Contact() {
       if (!res.ok) throw new Error(data.error || 'Failed to send');
       setSubmitSuccess(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
+      track('generate_lead', { form: 'contact' });
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -42,20 +50,28 @@ export default function Contact() {
 
   const contactMethods = [
     {
-      title: "Sales Inquiries",
-      description: "For pricing and general enquiries",
-      value: SALES_EMAIL,
-      href: SALES_MAILTO,
-      actionText: "Email Sales Team",
-      type: "email",
+      title: 'Sales enquiries',
+      description: 'For pricing and general enquiries',
+      value: SUPPORT_EMAIL,
+      href: SUPPORT_MAILTO,
+      actionText: 'Email us',
+      type: 'email' as const,
     },
     {
-      title: "Support",
-      description: "Fast technical support via WhatsApp Business",
-      value: "+44 7438 146343",
+      title: 'Book a demo',
+      description: 'A short WhatsApp walkthrough of Fleet Track PRO',
+      value: 'WhatsApp',
+      href: WHATSAPP_DEMO_URL,
+      actionText: WHATSAPP_DEMO_CTA,
+      type: 'whatsapp-demo' as const,
+    },
+    {
+      title: 'Support',
+      description: 'Fast technical support via WhatsApp Business',
+      value: 'WhatsApp',
       href: WHATSAPP_SUPPORT_URL,
-      actionText: "Message on WhatsApp",
-      type: "whatsapp",
+      actionText: WHATSAPP_SUPPORT_CTA,
+      type: 'whatsapp-support' as const,
     },
   ];
 
@@ -202,33 +218,45 @@ export default function Contact() {
       {/* Contact methods */}
       <section className="py-12 sm:py-16 mkt-atmosphere border-t border-[var(--mkt-border)]">
         <div className="mkt-container">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {contactMethods.map((method, index) => (
-              <div
-                key={index}
-                className="group p-8 mkt-card"
-              >
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--mkt-muted-surface)] flex items-center justify-center text-[var(--brand-blue)] group-hover:bg-blue-50 transition-colors">
-                    <Mail className="w-6 h-6" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {contactMethods.map((method) => {
+              const isWhatsApp = method.type.startsWith('whatsapp');
+              return (
+                <div key={method.title} className="group p-8 mkt-card">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--mkt-muted-surface)] flex items-center justify-center text-[var(--brand-blue)] group-hover:bg-blue-50 transition-colors">
+                      {isWhatsApp ? (
+                        <WhatsAppIcon className="w-6 h-6 text-emerald-600" />
+                      ) : (
+                        <Mail className="w-6 h-6" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-[var(--mkt-ink)]">{method.title}</h3>
+                      <p className="text-[var(--mkt-muted)] text-sm">{method.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-[var(--mkt-ink)]">{method.title}</h3>
-                    <p className="text-[var(--mkt-muted)] text-sm">{method.description}</p>
-                  </div>
+                  <p className="text-[var(--mkt-ink)] mb-6 break-all">{method.value}</p>
+                  <a
+                    href={method.href}
+                    target={isWhatsApp ? '_blank' : undefined}
+                    rel={isWhatsApp ? 'noopener noreferrer' : undefined}
+                    data-analytics-location={isWhatsApp ? 'contact' : undefined}
+                    data-analytics-intent={
+                      method.type === 'whatsapp-demo'
+                        ? 'demo'
+                        : method.type === 'whatsapp-support'
+                          ? 'support'
+                          : undefined
+                    }
+                    className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 min-h-[44px] rounded-xl text-white font-semibold transition-all duration-200 btn-brand-blue"
+                  >
+                    {isWhatsApp ? <WhatsAppIcon className="w-5 h-5 shrink-0" /> : null}
+                    {method.actionText}
+                  </a>
                 </div>
-                <p className="text-[var(--mkt-ink)] mb-6 break-all">{method.value}</p>
-                <Link
-                  href={method.href}
-                  target={method.type === 'whatsapp' ? '_blank' : undefined}
-                  rel={method.type === 'whatsapp' ? 'noopener noreferrer' : undefined}
-                  className="inline-flex items-center justify-center w-full px-6 py-3 rounded-xl text-white font-semibold transition-all duration-200 btn-brand-blue"
-                >
-                  {method.type === 'whatsapp' ? <MessageCircle className="w-5 h-5 mr-2" /> : null}
-                  {method.actionText}
-                </Link>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -237,7 +265,7 @@ export default function Contact() {
       <section className="py-12 sm:py-16 border-t border-[var(--mkt-border)] bg-white">
         <div className="mkt-container">
           <div className="max-w-4xl mx-auto p-8 rounded-2xl border border-[var(--mkt-border)] bg-[var(--mkt-muted-surface)]">
-            <h3 className="text-xl font-semibold text-[var(--mkt-ink)] mb-6">What to expect</h3>
+            <h2 className="text-xl font-semibold text-[var(--mkt-ink)] mb-6">What to expect</h2>
             <ul className="space-y-4 text-[var(--mkt-muted)]">
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 h-2 w-2 rounded-full bg-[var(--brand-blue)] flex-shrink-0" />
@@ -249,7 +277,7 @@ export default function Contact() {
               </li>
               <li className="flex items-start gap-3">
                 <span className="mt-1.5 h-2 w-2 rounded-full bg-[var(--brand-blue)] flex-shrink-0" />
-                <span>Business hours: Monday–Friday, 9am–5pm GMT.</span>
+                <span>Business hours: Monday–Friday, 9am–5pm UK time.</span>
               </li>
             </ul>
           </div>

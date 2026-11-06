@@ -5,14 +5,14 @@ const STATIC_LLMS_BODY = `# Fleet Track PRO
 
 > UK fleet management and DVSA compliance software for commercial vehicle operators.
 
-Fleet Track PRO helps UK businesses run daily vehicle walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for cars, vans, and light commercial fleets.
+Fleet Track PRO helps UK businesses run daily vehicle walkaround checks, report vehicle defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for cars and light commercial vehicles.
 
 Canonical website: ${absolutePageUrl('/')}
 Support email: help@fleettrackpro.co.uk
 
 ## What it does
 
-- Daily vehicle walkaround inspections via iOS and Android app
+- Daily vehicle walkaround inspections via iPhone app on the App Store (Android app available by invite)
 - Defect reporting with timestamped photo evidence
 - Defect close-out workflow: report, notify, repair, resolve
 - MOT and tax expiry monitoring with 7-day advance warnings
@@ -22,7 +22,7 @@ Support email: help@fleettrackpro.co.uk
 
 ## Who it is for
 
-UK fleet operators — trades, groundworks, logistics, construction, electrical, and plumbing businesses. Suitable for sole traders and companies running 2+ vehicles (minimum paid subscription quantity is 2 vehicles). Works for cars, vans, and light commercial fleets.
+UK fleet operators — trades, groundworks, logistics, construction, electrical, and plumbing businesses. Suitable for sole traders and companies running 2+ vehicles (minimum paid subscription quantity is 2 vehicles). Works for cars and light commercial vehicles.
 
 ## Pricing
 
@@ -52,7 +52,7 @@ UK fleet operators — trades, groundworks, logistics, construction, electrical,
 const STATIC_LLMS_FOOTER = `
 ## Platform and support
 
-- Platform: iOS app, Android app, web dashboard
+- Platform: iPhone app on the App Store, Android app available by invite, web dashboard
 - Data: DVLA integration for MOT and tax status visibility
 - Support: UK-based via email and WhatsApp
 - Record retention: designed to support fleet compliance record keeping
@@ -61,7 +61,7 @@ const STATIC_LLMS_FOOTER = `
 
 Website: ${absolutePageUrl('/')}
 Email: help@fleettrackpro.co.uk
-Sales: sales@fleettrackpro.co.uk
+Contact: help@fleettrackpro.co.uk
 `;
 
 export async function buildLlmsTxt(): Promise<string> {

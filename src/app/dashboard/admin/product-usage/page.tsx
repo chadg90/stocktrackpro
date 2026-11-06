@@ -3,20 +3,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   collection,
+  getCountFromServer,
   getDocs,
   limit,
   orderBy,
   query,
   Timestamp,
+  where,
 } from 'firebase/firestore';
 import { Activity, BarChart3, EyeOff } from 'lucide-react';
 import { firebaseDb } from '@/lib/firebase';
-import { preferSepMonth } from '@/lib/dateUtils';
 import {
   TRACKED_FEATURES,
   TRACKED_PAGES,
   type UsageKind,
 } from '@/lib/productUsage';
+import { formatAdminDateTime, formatAdminDayId } from '@/lib/adminDateFormat';
 import TableSkeleton from '../../components/TableSkeleton';
 
 type TotalRow = {
@@ -34,21 +36,16 @@ type DayRow = {
   counts: Record<string, number>;
 };
 
+type CompanyUsageRow = {
+  id: string;
+  name: string;
+  views: number;
+  checks: number;
+  last_seen: Timestamp | null;
+};
+
 function formatWhen(ts?: Timestamp | null): string {
-  if (!ts) return '—';
-  try {
-    return preferSepMonth(
-      ts.toDate().toLocaleString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    );
-  } catch {
-    return '—';
-  }
+  return formatAdminDateTime(ts ?? null);
 }
 
 export default function ProductUsageAdminPage() {
@@ -56,6 +53,7 @@ export default function ProductUsageAdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [totals, setTotals] = useState<TotalRow[]>([]);
   const [days, setDays] = useState<DayRow[]>([]);
+  const [companyRows, setCompanyRows] = useState<CompanyUsageRow[]>([]);
 
   useEffect(() => {
     if (!firebaseDb) {
@@ -69,9 +67,17 @@ export default function ProductUsageAdminPage() {
       setLoading(true);
       setError(null);
       try {
-        const totalsSnap = await getDocs(
-          query(collection(firebaseDb!, 'product_usage_totals'), orderBy('count', 'desc'), limit(200))
-        );
+        const [totalsSnap, daysSnap, companiesSnap, byCompanySnap] = await Promise.all([
+          getDocs(
+            query(collection(firebaseDb!, 'product_usage_totals'), orderBy('count', 'desc'), limit(200))
+          ),
+          getDocs(
+            query(collection(firebaseDb!, 'product_usage_daily'), orderBy('date', 'desc'), limit(30))
+          ),
+          getDocs(collection(firebaseDb!, 'companies')),
+          getDocs(collection(firebaseDb!, 'product_usage_by_company')).catch(() => null),
+        ]);
+
         const totalRows: TotalRow[] = [];
         totalsSnap.forEach((d) => {
           const data = d.data();
@@ -85,9 +91,6 @@ export default function ProductUsageAdminPage() {
           });
         });
 
-        const daysSnap = await getDocs(
-          query(collection(firebaseDb!, 'product_usage_daily'), orderBy('date', 'desc'), limit(30))
-        );
         const dayRows: DayRow[] = [];
         daysSnap.forEach((d) => {
           const data = d.data();
@@ -102,9 +105,69 @@ export default function ProductUsageAdminPage() {
           });
         });
 
+        const usageById = new Map<string, { views: number; last_seen: Timestamp | null }>();
+        byCompanySnap?.forEach((d) => {
+          const data = d.data();
+          usageById.set(d.id, {
+            views: typeof data.views === 'number' ? data.views : Number(data.views) || 0,
+            last_seen: (data.last_seen as Timestamp) || null,
+          });
+        });
+
+        const companyUsage: CompanyUsageRow[] = await Promise.all(
+          companiesSnap.docs.map(async (d) => {
+            const name = String((d.data() as { name?: string }).name || d.id);
+            const usage = usageById.get(d.id);
+            let inspectionCount = 0;
+            let lastInspection: Timestamp | null = null;
+            try {
+              const [countSnap, latestSnap] = await Promise.all([
+                getCountFromServer(
+                  query(
+                    collection(firebaseDb!, 'vehicle_inspections'),
+                    where('company_id', '==', d.id)
+                  )
+                ),
+                getDocs(
+                  query(
+                    collection(firebaseDb!, 'vehicle_inspections'),
+                    where('company_id', '==', d.id),
+                    orderBy('inspected_at', 'desc'),
+                    limit(1)
+                  )
+                ),
+              ]);
+              inspectionCount = countSnap.data().count;
+              const raw = latestSnap.docs[0]?.data()?.inspected_at;
+              lastInspection = raw instanceof Timestamp ? raw : null;
+            } catch {
+              inspectionCount = 0;
+            }
+
+            const usageSeen = usage?.last_seen ?? null;
+            let lastSeen: Timestamp | null = usageSeen;
+            if (lastInspection && usageSeen) {
+              lastSeen =
+                lastInspection.toMillis() >= usageSeen.toMillis() ? lastInspection : usageSeen;
+            } else {
+              lastSeen = lastInspection || usageSeen;
+            }
+
+            return {
+              id: d.id,
+              name,
+              views: usage?.views ?? 0,
+              checks: inspectionCount,
+              last_seen: lastSeen,
+            };
+          })
+        );
+        companyUsage.sort((a, b) => b.views + b.checks - (a.views + a.checks));
+
         if (!cancelled) {
           setTotals(totalRows);
           setDays(dayRows);
+          setCompanyRows(companyUsage);
         }
       } catch (err) {
         console.error(err);
@@ -212,6 +275,54 @@ export default function ProductUsageAdminPage() {
           ({topKey.count.toLocaleString('en-GB')} hits)
         </p>
       )}
+
+      <section className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+          <h2 className="text-sm font-bold uppercase tracking-wide text-gray-500">
+            Per company
+          </h2>
+          <p className="mt-1 text-xs text-gray-500">
+            Views are dashboard page views. Checks are vehicle inspections. Last seen is the more recent of
+            dashboard use and the latest inspection.
+          </p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+              <tr>
+                <th className="px-4 py-3">Company</th>
+                <th className="px-4 py-3">Views</th>
+                <th className="px-4 py-3">Checks</th>
+                <th className="px-4 py-3">Last seen</th>
+              </tr>
+            </thead>
+            <tbody>
+              {companyRows.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-4 py-6 text-gray-500">
+                    No companies found.
+                  </td>
+                </tr>
+              ) : (
+                companyRows.map((row) => (
+                  <tr key={row.id} className="border-t border-gray-100 dark:border-gray-800">
+                    <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{row.name}</td>
+                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">
+                      {row.views.toLocaleString('en-GB')}
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">
+                      {row.checks.toLocaleString('en-GB')}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">
+                      {formatWhen(row.last_seen)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section className="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
         <div className="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
@@ -335,7 +446,9 @@ export default function ProductUsageAdminPage() {
                   const total = Object.values(d.counts || {}).reduce((a, b) => a + (Number(b) || 0), 0);
                   return (
                     <tr key={d.id} className="border-t border-gray-100 dark:border-gray-800">
-                      <td className="px-4 py-3 text-gray-900 dark:text-gray-100">{d.date}</td>
+                      <td className="px-4 py-3 text-gray-900 dark:text-gray-100">
+                        {formatAdminDayId(d.date, d.date)}
+                      </td>
                       <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">
                         {total.toLocaleString('en-GB')}
                       </td>

@@ -4,6 +4,9 @@ import CustomerCaseStudyPage from '@/components/CustomerCaseStudyPage';
 import { getCustomerStory } from '@/content/customerStories';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
 
+export const dynamic = 'force-static';
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: 'Newstreet Groundworks Fleet Case Study',
   description:

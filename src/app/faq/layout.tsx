@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
 
+export const dynamic = 'force-static';
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: 'Fleet Management Software FAQs',
   description:

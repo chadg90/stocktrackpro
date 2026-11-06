@@ -58,7 +58,7 @@ export default function CustomerStoryCallout() {
           </ul>
 
           <Link
-            href="/customers/newstreet"
+            href="/customers/newstreet/"
             className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white btn-brand-blue focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 focus:ring-offset-white"
           >
             Read the case study

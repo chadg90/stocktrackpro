@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
+import { LEGAL_OG_IMAGES, LEGAL_TWITTER_IMAGES } from '@/lib/seo/legalOgImage';
+
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Terms and Conditions',
@@ -13,6 +17,12 @@ export const metadata: Metadata = {
     siteName: 'Fleet Track PRO',
     locale: 'en_GB',
     type: 'website',
+    images: [...LEGAL_OG_IMAGES],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Terms and Conditions | Fleet Track PRO',
+    images: [...LEGAL_TWITTER_IMAGES],
   },
 };
 

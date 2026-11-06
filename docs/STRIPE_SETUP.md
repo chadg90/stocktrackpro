@@ -70,7 +70,7 @@ Use the `whsec_…` shown in the terminal for local testing.
 3. Recommended settings:
    - Allow customers to update payment methods: **On**
    - Allow customers to cancel subscriptions: **On** (at end of period)
-   - Allow customers to update quantities: **Off** (we handle this through our dashboard UI so vehicle count stays in sync with Firestore)
+   - Allow customers to update quantities: **Off** (platform admins change quantity from **Dashboard → Companies**; webhook syncs line-item quantity into Firestore `subscribed_vehicles`)
    - Show invoice history: **On**
 4. Optional: copy the configuration ID and set `STRIPE_PORTAL_CONFIGURATION_ID` in your env.
 

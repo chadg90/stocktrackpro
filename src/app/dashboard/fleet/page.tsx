@@ -1,5 +1,7 @@
 'use client';
 
+import DashboardPageTitle from '../components/DashboardPageTitle';
+
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   collection,
@@ -16,8 +18,9 @@ import {
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { onAuthStateChanged } from 'firebase/auth';
-import { firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
-import { Plus, Pencil, Trash2, Search, Truck, AlertTriangle, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import { firebaseApp, firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
+import { Plus, Pencil, Search, Truck, AlertTriangle, Image as ImageIcon, Loader2 } from 'lucide-react';
 import Modal from '../components/Modal';
 import ExportButton from '../components/ExportButton';
 import ImageViewerModal from '../components/ImageViewerModal';
@@ -26,6 +29,8 @@ import LazyWhenVisible from '../components/LazyWhenVisible';
 import { EmptyStateTableRow } from '../components/EmptyState';
 import TableSkeleton from '../components/TableSkeleton';
 import TablePagination, { PAGE_SIZE } from '../components/TablePagination';
+import TypeToConfirmDelete from '../components/TypeToConfirmDelete';
+import AdminRowMenu from '../components/AdminRowMenu';
 import { useDebounce } from '@/hooks/useDebounce';
 import { checkCanAddVehicle } from '@/lib/subscriptionLimits';
 import {
@@ -34,6 +39,7 @@ import {
   isValidUkRegistrationShape,
   registrationKey,
 } from '@/lib/ukVehicleRegistration';
+import { storageObjectPathFromDownloadUrl } from '@/lib/storageThumbnail';
 import PageGuideButton from '../components/PageGuide';
 
 type Vehicle = {
@@ -82,6 +88,10 @@ export default function FleetPage() {
   // Image viewer state
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [viewingImageAlt, setViewingImageAlt] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<Vehicle | null>(null);
+  /** recommend = retire first; confirm-delete = type registration to permanently delete */
+  const [removeStep, setRemoveStep] = useState<'recommend' | 'confirm-delete' | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Only admins can delete per policy; managers can add/edit
   const canDelete = profile?.role === 'admin';
@@ -132,6 +142,42 @@ export default function FleetPage() {
     return urls.length > 0 ? urls[0] : null;
   };
 
+  /**
+   * Confirm the Firestore photo path exists via getDownloadURL only (no folder
+   * listing / thumb probe). Missing → null → "No image provided"; no console 404 img.
+   */
+  const resolveExistingInspectionImage = async (pathOrUrl: string): Promise<string | null> => {
+    if (!pathOrUrl || !firebaseApp) return null;
+    // Folder / prefix paths are not downloadable objects — skip Storage entirely.
+    if (pathOrUrl.endsWith('/')) return null;
+
+    const storage = getStorage(firebaseApp);
+
+    let objectPath: string | null = null;
+    if (/^https?:\/\//i.test(pathOrUrl)) {
+      try {
+        const host = new URL(pathOrUrl).hostname;
+        const isFirebase =
+          host.includes('firebasestorage.googleapis.com') ||
+          host.includes('storage.googleapis.com') ||
+          host.endsWith('.firebasestorage.app');
+        if (!isFirebase) return pathOrUrl;
+      } catch {
+        return null;
+      }
+      objectPath = storageObjectPathFromDownloadUrl(pathOrUrl);
+      if (!objectPath || objectPath.endsWith('/')) return null;
+    } else {
+      objectPath = pathOrUrl;
+    }
+
+    try {
+      return await getDownloadURL(ref(storage, objectPath));
+    } catch {
+      return null;
+    }
+  };
+
   const fetchVehicles = async (companyId: string) => {
     if (!firebaseDb || !companyId) {
       setLoading(false);
@@ -175,16 +221,18 @@ export default function FleetPage() {
         console.error('Error fetching inspections (non-critical):', err);
       }
 
-      // Enrich vehicles with inspection photos if they don't have image_url
-      const enrichedVehicles = vehiclesData.map(vehicle => {
-        if (!vehicle.image_url && inspectionsMap[vehicle.id]) {
-          const photoUrl = getInspectionPhoto(inspectionsMap[vehicle.id]);
-          if (photoUrl) {
-            return { ...vehicle, image_url: photoUrl };
-          }
-        }
-        return vehicle;
-      });
+      // Only hit Storage when Firestore already has a photo path/URL — never list folders.
+      const enrichedVehicles = await Promise.all(
+        vehiclesData.map(async (vehicle) => {
+          const fromInspection = inspectionsMap[vehicle.id]
+            ? getInspectionPhoto(inspectionsMap[vehicle.id])
+            : null;
+          const candidate = vehicle.image_url || fromInspection;
+          if (!candidate) return { ...vehicle, image_url: undefined };
+          const existing = await resolveExistingInspectionImage(candidate);
+          return { ...vehicle, image_url: existing || undefined };
+        })
+      );
 
       setVehicles(enrichedVehicles);
     } catch (error) {
@@ -386,14 +434,49 @@ export default function FleetPage() {
     }
   };
 
-  const handleDeleteVehicle = async (vehicleId: string) => {
-    if (!confirm('Are you sure you want to delete this vehicle? This action cannot be undone.') || !firebaseDb) return;
-    
+  const closeRemoveFlow = () => {
+    if (deleting) return;
+    setDeleteTarget(null);
+    setRemoveStep(null);
+  };
+
+  const openRemoveFlow = (vehicle: Vehicle) => {
+    setDeleteTarget(vehicle);
+    setRemoveStep(vehicle.status === 'retired' ? 'confirm-delete' : 'recommend');
+  };
+
+  const handleRetireVehicle = async () => {
+    if (!firebaseDb || !deleteTarget) return;
+    setDeleting(true);
     try {
-      await deleteDoc(doc(firebaseDb!, 'vehicles', vehicleId));
+      await updateDoc(doc(firebaseDb!, 'vehicles', deleteTarget.id), {
+        status: 'retired',
+        updated_at: serverTimestamp(),
+      });
+      setDeleteTarget(null);
+      setRemoveStep(null);
+      if (profile?.company_id) fetchVehicles(profile.company_id);
+    } catch (error) {
+      console.error('Error retiring vehicle:', error);
+      alert('Could not retire vehicle. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteVehicle = async () => {
+    if (!firebaseDb || !deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteDoc(doc(firebaseDb!, 'vehicles', deleteTarget.id));
+      setDeleteTarget(null);
+      setRemoveStep(null);
       if (profile?.company_id) fetchVehicles(profile.company_id);
     } catch (error) {
       console.error('Error deleting vehicle:', error);
+      alert('Could not delete vehicle. Please try again.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -420,6 +503,7 @@ export default function FleetPage() {
 
   return (
     <div>
+      <DashboardPageTitle title="Vehicles" />
       <ImageViewerModal 
         isOpen={!!viewingImage} 
         onClose={() => setViewingImage(null)} 
@@ -430,7 +514,7 @@ export default function FleetPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-white">Fleet Management</h1>
+            <h1 className="text-3xl font-bold text-white">Vehicles</h1>
             <PageGuideButton pageId="fleet" />
           </div>
           <p className="text-white/70 text-sm mt-1">Manage your vehicles and inspections</p>
@@ -489,8 +573,60 @@ export default function FleetPage() {
         />
       </div>
 
-      {/* Table */}
-      <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden" data-tour="fleet-table">
+      {/* Mobile cards (<640px) */}
+      <div className="sm:hidden space-y-3" data-tour="fleet-table">
+        {loading ? (
+          <div className="bg-black border border-blue-500/20 rounded-xl p-4 text-white/60 text-sm">Loading…</div>
+        ) : filteredVehicles.length === 0 ? (
+          <div className="bg-black border border-blue-500/20 rounded-xl p-4 text-white/60 text-sm">
+            No vehicles found. Add your first vehicle to get started.
+          </div>
+        ) : (
+          paginatedVehicles.map((vehicle) => (
+            <div key={vehicle.id} className="bg-black border border-blue-500/20 rounded-xl p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-white font-mono text-lg leading-tight">{vehicle.registration}</p>
+                  <p className="text-white/60 text-sm mt-1 truncate">
+                    {vehicle.make} {vehicle.model}
+                  </p>
+                </div>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize shrink-0
+                    ${vehicle.status === 'active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                      vehicle.status === 'service_due' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
+                      vehicle.status === 'maintenance' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                      'bg-white/10 text-white/60 border border-white/20'}`}
+                >
+                  {vehicle.status?.replace('_', ' ')}
+                </span>
+              </div>
+              <p className="text-white/70 text-sm mt-3">
+                {vehicle.mileage != null ? `${vehicle.mileage.toLocaleString()} mi` : '—'}
+              </p>
+              <div className="mt-3 flex items-center justify-end gap-2">
+                <button
+                  onClick={() => openEditModal(vehicle)}
+                  className="p-2 text-white/60 hover:text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
+                  title="Edit Vehicle"
+                  aria-label="Edit vehicle"
+                >
+                  <Pencil className="h-4 w-4" aria-hidden />
+                </button>
+                {canDelete && <AdminRowMenu onDelete={() => openRemoveFlow(vehicle)} />}
+              </div>
+            </div>
+          ))
+        )}
+        <TablePagination
+          currentPage={currentPage}
+          totalItems={filteredVehicles.length}
+          onPageChange={setCurrentPage}
+        />
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden sm:block bg-black border border-blue-500/20 rounded-xl overflow-hidden" data-tour="fleet-table">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-white/5 border-b border-blue-500/20 text-white/70 text-sm uppercase">
@@ -531,7 +667,6 @@ export default function FleetPage() {
                                   src={vehicle.image_url}
                                   alt={vehicle.make || 'Vehicle Image'}
                                   className="w-full h-full object-cover"
-                                  preferThumbnail
                                 />
                               </LazyWhenVisible>
                             ) : (
@@ -585,14 +720,7 @@ export default function FleetPage() {
                           <Pencil className="h-4 w-4" aria-hidden />
                         </button>
                         {canDelete && (
-                          <button 
-                            onClick={() => handleDeleteVehicle(vehicle.id)}
-                            className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                            title="Delete Vehicle"
-                            aria-label="Delete vehicle"
-                          >
-                            <Trash2 className="h-4 w-4" aria-hidden />
-                          </button>
+                          <AdminRowMenu onDelete={() => openRemoveFlow(vehicle)} />
                         )}
                       </div>
                     </td>
@@ -847,6 +975,53 @@ export default function FleetPage() {
           </div>
         </form>
       </Modal>
+
+      <Modal
+        isOpen={Boolean(deleteTarget) && removeStep === 'recommend'}
+        onClose={closeRemoveFlow}
+        title="Remove vehicle?"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-white/80 leading-relaxed">
+            We recommend <span className="font-semibold text-white">retiring</span>{' '}
+            {deleteTarget?.registration || 'this vehicle'} instead of deleting it.
+          </p>
+          <ul className="text-sm text-white/65 space-y-2 list-disc pl-5 leading-relaxed">
+            <li>Inspection and defect history stay linked for compliance records.</li>
+            <li>Retired vehicles do not count toward your subscribed vehicle allowance.</li>
+            <li>You can still see the vehicle in the list with a Retired status.</li>
+          </ul>
+          <div className="pt-2 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setRemoveStep('confirm-delete')}
+              disabled={deleting}
+              className="px-4 py-2 rounded-lg border border-white/20 text-white/70 hover:border-red-400/50 hover:text-red-300 text-sm disabled:opacity-60"
+            >
+              Delete permanently…
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleRetireVehicle()}
+              disabled={deleting}
+              className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 text-sm disabled:opacity-60"
+            >
+              {deleting ? 'Retiring…' : 'Retire vehicle'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <TypeToConfirmDelete
+        isOpen={Boolean(deleteTarget) && removeStep === 'confirm-delete'}
+        onClose={closeRemoveFlow}
+        onConfirm={handleDeleteVehicle}
+        title="Delete vehicle permanently"
+        confirmValue={deleteTarget?.registration || deleteTarget?.id || ''}
+        confirmLabel="registration"
+        warning="This permanently deletes the vehicle record from your fleet list. Linked inspection history is not removed, but the vehicle can no longer be managed here. Retiring is safer if you only need to free a vehicle slot. This cannot be undone."
+        processing={deleting}
+      />
     </div>
   );
 }

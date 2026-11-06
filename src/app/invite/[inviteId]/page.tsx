@@ -174,8 +174,8 @@ export default function InviteAcceptPage() {
 
           <ol className="text-sm text-slate-600 space-y-3 mb-6 list-decimal list-inside text-left">
             <li>
-              <span className="text-slate-800">Get the app</span> — use the App Store link below for iOS, or request an
-              Android invite if you are on Google Play testing.
+              <span className="text-slate-800">Get the app</span> — iPhone app on the App Store, Android app available by
+              invite.
             </li>
             <li>
               <span className="text-slate-800">Open Fleet Track PRO</span> and choose sign in (not create account).
@@ -197,10 +197,19 @@ export default function InviteAcceptPage() {
             </a>
             <div className="rounded-lg border border-slate-200 bg-white/5 p-4 text-left space-y-3">
               <div>
-                <p className="text-sm text-slate-600 font-medium">Android (invite only)</p>
+                <p className="text-sm text-slate-600 font-medium">Android app available by invite</p>
                 <p className="text-sm text-slate-500 mt-1">
-                  Google Play access is by invite while we roll out testing. Request access and we&apos;ll email your
-                  Play testing link.
+                  Android? Email{' '}
+                  <a
+                    href={androidInviteMailto({
+                      email: signedUpEmail || invite?.email,
+                      companyName: invite?.companyName,
+                    })}
+                    className="underline underline-offset-2 text-[var(--brand-blue)]"
+                  >
+                    {SUPPORT_EMAIL}
+                  </a>{' '}
+                  and we&apos;ll send you an invite.
                 </p>
               </div>
               <a

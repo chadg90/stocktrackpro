@@ -1,3 +1,5 @@
+import { WHATSAPP_SUPPORT_URL } from '@/lib/brand';
+
 export type SiteChatTopic = {
   id: string;
   label: string;
@@ -28,7 +30,7 @@ export const SITE_CHAT_TOPICS: SiteChatTopic[] = [
     id: 'devices',
     label: 'Does it work on phones?',
     answer:
-      'Yes. Drivers use the companion app on iOS and Android for daily checks and defects. Managers use the web dashboard for fleet overview, reporting, team invites, and billing.',
+      'Yes. Drivers use the companion app for daily checks and defects — iPhone app on the App Store, Android app available by invite. Managers use the web dashboard for fleet overview, reporting, team invites, and billing.',
   },
   {
     id: 'setup',
@@ -44,5 +46,5 @@ export const SITE_CHAT_TOPICS: SiteChatTopic[] = [
   },
 ];
 
-export const SITE_CHAT_WHATSAPP_URL =
-  'https://wa.me/447438146343?text=Hi%20Fleet%20Track%20PRO%2C%20I%20have%20a%20question%20from%20the%20website%20chat.';
+/** Support WhatsApp from the site chat panel (no phone number shown in UI). */
+export const SITE_CHAT_WHATSAPP_URL = WHATSAPP_SUPPORT_URL;

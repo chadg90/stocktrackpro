@@ -1,28 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
 import { Outfit, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
-import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
-import GaPageViews from "@/components/analytics/GaPageViews";
+import MarketingAnalytics from "@/components/analytics/MarketingAnalytics";
+import ReferralCapture from "@/components/ReferralCapture";
 import SiteChatBot from "@/components/SiteChatBot";
 import SiteWideJsonLd from "@/components/seo/SiteWideJsonLd";
 import { SITE_META_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
 import { APP_STORE_ID, SITE_LEGAL_NAME, SITE_NAME, SITE_URL } from "@/lib/brand";
-import { getGaId, isAnalyticsExcludedPath } from "@/lib/analytics";
 import { absolutePageUrl } from "@/lib/site";
 
+/** Body text — weights used above the fold on marketing pages. */
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
   display: "swap",
+  weight: ["400", "600", "700"],
   variable: "--font-mkt-body",
+  preload: true,
 });
 
+/** Display / brand — hero + section headings. */
 const outfit = Outfit({
   subsets: ["latin"],
   display: "swap",
+  weight: ["600", "700"],
   variable: "--font-mkt-display",
+  preload: true,
 });
 
 export const viewport: Viewport = {
@@ -98,16 +102,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const headerList = await headers();
-  const pathname = headerList.get('x-ftp-pathname') ?? '';
-  const gaId = getGaId();
-  const loadGa = Boolean(gaId) && !isAnalyticsExcludedPath(pathname);
-
   return (
     <html lang="en-GB" className={`scroll-smooth ${sourceSans.variable} ${outfit.variable}`}>
       <head>
@@ -134,12 +133,12 @@ export default async function RootLayout({
         <SiteWideJsonLd />
       </head>
       <body className={`${sourceSans.className} antialiased bg-slate-50 text-slate-900 min-h-screen flex flex-col`}>
-        {loadGa && gaId ? <GoogleAnalytics measurementId={gaId} /> : null}
         {children}
         <Footer />
         <CookieConsent />
         <SiteChatBot />
-        {loadGa ? <GaPageViews /> : null}
+        <ReferralCapture />
+        <MarketingAnalytics />
       </body>
     </html>
   );

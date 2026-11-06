@@ -35,7 +35,7 @@ export default function PricingSection() {
     'Full company dashboard',
     'Team management & invites',
     'Defect workflow tracking',
-    'iOS & Android mobile app',
+    'iPhone & Android (invite) app access',
     'Priority email support',
   ];
 
@@ -93,7 +93,7 @@ export default function PricingSection() {
                   <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
                     billingCycle === 'yearly' ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-400/25 text-slate-900'
                   }`}>
-                    Save 12%
+                    Save 12.5%
                   </span>
                 </button>
               </div>
@@ -136,7 +136,7 @@ export default function PricingSection() {
             </div>
 
             <Link
-              href="/pricing"
+              href="/pricing/"
               className="block w-full bg-blue-600 text-white text-center rounded-xl py-3 px-6 font-semibold hover:bg-blue-700 transition-colors mb-6"
             >
               Get Started — £{billedTotal}{billingCycle === 'yearly' ? '/year' : '/month'}

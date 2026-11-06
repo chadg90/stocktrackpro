@@ -1,5 +1,6 @@
 'use client';
 
+import DashboardPageTitle from '../components/DashboardPageTitle';
 import React, { Suspense, useEffect, useState, useMemo } from 'react';
 import {
   collection,
@@ -736,12 +737,15 @@ function DefectsPageInner() {
 
 export default function DefectsPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="p-6 text-sm text-white/60">Loading defects…</div>
-      }
-    >
-      <DefectsPageInner />
-    </Suspense>
+    <>
+      <DashboardPageTitle title="Defects" />
+      <Suspense
+        fallback={
+          <div className="p-6 text-sm text-white/60">Loading defects…</div>
+        }
+      >
+        <DefectsPageInner />
+      </Suspense>
+    </>
   );
 }

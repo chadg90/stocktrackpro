@@ -219,7 +219,7 @@ export default function CustomerCaseStudyPage({
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link
-                href="/contact"
+                href="/contact/"
                 className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-medium border border-[var(--mkt-border)] text-[var(--mkt-ink)] bg-white hover:bg-slate-50"
               >
                 Contact us

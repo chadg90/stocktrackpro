@@ -4,10 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const links = [
-  { href: '/dashboard/fleet-report', label: 'Overview' },
-  { href: '/dashboard/fleet-report/mileage', label: 'Mileage' },
-  { href: '/dashboard/fleet-report/week', label: 'This week' },
-  { href: '/dashboard/fleet-report/compliance', label: 'Who checked' },
+  { href: '/dashboard/fleet-report/', label: 'Overview' },
+  { href: '/dashboard/fleet-report/who-checked/', label: 'Who checked' },
 ];
 
 export default function FleetReportSubnav() {

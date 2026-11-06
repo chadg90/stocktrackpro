@@ -73,7 +73,7 @@ export const INTERACTIVE_DEMO_STEPS: DemoStep[] = [
         width: 83,
         height: 5.1,
         label: 'Sign In',
-        hint: 'Tap Sign In - Start Demo',
+        hint: 'Start the demo',
         nextStepId: 'home',
       },
     ],
@@ -83,7 +83,7 @@ export const INTERACTIVE_DEMO_STEPS: DemoStep[] = [
     title: 'Home',
     imageSrc: '/demo/02-home.jpg',
     imageAlt:
-      'Fleet Track PRO home screen — welcome card, quick actions, and bottom navigation',
+      'Image of the Fleet Track PRO driver app home screen — welcome card, quick actions, and bottom navigation',
     guide: {
       title: 'Bottom navigation',
       items: [
@@ -112,7 +112,7 @@ export const INTERACTIVE_DEMO_STEPS: DemoStep[] = [
     title: 'Select vehicle',
     imageSrc: '/demo/03-select-vehicle.png',
     imageAlt:
-      'Fleet Track PRO vehicle inspection — Select Vehicle step with 3 vehicles available',
+      'Image of the Fleet Track PRO driver app — Select Vehicle step with vehicles available',
     hotspots: [
       {
         id: 'tap-select-vehicle',
@@ -387,4 +387,5 @@ export const INTERACTIVE_DEMO_STEPS: DemoStep[] = [
   },
 ];
 
-export const INTERACTIVE_DEMO_START_ID = 'login';
+/** Start on the check flow — not the login form (avoids fake-input confusion). */
+export const INTERACTIVE_DEMO_START_ID = 'select-vehicle';

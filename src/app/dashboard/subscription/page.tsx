@@ -1,5 +1,7 @@
 'use client';
 
+import DashboardPageTitle from '../components/DashboardPageTitle';
+
 import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import {
@@ -358,6 +360,7 @@ export default function SubscriptionPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
+      <DashboardPageTitle title="Subscription" />
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );

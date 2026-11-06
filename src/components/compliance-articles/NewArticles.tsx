@@ -1,5 +1,6 @@
 import ComplianceArticleContent from '@/components/ComplianceArticleContent';
 import { ArticleCta, KeyTakeaways } from '@/components/compliance-articles/ArticleChrome';
+import DefectReportingLink from '@/components/compliance-articles/DefectReportingLink';
 
 export function NilDefectReportsArticle() {
   return (
@@ -13,10 +14,10 @@ export function NilDefectReportsArticle() {
 
       <h2>Why nil-defect records matter</h2>
       <p>
-        DVSA and GOV.UK guidance on commercial vehicle walkaround checks expect operators to run a daily defect
-        reporting system. Recording defects is essential, but so is showing that checks take place consistently. A
-        file that only contains “problem days” can look incomplete when an examiner asks what happened on the days
-        before a roadside stop.
+        DVSA and GOV.UK guidance on commercial vehicle walkaround checks expect operators to run a daily{' '}
+        <DefectReportingLink>defect reporting</DefectReportingLink> system. Recording defects is essential, but so is
+        showing that checks take place consistently. A file that only contains “problem days” can look incomplete when
+        an examiner asks what happened on the days before a roadside stop.
       </p>
       <p>
         Nil-defect reports answer a basic question: was this vehicle checked before use today? If your process only
@@ -81,9 +82,9 @@ export function HowLongToKeepFleetRecordsArticle() {
     <ComplianceArticleContent>
       <p>
         Keeping vehicles safe is only half of compliance. The other half is being able to prove what you did —
-        sometimes months later. DVSA’s Guide to Maintaining Roadworthiness expects defect reports and related repair
-        records to remain available for at least <strong>15 months</strong>. That window is longer than many small
-        fleets assume.
+        sometimes months later. DVSA’s Guide to Maintaining Roadworthiness expects{' '}
+        <DefectReportingLink>defect reports</DefectReportingLink> and related repair records to remain available for
+        at least <strong>15 months</strong>. That window is longer than many small fleets assume.
       </p>
 
       <h2>What the 15-month expectation covers</h2>
@@ -152,10 +153,10 @@ export function ClosingDefectsReturnToServiceArticle() {
   return (
     <ComplianceArticleContent>
       <p>
-        Reporting a defect is not the end of the job. DVSA expects a system where faults are recorded{' '}
-        <strong>and</strong> rectified before an unroadworthy vehicle is used again. The weak point in many fleets is
-        the middle of the loop: the defect is logged, then the vehicle quietly goes back out before anyone closes the
-        job.
+        Reporting a <DefectReportingLink>defect</DefectReportingLink> is not the end of the job. DVSA expects a system
+        where faults are recorded <strong>and</strong> rectified before an unroadworthy vehicle is used again. The weak
+        point in many fleets is the middle of the loop: the defect is logged, then the vehicle quietly goes back out
+        before anyone closes the job.
       </p>
 
       <h2>The full defect loop</h2>
@@ -240,7 +241,9 @@ export function PreparingForDvsaRoadsideCheckArticle() {
       <h2>Evidence that helps most</h2>
       <ul>
         <li>Today’s (or the most recent) walkaround / pre-use check for that vehicle</li>
-        <li>Any open or recently closed defects linked to the same vehicle</li>
+        <li>
+          Any open or recently closed <DefectReportingLink>defects</DefectReportingLink> linked to the same vehicle
+        </li>
         <li>Repair or sign-off notes where a defect was reported</li>
         <li>Clear vehicle identity (registration) and who completed the check</li>
       </ul>

@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { getAllPublishedComplianceArticles } from '@/lib/compliance-articles/server';
 import { absolutePageUrl } from '@/lib/site';
 
+/** Short revalidate so CDN cannot keep a stale short sitemap for long. */
 export const revalidate = 300;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -39,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/getting-started',
     '/compliance-centre',
     ...publishedArticles.map((article) => `/compliance-centre/${article.slug}`),
+    '/customers',
     '/customers/newstreet',
     '/customers/neemt',
     '/terms',

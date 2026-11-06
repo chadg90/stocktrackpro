@@ -59,13 +59,13 @@ export default function SetupChecklist({
       id: 'vehicle',
       done: vehicleCount > 0,
       label: 'Add a vehicle',
-      href: '/dashboard/fleet',
+      href: '/dashboard/fleet/',
     },
     {
       id: 'driver',
       done: teammateCount > 1,
       label: 'Invite a driver',
-      href: '/dashboard/team',
+      href: '/dashboard/team/',
     },
     {
       id: 'app',
@@ -164,7 +164,7 @@ export default function SetupChecklist({
           <p className="text-sm text-white/60">
             Completed checks also appear as PDFs in{' '}
             <Link
-              href="/dashboard/inspection-proof"
+              href="/dashboard/vehicle-documents/"
               className="text-blue-300 underline underline-offset-2 hover:text-blue-200"
               onClick={() => setShowCheckPanel(false)}
             >

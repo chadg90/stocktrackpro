@@ -19,6 +19,8 @@ export type MotTaxExpiryInput = {
   mot_expiry_date?: { toDate?: () => Date } | Date | string | null;
   tax_expiry_date?: { toDate?: () => Date } | Date | string | null;
   dvla_sync_error?: string | null;
+  /** When present, retired vehicles are excluded from MOT/TAX attention counts. */
+  status?: string | null;
 };
 
 export type MotTaxClassification = {
@@ -151,6 +153,9 @@ export function classifyMotTaxVehicle(
 export function countMotTaxStatus(
   vehicles: MotTaxExpiryInput[]
 ): MotTaxCounts {
+  const fleet = vehicles.filter(
+    (vehicle) => String(vehicle.status || '').toLowerCase() !== 'retired'
+  );
   let expired = 0;
   let urgent = 0;
   let warning = 0;
@@ -158,7 +163,7 @@ export function countMotTaxStatus(
   let unverified = 0;
   let unknown = 0;
 
-  for (const vehicle of vehicles) {
+  for (const vehicle of fleet) {
     const { motBucket, taxBucket, worstBucket } = classifyMotTaxVehicle(vehicle);
     if (motBucket === 'expired' || taxBucket === 'expired') {
       expired += 1;
@@ -183,6 +188,6 @@ export function countMotTaxStatus(
     ok,
     unverified,
     unknown,
-    total: vehicles.length,
+    total: fleet.length,
   };
 }

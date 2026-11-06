@@ -1,7 +1,7 @@
 'use client';
 
 import AppStoreBadge from '@/components/AppStoreBadge';
-import { APP_STORE_URL } from '@/lib/brand';
+import { APP_STORE_URL, PLATFORM_AVAILABILITY, SUPPORT_EMAIL } from '@/lib/brand';
 import { androidInviteMailto } from '@/lib/androidInvite';
 
 type DriverAppLinksProps = {
@@ -28,7 +28,7 @@ export default function DriverAppLinks({
     <div className={`space-y-3 min-w-0 ${className}`.trim()}>
       {showHeading ? (
         <p className={`text-sm font-medium ${variant === 'dark' ? 'text-white' : 'text-slate-800'}`}>
-          Drivers do daily checks in the app. Download it here
+          Drivers do daily checks in the app — {PLATFORM_AVAILABILITY}. Download it here
         </p>
       ) : null}
       <div className="flex flex-wrap items-start gap-4 min-w-0">
@@ -38,10 +38,14 @@ export default function DriverAppLinks({
             className={variant === 'dark' ? '[&_img]:brightness-110' : ''}
           />
           <p className={`text-xs leading-snug ${muted}`}>
-            Android is invite-only — we assist with onboarding.{' '}
-            <a href={androidInviteMailto({ email, companyName })} className={`underline underline-offset-2 ${link}`}>
-              Request Android invite
-            </a>
+            Android? Email{' '}
+            <a
+              href={androidInviteMailto({ email, companyName })}
+              className={`underline underline-offset-2 ${link}`}
+            >
+              {SUPPORT_EMAIL}
+            </a>{' '}
+            and we&apos;ll send you an invite.
           </p>
         </div>
         <div className="shrink-0 rounded-lg bg-white p-2 border border-black/10">

@@ -1,5 +1,5 @@
 /** Shared SEO copy — keep marketing metadata and JSON-LD aligned. */
-import { FREE_TRIAL_PHRASE, SITE_NAME } from '@/lib/brand';
+import { FREE_TRIAL_PHRASE, PLATFORM_AVAILABILITY, SITE_NAME } from '@/lib/brand';
 
 /** ~155 characters — primary meta description for Google SERP snippets. */
 export const SITE_META_DESCRIPTION =
@@ -13,7 +13,7 @@ export const SITE_TAGLINE =
   'UK fleet management software for daily DVSA inspections, defect reporting, and MOT tracking.';
 
 export const SITE_SHORT_DESCRIPTION =
-  `${SITE_NAME} helps UK fleets complete daily DVSA walkaround checks, report defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for cars, vans, and light commercial vehicles across iOS, Android, and the web dashboard. ${FREE_TRIAL_PHRASE}.`;
+  `${SITE_NAME} helps UK fleets complete daily DVSA walkaround checks, report defects with photos, track MOT and tax renewals, and close out repairs from one platform. Built for cars, vans, and light commercial vehicles — ${PLATFORM_AVAILABILITY}, plus a manager web dashboard. ${FREE_TRIAL_PHRASE}.`;
 
 export const SITE_KNOWS_ABOUT = [
   'Fleet management',
@@ -32,5 +32,6 @@ export const SOFTWARE_FEATURE_LIST = [
   'Timestamped defect reporting and close-out workflow',
   'MOT and tax expiry monitoring with advance alerts',
   'Manager web dashboard for fleet oversight',
+  'iPhone app on the App Store, Android app available by invite',
   'Unlimited team members on every plan',
 ];

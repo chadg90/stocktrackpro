@@ -30,7 +30,7 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     metaDescription:
       'Managing MOT and tax renewals across a fleet is high-risk without a system. Here is how fleet managers automate reminders and avoid enforcement.',
     datePublished: '2026-05-12T09:00:00+01:00',
-    dateModified: '2026-08-05T00:00:00+01:00',
+    dateModified: '2026-11-04T12:00:00+00:00',
   },
   {
     slug: 'pre-use-checks-company-vehicles',
@@ -60,7 +60,7 @@ export const COMPLIANCE_ARTICLES: ComplianceArticle[] = [
     slug: 'how-long-to-keep-fleet-records',
     title: 'How long to keep fleet inspection and defect records (15 months)',
     metaDescription:
-      'Guidance on retaining walkaround checks, defect reports and repair records for at least 15 months, including what fleets should retrieve on request.',
+      'DVSA expects fleets to keep vehicle check, defect and repair records for at least 15 months. See what to retain and how to retrieve evidence on request.',
     datePublished: '2026-08-05T00:00:00+01:00',
     dateModified: '2026-09-03T00:00:00+01:00',
   },

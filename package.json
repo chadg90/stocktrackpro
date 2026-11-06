@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "browserslist": [
-    "defaults"
+    "defaults and supports es6-module"
   ],
   "scripts": {
     "dev": "next dev",
@@ -13,7 +13,10 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "npx tailwindcss init -p",
-    "generate-icons": "node scripts/generate-icons.js"
+    "generate-icons": "node scripts/generate-icons.js",
+    "test:jsonld": "npx --yes tsx scripts/check-compliance-jsonld.ts",
+    "test:seo": "npx --yes tsx scripts/check-seo-titles-og.ts",
+    "test:links": "npx --yes tsx scripts/check-internal-trailing-slashes.ts"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.18",

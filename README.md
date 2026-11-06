@@ -78,9 +78,27 @@ npm run dev
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Analytics (GA4)
+
+Marketing pages load Google Analytics 4 (`NEXT_PUBLIC_GA_ID`, currently `G-JBYSKP5L0B`) with Consent Mode v2. Events only send when the visitor has granted analytics consent.
+
+Conversion helpers live in `src/lib/analytics.ts` (`track()`). Key client events:
+
+| Event | When |
+| --- | --- |
+| `begin_signup` | Onboarding account step shown |
+| `sign_up` | Company created (once per browser session) |
+| `generate_lead` | Contact form success response |
+| `click_whatsapp` | Click on a `wa.me` marketing link |
+| `click_app_store` | Click on an App Store badge/link |
+
+**GA4 Admin (manual):** mark `sign_up` and `generate_lead` as key events in GA4 Admin → Events. This cannot be done in code.
+
+Do not send names, emails, phone numbers, company names, user IDs, referral codes, or free text. Dashboard routes do not load gtag or fire these events.
+
 ## Deployment
 
-This project is deployed using Vercel and can be accessed at [www.stocktrackpro.co.uk](https://www.stocktrackpro.co.uk).
+This project is deployed using Firebase App Hosting (see `apphosting.yaml`). Legacy notes below may still mention Vercel.
 
 To deploy your own instance:
 

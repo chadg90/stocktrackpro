@@ -1,16 +1,19 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   collection, query, getDocs, setDoc, deleteDoc, doc,
   updateDoc, serverTimestamp, Timestamp, getDoc, limit,
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
-import { Plus, Trash2, ToggleLeft, ToggleRight, Copy, Check } from 'lucide-react';
+import { Plus, ToggleLeft, ToggleRight, Copy, Check } from 'lucide-react';
 import Modal from '../../components/Modal';
 import { EmptyStateTableRow } from '../../components/EmptyState';
 import TableSkeleton from '../../components/TableSkeleton';
+import TypeToConfirmDelete from '../../components/TypeToConfirmDelete';
+import AdminRowMenu from '../../components/AdminRowMenu';
+import { formatAdminDate } from '@/lib/adminDateFormat';
 
 type PromoCode = {
   id: string;
@@ -41,12 +44,9 @@ const isSchemaV2Promo = (code: PromoCode) =>
   !Object.prototype.hasOwnProperty.call(code, 'plan') &&
   !Object.prototype.hasOwnProperty.call(code, 'subscription_tier');
 
-const formatDate = (value?: Timestamp | string | null) => {
+const formatExpiry = (value?: Timestamp | string | null) => {
   if (!value) return 'No expiry';
-  try {
-    if (value instanceof Timestamp) return value.toDate().toLocaleDateString('en-GB');
-    return new Date(value).toLocaleDateString('en-GB');
-  } catch { return '—'; }
+  return formatAdminDate(value);
 };
 
 export default function AdminPromoCodesPage() {
@@ -56,6 +56,8 @@ export default function AdminPromoCodesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [showLegacy, setShowLegacy] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<PromoCode | null>(null);
 
   const [formCode, setFormCode] = useState('');
   const [formDescription, setFormDescription] = useState('');
@@ -83,8 +85,6 @@ export default function AdminPromoCodesPage() {
     if (!firebaseDb) return;
     setLoading(true);
     try {
-      // Cap reads at 500 docs (no orderBy — legacy codes may lack createdAt and
-      // orderBy would silently drop them). Sort client-side as before.
       const snap = await getDocs(query(collection(firebaseDb, 'promoCodes'), limit(500)));
       const data = snap.docs.map((d) => ({ id: d.id, ...d.data() } as PromoCode));
       data.sort((a, b) => {
@@ -96,6 +96,11 @@ export default function AdminPromoCodesPage() {
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
+
+  const visibleCodes = useMemo(
+    () => (showLegacy ? codes : codes.filter((c) => isSchemaV2Promo(c))),
+    [codes, showLegacy]
+  );
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +122,6 @@ export default function AdminPromoCodesPage() {
     }
     setProcessing(true);
     try {
-      // Document ID must equal the code so redeemPromoCode can look it up without client reads.
       await setDoc(doc(firebaseDb, 'promoCodes', codeId), {
         code: codeId,
         description: formDescription.trim() || null,
@@ -151,13 +155,18 @@ export default function AdminPromoCodesPage() {
     } catch { alert('Failed to update code.'); }
   };
 
-  const handleDelete = async (code: PromoCode) => {
-    if (!firebaseDb) return;
-    if (!confirm(`Delete promo code "${code.code}"? This cannot be undone.`)) return;
+  const handleDelete = async () => {
+    if (!firebaseDb || !deleteTarget) return;
+    setProcessing(true);
     try {
-      await deleteDoc(doc(firebaseDb, 'promoCodes', code.id));
+      await deleteDoc(doc(firebaseDb, 'promoCodes', deleteTarget.id));
+      setDeleteTarget(null);
       fetchCodes();
-    } catch { alert('Failed to delete code.'); }
+    } catch {
+      alert('Failed to delete code.');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const copyCode = (code: string) => {
@@ -186,6 +195,16 @@ export default function AdminPromoCodesPage() {
         </button>
       </div>
 
+      <label className="mb-4 inline-flex items-center gap-2 text-sm text-white/70 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={showLegacy}
+          onChange={(e) => setShowLegacy(e.target.checked)}
+          className="rounded border-white/30 bg-black text-blue-500 focus:ring-blue-500"
+        />
+        Show legacy codes
+      </label>
+
       <div className="bg-black border border-blue-500/20 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -203,10 +222,17 @@ export default function AdminPromoCodesPage() {
             <tbody className="divide-y divide-white/10">
               {loading ? (
                 <TableSkeleton cols={7} />
-              ) : codes.length === 0 ? (
-                <EmptyStateTableRow colSpan={7} message="No promo codes created yet." />
+              ) : visibleCodes.length === 0 ? (
+                <EmptyStateTableRow
+                  colSpan={7}
+                  message={
+                    showLegacy
+                      ? 'No promo codes created yet.'
+                      : 'No redeemable promo codes. Turn on “Show legacy codes” to review older entries.'
+                  }
+                />
               ) : (
-                codes.map((code) => (
+                visibleCodes.map((code) => (
                   <tr key={code.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
@@ -227,7 +253,7 @@ export default function AdminPromoCodesPage() {
                     <td className="px-6 py-4 text-white/60 text-sm">
                       {code.usedCount ?? 0}{code.maxUses ? ` / ${code.maxUses}` : ''}
                     </td>
-                    <td className="px-6 py-4 text-white/60 text-sm">{formatDate(code.expiresAt)}</td>
+                    <td className="px-6 py-4 text-white/60 text-sm">{formatExpiry(code.expiresAt)}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                         !isSchemaV2Promo(code)
@@ -253,13 +279,7 @@ export default function AdminPromoCodesPage() {
                         >
                           {code.active ? <ToggleRight className="h-4 w-4 text-green-400" /> : <ToggleLeft className="h-4 w-4" />}
                         </button>
-                        <button
-                          onClick={() => handleDelete(code)}
-                          className="p-2 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <AdminRowMenu onDelete={() => setDeleteTarget(code)} />
                       </div>
                     </td>
                   </tr>
@@ -320,11 +340,22 @@ export default function AdminPromoCodesPage() {
             </button>
             <button type="submit" disabled={processing}
               className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:opacity-60">
-              {processing ? 'Creating...' : 'Create Code'}
+              {processing ? 'Creating…' : 'Create Code'}
             </button>
           </div>
         </form>
       </Modal>
+
+      <TypeToConfirmDelete
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete promo code"
+        confirmValue={deleteTarget?.code || ''}
+        confirmLabel="promo code"
+        warning="This permanently removes the promo code. This cannot be undone."
+        processing={processing}
+      />
     </div>
   );
 }

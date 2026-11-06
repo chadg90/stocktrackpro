@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
+import FirebaseClientProvider from '@/components/FirebaseClientProvider';
 import DashboardLayoutClient from './DashboardLayoutClient';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   // absolute avoids root template appending "| Fleet Track PRO" twice
@@ -17,16 +20,20 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: '/dashboard',
+    canonical: '/dashboard/',
   },
   openGraph: {
     title: 'Manager Dashboard Login | Fleet Track PRO',
     description:
       'Sign in to the Fleet Track PRO manager dashboard for fleet inspections, defects, and compliance.',
-    url: '/dashboard',
+    url: '/dashboard/',
   },
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <DashboardLayoutClient>{children}</DashboardLayoutClient>;
+  return (
+    <FirebaseClientProvider>
+      <DashboardLayoutClient>{children}</DashboardLayoutClient>
+    </FirebaseClientProvider>
+  );
 }

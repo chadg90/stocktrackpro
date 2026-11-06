@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import CommercialFeaturePage from '@/components/CommercialFeaturePage';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
 
+export const dynamic = 'force-static';
+export const revalidate = 3600;
+
 const path = '/fleet-mot-tax-reminders';
 const title = 'Fleet MOT and Tax Reminder Software';
 const description =
@@ -64,19 +67,19 @@ export default function FleetMotTaxRemindersPage() {
       evidence="External data can be delayed or unavailable, so the registered keeper or operator remains responsible for checking the official MOT and tax position and acting before a vehicle is used. Fleet Track PRO provides operational visibility and reminders, not a legal guarantee."
       related={[
         {
-          href: '/compliance-centre/mot-expiry-tracking-for-fleets',
+          href: '/compliance-centre/mot-expiry-tracking-for-fleets/',
           label: 'How to track MOT expiry dates across a fleet',
         },
         {
-          href: '/vehicle-walkaround-check-app',
+          href: '/vehicle-walkaround-check-app/',
           label: 'Vehicle walkaround check app',
         },
         {
-          href: '/vehicle-defect-reporting-software',
+          href: '/vehicle-defect-reporting-software/',
           label: 'Vehicle defect reporting software',
         },
         {
-          href: '/features',
+          href: '/features/',
           label: 'Explore every Fleet Track PRO feature',
         },
       ]}

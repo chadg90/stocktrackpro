@@ -48,18 +48,18 @@ export default function Terms() {
             </p>
             <p className="text-slate-600 leading-relaxed mb-4">
               Please read them together with our{' '}
-              <Link href="/privacy" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
+              <Link href="/privacy/" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Privacy Policy
               </Link>
               ,{' '}
               <Link
-                href="/subscription-terms"
+                href="/subscription-terms/"
                 className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"
               >
                 Subscription Terms
               </Link>
               , and{' '}
-              <Link href="/cookies" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
+              <Link href="/cookies/" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Cookie Policy
               </Link>
               . By accessing or using the Service, you agree to these Terms. If you do not agree, do not use the
@@ -135,7 +135,7 @@ export default function Terms() {
               (Stripe) and are not sold or renewed through the mobile app. Full rules on trials, billing cycles,
               quantity changes, cancellation, and refunds are in our{' '}
               <Link
-                href="/subscription-terms"
+                href="/subscription-terms/"
                 className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"
               >
                 Subscription Terms

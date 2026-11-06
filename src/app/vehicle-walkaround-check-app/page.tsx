@@ -1,19 +1,28 @@
 import type { Metadata } from 'next';
 import CommercialFeaturePage from '@/components/CommercialFeaturePage';
+import { getCommercialFeatureFaqs } from '@/content/commercialFeatureFaqs';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
+import { PLATFORM_AVAILABILITY } from '@/lib/brand';
+
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 const path = '/vehicle-walkaround-check-app';
+/** H1 / on-page copy — keep stable; SEO title/description are separate. */
 const title = 'Vehicle Walkaround Check App for UK Fleets';
 const description =
-  'Run structured vehicle walkaround checks from iOS or Android with required photos, named drivers, timestamps and immediate defect reporting.';
+  `Run structured vehicle walkaround checks — ${PLATFORM_AVAILABILITY} — with required photos, named drivers, timestamps and immediate defect reporting.`;
+const seoTitle = 'Walkaround Check App for UK Fleets: Free Trial';
+const seoDescription =
+  'Walkaround check app for UK fleets. Drivers complete structured vehicle checks with required photos, timestamps and defect reporting. Start a free trial.';
 
 export const metadata: Metadata = {
-  title,
-  description,
+  title: { absolute: seoTitle },
+  description: seoDescription,
   alternates: { canonical: canonicalPath(path) },
   openGraph: {
-    title: `${title} | Fleet Track PRO`,
-    description,
+    title: seoTitle,
+    description: seoDescription,
     url: absolutePageUrl(path),
     type: 'website',
     locale: 'en_GB',
@@ -22,8 +31,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${title} | Fleet Track PRO`,
-    description,
+    title: seoTitle,
+    description: seoDescription,
     images: ['/og-image.jpg'],
   },
 };
@@ -35,12 +44,12 @@ export default function VehicleWalkaroundCheckAppPage() {
       eyebrow="Digital vehicle inspections"
       title={title}
       description={description}
-      intro="Replace paper inspection sheets with a consistent mobile check that records who inspected the vehicle, when it happened, what they checked and the photos they supplied."
+      intro="Our vehicle walkaround check app replaces paper inspection sheets with a consistent mobile process for daily vehicle checks — recording who inspected the vehicle, when it happened, what they checked and the photos they supplied."
       benefits={[
         {
           title: 'A consistent daily process',
           description:
-            'Drivers follow the same structured inspection flow on iOS or Android, helping managers avoid incomplete or inconsistent paper forms.',
+            `Drivers follow the same structured inspection flow — ${PLATFORM_AVAILABILITY} — helping managers avoid incomplete or inconsistent paper forms.`,
         },
         {
           title: 'Six required photos',
@@ -64,39 +73,23 @@ export default function VehicleWalkaroundCheckAppPage() {
       evidence="Digital checks make records easier to retrieve by vehicle, driver and date. They support a consistent roadworthiness process but do not replace driver training, competent defect assessment or the operator’s legal responsibilities."
       related={[
         {
-          href: '/compliance-centre/paper-vs-digital-inspection-sheets',
+          href: '/compliance-centre/paper-vs-digital-inspection-sheets/',
           label: 'Paper vs digital vehicle inspection sheets',
         },
         {
-          href: '/compliance-centre/pre-use-checks-company-vehicles',
+          href: '/compliance-centre/pre-use-checks-company-vehicles/',
           label: 'Pre-use checks for company vehicles',
         },
         {
-          href: '/vehicle-defect-reporting-software',
+          href: '/vehicle-defect-reporting-software/',
           label: 'Vehicle defect reporting software',
         },
         {
-          href: '/features',
+          href: '/features/',
           label: 'Explore every Fleet Track PRO feature',
         },
       ]}
-      faqs={[
-        {
-          question: 'Can drivers complete checks from a mobile phone?',
-          answer:
-            'Yes. Drivers use the Fleet Track PRO app on iOS or Android to complete the checklist, take required photos and report defects.',
-        },
-        {
-          question: 'Does the app prove that a vehicle is roadworthy?',
-          answer:
-            'No software can guarantee roadworthiness. The app creates a clearer record of the check and reported issues; the operator must still use trained people and act on defects appropriately.',
-        },
-        {
-          question: 'Can managers view previous inspections?',
-          answer:
-            'Yes. Managers can review inspection and defect history from the web dashboard, including the vehicle, named user, time and recorded evidence.',
-        },
-      ]}
+      faqs={getCommercialFeatureFaqs()}
     />
   );
 }

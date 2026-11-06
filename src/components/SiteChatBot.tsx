@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { MessageCircle, X, RotateCcw } from 'lucide-react';
 import { SITE_CHAT_TOPICS, SITE_CHAT_WHATSAPP_URL } from '@/content/siteChatFaq';
+import { WHATSAPP_SUPPORT_CTA } from '@/lib/brand';
 
 type ChatMessage =
   | { id: string; role: 'bot'; text: string }
@@ -18,11 +19,25 @@ function isDashboardPath(pathname: string | null): boolean {
   return pathname === '/dashboard' || pathname.startsWith('/dashboard/');
 }
 
+function isHomePath(pathname: string | null): boolean {
+  return pathname === '/' || pathname === '';
+}
+
+/** Pages where the floating chat must stay off (forms / checkout focus). */
+function isChatHiddenPath(pathname: string | null): boolean {
+  if (!pathname) return false;
+  if (isDashboardPath(pathname)) return true;
+  if (pathname === '/pricing' || pathname.startsWith('/pricing/')) return true;
+  if (pathname === '/onboarding' || pathname.startsWith('/onboarding/')) return true;
+  return false;
+}
+
 export default function SiteChatBot() {
   const pathname = usePathname();
   const panelId = useId();
   const [open, setOpen] = useState(false);
   const [cookieBannerVisible, setCookieBannerVisible] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'bot', text: WELCOME },
   ]);
@@ -42,7 +57,36 @@ export default function SiteChatBot() {
     return () => obs.disconnect();
   }, []);
 
-  if (isDashboardPath(pathname)) return null;
+  useEffect(() => {
+    if (!isHomePath(pathname)) {
+      setPastHero(true);
+      return;
+    }
+
+    const hero = document.getElementById('home-hero');
+    if (!hero || typeof IntersectionObserver === 'undefined') {
+      setPastHero(true);
+      return;
+    }
+
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        setPastHero(!entry.isIntersecting && entry.boundingClientRect.bottom <= 0);
+      },
+      { threshold: 0 }
+    );
+    obs.observe(hero);
+    return () => obs.disconnect();
+  }, [pathname]);
+
+  useEffect(() => {
+    // Close the panel when navigating onto a hidden route.
+    if (isChatHiddenPath(pathname)) setOpen(false);
+  }, [pathname]);
+
+  if (isChatHiddenPath(pathname)) return null;
+
+  const showLauncher = pastHero;
 
   const resetChat = () => {
     setMessages([{ id: `welcome-${Date.now()}`, role: 'bot', text: WELCOME }]);
@@ -58,20 +102,23 @@ export default function SiteChatBot() {
     ]);
   };
 
+  if (!showLauncher && !open) return null;
+
+  const bottomStyle = cookieBannerVisible
+    ? 'calc(var(--ftp-cookie-pad, 56px) + 16px)'
+    : 'max(16px, env(safe-area-inset-bottom))';
+
   return (
     <div
-      className={`fixed right-4 z-[60] flex flex-col items-end gap-3 sm:right-6 ${
-        cookieBannerVisible
-          ? 'bottom-[5.75rem] sm:bottom-[4.5rem]'
-          : 'bottom-[max(1.25rem,env(safe-area-inset-bottom))]'
-      }`}
+      className={`fixed z-[60] flex flex-col items-end gap-3 ${showLauncher ? '' : 'pointer-events-none'}`}
+      style={{ right: 16, bottom: bottomStyle, left: 'auto' }}
     >
       {open && (
         <div
           id={panelId}
           role="dialog"
           aria-label="Fleet Track PRO help chat"
-          className="flex w-[min(100vw-2rem,22rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.14)]"
+          className="pointer-events-auto flex w-[min(100vw-2rem,22rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.14)]"
         >
           <div className="flex items-center justify-between gap-2 bg-slate-900 px-4 py-3 text-white">
             <div>
@@ -139,12 +186,14 @@ export default function SiteChatBot() {
                 href={SITE_CHAT_WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
+                data-analytics-location="floating"
+                data-analytics-intent="support"
                 className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
               >
-                WhatsApp
+                {WHATSAPP_SUPPORT_CTA}
               </a>
               <Link
-                href="/contact"
+                href="/contact/"
                 onClick={() => setOpen(false)}
                 className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50"
               >
@@ -155,16 +204,18 @@ export default function SiteChatBot() {
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand-blue)] text-white shadow-lg shadow-slate-900/15 transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2"
-        aria-expanded={open}
-        aria-controls={open ? panelId : undefined}
-        aria-label={open ? 'Close help chat' : 'Open help chat'}
-      >
-        {open ? <X className="h-6 w-6" aria-hidden /> : <MessageCircle className="h-6 w-6" aria-hidden />}
-      </button>
+      {showLauncher ? (
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand-blue)] text-white shadow-lg shadow-slate-900/15 transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2"
+          aria-expanded={open}
+          aria-controls={open ? panelId : undefined}
+          aria-label={open ? 'Close help chat' : 'Open help chat'}
+        >
+          {open ? <X className="h-6 w-6" aria-hidden /> : <MessageCircle className="h-6 w-6" aria-hidden />}
+        </button>
+      ) : null}
     </div>
   );
 }

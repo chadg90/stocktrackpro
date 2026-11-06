@@ -3,6 +3,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import { absolutePageUrl, canonicalPath } from '@/lib/site';
+import { LEGAL_OG_IMAGES, LEGAL_TWITTER_IMAGES } from '@/lib/seo/legalOgImage';
+
+export const dynamic = 'force-static';
+export const revalidate = 3600;
 
 /** Update only when the terms text changes. */
 const LAST_UPDATED = '4 August 2026';
@@ -19,6 +23,12 @@ export const metadata: Metadata = {
     siteName: 'Fleet Track PRO',
     locale: 'en_GB',
     type: 'website',
+    images: [...LEGAL_OG_IMAGES],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Subscription Terms | Fleet Track PRO',
+    images: [...LEGAL_TWITTER_IMAGES],
   },
 };
 
@@ -71,11 +81,11 @@ export default function SubscriptionTermsPage() {
             </p>
             <p className="text-slate-600 leading-relaxed mb-4">
               These Subscription Terms should be read alongside our{' '}
-              <Link href="/terms" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
+              <Link href="/terms/" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Terms and Conditions
               </Link>{' '}
               and{' '}
-              <Link href="/privacy" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
+              <Link href="/privacy/" className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2">
                 Privacy Policy
               </Link>
               . If there is a conflict on billing, renewal, trial, or cancellation, these Subscription Terms
@@ -99,12 +109,12 @@ export default function SubscriptionTermsPage() {
                 </>,
                 <>
                   Annual billing:{' '}
-                  <strong className="text-slate-800">£84 per vehicle per year</strong> (approximately 12% less
+                  <strong className="text-slate-800">£84 per vehicle per year</strong> (12.5% less
                   than monthly, paid in advance).
                 </>,
                 'Minimum subscription quantity is 2 vehicles.',
                 'Displayed pricing is in GBP as shown on the Pricing page. Fleet Track PRO is not VAT registered, so VAT is not charged on subscriptions.',
-                'Your subscribed vehicle count controls how many vehicles your company can manage at any one time.',
+                'Your subscribed vehicle count controls how many non-retired vehicles your company can manage at any one time. Retired vehicles are kept for history and do not count toward your limit.',
                 'Published website prices may change for new customers. Existing customers are handled as set out in Sections 8 and 9.',
               ]}
             />
@@ -199,7 +209,7 @@ export default function SubscriptionTermsPage() {
                 <>
                   Backups and log files are retained on a rolling schedule in line with our{' '}
                   <Link
-                    href="/privacy"
+                    href="/privacy/"
                     className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-2"
                   >
                     Privacy Policy

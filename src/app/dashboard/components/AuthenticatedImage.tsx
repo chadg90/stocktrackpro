@@ -2,7 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { firebaseApp } from '@/lib/firebase';
 import { Image as ImageIcon } from 'lucide-react';
-import { toStorageThumbnailUrl } from '@/lib/storageThumbnail';
+import {
+  storageObjectPathFromDownloadUrl,
+  toStorageThumbnailUrl,
+} from '@/lib/storageThumbnail';
 
 type Props = {
   src?: string | null;
@@ -15,33 +18,79 @@ type Props = {
   preferThumbnail?: boolean;
 };
 
-async function headOk(url: string): Promise<boolean> {
+function isHttpUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value);
+}
+
+function isFirebaseStorageHost(url: string): boolean {
   try {
-    const response = await fetch(url, { method: 'HEAD' });
-    return response.ok;
+    const host = new URL(url).hostname;
+    return (
+      host.includes('firebasestorage.googleapis.com') ||
+      host.includes('storage.googleapis.com') ||
+      host.endsWith('.firebasestorage.app')
+    );
   } catch {
     return false;
   }
 }
 
+/**
+ * Prefer direct display for http(s) URLs — avoid CORS-noisy HEAD probes on Storage.
+ * Storage object paths are resolved via the Firebase SDK.
+ */
 async function resolveDownloadUrl(originalSrc: string): Promise<string | null> {
-  try {
-    const response = await fetch(originalSrc, { method: 'HEAD' });
-    if (response.ok) return originalSrc;
-  } catch {
-    /* try SDK */
+  if (isHttpUrl(originalSrc)) {
+    return originalSrc;
   }
   try {
+    if (!firebaseApp) return null;
     const storage = getStorage(firebaseApp);
     return await getDownloadURL(ref(storage, originalSrc));
-  } catch (err) {
-    console.error('Failed to refresh image URL', err);
+  } catch {
+    return null;
+  }
+}
+
+async function resolveThumbnailUrl(originalSrc: string): Promise<string | null> {
+  const thumbCandidate = toStorageThumbnailUrl(originalSrc);
+  if (thumbCandidate === originalSrc) return null;
+
+  if (!firebaseApp) return null;
+  const storage = getStorage(firebaseApp);
+
+  // Firebase download URLs: probe via SDK getDownloadURL so a missing
+  // `_100x100` never becomes an <img> src (avoids console 404s).
+  if (isHttpUrl(originalSrc) && isFirebaseStorageHost(originalSrc)) {
+    const objectPath = storageObjectPathFromDownloadUrl(originalSrc);
+    if (!objectPath) return null;
+    const thumbPath = toStorageThumbnailUrl(objectPath);
+    if (thumbPath === objectPath) return null;
+    try {
+      return await getDownloadURL(ref(storage, thumbPath));
+    } catch {
+      return null;
+    }
+  }
+
+  if (isHttpUrl(thumbCandidate)) {
+    try {
+      const response = await fetch(thumbCandidate, { method: 'HEAD' });
+      return response.ok ? thumbCandidate : null;
+    } catch {
+      return null;
+    }
+  }
+
+  try {
+    return await getDownloadURL(ref(storage, thumbCandidate));
+  } catch {
     return null;
   }
 }
 
 /**
- * AuthenticatedImage — HEAD check + optional Storage refresh.
+ * AuthenticatedImage — optional Storage refresh / thumbnail.
  * preferThumbnail reduces bandwidth when Resize Images extension is enabled.
  */
 export default function AuthenticatedImage({ src, alt, className, preferThumbnail = false }: Props) {
@@ -65,13 +114,11 @@ export default function AuthenticatedImage({ src, alt, className, preferThumbnai
       }
 
       if (preferThumbnail) {
-        const thumbUrl = toStorageThumbnailUrl(src);
-        if (thumbUrl !== src && (await headOk(thumbUrl))) {
-          if (!cancelled) {
-            thumbShownRef.current = true;
-            setDisplaySrc(thumbUrl);
-            setLoading(false);
-          }
+        const thumbUrl = await resolveThumbnailUrl(src);
+        if (thumbUrl && !cancelled) {
+          thumbShownRef.current = true;
+          setDisplaySrc(thumbUrl);
+          setLoading(false);
           return;
         }
       }

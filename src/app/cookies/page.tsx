@@ -67,7 +67,7 @@ export default function CookiePolicy() {
                 </>,
                 <>
                   <strong className="text-slate-800">Google Analytics 4 (marketing pages only, opt-in)</strong> — after
-                  you choose <em>Accept analytics</em>, we use Google Analytics 4 on marketing pages (for example home,
+                  you choose <em>Accept</em>, we use Google Analytics 4 on marketing pages (for example home,
                   pricing, features, and articles) to see which pages help. We do not load Analytics on the manager
                   dashboard or other signed-in product areas. The cookies used are{' '}
                   <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">_ga</code> and{' '}
