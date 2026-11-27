@@ -80,6 +80,238 @@ service cloud.firestore {
     function vehicleInspectionTenantOk(resourceCompanyId) {
       return userCompanyId() == resourceCompanyId && isCompanyActive();
     }
+
+    function deliveryModuleData() {
+      return get(/databases/$(database)/documents/companies/$(userCompanyId())).data
+        .get('modules', {}).get('delivery', {});
+    }
+
+    function deliveryModuleOn() {
+      let mod = deliveryModuleData();
+      let status = mod.get('status', '');
+      return status == 'active' ||
+        (
+          status == 'trial' &&
+          (
+            !(mod.keys().hasAny(['trialEndsAt'])) ||
+            mod.trialEndsAt == null ||
+            (mod.trialEndsAt is timestamp && mod.trialEndsAt >= request.time) ||
+            (mod.trialEndsAt is string)
+          )
+        );
+    }
+
+    function deliveryModuleReadable() {
+      let status = deliveryModuleData().get('status', '');
+      return deliveryModuleOn() || status == 'cancelled' || status == 'expired';
+    }
+
+    // Size caps for client writes. Limits are well above normal app use so
+    // managers/drivers are not blocked; they stop oversized junk in a document.
+    function strOk(value, max) {
+      return value == null || (value is string && value.size() <= max);
+    }
+
+    function listOk(value, maxItems) {
+      return value == null || (value is list && value.size() <= maxItems);
+    }
+
+    function mapOk(value, maxKeys) {
+      return value == null || (value is map && value.keys().size() <= maxKeys);
+    }
+
+    function inspectionWatchlistOk(value) {
+      return value == null || (
+        value is map &&
+        value.keys().size() <= 4 &&
+        listOk(value.get('staffIds', null), 500) &&
+        listOk(value.get('vehicleIds', null), 500)
+      );
+    }
+
+    function walkaroundOk(value) {
+      return value == null || (
+        value is map &&
+        value.keys().size() <= 12 &&
+        strOk(value.get('checklist_copy_version', null), 80) &&
+        strOk(value.get('intro_snapshot', null), 8000) &&
+        mapOk(value.get('items', null), 40)
+      );
+    }
+
+    function profileBoundsOk() {
+      let d = request.resource.data;
+      return d.keys().size() <= 80
+        && strOk(d.get('display_name', null), 200)
+        && strOk(d.get('name', null), 200)
+        && strOk(d.get('firstName', null), 200)
+        && strOk(d.get('lastName', null), 200)
+        && strOk(d.get('first_name', null), 200)
+        && strOk(d.get('last_name', null), 200)
+        && strOk(d.get('phone', null), 40)
+        && strOk(d.get('email', null), 320)
+        && strOk(d.get('photo_url', null), 2000)
+        && strOk(d.get('expoPushToken', null), 512)
+        && strOk(d.get('company_name', null), 200)
+        && strOk(d.get('role', null), 40)
+        && strOk(d.get('company_id', null), 128)
+        && strOk(d.get('inspector_job_title', null), 200)
+        && strOk(d.get('inspector_address', null), 500)
+        && strOk(d.get('qualification_name', null), 200)
+        && strOk(d.get('qualification_number', null), 80)
+        && strOk(d.get('qualification_issuing_body', null), 200)
+        && strOk(d.get('employment_status', null), 40)
+        && strOk(d.get('inspector_employer_name', null), 200)
+        && strOk(d.get('inspector_employer_address', null), 500)
+        && strOk(d.get('app_platform', null), 40)
+        && strOk(d.get('app_version', null), 40)
+        && strOk(d.get('app_build', null), 40)
+        && strOk(d.get('app_runtime_version', null), 80)
+        && strOk(d.get('app_ota_label', null), 80)
+        && strOk(d.get('app_ota_update_id', null), 128)
+        && strOk(d.get('app_ota_channel', null), 40)
+        && strOk(d.get('authSessionId', null), 80)
+        && inspectionWatchlistOk(d.get('inspectionWatchlist', null));
+    }
+
+    function toolBoundsOk() {
+      let d = request.resource.data;
+      return d.keys().size() <= 40
+        && strOk(d.get('name', null), 200)
+        && strOk(d.get('serial_number', null), 80)
+        && strOk(d.get('serial', null), 80)
+        && strOk(d.get('description', null), 2000)
+        && strOk(d.get('condition', null), 40)
+        && strOk(d.get('status', null), 40)
+        && strOk(d.get('qr_code', null), 200)
+        && strOk(d.get('image_url', null), 2000)
+        && strOk(d.get('location_id', null), 128)
+        && strOk(d.get('location', null), 200)
+        && strOk(d.get('checkedOutBy', null), 128);
+    }
+
+    function locationBoundsOk() {
+      let d = request.resource.data;
+      return d.keys().size() <= 20
+        && strOk(d.get('name', null), 200)
+        && strOk(d.get('address', null), 500)
+        && strOk(d.get('description', null), 2000);
+    }
+
+    function toolHistoryBoundsOk() {
+      let d = request.resource.data;
+      return d.keys().size() <= 20
+        && strOk(d.get('action', null), 40)
+        && strOk(d.get('user_name', null), 200)
+        && strOk(d.get('notes', null), 2000)
+        && strOk(d.get('condition', null), 40)
+        && strOk(d.get('tool_id', null), 128)
+        && strOk(d.get('user_id', null), 128)
+        && strOk(d.get('location_id', null), 128);
+    }
+
+    function vehicleBoundsOk() {
+      let d = request.resource.data;
+      return d.keys().size() <= 80
+        && strOk(d.get('make', null), 80)
+        && strOk(d.get('model', null), 80)
+        && strOk(d.get('registration', null), 32)
+        && strOk(d.get('vin', null), 32)
+        && strOk(d.get('color', null), 40)
+        && strOk(d.get('status', null), 40)
+        && strOk(d.get('notes', null), 4000)
+        && strOk(d.get('image_url', null), 2000)
+        && strOk(d.get('inspection_category', null), 40)
+        && strOk(d.get('mot_status', null), 80)
+        && strOk(d.get('tax_status', null), 80)
+        && strOk(d.get('dvla_sync_error', null), 2000);
+    }
+
+    function inspectionBoundsOk() {
+      let d = request.resource.data;
+      return d.keys().size() <= 60
+        && strOk(d.get('vehicle_id', null), 128)
+        && strOk(d.get('company_id', null), 128)
+        && strOk(d.get('inspector_name', null), 200)
+        && strOk(d.get('overall_condition', null), 40)
+        && strOk(d.get('defect_type', null), 80)
+        && strOk(d.get('defect_severity', null), 40)
+        && strOk(d.get('defect_description', null), 4000)
+        && strOk(d.get('status', null), 40)
+        && strOk(d.get('inspection_type', null), 40)
+        && strOk(d.get('inspection_category', null), 40)
+        && strOk(d.get('inspection_template_id', null), 80)
+        && strOk(d.get('template_version', null), 40)
+        && strOk(d.get('driver_declaration_text_snapshot', null), 8000)
+        && strOk(d.get('notes', null), 2000)
+        && listOk(d.get('defects', null), 50)
+        && mapOk(d.get('photo_urls', null), 20)
+        && mapOk(d.get('sections', null), 20)
+        && mapOk(d.get('check_results', null), 80)
+        && mapOk(d.get('recorded_values', null), 40)
+        && mapOk(d.get('declaration', null), 20)
+        && mapOk(d.get('walkaround_checklist', null), 40)
+        && walkaroundOk(d.get('walkaround_declaration', null));
+    }
+
+    function defectBoundsOk() {
+      let d = request.resource.data;
+      return d.keys().size() <= 40
+        && strOk(d.get('description', null), 4000)
+        && strOk(d.get('defect_type', null), 80)
+        && strOk(d.get('severity', null), 40)
+        && strOk(d.get('status', null), 40)
+        && strOk(d.get('workflow_status', null), 40)
+        && strOk(d.get('resolution_notes', null), 4000)
+        && strOk(d.get('reporter_contact_phone', null), 40)
+        && strOk(d.get('failure_severity', null), 40)
+        && strOk(d.get('failure_vehicle_status', null), 40)
+        && strOk(d.get('vehicle_id', null), 128)
+        && strOk(d.get('inspection_id', null), 128)
+        && strOk(d.get('check_id', null), 80)
+        && mapOk(d.get('evidence', null), 10);
+    }
+
+    function vehicleDocumentBoundsOk() {
+      let d = request.resource.data;
+      return d.keys().size() <= 20
+        && strOk(d.get('title', null), 200)
+        && strOk(d.get('storage_path', null), 500)
+        && strOk(d.get('file_name', null), 200)
+        && strOk(d.get('content_type', null), 80)
+        && strOk(d.get('notes', null), 2000)
+        && strOk(d.get('vehicle_id', null), 128)
+        && strOk(d.get('type', null), 40);
+    }
+
+    function damageReportBoundsOk() {
+      let d = request.resource.data;
+      return d.keys().size() <= 30
+        && strOk(d.get('description', null), 4000)
+        && strOk(d.get('notes', null), 4000)
+        && strOk(d.get('status', null), 40)
+        && strOk(d.get('severity', null), 40)
+        && strOk(d.get('vehicle_id', null), 128)
+        && mapOk(d.get('photo_urls', null), 20)
+        && listOk(d.get('photos', null), 20);
+    }
+
+    function inviteBoundsOk() {
+      let d = request.resource.data;
+      return strOk(d.get('inviteeName', null), 200)
+        && strOk(d.get('companyName', null), 200)
+        && strOk(d.get('invitedByName', null), 200)
+        && strOk(d.get('emailError', null), 2000);
+    }
+
+    function notificationBoundsOk() {
+      let d = request.resource.data;
+      return d.keys().size() <= 20
+        && strOk(d.get('type', null), 80)
+        && strOk(d.get('title', null), 200)
+        && strOk(d.get('message', null), 2000)
+        && strOk(d.get('user_id', null), 128);
+    }
     
     // ============================================
     // PROFILES
@@ -94,6 +326,7 @@ service cloud.firestore {
           .hasOnly([
             'expoPushToken',
             'pushTokenUpdatedAt',
+            'inspectionWatchlist',
             'display_name',
             'photo_url',
             'phone',
@@ -110,6 +343,8 @@ service cloud.firestore {
             'app_ota_channel',
             'app_last_seen_at',
             'last_login',
+            'authSessionId',
+            'authSessionAt',
             'inspector_job_title',
             'inspector_address',
             'qualification_name',
@@ -165,7 +400,7 @@ service cloud.firestore {
           (!('company_id' in request.resource.data) || request.resource.data.company_id == null)
         ) ||
         isAdmin()
-      );
+      ) && profileBoundsOk();
       
       // Users cannot change their own role or company_id except onboarding claim;
       // managers cannot promote to admin.
@@ -174,7 +409,7 @@ service cloud.firestore {
         profileSelfUpdateAllowed(userId) ||
         profileOnboardingClaim(userId) ||
         profileManagerUpdateOk()
-      );
+      ) && profileBoundsOk();
       
       // Only admins can delete profiles
       allow delete: if isAdmin();
@@ -191,8 +426,8 @@ service cloud.firestore {
     // COMPANIES
     // ============================================
     // Manager updates are restricted to display settings only.
-    // Subscription / billing / legacy / Stripe / entitlement fields are server-only
-    // (Admin SDK: Stripe webhooks, set-status, redeemPromoCode, expireWebTrials, etc.).
+    // Subscription / billing / legacy / Stripe / modules / entitlement fields are server-only
+    // (Admin SDK: Stripe webhooks, set-status, set-delivery-module, redeemPromoCode, expireWebTrials, etc.).
     function managerCompanyUpdateAllowed() {
       return request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['name', 'updated_at', 'updatedAt'])
@@ -201,12 +436,8 @@ service cloud.firestore {
         && request.resource.data.name.size() <= 200
         && request.resource.data.get('created_by', null) == resource.data.get('created_by', null)
         && request.resource.data.get('subscription_status', null) == resource.data.get('subscription_status', null)
-        && request.resource.data.get('legacy', null) == resource.data.get('legacy', null);
-    }
-
-    // Referral field is Admin SDK only (POST /api/referrals/attach).
-    function companyUpdateDoesNotTouchReferral() {
-      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['referral']);
+        && request.resource.data.get('legacy', null) == resource.data.get('legacy', null)
+        && request.resource.data.get('modules', null) == resource.data.get('modules', null);
     }
 
     match /companies/{companyId} {
@@ -221,19 +452,27 @@ service cloud.firestore {
       
       // Web onboarding creates a company with created_by = uid; mobile self-serve company signup
       // is removed in the app. Admins can create for support flows.
+      // Non-admin creates are locked to trial-only fields so a client can never
+      // self-grant entitlements (subscription_status active/promotional, legacy, etc.).
       // Create is intentionally separate from update — do not broaden this path.
-      // Clients must never set referral on create (Admin SDK attaches it after).
       allow create: if isSignedIn() && (
-        (isAdmin() && !('referral' in request.resource.data)) ||
+        isAdmin() ||
         (
           request.resource.data.created_by == request.auth.uid &&
-          !('referral' in request.resource.data)
+          request.resource.data.keys().hasOnly([
+            'name', 'subscription_status', 'trial_start_date', 'trial_end_date',
+            'subscription_expiry_date', 'created_at', 'created_by'
+          ]) &&
+          request.resource.data.subscription_status == 'trial' &&
+          request.resource.data.name is string &&
+          request.resource.data.name.size() > 0 &&
+          request.resource.data.name.size() <= 200
         )
       );
       
-      // Admins retain update access except referral (Admin SDK only).
+      // Global admins retain full update access.
       // Tenant managers may only change allowlisted settings fields.
-      allow update: if isSignedIn() && companyUpdateDoesNotTouchReferral() && (
+      allow update: if isSignedIn() && (
         isAdmin() ||
         (isManager() && userCompanyId() == companyId && managerCompanyUpdateAllowed())
       );
@@ -243,29 +482,16 @@ service cloud.firestore {
     }
 
     // ============================================
-    // REFERRALS (capture + admin monitor)
-    // ============================================
-    // Writes only via Admin SDK (/api/referrals/attach and future payout tools).
-    match /referralCodes/{codeId} {
-      allow read: if isAdmin();
-      allow write: if false;
-    }
-
-    match /referrals/{companyId} {
-      allow read: if isAdmin();
-      allow write: if false;
-    }
-
-    // ============================================
     // TOOLS
     // ============================================
     match /tools/{toolId} {
       allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
-      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
+      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive() && toolBoundsOk();
       allow update: if isSignedIn() &&
         userCompanyId() == request.resource.data.company_id &&
         request.resource.data.company_id == resource.data.company_id &&
-        isCompanyActive();
+        isCompanyActive() &&
+        toolBoundsOk();
       allow delete: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
     }
 
@@ -277,7 +503,7 @@ service cloud.firestore {
       allow create: if isSignedIn() && (
         (isManager() && userCompanyId() == request.resource.data.company_id && isCompanyActive()) ||
         isAdmin()
-      );
+      ) && locationBoundsOk();
       allow update: if isSignedIn() && (
         (
           isManager() &&
@@ -286,7 +512,7 @@ service cloud.firestore {
           isCompanyActive()
         ) ||
         isAdmin()
-      );
+      ) && locationBoundsOk();
       allow delete: if isSignedIn() && (
         (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
         isAdmin()
@@ -298,7 +524,7 @@ service cloud.firestore {
     // ============================================
     match /tool_history/{historyId} {
       allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
-      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
+      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive() && toolHistoryBoundsOk();
       // History is immutable - only admins can modify/delete
       allow update, delete: if isAdmin();
     }
@@ -311,9 +537,14 @@ service cloud.firestore {
       // Creation is Admin SDK only via createVehicle so subscription/promo limits
       // are enforced transactionally and concurrent requests cannot exceed them.
       allow create: if false;
+      // Provenance fields are immutable on update (omitting them keeps the old
+      // value, which still passes; only changing them is denied).
       allow update: if isSignedIn() &&
         request.resource.data.company_id == resource.data.company_id &&
-        vehicleInspectionTenantOk(resource.data.company_id);
+        request.resource.data.get('created_by', null) == resource.data.get('created_by', null) &&
+        request.resource.data.get('created_at', null) == resource.data.get('created_at', null) &&
+        vehicleInspectionTenantOk(resource.data.company_id) &&
+        vehicleBoundsOk();
       allow delete: if isSignedIn() && (
         (
           isManager() &&
@@ -334,7 +565,7 @@ service cloud.firestore {
     // ============================================
     match /vehicle_inspections/{inspectionId} {
       allow read: if isSignedIn() && vehicleInspectionTenantOk(resource.data.company_id);
-      allow create: if isSignedIn() && vehicleInspectionTenantOk(request.resource.data.company_id);
+      allow create: if isSignedIn() && vehicleInspectionTenantOk(request.resource.data.company_id) && inspectionBoundsOk();
       // Users can update their own inspections, managers can update any in their company
       allow update: if isSignedIn() && (
         (
@@ -346,7 +577,7 @@ service cloud.firestore {
           vehicleInspectionTenantOk(resource.data.company_id)
         ) ||
         isAdmin()
-      ) && request.resource.data.company_id == resource.data.company_id;
+      ) && request.resource.data.company_id == resource.data.company_id && inspectionBoundsOk();
       allow delete: if isSignedIn() && (
         (isManager() && vehicleInspectionTenantOk(resource.data.company_id)) ||
         isAdmin()
@@ -358,7 +589,7 @@ service cloud.firestore {
     // ============================================
     match /vehicle_defects/{defectId} {
       allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
-      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
+      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive() && defectBoundsOk();
       allow update: if isSignedIn() && (
         (
           isManager() &&
@@ -367,7 +598,7 @@ service cloud.firestore {
           isCompanyActive()
         ) ||
         isAdmin()
-      );
+      ) && defectBoundsOk();
       // Resolved defects are audit records — hard delete is not allowed.
       allow delete: if isSignedIn() &&
         resource.data.status != 'resolved' &&
@@ -388,7 +619,8 @@ service cloud.firestore {
         isCompanyActive() &&
         request.resource.data.vehicle_id is string &&
         request.resource.data.type in ['mot', 'service', 'other'] &&
-        request.resource.data.storage_path is string;
+        request.resource.data.storage_path is string &&
+        vehicleDocumentBoundsOk();
       allow update: if isSignedIn() && (
         (
           isManager() &&
@@ -397,7 +629,7 @@ service cloud.firestore {
           isCompanyActive()
         ) ||
         isAdmin()
-      );
+      ) && vehicleDocumentBoundsOk();
       allow delete: if isSignedIn() && (
         (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
         isAdmin()
@@ -409,7 +641,7 @@ service cloud.firestore {
     // ============================================
     match /vehicle_damage_reports/{reportId} {
       allow read: if isSignedIn() && userCompanyId() == resource.data.company_id && isCompanyActive();
-      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive();
+      allow create: if isSignedIn() && userCompanyId() == request.resource.data.company_id && isCompanyActive() && damageReportBoundsOk();
       allow update: if isSignedIn() && (
         (
           isManager() &&
@@ -418,7 +650,7 @@ service cloud.firestore {
           isCompanyActive()
         ) ||
         isAdmin()
-      );
+      ) && damageReportBoundsOk();
       allow delete: if isSignedIn() && (
         (isManager() && userCompanyId() == resource.data.company_id && isCompanyActive()) ||
         isAdmin()
@@ -483,7 +715,8 @@ service cloud.firestore {
           'updatedAt',
           'expiresAt',
           'emailSent'
-        ]);
+        ])
+        && inviteBoundsOk();
     }
 
     function managerInviteUpdateAllowed() {
@@ -494,16 +727,19 @@ service cloud.firestore {
         && request.resource.data.email == resource.data.email
         && request.resource.data.invitedBy == resource.data.invitedBy
         && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['status', 'expiresAt', 'updatedAt', 'emailSent', 'emailError']);
+          .hasOnly(['status', 'expiresAt', 'updatedAt', 'emailSent', 'emailError'])
+        && inviteBoundsOk();
     }
 
     // ============================================
     // INVITES
     // ============================================
+    // Invites: managers/admins list their company; invitee may read own invite by email.
+    // Drivers (role user) must NOT list company invites — inviteId is the accept secret.
     match /invites/{inviteId} {
       allow read: if isSignedIn() && (
         isAdmin() ||
-        resource.data.companyId == userCompanyId() ||
+        (isManager() && resource.data.companyId == userCompanyId()) ||
         (request.auth.token.email != null && resource.data.email == request.auth.token.email)
       );
       // Global admins retain create via isAdmin() / catch-all.
@@ -545,7 +781,8 @@ service cloud.firestore {
         && request.resource.data.user_id is string
         && request.resource.data.keys().hasAll([
           'type', 'title', 'message', 'company_id', 'user_id', 'read', 'created_at'
-        ]);
+        ])
+        && notificationBoundsOk();
 
       allow update: if isSignedIn()
         && resource.data.user_id == request.auth.uid
@@ -579,8 +816,29 @@ service cloud.firestore {
         && dayId.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
         && request.resource.data.keys().hasOnly(['date', 'counts', 'updated_at'])
         && request.resource.data.date == dayId
-        && request.resource.data.counts is map;
+        && request.resource.data.counts is map
+        && request.resource.data.counts.keys().size() <= 200;
       allow delete: if isAdmin();
+    }
+
+    // Rate-limit counters for callable functions. Writes are Admin SDK only.
+    match /rateLimits/{limitId} {
+      allow read, write: if false;
+    }
+
+    // Billing kill-switch / alert dedupe. Writes are Admin SDK only.
+    match /billing_guard_state/{id} {
+      allow read, write: if false;
+    }
+
+    match /billing_usage/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /billing_usage_daily/{dayId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     match /product_usage_totals/{totalId} {
@@ -599,16 +857,57 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    match /product_usage_by_company/{companyId} {
+    // Operational telemetry. Drivers may record their own company's attempt.
+    // Only a platform admin can read across companies. Clients cannot edit or delete.
+    match /ops_events/{eventId} {
       allow read: if isAdmin();
-      allow create, update: if isSignedIn()
-        && isManagerOrAdmin()
-        && companyId == userCompanyId()
-        && request.resource.data.company_id == companyId
-        && request.resource.data.keys().hasOnly(['company_id', 'views', 'checks', 'last_seen', 'updated_at'])
-        && (!('views' in request.resource.data) || request.resource.data.views is number)
-        && (!('checks' in request.resource.data) || request.resource.data.checks is number);
-      allow delete: if isAdmin();
+      allow create: if isSignedIn() && profileExists()
+        && request.resource.data.company_id == userCompanyId()
+        && request.resource.data.keys().hasOnly([
+          'company_id', 'operation_id', 'category', 'outcome', 'error_category',
+          'app_version', 'platform', 'occurred_at', 'expires_at'
+        ])
+        && request.resource.data.operation_id is string
+        && request.resource.data.operation_id.size() > 0
+        && request.resource.data.operation_id.size() <= 120
+        && request.resource.data.category in ['photo_upload', 'inspection_submit', 'report_submit']
+        && request.resource.data.outcome in ['success', 'failure']
+        && (request.resource.data.error_category == null
+          || request.resource.data.error_category in ['permission', 'network', 'storage', 'unknown'])
+        && request.resource.data.app_version is string
+        && request.resource.data.app_version.size() <= 32
+        && request.resource.data.platform in ['ios', 'android', 'unknown']
+        && request.resource.data.occurred_at is timestamp
+        && request.resource.data.expires_at is timestamp;
+      allow update, delete: if false;
+    }
+
+    // Privileged-action notes. Platform admin only. No edits or deletes from the client.
+    match /admin_audit/{auditId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['action', 'company_id', 'at'])
+        && request.resource.data.action is string
+        && request.resource.data.action.size() > 0
+        && request.resource.data.action.size() <= 80;
+      allow update, delete: if false;
+    }
+
+    match /delivery_jobs/{jobId} {
+      allow read: if isSignedIn() &&
+        userCompanyId() == resource.data.company_id &&
+        isCompanyActive() &&
+        deliveryModuleReadable() &&
+        (
+          isManagerOrAdmin() ||
+          resource.data.assigned_driver_id == request.auth.uid
+        );
+      allow create: if false;
+      allow update: if false;
+      allow delete: if isManagerOrAdmin() &&
+        userCompanyId() == resource.data.company_id &&
+        isCompanyActive() &&
+        deliveryModuleOn();
     }
 
     // ============================================
@@ -620,13 +919,20 @@ service cloud.firestore {
         collection != 'vehicles' &&
         collection != 'promotionalSubscriptions' &&
         collection != 'vehicleCreationLocks' &&
-        collection != 'referralCodes' &&
-        collection != 'referrals';
+        collection != 'rateLimits' &&
+        collection != 'billing_guard_state' &&
+        collection != 'billing_usage' &&
+        collection != 'billing_usage_daily' &&
+        collection != 'delivery_jobs';
       allow update, delete: if isAdmin() &&
+        collection != 'ops_events' &&
+        collection != 'admin_audit' &&
         collection != 'promotionalSubscriptions' &&
         collection != 'vehicleCreationLocks' &&
-        collection != 'referralCodes' &&
-        collection != 'referrals';
+        collection != 'rateLimits' &&
+        collection != 'billing_guard_state' &&
+        collection != 'billing_usage' &&
+        collection != 'billing_usage_daily';
     }
   }
 }

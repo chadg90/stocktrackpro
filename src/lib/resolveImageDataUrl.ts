@@ -1,16 +1,16 @@
-import { getBytes, getStorage, ref } from 'firebase/storage';
+import { getBytes, getDownloadURL, getStorage, ref } from 'firebase/storage';
 import { firebaseApp, firebaseAuth } from '@/lib/firebase';
 
-const DEFAULT_TIMEOUT_MS = 20000;
+const DEFAULT_TIMEOUT_MS = 12000;
 const MAX_EMBED_EDGE_PX = 640;
 const JPEG_QUALITY = 0.68;
-/** Client getBytes has been hanging in this app — never wait longer than this. */
-const SDK_ATTEMPT_MS = 2500;
+/** Client getBytes can hang — keep SDK fallback short. */
+const SDK_ATTEMPT_MS = 3500;
 
 /**
  * Load an image for PDF embedding.
- * Prefers the authenticated /api/storage/object proxy (Admin SDK) so we avoid
- * browser CORS and client getBytes hangs, then compresses for fast jsPDF use.
+ * Prefers same-origin /api/storage/object (Admin SDK) — fast, no CORS.
+ * Short SDK / signed / download fallbacks only if the proxy fails.
  */
 export type ResolvedImage = {
   dataUrl: string;
@@ -28,9 +28,24 @@ export async function resolveImageDataUrl(
   const timeoutMs = opts?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const maxEdgePx = opts?.maxEdgePx ?? MAX_EMBED_EDGE_PX;
 
+  if (isLocalAssetPath(v)) {
+    try {
+      const blob = await withTimeout(
+        fetch(v).then((r) => (r.ok ? r.blob() : null)),
+        Math.min(timeoutMs, 4000),
+        'logo fetch timed out'
+      );
+      if (!blob || blob.size === 0) return null;
+      return await compressImageBlob(blob, maxEdgePx);
+    } catch (err) {
+      console.warn('[resolveImageDataUrl] local asset failed', v.slice(0, 120), err);
+      return null;
+    }
+  }
+
   try {
     const blob = await withTimeout(
-      loadBlob(v, { prefer: 'api' }),
+      loadBlob(v, { preferSigned: false }),
       timeoutMs,
       `image load timed out (${timeoutMs}ms)`
     );
@@ -38,7 +53,7 @@ export async function resolveImageDataUrl(
 
     return await withTimeout(
       compressImageBlob(blob, maxEdgePx),
-      Math.min(timeoutMs, 8000),
+      Math.min(timeoutMs, 5000),
       'image compress timed out'
     );
   } catch (err) {
@@ -60,7 +75,7 @@ export async function fetchStorageBytes(
   const timeoutMs = opts?.timeoutMs ?? 25000;
   try {
     const blob = await withTimeout(
-      loadBlob(v, { prefer: 'signed' }),
+      loadBlob(v, { preferSigned: true }),
       timeoutMs,
       `storage download timed out (${timeoutMs}ms)`
     );
@@ -90,11 +105,14 @@ export async function mapPool<T, R>(
   return results;
 }
 
+/**
+ * Prefer Admin proxy (same-origin, no CORS). Fallbacks are short so PDF
+ * generation does not stall when a method hangs.
+ */
 async function loadBlob(
   v: string,
-  opts: { prefer: 'api' | 'signed' }
+  opts: { preferSigned: boolean }
 ): Promise<Blob | null> {
-  // Public/local site assets — never send these to Firebase Storage.
   if (isLocalAssetPath(v)) {
     try {
       const res = await fetch(v);
@@ -106,47 +124,68 @@ async function loadBlob(
   }
 
   const objectPath = toStorageObjectPath(v);
+  if (!objectPath) return null;
 
-  const trySignedUrl = async (): Promise<Blob | null> => {
-    if (!objectPath) return null;
-    const signed = await getSignedStorageUrl(objectPath);
-    if (!signed) return null;
-    try {
-      const res = await fetch(signed);
-      if (res.ok) return await res.blob();
-    } catch {
-      /* fall through */
-    }
-    return null;
-  };
-
-  const tryApiBytes = async (): Promise<Blob | null> => {
-    if (!objectPath) return null;
-    return loadViaStorageApi(objectPath);
-  };
-
-  const trySdkShort = async (): Promise<Blob | null> => {
-    if (!objectPath || !firebaseApp) return null;
-    try {
-      const bytes = await withTimeout(
-        getBytes(ref(getStorage(firebaseApp), objectPath)),
-        SDK_ATTEMPT_MS,
-        'getBytes timed out'
-      );
-      if (bytes?.byteLength) return new Blob([bytes], { type: guessMime(objectPath) });
-    } catch {
-      /* fall through */
-    }
-    return null;
-  };
-
-  if (opts.prefer === 'signed') {
-    // Packs: signed URL first (large PDFs), then small proxy, brief SDK last.
-    return (await trySignedUrl()) || (await tryApiBytes()) || (await trySdkShort());
+  if (opts.preferSigned) {
+    return (
+      (await trySignedUrl(objectPath)) ||
+      (await tryApiBytes(objectPath)) ||
+      (await tryDownloadUrl(objectPath)) ||
+      (await trySdkBytes(objectPath))
+    );
   }
 
-  // PDF images: byte proxy first, then signed URL, brief SDK last.
-  return (await tryApiBytes()) || (await trySignedUrl()) || (await trySdkShort());
+  // PDF images: proxy first (fast when auth works), then short SDK, then signed/download.
+  return (
+    (await tryApiBytes(objectPath)) ||
+    (await trySdkBytes(objectPath)) ||
+    (await trySignedUrl(objectPath)) ||
+    (await tryDownloadUrl(objectPath))
+  );
+}
+
+async function trySdkBytes(objectPath: string): Promise<Blob | null> {
+  if (!firebaseApp) return null;
+  try {
+    const bytes = await withTimeout(
+      getBytes(ref(getStorage(firebaseApp), objectPath)),
+      SDK_ATTEMPT_MS,
+      'getBytes timed out'
+    );
+    if (bytes?.byteLength) return new Blob([bytes], { type: guessMime(objectPath) });
+  } catch {
+    /* fall through */
+  }
+  return null;
+}
+
+async function tryDownloadUrl(objectPath: string): Promise<Blob | null> {
+  if (!firebaseApp) return null;
+  try {
+    const url = await withTimeout(
+      getDownloadURL(ref(getStorage(firebaseApp), objectPath)),
+      4000,
+      'getDownloadURL timed out'
+    );
+    if (!url) return null;
+    const res = await withTimeout(fetch(url), 5000, 'download URL fetch timed out');
+    if (!res.ok) return null;
+    return await res.blob();
+  } catch {
+    return null;
+  }
+}
+
+async function trySignedUrl(objectPath: string): Promise<Blob | null> {
+  const signed = await getSignedStorageUrl(objectPath);
+  if (!signed) return null;
+  try {
+    const res = await withTimeout(fetch(signed), 8000, 'signed URL fetch timed out');
+    if (res.ok) return await res.blob();
+  } catch {
+    /* fall through */
+  }
+  return null;
 }
 
 function isLocalAssetPath(v: string): boolean {
@@ -155,17 +194,20 @@ function isLocalAssetPath(v: string): boolean {
   return false;
 }
 
+/** Always use trailing slash — site uses trailingSlash: true. */
+function storageObjectApiUrl(objectPath: string, sign = false): string {
+  const q = `path=${encodeURIComponent(objectPath)}${sign ? '&sign=1' : ''}`;
+  return `/api/storage/object/?${q}`;
+}
+
 async function getSignedStorageUrl(objectPath: string): Promise<string | null> {
   if (typeof window === 'undefined' || !firebaseAuth?.currentUser) return null;
   try {
     const token = await firebaseAuth.currentUser.getIdToken();
-    const res = await fetch(
-      `/api/storage/object?path=${encodeURIComponent(objectPath)}&sign=1`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        cache: 'no-store',
-      }
-    );
+    const res = await fetch(storageObjectApiUrl(objectPath, true), {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
     if (!res.ok) return null;
     const data = (await res.json()) as { url?: string };
     return typeof data.url === 'string' && data.url ? data.url : null;
@@ -174,14 +216,18 @@ async function getSignedStorageUrl(objectPath: string): Promise<string | null> {
   }
 }
 
-async function loadViaStorageApi(objectPath: string): Promise<Blob | null> {
+async function tryApiBytes(objectPath: string): Promise<Blob | null> {
   if (typeof window === 'undefined' || !firebaseAuth?.currentUser) return null;
   try {
     const token = await firebaseAuth.currentUser.getIdToken();
-    const res = await fetch(`/api/storage/object?path=${encodeURIComponent(objectPath)}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    });
+    const res = await withTimeout(
+      fetch(storageObjectApiUrl(objectPath), {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      }),
+      8000,
+      'storage API timed out'
+    );
     if (!res.ok) return null;
     const contentType = res.headers.get('content-type') || '';
     if (contentType.includes('application/json')) return null;

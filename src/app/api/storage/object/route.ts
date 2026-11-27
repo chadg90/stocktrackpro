@@ -33,6 +33,7 @@ function companyMayAccessPath(companyId: string, objectPath: string): boolean {
   const prefixes = [
     `vehicle-inspections/${companyId}/`,
     `vehicle-documents/${companyId}/`,
+    `delivery/${companyId}/`,
   ];
   return prefixes.some((p) => objectPath.startsWith(p));
 }

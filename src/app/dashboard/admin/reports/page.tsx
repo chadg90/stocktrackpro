@@ -29,11 +29,7 @@ import {
 } from '@/lib/adminMonthlyCompanyReportHelpers';
 import { ADMIN_REPORT_QUERY_CAP, fifteenMonthsAgoStart } from '@/lib/dvsaRetention';
 import { formatAdminDate } from '@/lib/adminDateFormat';
-import {
-  isLegacyOnlyCompany,
-  isPaidStripeCompany,
-  isPromoCompany,
-} from '@/lib/adminCompanyMetrics';
+import { billingCategory } from '@/lib/adminCompanyMetrics';
 
 type Profile = {
   role?: string;
@@ -238,11 +234,9 @@ export default function AdminReportsPage() {
       (company) =>
         company.subscription_status === 'trial' || company.subscription_status === 'trialing'
     ).length;
-    const paidCompanies = companyList.filter((company) => isPaidStripeCompany(company)).length;
-    const promoCompanies = companyList.filter(
-      (company) => isPromoCompany(company) && !isPaidStripeCompany(company) && !isLegacyOnlyCompany(company)
-    ).length;
-    const legacyCompanies = companyList.filter((company) => isLegacyOnlyCompany(company)).length;
+    const paidCompanies = companyList.filter((company) => billingCategory(company) === 'paid').length;
+    const promoCompanies = companyList.filter((company) => billingCategory(company) === 'promo').length;
+    const legacyCompanies = companyList.filter((company) => billingCategory(company) === 'legacy').length;
     const activeCompanies = paidCompanies;
     const billingRiskCompanies = companyList
       .filter(
@@ -852,7 +846,7 @@ export default function AdminReportsPage() {
         topInspectorName: result.topInspectorName,
         topInspectorChecks: result.topInspectorChecks,
       };
-      const response = await fetch('/api/admin/reports/generate-pdf', {
+      const response = await fetch('/api/admin/reports/generate-pdf/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -931,7 +925,7 @@ export default function AdminReportsPage() {
         <div className="dashboard-card p-5">
           <p className="text-white/60 text-xs uppercase tracking-wide">Paid</p>
           <p className="text-white text-3xl font-semibold mt-2">{snapshot?.paidCompanies ?? '—'}</p>
-          <p className="text-white/40 text-xs mt-1">Active Stripe subscription</p>
+          <p className="text-white/40 text-xs mt-1">Stripe or loyalty paying</p>
         </div>
         <div className="dashboard-card p-5">
           <p className="text-white/60 text-xs uppercase tracking-wide">Promo</p>

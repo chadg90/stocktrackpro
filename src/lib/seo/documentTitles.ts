@@ -37,13 +37,13 @@ const COMPLIANCE_TITLE_BY_PREFIX: ComplianceTitleOverride[] = [
     absolute: 'How Long to Keep Vehicle Check Records? (15 Months)',
   },
   {
-    // Keep <title> aligned with the article H1 (trimmed to SERP limit).
+    // Exact article H1 (63 chars) — requested over the 60-char SERP cap.
     prefix: 'van-drivers-hours',
-    absolute: "Van Drivers' Hours: GB Domestic Rules for Vans (2026)",
+    absolute: "Van Drivers' Hours: GB Domestic Rules for Vans Explained (2026)",
   },
   {
     prefix: 'drivers-hours',
-    absolute: "Van Drivers' Hours: GB Domestic Rules for Vans (2026)",
+    absolute: "Van Drivers' Hours: GB Domestic Rules for Vans Explained (2026)",
   },
   { prefix: 'nil-defect', segment: 'Nil-Defect Reports for Fleet Checks' },
   { prefix: 'closing-defects', segment: 'Closing Defects Before Return to Service' },
@@ -72,7 +72,11 @@ function assertAbsoluteLength(absolute: string, label: string) {
   }
 }
 
+/** Slugs whose <title> must match the H1 even when that is over 60 characters. */
+const EXACT_H1_PREFIXES = new Set(['van-drivers-hours', 'drivers-hours']);
+
 for (const row of COMPLIANCE_TITLE_BY_PREFIX) {
+  if (EXACT_H1_PREFIXES.has(row.prefix)) continue;
   if ('absolute' in row && row.absolute) {
     assertAbsoluteLength(row.absolute, row.prefix);
   } else if ('segment' in row && row.segment) {

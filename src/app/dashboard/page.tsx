@@ -7,7 +7,6 @@ import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import {
   onAuthStateChanged,
-  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   User,
@@ -26,7 +25,8 @@ import {
   limit,
   Timestamp,
 } from 'firebase/firestore';
-import { firebaseAuth, firebaseDb } from '@/lib/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
 import { format, subDays, startOfDay, startOfWeek, startOfMonth, differenceInDays } from 'date-fns';
 import {
   activityHistoryStartFromDashboardRange,
@@ -423,13 +423,14 @@ export default function DashboardPage() {
       setError('Enter your account email above, then tap Forgot password.');
       return;
     }
-    if (!isFirebaseAvailable || !firebaseAuth) {
+    if (!isFirebaseAvailable || !firebaseFunctions) {
       setError('Firebase is not configured properly');
       return;
     }
     setResetBusy(true);
     try {
-      await sendPasswordResetEmail(firebaseAuth, trimmed);
+      const requestPasswordReset = httpsCallable(firebaseFunctions, 'requestPasswordReset');
+      await requestPasswordReset({ email: trimmed });
       setResetMessage('If an account exists for that email, a password reset link has been sent.');
     } catch (err: unknown) {
       // Avoid account enumeration — same message for most failures.
@@ -437,9 +438,9 @@ export default function DashboardPage() {
         typeof err === 'object' && err !== null && 'code' in err && typeof (err as { code: unknown }).code === 'string'
           ? (err as { code: string }).code
           : '';
-      if (code === 'auth/invalid-email') {
+      if (code === 'functions/invalid-argument') {
         setError('Please enter a valid email address.');
-      } else if (code === 'auth/too-many-requests') {
+      } else if (code === 'functions/resource-exhausted') {
         setError('Too many attempts. Please wait a moment and try again.');
       } else {
         setResetMessage('If an account exists for that email, a password reset link has been sent.');
@@ -607,11 +608,12 @@ export default function DashboardPage() {
     return defects.filter((d) => d.status !== 'resolved').length;
   }, [openDefectsNowCount, defects, dashboardReady]);
 
-  const { motTaxExpiredCount, motTaxDueSoonCount } = useMemo(() => {
+  const { motTaxExpiredCount, motTaxDueSoonCount, motTaxNeedsCheckCount } = useMemo(() => {
     const counts = countMotTaxStatus(vehicles);
     return {
       motTaxExpiredCount: counts.expired,
       motTaxDueSoonCount: counts.dueSoon,
+      motTaxNeedsCheckCount: counts.unverified,
     };
   }, [vehicles]);
 
@@ -894,6 +896,7 @@ export default function DashboardPage() {
                   <SoftSpinner label="Checking fleet status…" />
                 ) : motTaxExpiredCount === 0 &&
                   motTaxDueSoonCount === 0 &&
+                  motTaxNeedsCheckCount === 0 &&
                   (openDefectsNow ?? 0) === 0 &&
                   mileageAttentionCount === 0 &&
                   inspections.length > 0 ? (
@@ -910,6 +913,17 @@ export default function DashboardPage() {
                         >
                           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
                           {motTaxExpiredCount} vehicle{motTaxExpiredCount === 1 ? '' : 's'} with MOT or tax already expired
+                        </Link>
+                      </li>
+                    )}
+                    {motTaxNeedsCheckCount > 0 && (
+                      <li>
+                        <Link
+                          href="/dashboard/mot-tax/?filter=unknown"
+                          className="inline-flex items-center gap-2 text-amber-700 hover:underline dark:text-amber-300"
+                        >
+                          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+                          {motTaxNeedsCheckCount} vehicle{motTaxNeedsCheckCount === 1 ? '' : 's'} need a DVLA check
                         </Link>
                       </li>
                     )}
@@ -947,8 +961,13 @@ export default function DashboardPage() {
                       </li>
                     )}
                     {inspections.length === 0 && (
-                      <li className="text-white/60">
-                        No inspections in {rangeLabel}. Daily checks from the app will appear here.
+                      <li>
+                        <Link
+                          href="/dashboard/fleet-report/"
+                          className="text-white/60 hover:text-white hover:underline"
+                        >
+                          No inspections in {rangeLabel}. Daily checks from the app will appear here.
+                        </Link>
                       </li>
                     )}
                     {motTaxExpiredCount === 0 &&

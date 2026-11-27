@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import { SITE_LEGAL_NAME, SITE_NAME, SITE_URL, SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
 
 /** Update only when the terms text changes. */
-const LAST_UPDATED = '4 August 2026';
+const LAST_UPDATED = '24 November 2026';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -83,6 +83,16 @@ export default function Terms() {
 
           <Section title="2. Service description">
             <p className="text-slate-600 leading-relaxed mb-4">
+              The Service includes core fleet features (such as vehicle records and daily checks) and may include
+              optional paid add-ons such as Delivery. Add-on pricing, trials, and cancellation are described in the{' '}
+              <Link href="/subscription-terms/" className="text-[var(--brand-blue)] hover:underline">
+                Subscription Terms
+              </Link>
+              . Where Delivery is used for medical or other specialised transport, the Service is a software tool
+              only — you remain responsible for clinical and operational compliance; we do not provide medical advice
+              or certification.
+            </p>
+            <p className="text-slate-600 leading-relaxed mb-4">
               {SITE_NAME} is a fleet inspection and compliance software platform that may include:
             </p>
             <BulletList
@@ -94,6 +104,7 @@ export default function Terms() {
                 'Mobile app access for drivers, fitters, and field staff',
                 'Audit trails and history for operational records',
                 'Role-based access (manager or user — fitters are typically assigned the manager role)',
+                'Optional Delivery add-on for manager-created jobs and driver staged collection/delivery workflows',
               ]}
             />
             <p className="text-slate-600 leading-relaxed mt-4">

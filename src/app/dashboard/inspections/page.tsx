@@ -217,10 +217,17 @@ export default function InspectionsPage() {
           </div>
           <input
             type="text"
+            placeholder="Search inspections"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="sm:hidden pl-10 w-full bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
+          />
+          <input
+            type="text"
             placeholder="Search by registration, inspector, or defect status…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
+            className="hidden sm:block pl-10 w-full bg-black border border-blue-500/30 rounded-lg px-4 py-2 text-white focus:border-blue-500 outline-none"
           />
         </div>
         <ExportButton

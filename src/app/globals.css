@@ -748,6 +748,32 @@ html[data-cookie-banner='1'] body {
   .theme-light main .bg-black {
     background-color: #ffffff !important;
   }
+  /* Semi-transparent blacks (e.g. bg-black/40 pickers) stay muddy grey unless remapped */
+  .theme-light main .bg-black\/40,
+  .theme-light main .bg-black\/50,
+  .theme-light main .bg-black\/60 {
+    background-color: #ffffff !important;
+  }
+
+  /* Deliveries create form — force light surfaces (buttons are not remapped like inputs) */
+  .theme-light main .delivery-picker,
+  .theme-light main .delivery-field,
+  .theme-light main .delivery-options,
+  .theme-light main .delivery-confirm {
+    background-color: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+  .theme-light main .delivery-confirm {
+    background-color: #f8fafc !important;
+  }
+  .theme-light main .delivery-options button {
+    color: #1e293b !important;
+  }
+  .theme-light main .delivery-options button:hover {
+    background-color: #f1f5f9 !important;
+  }
+
   .theme-light main .border-blue-500\/20,
   .theme-light main .border-blue-500\/25,
   .theme-light main .border-blue-500\/30 {

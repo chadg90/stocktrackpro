@@ -9,6 +9,7 @@ export const BILLING_REASSURANCE_ITEMS = [
   'Monthly plans: cancel anytime from Manage Billing — no long-term contract',
   'Annual plans: paid upfront for 12 months; you can switch off renewal at any time',
   'No setup fees · price per vehicle, not per user',
+  'Optional Delivery add-on: £15 per vehicle / month (same vehicle slots as fleet)',
 ] as const;
 
 export const BILLING_REASSURANCE_TERMS_HREF = '/subscription-terms/';

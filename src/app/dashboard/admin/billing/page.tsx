@@ -273,7 +273,9 @@ export default function BillingAdminPage() {
           </div>
           <div>
             <div className="mb-1 flex items-center justify-between text-sm">
-              <span className="text-gray-700 dark:text-gray-200">Kill switch £{killBudget.toFixed(0)}</span>
+              <span className="text-gray-700 dark:text-gray-200">
+                Critical alert £{killBudget.toFixed(0)} (billing stays on)
+              </span>
               <span className="font-semibold text-gray-900 dark:text-white">
                 {formatGbp(Number.isFinite(monthCost) ? monthCost : null)} / {formatGbp(killBudget)}
               </span>

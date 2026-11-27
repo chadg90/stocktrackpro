@@ -53,6 +53,13 @@ type Company = {
   legacy?: boolean;
   promo_schema_version?: number;
   promo_vehicle_limit?: number;
+  modules?: {
+    delivery?: {
+      status?: string;
+      trialEndsAt?: string | null;
+      vehicleQuantity?: number | null;
+    } | null;
+  } | null;
 };
 
 type Tier = { label: string; users: string; colour: string };
@@ -693,6 +700,35 @@ export default function SubscriptionPage() {
               <p className="text-white font-semibold text-lg">{company?.stripe_customer_id ? 'Stripe (website)' : 'Not linked yet'}</p>
             </div>
           )}
+        </div>
+
+        <div className="mb-8 rounded-lg border border-blue-500/30 bg-blue-500/5 p-4 sm:p-5">
+          <h3 className="text-white font-semibold text-base mb-1">Delivery add-on</h3>
+          <p className="text-white/70 text-sm leading-relaxed mb-2">
+            Optional £15 per vehicle / month on top of fleet checks. Quantity matches your subscribed
+            vehicle slots while active. Example: 3 vehicles = £24 checks + £45 Delivery = £69. Cancel
+            Delivery anytime — fleet billing stays at £8 × vehicles.
+          </p>
+          <p className="text-white/80 text-sm">
+            Status:{' '}
+            <span className="font-semibold text-blue-300">
+              {company?.modules?.delivery?.status || 'not enabled'}
+            </span>
+            {company?.modules?.delivery?.trialEndsAt
+              ? ` · trial ends ${String(company.modules.delivery.trialEndsAt).slice(0, 10)}`
+              : ''}
+          </p>
+          <p className="text-white/50 text-xs mt-2">
+            Enablement is managed by Fleet Track PRO (trial then paid). See{' '}
+            <Link href="/features/delivery/" className="text-blue-400 hover:underline">
+              Delivery
+            </Link>{' '}
+            and{' '}
+            <Link href="/subscription-terms/" className="text-blue-400 hover:underline">
+              Subscription Terms
+            </Link>
+            .
+          </p>
         </div>
 
         <div className="flex flex-col gap-3" data-tour="sub-billing">

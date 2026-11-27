@@ -1,4 +1,11 @@
-import { collection, getDocs, query, where, type Firestore } from 'firebase/firestore';
+import {
+  collection,
+  getCountFromServer,
+  getDocs,
+  query,
+  where,
+  type Firestore,
+} from 'firebase/firestore';
 
 /** Fields used to bucket companies for admin Paid / Promo / Legacy counts. */
 export type AdminCompanyPlanFields = {
@@ -49,6 +56,52 @@ export function isLegacyOnlyCompany(company: AdminCompanyPlanFields): boolean {
   return isLegacyCompany(company) && !isPaidStripeCompany(company);
 }
 
+export type BillingCategory = 'paid' | 'legacy' | 'promo' | 'trial' | 'inactive';
+
+/** One bucket for Admin home, Admin Reports, and Companies. Paid wins over Legacy. */
+export function billingCategory(company: AdminCompanyPlanFields): BillingCategory {
+  if (isPaidStripeCompany(company)) return 'paid';
+  if (isLegacyOnlyCompany(company)) return 'legacy';
+  if (isPromoCompany(company)) return 'promo';
+  if (isTrialCompany(company)) return 'trial';
+  return 'inactive';
+}
+
+const PRICE_PER_VEHICLE_MONTHLY = 8;
+const PRICE_PER_VEHICLE_YEARLY = 84;
+
+/**
+ * Monthly amount for MRR. Loyalty/custom price wins; otherwise slots × list price
+ * (annual ÷ 12). Not paid → 0.
+ */
+export function monthlyRevenueGbp(company: AdminCompanyPlanFields): number {
+  if (!isPaidStripeCompany(company)) return 0;
+  const custom = Number(company.monthly_amount_gbp);
+  if (Number.isFinite(custom) && custom > 0) return Math.round(custom * 100) / 100;
+  const slots = Number(company.subscribed_vehicles);
+  if (!Number.isFinite(slots) || slots < 1) return 0;
+  if ((company.billing_cycle || '').toLowerCase() === 'yearly') {
+    return Math.round(((slots * PRICE_PER_VEHICLE_YEARLY) / 12) * 100) / 100;
+  }
+  return Math.round(slots * PRICE_PER_VEHICLE_MONTHLY * 100) / 100;
+}
+
+/** Companies plan column. Loyalty fixed price is labelled separately from Legacy (no bill). */
+export function companyPlanLabel(company: AdminCompanyPlanFields): string {
+  const custom = Number(company.monthly_amount_gbp);
+  if (company.legacy === true && Number.isFinite(custom) && custom > 0) {
+    return `Loyalty £${custom.toFixed(2)}/mo`;
+  }
+  if (company.legacy === true && !isPaidStripeCompany(company)) return 'Legacy';
+  if (company.subscription_type === 'promotional' && !isPaidStripeCompany(company)) return 'Promo';
+  if (company.subscription_type === 'stripe' || company.stripe_subscription_id) {
+    return company.billing_cycle === 'yearly' ? 'Yearly' : 'Monthly';
+  }
+  const status = (company.subscription_status || '').toLowerCase();
+  if (status === 'trial' || status === 'trialing') return 'Trial';
+  return company.subscription_type?.trim() || '—';
+}
+
 export function isTrialCompany(company: AdminCompanyPlanFields): boolean {
   if (isPaidStripeCompany(company) || isPromoCompany(company) || isLegacyCompany(company)) {
     return false;
@@ -60,18 +113,34 @@ export function isTrialCompany(company: AdminCompanyPlanFields): boolean {
 /**
  * Non-retired vehicles on this company (same definition as Companies → Vehicles).
  * Retired are counted separately so Admin home can show them without mixing totals.
+ * Uses count aggregation (cheap) with a document-scan fallback if the composite index is missing.
  */
 export async function countCompanyFleetVehicles(
   db: Firestore,
   companyId: string
 ): Promise<{ live: number; retired: number }> {
-  const snap = await getDocs(query(collection(db, 'vehicles'), where('company_id', '==', companyId)));
-  let live = 0;
-  let retired = 0;
-  snap.docs.forEach((docSnap) => {
-    const status = String(docSnap.data()?.status || 'active').toLowerCase();
-    if (status === 'retired') retired += 1;
-    else live += 1;
-  });
-  return { live, retired };
+  const vehicles = collection(db, 'vehicles');
+  const companyFilter = where('company_id', '==', companyId);
+
+  try {
+    const [totalSnap, retiredSnap] = await Promise.all([
+      getCountFromServer(query(vehicles, companyFilter)),
+      getCountFromServer(
+        query(vehicles, companyFilter, where('status', '==', 'retired'))
+      ),
+    ]);
+    const total = totalSnap.data().count;
+    const retired = retiredSnap.data().count;
+    return { live: Math.max(0, total - retired), retired };
+  } catch {
+    const snap = await getDocs(query(vehicles, companyFilter));
+    let live = 0;
+    let retired = 0;
+    snap.docs.forEach((docSnap) => {
+      const status = String(docSnap.data()?.status || 'active').toLowerCase();
+      if (status === 'retired') retired += 1;
+      else live += 1;
+    });
+    return { live, retired };
+  }
 }

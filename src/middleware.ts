@@ -190,7 +190,13 @@ export function middleware(request: NextRequest) {
   }
 
   // trailingSlash: true + skipTrailingSlashRedirect — enforce slash here (except root).
-  if (pathname.length > 1 && !pathname.endsWith('/')) {
+  // Never slash-redirect API routes: a 308 drops Authorization on the follow-up
+  // request, which broke PDF image embedding (/api/storage/object).
+  if (
+    pathname.length > 1 &&
+    !pathname.endsWith('/') &&
+    !pathname.startsWith('/api/')
+  ) {
     return redirectTo(request, `${ensureTrailingSlash(pathname)}${search}`, 308);
   }
 
@@ -205,10 +211,12 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Product routes only. On App Hosting, any middleware hit forces
-     * Cache-Control: private and drops s-maxage — so marketing HTML must never
-     * match here (except the two retired LOLER article paths below, which must
-     * 308 to /compliance-centre/ in one hop before Next's trailingSlash redirect).
+     * Product routes (always): no-store / auth-adjacent handling.
+     * Retired LOLER/plant paths (with and without slash): one-hop 308 to
+     * /compliance-centre/ — must stay listed so slash forms are covered too.
+     * No-trailing-slash catch-all: permanent 308 to the slash canonical.
+     * Slash-terminated marketing HTML is intentionally omitted so App Hosting
+     * keeps public s-maxage on final 200s.
      * Apex→www for marketing is handled by the Firebase custom domain.
      */
     '/dashboard',
@@ -221,5 +229,7 @@ export const config = {
     '/compliance-centre/loler-thorough-examination-records/',
     '/compliance-centre/plant-examination-due-date-tracking',
     '/compliance-centre/plant-examination-due-date-tracking/',
+    // Paths that do not end in / and are not static files / Next internals.
+    '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|.*\\..*).*[^/])',
   ],
 };

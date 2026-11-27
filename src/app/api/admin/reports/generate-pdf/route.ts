@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 import type { MonthlyCompanyReportInput } from '@/lib/adminMonthlyCompanyReportPdf';
-import { buildAdminMonthlyCompanyReportHtmlPdfBytes } from '@/lib/adminMonthlyCompanyReportHtmlPdf';
+import { buildAdminMonthlyCompanyReportPdfBytes } from '@/lib/adminMonthlyCompanyReportPdf';
 import { buildReportFilename } from '@/lib/adminMonthlyCompanyReportInput';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
@@ -28,13 +30,28 @@ async function assertAdmin(request: NextRequest): Promise<void> {
   }
 }
 
+let cachedLogoDataUrl: string | null | undefined;
+
+/** Fleet Track PRO logo for the PDF header. Cached per instance; absent logo falls back to a drawn mark. */
+async function loadLogoDataUrl(): Promise<string | undefined> {
+  if (cachedLogoDataUrl !== undefined) return cachedLogoDataUrl ?? undefined;
+  try {
+    const bytes = await readFile(join(process.cwd(), 'public', 'report-logo-uploaded.png'));
+    cachedLogoDataUrl = `data:image/png;base64,${bytes.toString('base64')}`;
+  } catch (error) {
+    console.warn('Admin report: logo not found, using drawn fallback', error instanceof Error ? error.message : error);
+    cachedLogoDataUrl = null;
+  }
+  return cachedLogoDataUrl ?? undefined;
+}
+
 function sanitizeText(str: string): string {
   if (!str) return '';
   return str
-    .replace(/\r\n|\r|\n/g, '<br>')
+    .replace(/\r\n|\r|\n/g, ' ')
     .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
     .replace(/[\uFFFD\uFFFE\uFFFF]/g, '')
-    .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF\u0100-\u017F<>\/\s]/g, '')
+    .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF\u0100-\u017F\s]/g, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
 }
@@ -72,7 +89,10 @@ export async function POST(request: NextRequest) {
     await assertAdmin(request);
     const payload = (await request.json()) as MonthlyCompanyReportInput;
     const reportInput = normalizeReportInput(payload);
-    const pdfBytes = await buildAdminMonthlyCompanyReportHtmlPdfBytes(reportInput);
+    // App Hosting / Cloud Run does not ship Chromium system libs (libnspr4 etc.),
+    // so Puppeteer/@sparticuz/chromium fails at launch. Use jsPDF instead.
+    const logoDataUrl = await loadLogoDataUrl();
+    const pdfBytes = buildAdminMonthlyCompanyReportPdfBytes(reportInput, { logoDataUrl });
     const filename = buildReportFilename(reportInput.companyName, reportInput.monthLabel);
 
     return new NextResponse(Buffer.from(pdfBytes), {

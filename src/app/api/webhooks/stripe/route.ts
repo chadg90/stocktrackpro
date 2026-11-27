@@ -3,7 +3,69 @@ import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe-server';
 import { getAdminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
-import { resolveSubscribedVehicleQuantity } from '@/lib/stripeVehicleQuantity';
+import {
+  resolveDeliveryVehicleQuantity,
+  resolveSubscribedVehicleQuantity,
+} from '@/lib/stripeVehicleQuantity';
+
+async function syncDeliveryModuleFromSubscription(
+  db: ReturnType<typeof getAdminDb>,
+  companyId: string,
+  subscription: Stripe.Subscription
+) {
+  const delivery = resolveDeliveryVehicleQuantity(subscription);
+  const companyRef = db.collection('companies').doc(companyId);
+  const companySnap = await companyRef.get();
+  if (!companySnap.exists) return;
+  const company = companySnap.data() || {};
+  const existing = company.modules?.delivery || {};
+  const now = new Date().toISOString();
+
+  if (delivery) {
+    const periodEnd = subscription.current_period_end
+      ? new Date(subscription.current_period_end * 1000).toISOString()
+      : existing.currentPeriodEnd || null;
+    await companyRef.set(
+      {
+        modules: {
+          ...(company.modules || {}),
+          delivery: {
+            ...existing,
+            status: 'active',
+            vehicleQuantity: delivery.quantity,
+            stripe_subscription_item_id: delivery.itemId,
+            currentPeriodEnd: periodEnd,
+            trialEndsAt: null,
+            updated_at: now,
+          },
+        },
+        updated_at: now,
+      },
+      { merge: true }
+    );
+    return;
+  }
+
+  // Delivery item removed — if was active/paid, mark cancelled (leave trial alone).
+  if (existing.status === 'active') {
+    await companyRef.set(
+      {
+        modules: {
+          ...(company.modules || {}),
+          delivery: {
+            ...existing,
+            status: 'cancelled',
+            vehicleQuantity: null,
+            stripe_subscription_item_id: null,
+            updated_at: now,
+          },
+        },
+        updated_at: now,
+      },
+      { merge: true }
+    );
+  }
+}
 
 const WEBHOOK_WINDOW_MS = 60 * 1000;
 const WEBHOOK_MAX_REQUESTS = 120; // Stripe may retry
@@ -214,6 +276,7 @@ export async function POST(request: NextRequest) {
           { merge: true }
         );
         console.log('Updated company', companyId, 'subscription (customer.subscription.updated)', { stripeStatus: status, firebaseStatus, subscribedVehicles, billingCycle });
+        await syncDeliveryModuleFromSubscription(db, companyId, subscription);
         break;
       }
 

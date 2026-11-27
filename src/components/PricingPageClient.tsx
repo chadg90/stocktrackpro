@@ -286,6 +286,17 @@ export default function PricingPageClient({ trialCta }: { trialCta: ReactNode })
                       {MIN_VEHICLES * PRICE_PER_VEHICLE_YEARLY}/year).
                     </span>
                   </li>
+                  <li className="flex items-start gap-2.5">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--brand-blue)] shrink-0" aria-hidden />
+                    <span>
+                      Optional Delivery add-on: £15 per vehicle / month on top of fleet. Quantity matches your
+                      vehicle slots. See{' '}
+                      <Link href="/features/delivery/" className="text-[var(--brand-blue)] underline">
+                        Delivery
+                      </Link>
+                      .
+                    </span>
+                  </li>
                 </ul>
               </div>
 

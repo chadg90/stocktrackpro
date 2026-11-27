@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit, Source_Sans_3 } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
@@ -11,20 +11,27 @@ import { SITE_META_DESCRIPTION, SITE_TAGLINE } from "@/content/siteSeo";
 import { APP_STORE_ID, SITE_LEGAL_NAME, SITE_NAME, SITE_URL } from "@/lib/brand";
 import { absolutePageUrl } from "@/lib/site";
 
-/** Body text — weights used above the fold on marketing pages. */
-const sourceSans = Source_Sans_3({
-  subsets: ["latin"],
+// Fonts are self-hosted (same Google Fonts latin WOFF2 files) so `next build` never
+// contacts fonts.googleapis.com. next/font/google intermittently fails the build when
+// Google returns extensionless font URLs — see vercel/next.js#99114.
+// `weight` must be the variable range, otherwise next/font/local pins every weight to 400.
+
+/** Body text — Source Sans 3 (variable, latin). */
+const sourceSans = localFont({
+  src: "./fonts/source-sans-3-latin-variable.woff2",
+  weight: "200 900",
+  style: "normal",
   display: "swap",
-  weight: ["400", "600", "700"],
   variable: "--font-mkt-body",
   preload: true,
 });
 
-/** Display / brand — hero + section headings. */
-const outfit = Outfit({
-  subsets: ["latin"],
+/** Display / brand — Outfit (variable, latin), hero + section headings. */
+const outfit = localFont({
+  src: "./fonts/outfit-latin-variable.woff2",
+  weight: "100 900",
+  style: "normal",
   display: "swap",
-  weight: ["600", "700"],
   variable: "--font-mkt-display",
   preload: true,
 });

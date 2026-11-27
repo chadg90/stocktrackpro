@@ -17,7 +17,8 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { firebaseAuth, firebaseDb } from '@/lib/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { firebaseAuth, firebaseDb, firebaseFunctions } from '@/lib/firebase';
 import { Trash2, Search, Mail, User as UserIcon, Pencil, Link2, Check as CheckIcon } from 'lucide-react';
 import Modal from '../components/Modal';
 import { EmptyStateTableRow } from '../components/EmptyState';
@@ -103,7 +104,7 @@ export default function TeamPage() {
   const isAdmin = currentUserProfile?.role === 'admin';
   const isManager = currentUserProfile?.role === 'manager';
   const canEditUsers = isAdmin || isManager; // Managers can edit basic user info
-  const canDeleteUsers = isAdmin; // Only admins can delete user accounts
+  const canDeleteUsers = isAdmin || isManager; // Managers remove company users via deleteUser callable
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -246,17 +247,26 @@ export default function TeamPage() {
     }
   };
 
-  const handleRemoveUser = async (userId: string) => {
+  const handleRemoveUser = async (userId: string, memberRole?: string) => {
     if (userId === currentUserProfile?.id) {
-      alert("You cannot remove yourself.");
+      alert('You cannot remove yourself.');
       return;
     }
-    
-    if (!confirm('Are you sure you want to remove this user? This will delete their account.') || !firebaseDb) return;
-    
+    if (isManager && memberRole === 'admin') {
+      alert('Managers cannot remove admin accounts.');
+      return;
+    }
+    if (
+      !confirm('Are you sure you want to remove this user? This will delete their account.') ||
+      !firebaseFunctions
+    ) {
+      return;
+    }
+
     try {
-      // Deleting profile triggers cloud function to delete Auth user
-      await deleteDoc(doc(firebaseDb!, 'profiles', userId));
+      // Admin SDK path: managers are blocked from client profile deletes by rules
+      const deleteUser = httpsCallable(firebaseFunctions, 'deleteUser');
+      await deleteUser({ userId });
       const scopeId = isAdmin ? selectedCompanyFilter : currentUserProfile?.company_id;
       if (scopeId) fetchTeam(scopeId);
     } catch (error) {
@@ -615,9 +625,11 @@ export default function TeamPage() {
                             <Pencil className="h-4 w-4" aria-hidden />
                           </button>
                         )}
-                        {canDeleteUsers && member.id !== currentUserProfile?.id && (
+                        {canDeleteUsers &&
+                          member.id !== currentUserProfile?.id &&
+                          !(isManager && member.role === 'admin') && (
                           <button 
-                            onClick={() => handleRemoveUser(member.id)}
+                            onClick={() => handleRemoveUser(member.id, member.role)}
                             className="p-2 text-white/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Remove User"
                             aria-label="Remove user from team"
@@ -664,10 +676,13 @@ export default function TeamPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
-                {invites.length === 0 ? (
+                {invites.filter((invite) => invite.status !== 'cancelled').length === 0 ? (
                   <EmptyStateTableRow colSpan={6} message="No invites sent yet." />
                 ) : (
-                  invites.slice(0, 8).map((invite) => (
+                  invites
+                    .filter((invite) => invite.status !== 'cancelled')
+                    .slice(0, 8)
+                    .map((invite) => (
                     <tr key={invite.id} className="hover:bg-white/5 transition-colors">
                       <td className="px-6 py-3 text-white/80 text-sm">{invite.email}</td>
                       <td className="px-6 py-3 text-white/70 text-sm capitalize">{invite.role}</td>

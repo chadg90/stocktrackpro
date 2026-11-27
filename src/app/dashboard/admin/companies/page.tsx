@@ -34,7 +34,7 @@ import TypeToConfirmDelete from '../../components/TypeToConfirmDelete';
 import AdminRowMenu from '../../components/AdminRowMenu';
 import { formatAdminDate } from '@/lib/adminDateFormat';
 import { getTrialEndDate, type TrialCompanyFields } from '@/lib/trialStatus';
-import { countCompanyFleetVehicles } from '@/lib/adminCompanyMetrics';
+import { companyPlanLabel, countCompanyFleetVehicles } from '@/lib/adminCompanyMetrics';
 
 type Company = TrialCompanyFields & {
   id: string;
@@ -45,7 +45,15 @@ type Company = TrialCompanyFields & {
   subscribed_vehicles?: number;
   stripe_subscription_id?: string;
   legacy?: boolean;
+  monthly_amount_gbp?: number;
   created_at?: unknown;
+  modules?: {
+    delivery?: {
+      status?: string;
+      trialEndsAt?: string | null;
+      vehicleQuantity?: number | null;
+    } | null;
+  } | null;
 };
 
 type CompanyWithCounts = Company & {
@@ -73,13 +81,138 @@ function statusBucket(status?: string): 'active' | 'trial' | 'inactive' {
 }
 
 function planLabel(company: Company): string {
-  if (company.legacy === true) return 'Legacy';
-  if (company.subscription_type === 'promotional') return 'Promo';
-  if (company.subscription_type === 'stripe' || company.stripe_subscription_id) {
-    return company.billing_cycle === 'yearly' ? 'Yearly' : 'Monthly';
-  }
-  if (statusBucket(company.subscription_status) === 'trial') return 'Trial';
-  return company.subscription_type?.trim() || '—';
+  return companyPlanLabel(company);
+}
+
+type DeliveryAction = 'start_trial' | 'extend_trial' | 'end_trial' | 'convert_paid' | 'cancel_paid';
+
+function DeliveryAddonPanel({
+  company,
+  busy,
+  message,
+  error,
+  onAction,
+}: {
+  company: Company;
+  busy: boolean;
+  message: string | null;
+  error: string | null;
+  onAction: (action: DeliveryAction) => void;
+}) {
+  const deliveryStatus = String(company.modules?.delivery?.status || 'off').toLowerCase();
+  const onTrial = deliveryStatus === 'trial';
+  const isPaid = deliveryStatus === 'active';
+  const trialEnds = company.modules?.delivery?.trialEndsAt
+    ? String(company.modules.delivery.trialEndsAt).slice(0, 10)
+    : null;
+  const hasStripe = Boolean(company.stripe_subscription_id);
+  const statusLabel =
+    deliveryStatus === 'trial'
+      ? 'Trial'
+      : deliveryStatus === 'active'
+        ? 'Paid'
+        : deliveryStatus === 'expired'
+          ? 'Expired'
+          : deliveryStatus === 'cancelled'
+            ? 'Cancelled'
+            : 'Off';
+
+  return (
+    <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-slate-900">Delivery add-on</p>
+          <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
+            Trial is free. Paid is £15 × fleet vehicle slots.
+          </p>
+        </div>
+        <span className="shrink-0 rounded-md bg-white border border-slate-200 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+          {statusLabel}
+        </span>
+      </div>
+
+      {trialEnds ? (
+        <p className="text-xs text-slate-600">
+          Trial ends <span className="font-medium text-slate-800">{trialEnds}</span>
+        </p>
+      ) : null}
+
+      <div className="flex flex-col gap-2 pt-1">
+        {!isPaid ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => onAction('start_trial')}
+            className="w-full rounded-lg bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
+          >
+            {busy ? 'Updating…' : onTrial ? 'Restart 30-day trial' : 'Start 30-day trial'}
+          </button>
+        ) : null}
+
+        {onTrial ? (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onAction('extend_trial')}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+            >
+              Extend +14 days
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onAction('end_trial')}
+              className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50"
+            >
+              End trial
+            </button>
+          </div>
+        ) : null}
+
+        {!isPaid ? (
+          <button
+            type="button"
+            disabled={busy || !hasStripe}
+            title={!hasStripe ? 'Needs a Stripe fleet subscription first' : undefined}
+            onClick={() => {
+              if (
+                !window.confirm(
+                  'Convert Delivery to paid? Attaches £15 × vehicle slots on their Stripe subscription.'
+                )
+              ) {
+                return;
+              }
+              onAction('convert_paid');
+            }}
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+          >
+            Convert to paid
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              if (!window.confirm('Cancel paid Delivery only? Fleet £8 line stays.')) return;
+              onAction('cancel_paid');
+            }}
+            className="w-full rounded-lg border border-red-300 bg-white px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+          >
+            Cancel paid Delivery
+          </button>
+        )}
+      </div>
+
+      {!hasStripe && !isPaid ? (
+        <p className="text-[11px] text-slate-500 leading-relaxed">
+          Convert to paid needs a Stripe fleet subscription. Trial works without one.
+        </p>
+      ) : null}
+      {message ? <p className="text-xs font-medium text-emerald-700">{message}</p> : null}
+      {error ? <p className="text-xs font-medium text-red-700">{error}</p> : null}
+    </div>
+  );
 }
 
 function toDate(value: unknown): Date | null {
@@ -113,11 +246,14 @@ export default function AdminCompaniesPage() {
   const [newCompanyName, setNewCompanyName] = useState('');
   const [processing, setProcessing] = useState(false);
   const [quantityMessage, setQuantityMessage] = useState<string | null>(null);
+  const [deliveryMessage, setDeliveryMessage] = useState<string | null>(null);
+  const [deliveryError, setDeliveryError] = useState<string | null>(null);
+  const [deliveryBusy, setDeliveryBusy] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<CompanyWithCounts | null>(null);
 
-  const fetchCompanies = async () => {
+  const fetchCompanies = async (opts?: { silent?: boolean }) => {
     if (!firebaseDb) return;
-    setLoading(true);
+    if (!opts?.silent) setLoading(true);
     try {
       const companiesSnap = await getDocs(query(collection(firebaseDb!, 'companies')));
       const companiesData = companiesSnap.docs.map(
@@ -192,6 +328,61 @@ export default function AdminCompaniesPage() {
     }
   };
 
+  const runDeliveryAction = async (
+    action: 'start_trial' | 'extend_trial' | 'end_trial' | 'convert_paid' | 'cancel_paid'
+  ) => {
+    if (!currentCompany) {
+      setDeliveryError('No company selected.');
+      return;
+    }
+    const user = firebaseAuth?.currentUser;
+    if (!user) {
+      setDeliveryError('Not signed in. Refresh the page and try again.');
+      return;
+    }
+    setDeliveryBusy(true);
+    setDeliveryMessage(null);
+    setDeliveryError(null);
+    try {
+      // Force refresh so a stale ID token does not 401 against Admin SDK.
+      const token = await user.getIdToken(true);
+      // Trailing slash required — middleware 308s slashless API URLs and breaks POST.
+      const res = await fetch('/api/admin/set-delivery-module/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          company_id: currentCompany.id,
+          action,
+          trial_days: 30,
+          extend_days: 14,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Delivery update failed (${res.status})`);
+      setDeliveryMessage(data.message || 'Delivery module updated.');
+      setCurrentCompany((prev) =>
+        prev
+          ? {
+              ...prev,
+              modules: data.delivery
+                ? { ...(prev.modules || {}), delivery: data.delivery }
+                : prev.modules,
+            }
+          : prev
+      );
+      // Refresh list in background — keep modal open with updated status.
+      void fetchCompanies({ silent: true });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Delivery update failed';
+      setDeliveryError(msg);
+    } finally {
+      setDeliveryBusy(false);
+    }
+  };
+
   const handleEditCompany = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!firebaseDb || !firebaseAuth || !currentCompany || !editName.trim()) return;
@@ -217,7 +408,7 @@ export default function AdminCompaniesPage() {
           const user = firebaseAuth.currentUser;
           if (!user) throw new Error('Not signed in');
           const token = await user.getIdToken();
-          const res = await fetch('/api/admin/set-vehicle-quantity', {
+          const res = await fetch('/api/admin/set-vehicle-quantity/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -276,6 +467,8 @@ export default function AdminCompaniesPage() {
         : ''
     );
     setQuantityMessage(null);
+    setDeliveryMessage(null);
+    setDeliveryError(null);
     setIsEditModalOpen(true);
   };
 
@@ -656,6 +849,7 @@ export default function AdminCompaniesPage() {
               No Stripe subscription on this company — vehicle slots are not editable here.
             </p>
           )}
+
           <div className="pt-2 flex justify-end gap-2">
             <button
               type="button"
@@ -673,6 +867,17 @@ export default function AdminCompaniesPage() {
             </button>
           </div>
         </form>
+
+        {/* Outside the edit form so Delivery actions never collide with Save Changes */}
+        {currentCompany ? (
+          <DeliveryAddonPanel
+            company={currentCompany}
+            busy={deliveryBusy}
+            message={deliveryMessage}
+            error={deliveryError}
+            onAction={(action) => void runDeliveryAction(action)}
+          />
+        ) : null}
       </Modal>
 
       <TypeToConfirmDelete

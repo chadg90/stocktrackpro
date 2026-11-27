@@ -2,8 +2,9 @@ import { MetadataRoute } from 'next';
 import { getAllPublishedComplianceArticles } from '@/lib/compliance-articles/server';
 import { absolutePageUrl } from '@/lib/site';
 
-/** Short revalidate so CDN cannot keep a stale short sitemap for long. */
-export const revalidate = 300;
+/** Always render the current URL list. CDN cache is s-maxage=300 with no long SWR. */
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const publishedArticles = await getAllPublishedComplianceArticles();
@@ -16,9 +17,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ) as Record<string, Date>;
   const pageLastModified: Record<string, Date> = {
     '/features': new Date('2026-09-03'),
+    '/features/delivery': new Date('2026-11-24'),
     '/about': new Date('2026-09-03'),
-    '/pricing': new Date('2026-09-03'),
-    '/faq': new Date('2026-09-03'),
+    '/pricing': new Date('2026-11-24'),
+    '/faq': new Date('2026-11-24'),
+    '/subscription-terms': new Date('2026-11-24'),
+    '/terms': new Date('2026-11-24'),
+    '/privacy': new Date('2026-11-24'),
     '/contact': new Date('2026-09-03'),
     '/vehicle-walkaround-check-app': new Date('2026-09-03'),
     '/vehicle-defect-reporting-software': new Date('2026-09-03'),
@@ -30,6 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const routes = [
     '/',
     '/features',
+    '/features/delivery',
     '/vehicle-walkaround-check-app',
     '/vehicle-defect-reporting-software',
     '/fleet-mot-tax-reminders',
@@ -56,6 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       '/vehicle-walkaround-check-app',
       '/vehicle-defect-reporting-software',
       '/fleet-mot-tax-reminders',
+      '/features/delivery',
     ].includes(route);
     return {
       // Match next.config trailingSlash: true — Google should see final URLs, not 308 hops.

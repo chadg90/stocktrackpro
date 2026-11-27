@@ -11,6 +11,7 @@ const featureMenuItems = [
   { name: 'Walkaround check app', href: '/vehicle-walkaround-check-app/' },
   { name: 'Defect reporting', href: '/vehicle-defect-reporting-software/' },
   { name: 'MOT & tax reminders', href: '/fleet-mot-tax-reminders/' },
+  { name: 'Delivery add-on', href: '/features/delivery/' },
 ];
 
 const baseNavItems = [

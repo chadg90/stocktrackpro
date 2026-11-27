@@ -41,6 +41,16 @@ export default function FAQ() {
       answer: "£8 per vehicle per month, with a minimum of 2 vehicles. Annual billing is £84 per vehicle per year (about £7 per month equivalent). See the Pricing page for the calculator and trial options.",
     },
     {
+      question: "What is the Delivery add-on?",
+      answer:
+        "Delivery is an optional add-on separate from daily vehicle checks. Managers create jobs on the website or app; drivers run a staged collection and delivery flow with photos, timestamps, and map deep links. Pricing is £15 per vehicle per month on top of your fleet plan, and the Delivery quantity always matches your subscribed vehicle slots. Example: 3 vehicles = £24 for checks; add Delivery = +£45 → £69 total. Cancel Delivery and you return to £8 × vehicles only. See the Delivery feature page and Subscription Terms.",
+    },
+    {
+      question: "Is a Delivery trial the same as the 14-day fleet trial?",
+      answer:
+        "No. The 14-day fleet signup trial covers vehicle checks. Delivery trials are granted separately by Fleet Track PRO for evaluation and do not add a Delivery charge until converted to paid.",
+    },
+    {
       question: "Does this work on Android and iOS?",
       answer: `Yes. ${PLATFORM_AVAILABILITY} — email ${SUPPORT_EMAIL} and we'll send you an Android invite. Drivers use the app for vehicle inspections, defect logging, and workflow updates. Managers also get a web dashboard for analytics, team management, and billing.`,
     },

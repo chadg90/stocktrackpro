@@ -1,0 +1,16 @@
+Firestore rules + indexes are NOT deployed from this website folder.
+
+Single source of truth (live / deploy from here only):
+  ../STP/firestore-rules-corrected.txt
+  ../STP/firestore.indexes.json
+  ../STP/firebase.json
+
+This folder keeps a mirrored copy at firestore.rules (synced to the STP
+corrected rules) for reference only. The previous weaker file is saved as:
+  firestore.rules.stale-backup-722lines
+
+To deploy rules or indexes:
+  cd ../STP && firebase deploy --only firestore --project stocktrackpronew-b853b
+
+Website hosting only:
+  cd stocktrackpro && firebase deploy --only apphosting --project stocktrackpronew-b853b

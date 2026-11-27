@@ -47,10 +47,20 @@ export function rateLimit(
   return true;
 }
 
+/**
+ * Prefer platform-provided IP; for X-Forwarded-For use the rightmost hop
+ * (proxies append — leftmost can be spoofed by the client).
+ */
 export function getClientIp(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0].trim();
   const real = request.headers.get('x-real-ip');
-  if (real) return real.trim();
+  if (real && real.trim()) return real.trim();
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    const parts = forwarded
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
   return '';
 }

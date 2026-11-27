@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import Link from 'next/link';
-import { Car, Users, Wrench, Shield, Gauge, FileCheck, ArrowRight, Smartphone } from 'lucide-react';
+import { Car, Users, Wrench, Shield, Gauge, FileCheck, ArrowRight, Smartphone, Package } from 'lucide-react';
 import { PLATFORM_AVAILABILITY } from '@/lib/brand';
 
 const WHATSAPP_ENQUIRY_URL =
@@ -117,6 +117,20 @@ const features: Feature[] = [
     useCase:
       'You start the day, open the dashboard, and know exactly what needs attention — no chasing, no phone calls.',
   },
+  {
+    title: 'Delivery add-on (optional)',
+    icon: Package,
+    summary:
+      'Separate from daily vehicle checks. Managers create jobs; drivers run staged collection and delivery with photos, timestamps, and map deep links. Billed at £15 per vehicle per month matching your fleet slots.',
+    bullets: [
+      'Manager create on website or app; driver staged flow on the phone',
+      'Medical organ-transport template available (IMT); engine supports further templates',
+      'Quantity mirrors subscribed vehicles — cancel Delivery without changing fleet checks',
+      'Admin-granted trial, then paid Stripe line when you convert',
+    ],
+    useCase:
+      'A medical courier company runs organ jobs with hub-informed gates and serial photos, while their other fleet customers never see Delivery until it is turned on.',
+  },
 ];
 
 export default function Features() {
@@ -194,6 +208,16 @@ export default function Features() {
                               Read why UK fleets are moving from paper to digital inspection sheets
                             </Link>
                           </p>
+                        </div>
+                      )}
+                      {feature.title === 'Delivery add-on (optional)' && (
+                        <div className="mt-4 text-sm">
+                          <Link
+                            href="/features/delivery/"
+                            className="text-[var(--brand-blue)] hover:text-blue-700 underline underline-offset-4"
+                          >
+                            Read the full Delivery add-on page
+                          </Link>
                         </div>
                       )}
                       {feature.title === 'Defect workflow: flagged to fixed' && (

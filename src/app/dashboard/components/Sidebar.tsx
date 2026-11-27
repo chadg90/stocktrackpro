@@ -27,12 +27,14 @@ import {
   ExternalLink,
   Gauge,
   FolderOpen,
+  Package,
 } from 'lucide-react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { firebaseAuth, firebaseDb } from '@/lib/firebase';
 import { GA_ADMIN_URL } from '@/lib/analytics';
 import { clearCachedProfileRole, getCachedProfileRole, setCachedProfileRole } from '@/lib/sessionRoleCache';
+import { isDeliveryModuleOn } from '@/lib/deliveryModule';
 import Image from 'next/image';
 import NotificationBell from './NotificationBell';
 
@@ -42,6 +44,8 @@ type NavigationItem = {
   icon: React.ComponentType<{ className?: string }>;
   managerOnly?: boolean;
   adminOnly?: boolean;
+  /** Only show when company has Delivery add-on (trial/active). */
+  deliveryModuleOnly?: boolean;
   /** Open in a new tab (e.g. Google Analytics). */
   external?: boolean;
 };
@@ -77,6 +81,18 @@ const navigationGroups: NavigationGroup[] = [
     items: [
       { name: 'Inspections', href: '/dashboard/inspections/', icon: ClipboardList },
       { name: 'Mileage', href: '/dashboard/mileage/', icon: Gauge, managerOnly: true },
+    ],
+  },
+  {
+    label: 'Road Movement Orders',
+    items: [
+      {
+        name: 'Road Movement Orders',
+        href: '/dashboard/deliveries/',
+        icon: Package,
+        managerOnly: true,
+        deliveryModuleOnly: true,
+      },
     ],
   },
   {
@@ -127,6 +143,7 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
     if (typeof window === 'undefined' || !firebaseAuth?.currentUser) return null;
     return getCachedProfileRole(firebaseAuth.currentUser.uid);
   });
+  const [deliveryEnabled, setDeliveryEnabled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -140,13 +157,24 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
         const profileRef = doc(firebaseDb, 'profiles', user.uid);
         const snap = await getDoc(profileRef);
         if (snap.exists()) {
-          const role = String(snap.data().role || '') || null;
+          const data = snap.data();
+          const role = String(data.role || '') || null;
           if (role) setCachedProfileRole(user.uid, role);
           setUserRole(role);
+          const companyId = data.company_id;
+          if (companyId) {
+            const companySnap = await getDoc(doc(firebaseDb, 'companies', companyId));
+            setDeliveryEnabled(
+              companySnap.exists() ? isDeliveryModuleOn(companySnap.data() || null) : false
+            );
+          } else {
+            setDeliveryEnabled(false);
+          }
         }
       } else {
         clearCachedProfileRole();
         setUserRole(null);
+        setDeliveryEnabled(false);
       }
     });
 
@@ -254,6 +282,7 @@ export default function Sidebar({ theme, onToggleTheme }: SidebarProps) {
               if (item.adminOnly && userRole !== 'admin') return false;
               // Manager-only items: show to managers AND admins (admins have higher privileges)
               if (item.managerOnly && userRole !== 'manager' && userRole !== 'admin') return false;
+              if (item.deliveryModuleOnly && !deliveryEnabled) return false;
               return true;
             });
 

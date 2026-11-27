@@ -9,7 +9,7 @@ export const dynamic = 'force-static';
 export const revalidate = 3600;
 
 /** Update only when the terms text changes. */
-const LAST_UPDATED = '4 August 2026';
+const LAST_UPDATED = '24 November 2026';
 
 export const metadata: Metadata = {
   title: 'Subscription Terms',
@@ -154,6 +154,33 @@ export default function SubscriptionTermsPage() {
                 'Quantity changes take effect at your next billing cycle. Your current paid period is not re-prorated, and no partial-period credit is given for mid-cycle reductions.',
                 'Feature limits (vehicles you can manage) are tied to the active subscribed quantity. If you reduce quantity below what you have registered, you may need to remove or deactivate excess items before the new limit applies.',
                 'We may refuse or delay a quantity reduction that would leave unpaid or disputed balances outstanding.',
+                'If the optional Delivery add-on is active on your account, changing subscribed vehicle quantity also changes the Delivery line quantity so both match (see Section 4A).',
+              ]}
+            />
+          </Section>
+
+          <Section title="4A. Optional Delivery add-on">
+            <BulletList
+              items={[
+                <>
+                  Delivery is an <strong className="text-slate-800">optional add-on</strong>, billed separately from
+                  the core fleet (vehicle check) plan. It is not included in the £8 per vehicle fleet price.
+                </>,
+                <>
+                  Delivery is charged at{' '}
+                  <strong className="text-slate-800">£15 per vehicle per month</strong> while the add-on is
+                  active. The Delivery quantity equals your subscribed vehicle slots (the same N as fleet).
+                </>,
+                <>
+                  Example: 3 fleet slots = £24/month for checks. Adding Delivery adds £45 (3 × £15), for a
+                  combined <strong className="text-slate-800">£69/month</strong>. Cancelling Delivery returns you to
+                  fleet-only pricing (£8 × slots).
+                </>,
+                'While Delivery is active, adding or removing a subscribed vehicle slot updates both the fleet line and the Delivery line.',
+                'A Delivery trial may be granted by Fleet Track PRO for evaluation. Delivery trials are separate from the 14-day fleet signup trial in Section 2, do not require a card for the add-on itself, and may be started, extended, or ended by us. Fleet billing is not changed by a Delivery trial.',
+                'Cancelling or ending Delivery does not cancel your fleet subscription. Job history for your company may remain readable while retained; creating new Delivery jobs requires an active or trial Delivery module.',
+                'Delivery job records (including photos and event/location stamps) are retained for 24 months from creation, then permanently deleted from our systems (subject to legal holds). Longer retention is not provided by default.',
+                'Fleet Track PRO provides software tools only. You remain responsible for operational, clinical, and regulatory processes (including any medical transport duties). We do not provide medical advice or certification.',
               ]}
             />
           </Section>
@@ -194,6 +221,7 @@ export default function SubscriptionTermsPage() {
           <Section title="7. Data retention after cancellation">
             <BulletList
               items={[
+                'Delivery job records and photos are retained for 24 months from job creation, then deleted automatically, whether or not the Delivery add-on is still active (see Section 4A).',
                 'After cancellation, your company data (vehicles, inspections, defects, and team profiles) remains in our systems for a reasonable period so you can reactivate and recover data if needed.',
                 <>
                   If your subscription has ended and has not been reactivated, you can request permanent deletion by

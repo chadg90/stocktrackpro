@@ -455,31 +455,12 @@ function buildHtml(input: MonthlyCompanyReportInput): string {
     </footer>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 const ctx = document.getElementById('trend');
 function renderChart() {
-  if (typeof Chart !== 'undefined') {
-    new Chart(ctx, {
-      type:'bar',
-      data:{labels:${chartLabels},datasets:[
-        {label:'Checks',data:${chartChecks},backgroundColor:'#2563eb',minBarLength:4,borderRadius:4},
-        {label:'Defects reported',data:${chartReported},backgroundColor:'#e6a817',minBarLength:4,borderRadius:4},
-        {label:'Defects resolved',data:${chartResolved},backgroundColor:'#1a7a3a',minBarLength:4,borderRadius:4}
-      ]},
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{legend:{display:false}},
-        scales:{
-          x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:0}},
-          y:{beginAtZero:true,ticks:{stepSize:5},grid:{color:'#0000000f'}}
-        }
-      }
-    });
-    return;
-  }
+  // Offline canvas bars — no CDN Chart.js (unreliable in serverless PDF).
   const c = ctx;
+  if (!c) return;
   const g = c.getContext('2d');
   if (!g) return;
   const labels = ${chartLabels};
@@ -533,16 +514,21 @@ export async function buildAdminMonthlyCompanyReportHtmlPdfBytes(
     throw new Error('No Chromium executable found for PDF generation.');
   }
 
+  // Sparticuz ships headless_shell — puppeteer headless:true maps to --headless=new
+  // which that binary does not support. Official mode is headless: 'shell'.
   const browser = await puppeteer.launch({
-    args: chromium.args,
+    args: puppeteer.defaultArgs({ args: chromium.args, headless: 'shell' }),
     defaultViewport: { width: 794, height: 1123 },
     executablePath,
-    headless: true,
+    headless: 'shell',
   });
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 794, height: 1123 });
-    await page.setContent(buildHtml(input), { waitUntil: 'networkidle0' });
+    // Avoid networkidle0 — CDN Chart.js can hang serverless PDF generation.
+    await page.setContent(buildHtml(input), { waitUntil: 'load', timeout: 20_000 });
+    // Give the local canvas fallback a beat to paint before snapshot.
+    await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 150)));
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,

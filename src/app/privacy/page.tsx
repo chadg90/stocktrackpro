@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { SITE_LEGAL_NAME, SITE_NAME, SITE_URL, SUPPORT_EMAIL, SUPPORT_MAILTO } from '@/lib/brand';
 
 /** Update only when the policy text changes. */
-const LAST_UPDATED = '2 November 2026';
+const LAST_UPDATED = '24 November 2026';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -86,6 +86,7 @@ export default function PrivacyPolicy() {
                 'Account information (name, business email, password, company details)',
                 'Team invitations and role assignments (manager or user)',
                 'Company, vehicle, inspection, and defect reporting data',
+                'Optional Delivery add-on job data (addresses, assigned drivers, collection/delivery details, SNOD or recipient names, photos, event timestamps, and optional location stamps at those events)',
                 'Support and contact messages you send us',
               ]}
             />
@@ -279,7 +280,7 @@ export default function PrivacyPolicy() {
             <BulletList
               items={[
                 'Account data is retained while your user account is active',
-                'Vehicle and inspection data are retained according to your company’s needs and legal obligations',
+                'Vehicle and inspection data are retained according to your company’s needs, legal obligations, and the Subscription Terms. Delivery job records (including photos and event stamps) are retained for 24 months from creation, then deleted',
                 'Inactive individual user accounts with no sign-in for 90 consecutive days may be deleted with associated personal data where this does not conflict with an active company subscription or legal retention duties; we will give reasonable notice where practicable',
                 'After company cancellation, account and fleet data are normally retained for up to 90 days to allow reactivation or export requests, then deleted or anonymised, unless a longer legal hold applies (for example ongoing disputes, security investigations, or tax/accounting requirements). Inspection and defect records may also be retained up to the operational compliance window of 15 months where that is longer and still relevant',
               ]}

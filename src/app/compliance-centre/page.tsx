@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import Navbar from '@/app/components/Navbar';
+import ComplianceArticleFilters from '@/components/compliance-articles/ComplianceArticleFilters';
 import ComplianceCentreHubJsonLd from '@/components/seo/ComplianceCentreHubJsonLd';
 import MarketingWebPageJsonLd from '@/components/seo/MarketingWebPageJsonLd';
 import { getAllPublishedComplianceArticles } from '@/lib/compliance-articles/server';
@@ -35,22 +35,7 @@ export default async function ComplianceCentreHubPage() {
 
         <section className="mkt-section bg-white border-t border-[var(--mkt-border)]">
           <div className="mkt-container max-w-3xl">
-            <ul className="space-y-4">
-              {articles.map((article) => (
-                <li key={article.slug}>
-                  <Link
-                    href={`/compliance-centre/${article.slug}/`}
-                    className="block mkt-card p-6"
-                  >
-                    <h2 className="text-xl font-semibold text-[var(--mkt-ink)] mb-2">{article.title}</h2>
-                    <p className="text-[var(--mkt-muted)] text-sm leading-relaxed">{article.metaDescription}</p>
-                    <span className="inline-flex mt-4 text-[var(--brand-blue)] text-sm font-semibold">
-                      Read article →
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <ComplianceArticleFilters articles={articles} />
           </div>
         </section>
       </main>

@@ -9,7 +9,8 @@ Compare these values with what you have in Vercel. Make sure each variable has t
 - `NEXT_PUBLIC_FIREBASE_PROJECT_ID` = `stocktrackpronew-b853b`
 - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` = `stocktrackpronew-b853b.firebasestorage.app`
 - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` = `459050969384`
-- `NEXT_PUBLIC_FIREBASE_APP_ID` = `1:459050969384:ios:7812c2b19ba0b7c200081d`
+- `NEXT_PUBLIC_FIREBASE_APP_ID` = `1:459050969384:web:2d4c210a903eea1200081d`
+- `NEXT_PUBLIC_FIREBASE_APPCHECK_RECAPTCHA_SITE_KEY` = reCAPTCHA site key from Firebase App Check (web)
 - `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` = `G-1234567890`
 - `FIREBASE_SERVICE_ACCOUNT_JSON` = (run `node scripts/get-vercel-env.js` to get the single-line JSON)
 

@@ -16,12 +16,16 @@ const securityHeaders = [
 
 const nextConfig = {
   reactStrictMode: true,
+  // Keep Chromium/Puppeteer out of the Next bundle so binary paths resolve on App Hosting.
+  serverExternalPackages: ['@sparticuz/chromium', 'puppeteer-core'],
   // output: 'export' removed so /api/checkout and /api/webhooks/stripe work (Stripe integration)
   trailingSlash: true,
-  // Marketing: Next may add a trailing slash before redirects run, which turns
-  // no-slash LOLER aliases into 2 hops. Those four paths are handled in middleware
-  // (one-hop 308). Other marketing URLs keep Next's trailingSlash behaviour.
-  skipTrailingSlashRedirect: false,
+  // Built-in slash 308 would run before next.config redirects and turn no-slash
+  // LOLER/plant aliases into two hops. Keep skip on; middleware handles
+  // (1) LOLER/plant one-hop 308s and (2) other no-slash → slash 308s.
+  // Slash-terminated marketing HTML is excluded from the matcher so App Hosting
+  // can keep public s-maxage.
+  skipTrailingSlashRedirect: true,
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 31536000,
@@ -140,7 +144,7 @@ const nextConfig = {
 
     const sitemapCache = {
       key: 'Cache-Control',
-      value: 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
+      value: 'public, max-age=0, s-maxage=300',
     };
 
     return [
@@ -153,10 +157,6 @@ const nextConfig = {
         source: '/:path*.(js|css|avif|webp|png|jpg|jpeg|gif|svg|ico|woff|woff2)',
         headers: [...securityHeaders, immutableCache],
       },
-      {
-        source: '/sitemap.xml',
-        headers: [...securityHeaders, sitemapCache],
-      },
       ...noStoreSources.map((source) => ({
         source,
         headers: [...securityHeaders, noStore],
@@ -165,6 +165,11 @@ const nextConfig = {
         // Marketing HTML (and remaining routes). Product paths above win on overlap.
         source: '/:path*',
         headers: [...securityHeaders, marketingCache],
+      },
+      {
+        // Last so it overrides the marketing catch-all (s-maxage=3600 + long SWR).
+        source: '/sitemap.xml',
+        headers: [...securityHeaders, sitemapCache],
       },
     ];
   },

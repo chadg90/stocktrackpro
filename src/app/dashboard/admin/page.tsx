@@ -32,11 +32,8 @@ import { GA_ADMIN_URL } from '@/lib/analytics';
 import { getTrialEndDate, type TrialCompanyFields } from '@/lib/trialStatus';
 import { formatAdminDate } from '@/lib/adminDateFormat';
 import {
+  billingCategory,
   countCompanyFleetVehicles,
-  isLegacyOnlyCompany,
-  isPaidStripeCompany,
-  isPromoCompany,
-  isTrialCompany,
   type AdminCompanyPlanFields,
 } from '@/lib/adminCompanyMetrics';
 
@@ -138,11 +135,11 @@ export default function AdminHomePage() {
         let trial = 0;
         let inactive = 0;
         for (const c of companies) {
-          // Paid first so Stripe-billed legacy (Newstreet) counts as Paid, not Legacy.
-          if (isPaidStripeCompany(c)) paid += 1;
-          else if (isLegacyOnlyCompany(c)) legacy += 1;
-          else if (isPromoCompany(c)) promo += 1;
-          else if (isTrialCompany(c)) trial += 1;
+          const bucket = billingCategory(c);
+          if (bucket === 'paid') paid += 1;
+          else if (bucket === 'legacy') legacy += 1;
+          else if (bucket === 'promo') promo += 1;
+          else if (bucket === 'trial') trial += 1;
           else inactive += 1;
         }
 
@@ -307,7 +304,7 @@ export default function AdminHomePage() {
           <p className="text-white text-3xl font-semibold mt-2">
             {loading ? '…' : (stats?.paid ?? 0)}
           </p>
-          <p className="text-white/40 text-xs mt-1">Active Stripe subscription</p>
+          <p className="text-white/40 text-xs mt-1">Stripe or loyalty paying</p>
         </div>
         <div className="dashboard-card p-5">
           <p className="text-white/60 text-xs uppercase tracking-wide">Promo</p>

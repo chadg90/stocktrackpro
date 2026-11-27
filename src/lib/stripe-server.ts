@@ -26,9 +26,37 @@ export function getStripePriceId(_tier: SubscriptionTier, cycle: BillingCycle = 
   return priceId;
 }
 
+/** Optional Delivery add-on (£15/vehicle/month). Separate Stripe price from fleet. */
+export function getStripeDeliveryPriceId(cycle: BillingCycle = 'monthly'): string {
+  const envVar =
+    cycle === 'yearly' ? 'STRIPE_PRICE_DELIVERY_YEARLY' : 'STRIPE_PRICE_DELIVERY_MONTHLY';
+  const priceId = process.env[envVar] || process.env.STRIPE_PRICE_DELIVERY_MONTHLY;
+  if (!priceId) {
+    throw new Error(`Missing env: ${envVar} (or STRIPE_PRICE_DELIVERY_MONTHLY)`);
+  }
+  return priceId;
+}
+
+export function getFleetPriceIds(): string[] {
+  const ids = [
+    process.env.STRIPE_PRICE_PER_VEHICLE,
+    process.env.STRIPE_PRICE_PER_VEHICLE_YEARLY,
+  ].filter((id): id is string => typeof id === 'string' && id.length > 0);
+  return ids;
+}
+
+export function getDeliveryPriceIds(): string[] {
+  const ids = [
+    process.env.STRIPE_PRICE_DELIVERY_MONTHLY,
+    process.env.STRIPE_PRICE_DELIVERY_YEARLY,
+  ].filter((id): id is string => typeof id === 'string' && id.length > 0);
+  return ids;
+}
+
 export const MIN_VEHICLES = 2;
 export const PRICE_PER_VEHICLE = 8; // GBP, monthly
 export const PRICE_PER_VEHICLE_YEARLY = 84; // GBP per vehicle per year (~£7/mo, save ~12.5%)
+export const PRICE_DELIVERY_PER_VEHICLE = 15; // GBP, monthly add-on
 
 /** Create a Stripe Customer Portal session for managing subscription. Requires company to have stripe_customer_id. */
 export async function createBillingPortalSession(

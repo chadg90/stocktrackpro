@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
-import { getStripe } from '@/lib/stripe-server';
+import { getStripe, getFleetPriceIds, getDeliveryPriceIds } from '@/lib/stripe-server';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import {
   ADMIN_MAX_VEHICLES,
@@ -119,13 +119,29 @@ export async function POST(request: NextRequest) {
 
     const stripe = getStripe();
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const item = subscription.items?.data?.[0];
-    if (!item?.id) {
-      return NextResponse.json({ error: 'Stripe subscription has no billable item' }, { status: 400 });
+    const fleetIds = new Set(getFleetPriceIds());
+    const deliveryIds = new Set(getDeliveryPriceIds());
+    const fleetItem =
+      subscription.items?.data?.find((i) => i.price?.id && fleetIds.has(i.price.id)) ||
+      subscription.items?.data?.find((i) => i.price?.id && !deliveryIds.has(i.price.id)) ||
+      subscription.items?.data?.[0];
+    if (!fleetItem?.id) {
+      return NextResponse.json({ error: 'Stripe subscription has no fleet billable item' }, { status: 400 });
     }
 
-    const currentStripeQty = item.quantity ?? null;
-    if (currentStripeQty === vehicleCount && previousQuantity === vehicleCount) {
+    const deliveryMod = company.modules?.delivery;
+    const deliveryActive = deliveryMod?.status === 'active';
+    const deliveryItem =
+      deliveryActive && deliveryIds.size > 0
+        ? subscription.items?.data?.find((i) => i.price?.id && deliveryIds.has(i.price.id))
+        : null;
+
+    const currentStripeQty = fleetItem.quantity ?? null;
+    if (
+      currentStripeQty === vehicleCount &&
+      previousQuantity === vehicleCount &&
+      (!deliveryItem || deliveryItem.quantity === vehicleCount)
+    ) {
       return NextResponse.json({
         success: true,
         unchanged: true,
@@ -136,8 +152,14 @@ export async function POST(request: NextRequest) {
     }
 
     // No mid-cycle invoice — quantity changes apply for the next billing period (per terms).
+    const itemsUpdate: { id: string; quantity: number }[] = [
+      { id: fleetItem.id, quantity: vehicleCount },
+    ];
+    if (deliveryItem?.id) {
+      itemsUpdate.push({ id: deliveryItem.id, quantity: vehicleCount });
+    }
     await stripe.subscriptions.update(subscriptionId, {
-      items: [{ id: item.id, quantity: vehicleCount }],
+      items: itemsUpdate,
       proration_behavior: 'none',
       metadata: {
         ...subscription.metadata,
@@ -147,15 +169,23 @@ export async function POST(request: NextRequest) {
     });
 
     const now = new Date().toISOString();
-    await companyRef.set(
-      {
-        subscribed_vehicles: vehicleCount,
-        subscription_type: 'stripe',
-        stripe_subscription_id: subscriptionId,
-        updated_at: now,
-      },
-      { merge: true }
-    );
+    const companyUpdate: Record<string, unknown> = {
+      subscribed_vehicles: vehicleCount,
+      subscription_type: 'stripe',
+      stripe_subscription_id: subscriptionId,
+      updated_at: now,
+    };
+    if (deliveryActive) {
+      companyUpdate.modules = {
+        ...(company.modules || {}),
+        delivery: {
+          ...deliveryMod,
+          vehicleQuantity: vehicleCount,
+          updated_at: now,
+        },
+      };
+    }
+    await companyRef.set(companyUpdate, { merge: true });
 
     await db.collection('admin_audit_logs').add({
       action: 'set_vehicle_quantity',

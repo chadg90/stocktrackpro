@@ -42,8 +42,20 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  # Web app id (StocktrackproDashboard) — required for App Check to bind to the website app.
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
-    value: 1:459050969384:ios:7812c2b19ba0b7c200081d
+    value: 1:459050969384:web:2d4c210a903eea1200081d
+    availability:
+      - BUILD
+      - RUNTIME
+  # App Check (reCAPTCHA Enterprise site key — public). Enforcement stays Off in Console.
+  - variable: NEXT_PUBLIC_FIREBASE_APPCHECK_RECAPTCHA_SITE_KEY
+    value: 6Ld1GTUuAAAAALywEdbAdAvxDPpbc4mmCeFybTuf
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_APPCHECK_PROVIDER
+    value: enterprise
     availability:
       - BUILD
       - RUNTIME
